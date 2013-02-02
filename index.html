@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Twitter Vis!</title>
+        <meta name="description" content="A neat twitter visualization">
+        <meta name="viewport" content="width=device-width">
+
+        <link rel="stylesheet" href="css/main.css">
+    </head>
+    <body>
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span12 test">
+                    wheeeee!
+                </div>
+            </div>
+        </div>
+
+        <script>
+            window.require = {
+                baseUrl: 'js',
+                paths: {
+                    'underscore': 'lib/underscore-amd',
+                    'jquery' : 'lib/jquery',
+                    'moment': 'lib/moment'
+                },
+                shim: {
+                    'lib/d3': {
+                        exports: 'd3'
+                    },
+                    'lib/bootstrap': ['jquery']
+                }
+            };
+        </script>
+
+        <script src="js/lib/require.js" data-main="app"></script>
+    </body>
+</html>
