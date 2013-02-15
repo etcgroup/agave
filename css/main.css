@@ -1,1 +1,36 @@
 @import url(lib/bootstrap.css);
+
+body {
+    font: 10px sans-serif;
+    background-color: #222;
+}
+
+.axis path,
+.axis line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+}
+
+.area {
+    fill: steelblue;
+}
+
+.spark {
+    stroke: #000;
+
+}
+
+.circular-border {
+    fill: #222;
+    /*stroke: #eee;*/
+}
+
+.dot {
+    /*fill-opacity: 0.6*/
+}
+
+.dot:hover {
+    stroke: #ffffaa;
+    stroke-width: 1px;
+}
