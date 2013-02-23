@@ -1,5 +1,57 @@
-define(['lib/d3', 'vis/rectangle', 'vis/circular'],
-    function(d3, Rectangle, Circular) {
+define(['jquery', 'lib/d3', 'vis/rectangle', 'vis/circular', 'vis/tweetstream'],
+    function($, d3, Rectangle, Circular, TweetStream) {
+
+        var from = 1359327600;
+        var to = 1359331200;
+        var interval = 30;
+        var min_important_rt = 1;
+
+        var width = $('#tweetstream').width();
+        var ts = new TweetStream({
+            target: '#tweetstream',
+            timeFrom: from,
+            timeTo: to,
+            interval: interval,
+            width: width
+        });
+        ts.render();
+
+        $.getJSON('http://localhost/twittervis/data/by_time.php', {
+            from: from,
+            to: to,
+            interval: interval,
+            noise_threshold: min_important_rt
+        })
+        .done(function(response) {
+            console.log(response.performance);
+            console.log(response.request);
+            ts.renderOriginals(response.payload);
+        });
+
+        $.getJSON('http://localhost/twittervis/data/noise.php', {
+            from: from,
+            to: to,
+            interval: interval,
+            noise_threshold: min_important_rt
+        }, 'json')
+        .done(function(response) {
+            console.log(response.performance);
+            console.log(response.request);
+            ts.renderNoise(response.payload);
+        });
+
+        $.getJSON('http://localhost/twittervis/data/retweets.php', {
+            from: from,
+            to: to,
+            interval: interval
+        }, 'json')
+        .done(function(response) {
+            console.log(response.performance);
+            console.log(response.request);
+            ts.renderRetweets(response.payload);
+        });
+
+
 
         //        var data = getBackgroundData();
         //
@@ -12,21 +64,21 @@ define(['lib/d3', 'vis/rectangle', 'vis/circular'],
         //
         //        rect.render();
 
-        d3.csv('sagawards-interval.csv', function(data) {
-            var circle = new Circular({
-                target: '#circular',
-                data: data
-            });
+        //        d3.csv('sagawards-interval.csv', function(data) {
+        //            var circle = new Circular({
+        //                target: '#circular',
+        //                data: data
+        //            });
+        //
+        //            circle.render();
+        //        });
 
-            circle.render();
-        });
-
-//        var circle = new Circular({
-//            target: '#circular',
-//            data: getTweets()
-//        });
-//
-//        circle.render();
+        //        var circle = new Circular({
+        //            target: '#circular',
+        //            data: getTweets()
+        //        });
+        //
+        //        circle.render();
 
         function getTweets() {
             var data = [];
@@ -89,6 +141,88 @@ define(['lib/d3', 'vis/rectangle', 'vis/circular'],
             }
 
             return data;
+        }
+
+        function getOriginalTweets(start_time, stop_time) {
+
+            for (var time = +start_time; time < +stop_time; time += 60000) {
+                var tweetBin = originalTweetBin(time);
+
+
+            }
+
+            function originalTweetBin(time) {
+                var tweet_count = Math.floor(Math.random() * 50) + 5;
+                var positiveCount = Math.random() * tweet_count;
+                var negativeCount = Math.random() * (tweet_count - positiveCount);
+                var neutralCount = tweet_count - positiveCount - negativeCount;
+
+                return {
+                    //The time of the bin
+                    time: time,
+                    //The total count of tweets in this bin
+                    count: tweet_count,
+                    //The tweets grouped by sentiment
+                    groups: [
+                    {
+                        //The sentiment of the tweets in this group
+                        sentiment: 1,
+                        //The total number of tweets in this group
+                        count: positiveCount,
+                        //Data about any echoes (retweets) of these tweets
+                        echoes: {
+                            //The total number of echoes (regardless of frame)
+                            count: 2,
+                            //The amount of time over which the echoes span (regardless of frame)
+                            duration: 435,
+                            //The binned echoes of this bin, in the current frame
+                            items: [
+                            {
+                                //The time of this echo bin
+                                time: Date,
+                                //The size of the bin
+                                count: 4
+                            }
+                            //...
+                            ]
+                        },
+                        //Binned replies to this tweet group, grouped by sentiment
+                        replies: [
+                        {
+                            //The sentiment of this reply bin
+                            sentiment: -1,
+                            //The number of tweets in this reply bin (regardless of frame)
+                            count: 2,
+                            //The duration spanned by this bin (regardless of frame)
+                            duration: 43,
+                            //The binned replies in the current frame
+                            items: [
+                            {
+                                //The time of this reply bin
+                                time: Date,
+                                //The number of replies in this bin
+                                count: 2
+                            }
+                            //...
+                            ]
+                        }
+                        //...
+                        ],
+                        //Terms used in the tweets in this bin
+                        terms: {
+                            "#sb47": 23,
+                            "@nfl": 45
+                        //...
+                        },
+                        //Users who produced tweets in this bin
+                        users: {
+                            "@nfl": 40
+                        //...
+                        }
+                    }
+                    ]
+                };
+            }
         }
 
         function getBackgroundData() {

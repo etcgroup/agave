@@ -1,7 +1,6 @@
 @import url(lib/bootstrap.css);
 
 body {
-    font: 10px sans-serif;
     background-color: #222;
 }
 
@@ -30,7 +29,28 @@ body {
     /*fill-opacity: 0.6*/
 }
 
+.background {
+    fill: #222;
+}
+
 .dot:hover {
     stroke: #ffffaa;
     stroke-width: 1px;
+}
+
+.chart-label {
+    fill: #DDD;
+    font-size: 12px;
+}
+
+.retweets.bar {
+    fill: #666;
+}
+
+.noise.bar {
+    fill: #666;
+}
+
+.axis line, .axis path {
+    stroke: transparent;
 }
