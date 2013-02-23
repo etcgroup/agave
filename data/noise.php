@@ -16,12 +16,9 @@ $perf = $request->timing();
 $db = new Queries('localhost', 'root', '', 'twitter_sagawards');
 $db->record_timing($perf);
 
-$positive_count_field = 'positive';
-$negative_count_field = 'negative';
-$neutral_count_field = 'neutral';
 $count_field = 'count';
 $time_field = 'binned_time';
-$result = $db->get_grouped_originals($start, $end, $interval, $noise_threshold);
+$result = $db->get_grouped_noise($start, $end, $interval, $noise_threshold);
 
 $perf->start('processing');
 
@@ -34,9 +31,6 @@ while ($row = $result->fetch_assoc()) {
 
     while ($next_bin !== $binned_time) {
         $bin = new TimeBin($next_bin);
-        $bin->groups[] = new SentimentGroup(1);
-        $bin->groups[] = new SentimentGroup(-1);
-        $bin->groups[] = new SentimentGroup(0);
         $bins[] = $bin;
 
         $next_bin += $interval;
@@ -44,18 +38,6 @@ while ($row = $result->fetch_assoc()) {
 
     $current_bin = new TimeBin($binned_time);
     $current_bin->count = $row[$count_field];
-
-    $positive_group = new SentimentGroup(1);
-    $positive_group->count = (int)$row[$positive_count_field];
-    $current_bin->groups[] = $positive_group;
-
-    $negative_group = new SentimentGroup(-1);
-    $negative_group->count = (int)$row[$negative_count_field];
-    $current_bin->groups[] = $negative_group;
-
-    $neutral_group = new SentimentGroup(0);
-    $neutral_group->count = (int)$row[$neutral_count_field];
-    $current_bin->groups[] = $neutral_group;
 
     $bins[] = $current_bin;
 

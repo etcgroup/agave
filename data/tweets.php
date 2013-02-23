@@ -16,7 +16,7 @@ $db->record_timing($perf);
 
 $utc = new DateTimeZone('UTC');
 
-$result = $db->get_originals_in_interval($start, $end);
+$result = $db->get_originals($start, $end);
 
 $perf->start('processing');
 
