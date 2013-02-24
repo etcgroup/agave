@@ -27,6 +27,7 @@ class Queries {
     {
         if ($this->performance !== NULL)
         {
+            $this->performance->counter($query_name);
             $this->performance->start($query_name);
         }
     }
