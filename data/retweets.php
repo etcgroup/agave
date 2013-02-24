@@ -17,8 +17,6 @@ $perf = $request->timing();
 $db = new Queries('localhost', 'root', '', 'twitter_sagawards');
 $db->record_timing($perf);
 
-$group_by_sentiment = TRUE;
-
 $count_field = 'count';
 $time_field = 'binned_time';
 $positive_count_field = 'positive';
@@ -29,8 +27,6 @@ if ($params->of_id !== NULL)
 {
     $result = $db->get_grouped_retweets_of_id($params->of_id, $from, $to,
             $interval);
-
-    $group_by_sentiment = FALSE;
 }
 else if ($params->of_from !== NULL && $params->of_to !== NULL)
 {
@@ -53,12 +49,10 @@ $end = (int) $params->to;
 while ($next_bin < $end)
 {
     $bin = new TimeBin($next_bin);
-    if ($group_by_sentiment)
-    {
-        $bin->sentiment_group(1);
-        $bin->sentiment_group(-1);
-        $bin->sentiment_group(0);
-    }
+    $bin->sentiment_group(-1);
+    $bin->sentiment_group(0);
+    $bin->sentiment_group(1);
+
     $bins[] = $bin;
 
     $next_bin += $interval;
@@ -79,16 +73,16 @@ while ($row = $result->fetch_assoc())
     $current_bin = $bins[$bin_index];
     $current_bin->count = $row[$count_field];
 
-    if ($group_by_sentiment)
+    if (array_key_exists($positive_count_field, $row))
     {
-        $positive_group = $current_bin->sentiment_group(1);
-        $positive_group->count = (int) $row[$positive_count_field];
-
         $negative_group = $current_bin->sentiment_group(-1);
         $negative_group->count = (int) $row[$negative_count_field];
 
         $neutral_group = $current_bin->sentiment_group(0);
         $neutral_group->count = (int) $row[$neutral_count_field];
+
+        $positive_group = $current_bin->sentiment_group(1);
+        $positive_group->count = (int) $row[$positive_count_field];
     }
 
     $next_bin += $interval;

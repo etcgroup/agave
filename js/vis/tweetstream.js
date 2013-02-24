@@ -166,6 +166,7 @@ define([
                 });
 
                 this.retweetsGraph = new CountsOverTimeGraph({
+                    sentimentScale: this.sentimentScale(),
                     color: this.options.retweetsColor,
                     box: this.retweetsBox,
                     className: 'retweets',
@@ -174,9 +175,7 @@ define([
                 });
 
                 this.originalsGraph = new SentimentOverTimeGraph({
-                    negativeColor: this.options.negativeColor,
-                    neutralColor: this.options.neutralColor,
-                    positiveColor: this.options.positiveColor,
+                    sentimentScale: this.sentimentScale(),
                     box: this.originalsBox,
                     svg: this.svg(),
                     className: 'originals',
@@ -278,6 +277,16 @@ define([
 
             originalFocusDeactivated: function() {
                 this.retweetsGraph.removeSecondary();
+            },
+
+            sentimentScale: function() {
+                if (typeof this._sentimentScale === 'undefined') {
+                    this._sentimentScale = d3.scale.ordinal()
+                    .range([this.options.negativeColor, this.options.neutralColor, this.options.positiveColor])
+                    .domain([-1, 0, 1]);
+                }
+
+                return this._sentimentScale;
             },
 
             renderBackground: function() {

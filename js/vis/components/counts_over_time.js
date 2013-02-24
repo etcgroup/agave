@@ -3,6 +3,7 @@ define(['lib/d3', 'underscore'],
 
         var CountsOverTimeGraph = function(options) {
             this.options = _.defaults(options, {
+                sentimentScale: null,
                 color: '#666',
                 box: null,
                 svg: null,
@@ -88,16 +89,27 @@ define(['lib/d3', 'underscore'],
                 })
                 .attr('fill', this.options.color);
 
-                var secondaryBars = this.canvas.selectAll('rect.secondary')
+                var secondaryBins = this.canvas.selectAll('.secondary.bin')
                 .data(data)
-                .enter().append('rect')
-                .classed('secondary', true)
-                .attr('x', function(d) {
-                    return Math.floor(horizontalScale(d.time));
+                .enter().append('g')
+                .classed('secondary bin', true)
+                .attr('transform', function(d) {
+                    return self.transform('translate', Math.floor(horizontalScale(d.time)), 0);
+                });
+
+                var sentimentColorScale = this.options.sentimentScale;
+
+                var secondaries = secondaryBins.selectAll('rect')
+                .data(function(d) {
+                    return d.groups;
                 })
+                .enter().append('rect')
                 .attr('width', Math.ceil(horizontalScale.rangeBand()))
                 .attr('height', 0)
-                .attr('fill', brighterColor);
+                .attr('y', 0)
+                .attr('fill', function(d) {
+                    return d3.hsl(sentimentColorScale(d.sentiment)).brighter();
+                });
 
                 if (this.options.interactive) {
                     bars.on('mouseover', function(d) {
@@ -117,19 +129,28 @@ define(['lib/d3', 'underscore'],
             renderSecondary: function(data) {
                 var countScale = this.countScale(data);
 
-                this.canvas.selectAll('rect.secondary')
-                .data(data)
+                var secondaryBins = this.canvas.selectAll('.secondary.bin')
+                .data(data);
+
+                secondaryBins.selectAll('rect')
+                .data(function(d) {
+                    return d.groups;
+                })
                 .transition()
-                .duration(100)
+                .duration(50)
                 .attr('height', function(d) {
                     return Math.ceil(countScale(d.count));
+                })
+                .attr('y', function(d) {
+                    return Math.floor(countScale(d.countAccum));
                 });
             },
 
             removeSecondary: function() {
-                this.canvas.selectAll('rect.secondary')
+                this.canvas.selectAll('.secondary.bin').selectAll('rect')
                 .transition()
-                .attr('height', 0);
+                .attr('height', 0)
+                .attr('y', 0);
             }
         });
 
