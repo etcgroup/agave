@@ -44,13 +44,52 @@ body {
 }
 
 .retweets.bar {
-    fill: #666;
+
 }
 
 .noise.bar {
-    fill: #666;
+
+}
+
+#tweetstream {
+    position: relative;
 }
 
 .axis line, .axis path {
     stroke: transparent;
+}
+
+.graph-align-toggle {
+    position: absolute;
+    padding: 1px;
+    border-radius: 1px;
+    -webkit-transition: box-shadow 100ms linear, background-color 100ms linear;
+    -moz-transition: box-shadow 100ms linear, background-color 100ms linear;
+    -ms-transition: box-shadow 100ms linear, background-color 100ms linear;
+    -o-transition: box-shadow 100ms linear, background-color 100ms linear;
+    transition: box-shadow 100ms linear, background-color 100ms linear;
+}
+
+.graph-align-toggle:hover {
+    background-color: rgba(255, 255, 255, 0.5);
+    -moz-box-shadow: 0px 0px 3px rgba(255, 255, 255, 1);
+    -webkit-box-shadow: 0px 0px 3px rgba(255, 255, 255, 1);
+    box-shadow: 0px 0px 3px rgba(255, 255, 255, 1);
+}
+
+.graph-align-toggle:active {
+    background-color: rgba(255, 255, 255, 0.8);
+    -moz-box-shadow: 0px 0px 5px rgba(255, 255, 255, 1);
+    -webkit-box-shadow: 0px 0px 5px rgba(255, 255, 255, 1);
+    box-shadow: 0px 0px 5px rgba(255, 255, 255, 1);
+}
+
+.graph-align-toggle i {
+    display: block;
+    /*corner-radius: 2px;*/
+    -webkit-transform: rotate(90deg);
+    -moz-transform: rotate(90deg);
+    -ms-transform: rotate(90deg);
+    -o-transform: rotate(90deg);
+    transform: rotate(90deg);
 }

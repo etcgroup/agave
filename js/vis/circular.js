@@ -69,7 +69,7 @@ define(['lib/d3', 'underscore', 'jquery', 'lib/bootstrap'],
                 var minRetweets = d3.min(this.data, function(d) {
                     return d.rt_count;
                 });
-                var dotRadius = d3.scale.linear()
+                var dotRadius = d3.scale.sqrt()
                 .range([this.options.minDotRadius, this.options.maxDotRadius])
                 .domain([minRetweets, maxRetweets]);
 
