@@ -11,8 +11,8 @@ define(['lib/d3', 'underscore'],
                 interactive: false
             });
 
-            this.svg = this.options.svg;
             this.box = this.options.box;
+            this.initCanvas();
         };
 
 
@@ -49,8 +49,8 @@ define(['lib/d3', 'underscore'],
                 return property;
             },
 
-            render: function(data) {
-                var self = this;
+            initCanvas: function() {
+
                 var transform;
 
                 if (this.options.flip) {
@@ -62,17 +62,20 @@ define(['lib/d3', 'underscore'],
                     transform = this.transform('translate', this.box.left(), this.box.top())
                 }
 
-                var svg = this.svg;
-                svg = svg.append('g')
+                this.canvas = this.options.svg.append('g')
                 .classed(this.options.className, true)
                 .attr('transform', transform)
                 .attr('opacity', 0);
+            },
+
+            render: function(data) {
+                var self = this;
 
                 var horizontalScale = this.horizontalScale(data);
                 var countScale = this.countScale(data);
-                var colorHSL = d3.hsl(this.options.color);
+                var brighterColor = d3.hsl(this.options.color).brighter();
 
-                var bars = svg.selectAll('rect.bar')
+                var bars = this.canvas.selectAll('rect.bar')
                 .data(data)
                 .enter().append('rect')
                 .classed('bar', true)
@@ -85,18 +88,48 @@ define(['lib/d3', 'underscore'],
                 })
                 .attr('fill', this.options.color);
 
+                var secondaryBars = this.canvas.selectAll('rect.secondary')
+                .data(data)
+                .enter().append('rect')
+                .classed('secondary', true)
+                .attr('x', function(d) {
+                    return Math.floor(horizontalScale(d.time));
+                })
+                .attr('width', Math.ceil(horizontalScale.rangeBand()))
+                .attr('height', 0)
+                .attr('fill', brighterColor);
+
                 if (this.options.interactive) {
                     bars.on('mouseover', function(d) {
                         d3.select(this)
-                        .attr('fill', colorHSL.brighter());
+                        .attr('fill', brighterColor);
                     })
                     .on('mouseout', function(d) {
                         d3.select(this)
                         .attr('fill', self.options.color);
                     });
                 }
-                svg.transition()
+
+                this.canvas.transition()
                 .attr('opacity', 1);
+            },
+
+            renderSecondary: function(data) {
+                var countScale = this.countScale(data);
+
+                this.canvas.selectAll('rect.secondary')
+                .data(data)
+                .transition()
+                .duration(100)
+                .attr('height', function(d) {
+                    return Math.ceil(countScale(d.count));
+                });
+            },
+
+            removeSecondary: function() {
+                this.canvas.selectAll('rect.secondary')
+                .transition()
+                .attr('height', 0);
             }
         });
 

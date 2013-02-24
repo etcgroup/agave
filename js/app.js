@@ -51,7 +51,17 @@ define(['jquery', 'lib/d3', 'vis/rectangle', 'vis/circular', 'vis/tweetstream'],
             ts.renderRetweets(response.payload);
         });
 
-
+        //Request all the retweet histograms
+        $.getJSON('http://localhost/twittervis/data/retweet_histograms.php', {
+            from: from,
+            to: to,
+            interval: interval
+        }, 'json')
+        .done(function(response, index) {
+            console.log(response.performance);
+            console.log(response.request);
+            ts.renderRetweetHistograms(response.payload);
+        });
 
         //        var data = getBackgroundData();
         //

@@ -1,5 +1,5 @@
-define(['lib/d3', 'underscore'],
-    function(d3, _) {
+define(['lib/d3', 'underscore', 'backbone'],
+    function(d3, _, Backbone) {
 
         var SentimentOverTimeGraph = function(options) {
             this.options = _.defaults(options, {
@@ -13,13 +13,22 @@ define(['lib/d3', 'underscore'],
                 interactive: false
             });
 
-            this.svg = this.options.svg;
             this.box = this.options.box;
 
             this.barNormState = this.options.defaultBarState;
+
+            this.initCanvas();
         }
 
-        _.extend(SentimentOverTimeGraph.prototype, {
+        _.extend(SentimentOverTimeGraph.prototype, Backbone.Events, {
+
+            initCanvas: function() {
+                this.canvas = this.options.svg.append('g')
+                .attr('transform', this.transform('translate', this.box.left(), this.box.top()))
+                .classed(this.options.className, true)
+                .attr('opacity', 0);
+            },
+
             horizontalScale: function(bins) {
                 if (typeof this._horizontalScale === 'undefined') {
                     this._horizontalScale = d3.scale.ordinal()
@@ -62,14 +71,9 @@ define(['lib/d3', 'underscore'],
             render: function(data) {
                 var self = this;
 
-                var svg = this.svg;
-                svg = svg.append('g')
-                .attr('transform', this.transform('translate', this.box.left(), this.box.top()))
-                .attr('opacity', 0);
-
                 var horizontalScale = this.horizontalScale(data);
 
-                var bins = svg.selectAll('.bin')
+                var bins = this.canvas.selectAll('.bin')
                 .data(data)
                 .enter().append('g')
                 .classed('bin', true)
@@ -80,7 +84,7 @@ define(['lib/d3', 'underscore'],
                 var sentimentColorScale = this.sentimentScale();
 
                 var buckets = bins.selectAll('rect')
-                .data(function(d) {
+                .data(function(d, i) {
                     //Sort the sentiment groups
                     d.groups.sort(function(group) {
                         return group.sentiment;
@@ -91,6 +95,8 @@ define(['lib/d3', 'underscore'],
                     var countPercentAccum = 0;
                     var countAccum = 0;
                     d.groups.forEach(function(group) {
+                        group.time = d.time;
+                        group.bin_index = i;
                         group.countPercent = group.count / d.count;
                         group.countPercentAccum = countPercentAccum;
                         group.countAccum = countAccum;
@@ -106,14 +112,21 @@ define(['lib/d3', 'underscore'],
                 });
 
                 if (this.options.interactive) {
-                    buckets.on('mouseover', function(d) {
+                    buckets.on('mouseover', function(d, i) {
                         var color = d3.hsl(sentimentColorScale(d.sentiment));
                         d3.select(this)
                         .attr('fill', color.brighter());
+
+                        var rtHists = self.getRetweetHistogramFor(d.time, d.bin_index, d.sentiment);
+                        if (rtHists) {
+                            self.trigger('mouseover', rtHists);
+                        }
                     })
                     .on('mouseout', function(d) {
                         d3.select(this)
                         .attr('fill', sentimentColorScale(d.sentiment));
+
+                        self.trigger('mouseout');
                     });
                 }
 
@@ -123,8 +136,31 @@ define(['lib/d3', 'underscore'],
 
                 this._setSelectedBarsNormalized(buckets, this.areBarsNormalized());
 
-                svg.transition()
+                this.canvas.transition()
                 .attr('opacity', 1);
+            },
+
+            updateRetweetHistograms: function(retweetHistograms) {
+                this.retweetHistograms = retweetHistograms;
+            },
+
+            getRetweetHistogramFor: function(time, index, sentiment) {
+                if (this.retweetHistograms && index in this.retweetHistograms) {
+                    var hist = this.retweetHistograms[index];
+                    if (typeof sentiment !== 'undefined') {
+                        hist = _.map(hist, function(bin) {
+
+                            var match = _.find(bin.groups, function(group) {
+                                return group.sentiment == sentiment;
+                            });
+
+                            return match || 0;
+                        });
+                    }
+                    console.log(hist[0]);
+                    return hist;
+                }
+                return null;
             },
 
             areBarsNormalized: function() {
@@ -132,7 +168,7 @@ define(['lib/d3', 'underscore'],
             },
 
             setBarsNormalized: function(toNormalize) {
-                this._setSelectedBarsNormalized(this.svg.selectAll('.bin rect').transition(), toNormalize);
+                this._setSelectedBarsNormalized(this.canvas.selectAll('.bin rect').transition(), toNormalize);
             },
 
             _setSelectedBarsNormalized: function(selection, toNormalize) {

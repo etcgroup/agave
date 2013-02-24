@@ -152,9 +152,6 @@ define([
             this.target = d3.select(this.options.target);
             this.timeFrom = this.options.timeFrom;
             this.timeTo = this.options.timeTo;
-
-            this.initializeBoxes();
-            this.initializeComponents();
         }
 
         _.extend(TweetStream.prototype, {
@@ -186,6 +183,9 @@ define([
                     defaultBarState: this.options.defaultBarState,
                     interactive: true
                 });
+
+                this.originalsGraph.on('mouseover', this.originalFocusActivated, this);
+                this.originalsGraph.on('mouseout', this.originalFocusDeactivated, this);
             },
 
             initializeBoxes: function() {
@@ -268,6 +268,18 @@ define([
                 this.originalsGraph.render(originals);
             },
 
+            renderRetweetHistograms: function(retweetHistograms) {
+                this.originalsGraph.updateRetweetHistograms(retweetHistograms);
+            },
+
+            originalFocusActivated: function(retweetHistogram) {
+                this.retweetsGraph.renderSecondary(retweetHistogram);
+            },
+
+            originalFocusDeactivated: function() {
+                this.retweetsGraph.removeSecondary();
+            },
+
             renderBackground: function() {
                 var svg = this.svg();
 
@@ -288,9 +300,6 @@ define([
                 .attr("class", "x axis chart-label")
                 .attr("transform", this.transform('translate', this.innerBox.left(), this.innerBox.bottom()))
                 .call(xAxis);
-
-                this.renderSectionLabels();
-                this.renderToggleButton();
             },
 
             renderToggleButton: function() {
@@ -354,7 +363,11 @@ define([
             },
 
             render: function() {
+                this.initializeBoxes();
                 this.renderBackground();
+                this.initializeComponents();
+                this.renderSectionLabels();
+                this.renderToggleButton();
             }
         });
 
