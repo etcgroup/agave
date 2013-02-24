@@ -5,7 +5,7 @@ include_once 'performance.php';
 class Request {
 
     private $request = NULL;
-    private $timing = NULL;
+    private $performance = NULL;
 
     public function __construct() {
 
@@ -17,8 +17,8 @@ class Request {
      */
     public function timing()
     {
-        $this->timing = new Performance();
-        return $this->timing;
+        $this->performance = new Performance();
+        return $this->performance;
     }
 
     /**
@@ -38,9 +38,9 @@ class Request {
             $response['request'] = $this->request;
         }
 
-        if ($this->timing !== NULL)
+        if ($this->performance !== NULL)
         {
-            $response['performance'] = $this->timing->times;
+            $response['performance'] = $this->performance;
         }
 
         echo json_encode($response);
