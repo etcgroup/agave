@@ -7,7 +7,8 @@ define(['lib/d3', 'underscore'],
                 box: null,
                 svg: null,
                 className: 'tweets',
-                flip: false
+                flip: false,
+                interactive: false
             });
 
             this.svg = this.options.svg;
@@ -82,16 +83,18 @@ define(['lib/d3', 'underscore'],
                 .attr('height', function(d) {
                     return Math.ceil(countScale(d.count));
                 })
-                .attr('fill', this.options.color)
-                .on('mouseover', function(d) {
-                    d3.select(this)
-                    .attr('fill', colorHSL.brighter());
-                })
-                .on('mouseout', function(d) {
-                    d3.select(this)
-                    .attr('fill', self.options.color);
-                });
+                .attr('fill', this.options.color);
 
+                if (this.options.interactive) {
+                    bars.on('mouseover', function(d) {
+                        d3.select(this)
+                        .attr('fill', colorHSL.brighter());
+                    })
+                    .on('mouseout', function(d) {
+                        d3.select(this)
+                        .attr('fill', self.options.color);
+                    });
+                }
                 svg.transition()
                 .attr('opacity', 1);
             }

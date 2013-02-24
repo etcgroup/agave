@@ -9,7 +9,8 @@ define(['lib/d3', 'underscore'],
                 box: null,
                 svg: null,
                 className: 'tweets',
-                defaultBarSate: 'normalized'
+                defaultBarSate: 'normalized',
+                interactive: false
             });
 
             this.svg = this.options.svg;
@@ -102,16 +103,19 @@ define(['lib/d3', 'underscore'],
                 .attr('width', Math.ceil(horizontalScale.rangeBand()))
                 .attr('fill', function(d) {
                     return sentimentColorScale(d.sentiment);
-                })
-                .on('mouseover', function(d) {
-                    var color = d3.hsl(sentimentColorScale(d.sentiment));
-                    d3.select(this)
-                    .attr('fill', color.brighter());
-                })
-                .on('mouseout', function(d) {
-                    d3.select(this)
-                    .attr('fill', sentimentColorScale(d.sentiment));
                 });
+
+                if (this.options.interactive) {
+                    buckets.on('mouseover', function(d) {
+                        var color = d3.hsl(sentimentColorScale(d.sentiment));
+                        d3.select(this)
+                        .attr('fill', color.brighter());
+                    })
+                    .on('mouseout', function(d) {
+                        d3.select(this)
+                        .attr('fill', sentimentColorScale(d.sentiment));
+                    });
+                }
 
                 this.maxCount = d3.max(data, function(d) {
                     return d.count;

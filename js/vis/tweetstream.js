@@ -164,14 +164,16 @@ define([
                     box: this.noiseBox,
                     svg: this.svg(),
                     className: 'noise',
-                    flip: true
+                    flip: true,
+                    interactive: true
                 });
 
                 this.retweetsGraph = new CountsOverTimeGraph({
                     color: this.options.retweetsColor,
                     box: this.retweetsBox,
                     className: 'retweets',
-                    svg: this.svg()
+                    svg: this.svg(),
+                    interactive: true
                 });
 
                 this.originalsGraph = new SentimentOverTimeGraph({
@@ -181,7 +183,8 @@ define([
                     box: this.originalsBox,
                     svg: this.svg(),
                     className: 'originals',
-                    defaultBarState: this.options.defaultBarState
+                    defaultBarState: this.options.defaultBarState,
+                    interactive: true
                 });
             },
 
