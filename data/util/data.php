@@ -9,6 +9,24 @@ class TimeBin {
         $this->groups = array();
     }
 
+    /**
+     * Get a group for this sentiment.
+     *
+     * @param type $sentiment
+     */
+    public function sentiment_group($sentiment) {
+        foreach ($this->groups as $group) {
+            if ($group->sentiment == $sentiment) {
+                return $group;
+            }
+        }
+
+        //Create if doesn't exist.
+        $group = new SentimentGroup($sentiment);
+        $this->groups[] = $group;
+        return $group;
+    }
+
 }
 
 class SentimentGroup {

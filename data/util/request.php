@@ -71,6 +71,8 @@ class Request {
             if (array_key_exists($param_name, $_GET))
             {
                 $request[$param_name] = $_GET[$param_name];
+            } else {
+                $request[$param_name] = NULL;
             }
         }
 
