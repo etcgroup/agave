@@ -1,5 +1,9 @@
-define(['jquery', 'lib/d3', 'vis/rectangle', 'vis/circular', 'vis/tweetstream'],
-    function($, d3, Rectangle, Circular, TweetStream) {
+define(['jquery', 'lib/d3',
+    'vis/rectangle',
+    'vis/circular',
+    'vis/tweetstream',
+    'vis/semzoom'],
+    function($, d3, Rectangle, Circular, TweetStream, SemanticZoom) {
 
         var from = 1359327600;
         var to = 1359334800;
@@ -15,6 +19,25 @@ define(['jquery', 'lib/d3', 'vis/rectangle', 'vis/circular', 'vis/tweetstream'],
             width: width
         });
         ts.render();
+
+        var requester = function(zoomLevel, extent) {
+            var response = $.Deferred();
+            setTimeout(function() {
+                response.resolve();
+            }, 200);
+            return response;
+        }
+
+        var semZoomSVG = $('<svg width="400" height="200">')[0];
+        $("#semzoom").append(semZoomSVG);
+        var semzoom = new SemanticZoom({
+            target: semZoomSVG,
+            zoomLevels: [1,2, 3, 4, 5],
+            defaultZoomLevel: 3,
+            defaultExtent: [100, 200],
+            requester: requester
+        });
+        semzoom.render();
 
         $.getJSON('http://localhost/twittervis/data/by_time.php', {
             from: from,
