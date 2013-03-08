@@ -135,9 +135,9 @@ define([
 
         var TweetStream = function(options) {
             this.options = _.defaults(options, {
-                negativeColor: '#ce2525',
-                neutralColor: '#ccc',
-                positiveColor: '#2e5f9b',
+                negativeColor: '#DB0000',
+                neutralColor: '#b3b3b3',
+                positiveColor: '#0071DB',
                 noiseColor: '#666',
                 retweetsColor: '#666',
                 defaultBarState: 'normalized',

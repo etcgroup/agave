@@ -3,7 +3,7 @@ define(['jquery', 'lib/d3', 'vis/rectangle', 'vis/circular', 'vis/tweetstream'],
 
         var from = 1359327600;
         var to = 1359334800;
-        var interval = 60;
+        var interval = 60*2;
         var min_important_rt = 1;
 
         var width = $('#tweetstream').width();
