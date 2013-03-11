@@ -6,12 +6,14 @@ include_once 'util/request.php';
 
 $request = new Request();
 $params = $request->get(
-        array('from', 'to', 'interval'), array('of_id', 'of_from', 'of_to')
+        array(), array('of_id', 'of_from', 'of_to')
 );
 
-$from = new DateTime("@$params->from");
-$to = new DateTime("@$params->to");
-$interval = (int) $params->interval;
+$timeParams = $request->binnedTimeParams();
+
+$from = $timeParams->from;
+$to = $timeParams->to;
+$interval = $timeParams->interval;
 
 $perf = $request->timing();
 $db = new Queries('localhost', 'root', '', 'twitter_sagawards');
@@ -44,8 +46,8 @@ $perf->start('processing');
 
 $bins = array();
 
-$next_bin = (int) $params->from;
-$end = (int) $params->to;
+$next_bin = $from->getTimestamp();
+$end = (int) $to->getTimestamp();
 while ($next_bin < $end)
 {
     $bin = new TimeBin($next_bin);
@@ -58,7 +60,7 @@ while ($next_bin < $end)
     $next_bin += $interval;
 }
 
-$next_bin = (int) $params->from;
+$next_bin = $from->getTimestamp();
 $bin_index = 0;
 while ($row = $result->fetch_assoc())
 {

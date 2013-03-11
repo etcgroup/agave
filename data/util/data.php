@@ -4,7 +4,7 @@ class TimeBin {
 
     public function __construct($time)
     {
-        $this->time = $time;
+        $this->time = $time * 1000;
         $this->count = 0;
         $this->groups = array();
     }

@@ -5,11 +5,12 @@ include_once 'util/data.php';
 include_once 'util/request.php';
 
 $request = new Request();
-$params = $request->get(array('from', 'to', 'interval', 'noise_threshold'));
+$params = $request->get(array('noise_threshold'));
+$timeParams = $request->binnedTimeParams();
 
-$from = new DateTime("@$params->from");
-$to = new DateTime("@$params->to");
-$interval = (int) $params->interval;
+$from = $timeParams->from;
+$to = $timeParams->to;
+$interval = $timeParams->interval;
 $noise_threshold = (int) $params->noise_threshold;
 
 $perf = $request->timing();
@@ -24,8 +25,8 @@ $perf->start('processing');
 
 $bins = array();
 
-$next_bin = (int) $params->from;
-$end = (int) $params->to;
+$next_bin = $from->getTimestamp();
+$end = $to->getTimestamp();
 while ($next_bin < $end)
 {
     $bin = new TimeBin($next_bin);
@@ -34,7 +35,7 @@ while ($next_bin < $end)
     $next_bin += $interval;
 }
 
-$next_bin = (int) $params->from;
+$next_bin = $from->getTimestamp();
 $bin_index = 0;
 while ($row = $result->fetch_assoc())
 {
