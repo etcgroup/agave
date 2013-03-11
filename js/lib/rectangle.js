@@ -72,6 +72,13 @@ define(['underscore'], function(_) {
 
         extend: function(options) {
             return new Rectangle(_.defaults(options, this.options));
+        },
+
+        apply: function(selection) {
+            selection.attr('width', this.options.width)
+            .attr('height', this.options.height)
+            .attr('x', this.options.left)
+            .attr('y', this.options.top)
         }
     });
 
