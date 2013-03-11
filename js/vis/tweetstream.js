@@ -159,7 +159,7 @@ define([
                 this.noiseGraph = new CountsOverTimeGraph({
                     color: this.options.noiseColor,
                     box: this.noiseBox,
-                    svg: this.svg(),
+                    svg: this.svg().append('g'),
                     className: 'noise',
                     flip: true,
                     interactive: true
@@ -170,14 +170,14 @@ define([
                     color: this.options.retweetsColor,
                     box: this.retweetsBox,
                     className: 'retweets',
-                    svg: this.svg(),
+                    svg: this.svg().append('g'),
                     interactive: true
                 });
 
                 this.originalsGraph = new SentimentOverTimeGraph({
                     sentimentScale: this.sentimentScale(),
                     box: this.originalsBox,
-                    svg: this.svg(),
+                    svg: this.svg().append('g'),
                     className: 'originals',
                     defaultBarState: this.options.defaultBarState,
                     interactive: true
@@ -231,7 +231,7 @@ define([
                 if (typeof this._timeScale === 'undefined') {
                     this._timeScale = d3.time.scale()
                     .range([0, this.innerBox.width()])
-                    .domain([new Date(1000*this.timeFrom), new Date(1000*this.timeTo)]);
+                    .domain([new Date(this.timeFrom), new Date(this.timeTo)]);
                 }
 
                 return this._timeScale;
@@ -371,12 +371,41 @@ define([
                 .text("original tweets");
             },
 
+            renderForeground: function() {
+                var svg = this.svg();
+                var self = this;
+
+                var zoom = d3.behavior.zoom()
+                .x(this.timeScale())
+                .on('zoom', function() {
+                    self.update();
+                })
+
+                var foreground = svg.append('rect')
+                .attr('width', this.outerBox.width())
+                .attr('height', this.outerBox.height())
+                .classed('main foreground', true);
+
+                foreground.call(zoom);
+            },
+
+            update: function() {
+                var xAxis = d3.svg.axis()
+                .scale(this.timeScale())
+                .orient("bottom");
+
+                this.svg()
+                .select('g.x.axis')
+                .call(xAxis);
+            },
+
             render: function() {
                 this.initializeBoxes();
                 this.renderBackground();
                 this.initializeComponents();
                 this.renderSectionLabels();
                 this.renderToggleButton();
+                this.renderForeground();
             }
         });
 
