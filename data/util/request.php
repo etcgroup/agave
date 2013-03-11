@@ -7,7 +7,8 @@ class Request {
     private $request = NULL;
     private $performance = NULL;
 
-    public function __construct() {
+    public function __construct()
+    {
 
     }
 
@@ -53,7 +54,7 @@ class Request {
      * @param array $optional The optional parameters (optional)
      * @return type
      */
-    public function get($required, $optional=array())
+    public function get($required, $optional = array())
     {
         $request = array();
         foreach ($required as $param_name)
@@ -61,7 +62,9 @@ class Request {
             if (array_key_exists($param_name, $_GET))
             {
                 $request[$param_name] = $_GET[$param_name];
-            } else {
+            }
+            else
+            {
                 throw new Exception("Parameter $param_name is required");
             }
         }
@@ -71,7 +74,9 @@ class Request {
             if (array_key_exists($param_name, $_GET))
             {
                 $request[$param_name] = $_GET[$param_name];
-            } else {
+            }
+            else
+            {
                 $request[$param_name] = NULL;
             }
         }
@@ -79,6 +84,22 @@ class Request {
         $this->request = (object) $request;
 
         return $this->request;
+    }
+
+    public function binnedTimeParams()
+    {
+        $params = $this->get(array('from', 'to', 'interval'));
+
+        $from = (int) ($params->from / 1000);
+        $to = (int) ($params->to / 1000);
+        $interval = (int) ($params->interval / 1000);
+
+        $bundle = array(
+            'from' => new DateTime("@$from"),
+            'to' => new DateTime("@$to"),
+            'interval' => (int) $interval
+        );
+        return (object) $bundle;
     }
 
 }
