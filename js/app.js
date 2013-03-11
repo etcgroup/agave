@@ -1,13 +1,11 @@
 define(['jquery', 'lib/d3',
-    'vis/rectangle',
-    'vis/circular',
     'vis/tweetstream',
-    'vis/semzoom'],
-    function($, d3, Rectangle, Circular, TweetStream, SemanticZoom) {
+    'vis/tweet_timeline'],
+    function($, d3, TweetStream, TweetTimeline) {
 
-        var from = 1359327600;
-        var to = 1359334800;
-        var interval = 60*2;
+        var from = 1359327600*1000;
+        var to = 1359334800*1000;
+        var interval = 60*2*1000;
         var min_important_rt = 1;
 
         var width = $('#tweetstream').width();
@@ -28,16 +26,107 @@ define(['jquery', 'lib/d3',
             return response;
         }
 
-        var semZoomSVG = $('<svg width="400" height="200">')[0];
-        $("#semzoom").append(semZoomSVG);
-        var semzoom = new SemanticZoom({
-            target: semZoomSVG,
-            zoomLevels: [1,2, 3, 4, 5],
-            defaultZoomLevel: 3,
-            defaultExtent: [100, 200],
-            requester: requester
-        });
-        semzoom.render();
+        var extent = [0, 100];
+        function computeTimeCounts() {
+            var ddd = [];
+            for (var t = extent[0]; t < extent[1]; t += 5) {
+                ddd.push({
+                    time: t,
+                    count: Math.floor(Math.random() * 100)
+                });
+            }
+            return ddd;
+        }
+
+//        (function() {
+//
+//            var data = computeTimeCounts();
+//            var box = new Box({
+//                top: 0,
+//                left: 0,
+//                width: 400,
+//                height: 200
+//            });
+//            var svg = d3.select('.histogram').append('svg');
+//            svg.call(box);
+//
+//            var scale = d3.time.scale();
+//            var noisePanel = svg.append('g')
+//            .datum(data);
+//
+//            var noiseHistogram = new Histogram();
+//
+//            noiseHistogram
+//            .container(noisePanel)
+//            .box(box)
+//            .xScale(scale)
+//            .xScaleDomainAuto(data)
+//            .yScaleDomainAuto(data);
+//
+//            noiseHistogram.render();
+//        })();
+
+        //        (function() {
+        //
+        //            var scale = d3.time.scale();
+        //            var h = new Histogram();
+        //            h.box(new Box({
+        //                top: 0,
+        //                left: 0,
+        //                width: 400,
+        //                height: 200
+        //            }))
+        //            .xScale(scale);
+        //            var svgs = d3.selectAll('.histogram').append('svg')
+        //            .attr('height', 200)
+        //            .attr('width', 400);
+        //
+        //            svgs.datum(function(d, i) {
+        //                return computeTimeCounts();
+        //            });
+        //            h.xScale().domain(extent);
+        //
+        //            var update = function() {
+        //                svgs.call(h);
+        //            }
+        //
+        //            update();
+        //
+        //
+        //            var zoom = d3.behavior.zoom()
+        //            .x(scale)
+        //            .on('zoom', update);
+        //
+        //            var fore = svgs.append('rect')
+        //            .classed('foreground', true)
+        //            .attr('height', 200)
+        //            .attr('width', 400)
+        //            .call(zoom);
+        //        })();
+
+        (function() {
+            var startExtent = [1359327600*1000, 1359334800*1000];
+            var timeline = new TweetTimeline();
+            timeline.width(width)
+            .height(300)
+            .startBinWidth(120)
+            .timeScale().domain(startExtent);
+
+            var container = d3.select('#tweet-timeline');
+            timeline.container(container)
+            .render();
+        })();
+
+        //        var semZoomSVG = $('<svg width="400" height="200">')[0];
+        //        $("#semzoom").append(semZoomSVG);
+        //        var semzoom = new SemanticZoom({
+        //            target: semZoomSVG,
+        //            zoomLevels: [1,2, 3, 4, 5],
+        //            defaultZoomLevel: 3,
+        //            defaultExtent: [100, 200],
+        //            requester: requester
+        //        });
+        //        semzoom.render();
 
         $.getJSON('http://localhost/twittervis/data/by_time.php', {
             from: from,
