@@ -29,6 +29,7 @@ if ($params->of_id !== NULL)
 {
     $result = $db->get_grouped_retweets_of_id($params->of_id, $from, $to,
             $interval);
+    $hasSentiment = FALSE;
 }
 else if ($params->of_from !== NULL && $params->of_to !== NULL)
 {
@@ -36,26 +37,35 @@ else if ($params->of_from !== NULL && $params->of_to !== NULL)
     $tweets_to = new DateTime("@$params->of_to");
     $result = $db->get_grouped_retweets_of_range($tweets_from, $tweets_to,
             $from, $to, $interval);
+    $hasSentiment = TRUE;
 }
 else
 {
     $result = $db->get_grouped_retweets($from, $to, $interval);
+    $hasSentiment = FALSE;
 }
 
 $perf->start('processing');
 
-$bins = array();
+if ($hasSentiment)
+{
+    $groups = new GroupedSeries();
+}
+
+$totals = array();
 
 $next_bin = $from->getTimestamp();
 $end = (int) $to->getTimestamp();
 while ($next_bin < $end)
 {
-    $bin = new TimeBin($next_bin);
-    $bin->sentiment_group(-1);
-    $bin->sentiment_group(0);
-    $bin->sentiment_group(1);
+    if ($hasSentiment)
+    {
+        $groups->get_group(1)->add_bin($next_bin);
+        $groups->get_group(0)->add_bin($next_bin);
+        $groups->get_group(-1)->add_bin($next_bin);
+    }
 
-    $bins[] = $bin;
+    $totals[] = new CountBin($next_bin);
 
     $next_bin += $interval;
 }
@@ -72,19 +82,19 @@ while ($row = $result->fetch_assoc())
         $next_bin += $interval;
     }
 
-    $current_bin = $bins[$bin_index];
+    $current_bin = $totals[$bin_index];
     $current_bin->count = $row[$count_field];
 
-    if (array_key_exists($positive_count_field, $row))
+    if ($hasSentiment)
     {
-        $negative_group = $current_bin->sentiment_group(-1);
-        $negative_group->count = (int) $row[$negative_count_field];
+        $positive_bin = $groups->get_group(1)->get_bin($bin_index);
+        $positive_bin->count = (int) $row[$positive_count_field];
 
-        $neutral_group = $current_bin->sentiment_group(0);
-        $neutral_group->count = (int) $row[$neutral_count_field];
+        $negative_bin = $groups->get_group(-1)->get_bin($bin_index);
+        $negative_bin->count = (int) $row[$negative_count_field];
 
-        $positive_group = $current_bin->sentiment_group(1);
-        $positive_group->count = (int) $row[$positive_count_field];
+        $neutral_bin = $groups->get_group(0)->get_bin($bin_index);
+        $neutral_bin->count = (int) $row[$neutral_count_field];
     }
 
     $next_bin += $interval;
@@ -94,4 +104,11 @@ $result->free();
 
 $perf->stop('processing');
 
-$request->response($bins);
+if ($hasSentiment) {
+    $request->response(array(
+        'totals' => $totals,
+        'groups' => $groups
+    ));
+} else {
+    $request->response($totals);
+}

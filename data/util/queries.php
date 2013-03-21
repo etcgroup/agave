@@ -91,10 +91,7 @@ class Queries {
 
         $this->queries->grouped_retweets = $this->db->prepare(
                 "SELECT UNIX_TIMESTAMP(?) + ? * FLOOR((UNIX_TIMESTAMP(created_at)-UNIX_TIMESTAMP(?)) / ?) AS binned_time,
-                    COUNT(*) as count,
-                    SUM(IF(sentiment=1,1,0)) AS positive,
-                    SUM(IF(sentiment=0,1,0)) AS neutral,
-                    SUM(IF(sentiment=-1,1,0)) AS negative
+                    COUNT(*) as count
                 FROM tweets
                 WHERE is_retweet
                 AND created_at >= ?

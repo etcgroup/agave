@@ -94,6 +94,9 @@ class Request {
         $to = (int) ($params->to / 1000);
         $interval = (int) ($params->interval / 1000);
 
+        if ($interval == 0)
+            $interval = 1;
+        
         $bundle = array(
             'from' => new DateTime("@$from"),
             'to' => new DateTime("@$to"),

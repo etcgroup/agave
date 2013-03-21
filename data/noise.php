@@ -29,7 +29,7 @@ $next_bin = $from->getTimestamp();
 $end = $to->getTimestamp();
 while ($next_bin < $end)
 {
-    $bin = new TimeBin($next_bin);
+    $bin = new CountBin($next_bin);
     $bins[] = $bin;
 
     $next_bin += $interval;
