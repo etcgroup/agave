@@ -5,8 +5,9 @@ define([
     'lib/rectangle',
     'lib/transform',
     'vis/components/zoom_histogram',
+    'vis/components/stack_histogram',
     'vis/components/semzoom'],
-    function($, d3, _, Rectangle, Transform, ZoomHistogram, SemanticZoom) {
+    function($, d3, _, Rectangle, Transform, ZoomHistogram, StackHistogram, SemanticZoom) {
 
         var TweetTimeline = function() {
             this.initialize();
@@ -24,6 +25,8 @@ define([
                 this._negativeColor = "#F26522";
                 this._neutralColor = "#F8FDFF";
 
+                this._interpolation = 'linear';
+
                 this._sentimentScale = d3.scale.ordinal()
                 .domain([-1, 0, 1]);
 
@@ -35,15 +38,13 @@ define([
 
                 this._idealBinCount = 50;
                 this._noiseThreshold = 1;
-                this._startBinWidth = 120;
             },
 
-            startBinWidth: function(width) {
+            interpolate: function(interpolation) {
                 if (!arguments.length) {
-                    return this._startBinWidth;
+                    return this._interpolation;
                 }
-
-                this._startBinWidth = width;
+                this._interpolation = interpolation;
                 return this;
             },
 
@@ -272,12 +273,14 @@ define([
                 this._configureSemanticZoom();
                 this._renderNoiseHistogram();
                 this._renderRetweetHistogram();
+                this._renderOriginalsHistogram();
             },
 
             _updateContent: function() {
                 this._updateTimeAxis();
                 this._updateNoiseHistogram();
                 this._updateRetweetHistogram();
+                this._updateOriginalsHistogram();
             },
 
             _configureSemanticZoom: function() {
@@ -294,6 +297,18 @@ define([
                 }];
             },
 
+            _dummyGroupData: function() {
+                return [
+                {
+                    name: 0,
+                    values: [{
+                        time: 1,
+                        count: 1
+                    }]
+                }
+                ];
+            },
+
             _renderNoiseHistogram: function() {
                 var self = this;
 
@@ -307,6 +322,7 @@ define([
                 .box(this.boxes.noise)
                 .xScale(this._timeScale)
                 .yScaleDomainAuto(data)
+                .interpolate(this._interpolation)
                 .render();
 
                 this._noiseHistogram.cache()
@@ -329,7 +345,6 @@ define([
             },
 
             _renderRetweetHistogram: function() {
-                var self = this;
 
                 var data = this._dummyCountData();
 
@@ -342,6 +357,7 @@ define([
                 .box(this.boxes.retweets)
                 .xScale(this._timeScale)
                 .yScaleDomainAuto(data)
+                .interpolate(this._interpolation)
                 .render();
 
                 this._retweetHistogram.cache()
@@ -360,6 +376,44 @@ define([
 
             _updateRetweetHistogram: function() {
                 this._retweetHistogram.update();
+            },
+
+            _renderOriginalsHistogram: function() {
+                this._originalsHistogram = new ZoomHistogram();
+
+                this._originalsHistogram.histogram(new StackHistogram());
+
+                this._originalsHistogram.histogram()
+                .className('originals')
+                .container(this._svg)
+                .box(this.boxes.originals)
+                .xScale(this._timeScale)
+                .colorScale(this._sentimentScale)
+                .interpolate(this._interpolation)
+                .render();
+
+                this._originalsHistogram.histogram()
+                .target()
+                .datum(this._dummyGroupData());
+
+                var self = this;
+                this._originalsHistogram.cache()
+                .requester(function(zoomLevel, extent) {
+                    return $.getJSON('http://localhost/twittervis/data/by_time.php', {
+                        from: Math.round(extent[0]),
+                        to: Math.round(extent[1]),
+                        interval: Math.round(zoomLevel),
+                        noise_threshold: self._noiseThreshold
+                    }, 'json');
+                });
+
+                this._originalsHistogram.semantic(this._semantic);
+
+                this._updateOriginalsHistogram();
+            },
+
+            _updateOriginalsHistogram: function() {
+                this._originalsHistogram.update()
             },
 
             _renderTimeAxis: function() {
@@ -391,12 +445,16 @@ define([
                 var icon = newButton.append('i')
                 .classed('icon-white', true);
 
+                var self = this;
                 newButton.on('click', function() {
                     var toNormalize = !icon.classed('normalized');
 
                     //self.originalsGraph.setBarsNormalized(toNormalize);
                     icon.classed('icon-align-left', !toNormalize)
                     .classed('icon-align-justify normalized', toNormalize);
+
+                    self._originalsHistogram.histogram().expand(toNormalize);
+                    self._originalsHistogram.update();
                 });
 
                 this._updateToggleButton();

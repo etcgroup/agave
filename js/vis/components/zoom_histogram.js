@@ -8,9 +8,20 @@ define(['underscore',
             this._histogram = new Histogram();
             this._cache = new DataCache();
             this._semantic = new SemanticZoom();
+            this._dataAccessor = function(response) {
+                return response.payload;
+            }
         }
 
         _.extend(ZoomHistogram.prototype, {
+            responseProcessor: function(fun) {
+                if (!arguments.length) {
+                    return this._dataAccessor;
+                }
+                this._dataAcecssor = fun;
+                return this;
+            },
+
             histogram: function(hist) {
                 if (!arguments.length) {
                     return this._histogram;
@@ -43,31 +54,39 @@ define(['underscore',
                 .binWidth(this._cache.zoomLevel())
                 .update();
 
+                var alreadyUpdated = false;
+
                 if (changed) {
                     var binWidth = this._semantic.binWidth();
                     var interval = this._semantic.interval()
 
                     this._latestBinWidth = binWidth;
+                    this._latestBinWidthReceived = false;
 
                     this._cache.load(binWidth, interval)
                     .done(function(response) {
 
-                        //Ignore out of date responses
-                        if (binWidth != self._latestBinWidth) {
-                            console.log("ignoring out of date request for width " + binWidth);
+                        //Ignore late responses
+                        if (binWidth != self._latestBinWidth && self._latestBinWidthReceived) {
+                            console.log("ignoring late request for width " + binWidth);
                             return;
+                        }
+                        else if (binWidth == self._latestBinWidth) {
+                            self._latestBinWidthReceived = true;
                         }
 
                         self._histogram.target()
-                        .datum(response.payload);
+                        .datum(self._dataAccessor(response));
 
-                        self._histogram
-                        .yScaleDomainAuto(response.payload)
-                        .update();
+                        self._histogram.update();
+
+                        alreadyUpdated = true;
                     });
                 }
 
-                this._histogram.update();
+                if (!alreadyUpdated) {
+                    this._histogram.update();
+                }
             }
         });
 

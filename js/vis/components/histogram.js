@@ -38,7 +38,7 @@ define(['lib/d3', 'underscore', 'lib/rectangle', 'lib/transform'],
                     return self._yScale(self._yAccessor(d));
                 }
 
-                this._area = d3.svg.area().x(scaledX).y1(scaledY);
+                this._area = d3.svg.area().x(scaledX).y1(scaledY).y0(0);
             },
 
             _updateScales: function() {
@@ -47,6 +47,9 @@ define(['lib/d3', 'underscore', 'lib/rectangle', 'lib/transform'],
 
                 //Redo the y scale
                 this._yScale.range([0, this._box.height()]);
+
+
+                this.yScaleDomainAuto(this.target().datum());
             },
 
             container: function(selection) {
@@ -93,6 +96,7 @@ define(['lib/d3', 'underscore', 'lib/rectangle', 'lib/transform'],
                 this._updateTargetSize();
 
                 this._renderPath();
+                this._updatePath();
             },
 
             flipped: function(flipped) {
@@ -124,19 +128,15 @@ define(['lib/d3', 'underscore', 'lib/rectangle', 'lib/transform'],
 
             _renderPath: function() {
                 //Add the path
-                this._target.append("path")
+                return this._target.append("path")
                 .classed('area', true);
-
-                //Set the area baseline
-                this._area.y0(0);
-
-                this._updatePath();
             },
 
             _updatePath: function() {
                 //Adjust the path to fit the data
-                this._target.select(".area")
-                .attr("d", this._area);
+                var path = this._target.select(".area")
+
+                path.attr("d", this._area);
             },
 
             interpolate: function(value) {

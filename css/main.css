@@ -33,6 +33,11 @@ body {
     fill: #222;
 }
 
+.foreground {
+    fill: none;
+    pointer-events: all;
+}
+
 .dot:hover {
     stroke: #ffffaa;
     stroke-width: 1px;
@@ -41,18 +46,6 @@ body {
 .chart-label {
     fill: #DDD;
     font-size: 12px;
-}
-
-.retweets.bar {
-
-}
-
-.noise.bar {
-
-}
-
-#tweetstream {
-    position: relative;
 }
 
 .axis line, .axis path {
@@ -92,4 +85,14 @@ body {
     -ms-transform: rotate(90deg);
     -o-transform: rotate(90deg);
     transform: rotate(90deg);
+}
+
+#tweet-timeline {
+    position: relative;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
