@@ -37,18 +37,14 @@ for ($current_start = (int) $params->from; $current_start < $end; $current_start
 
     $perf->start('processing');
 
-    $bins = array();
+    $groups = new GroupedSeries();
 
     $next_bin = (int) $params->from;
     while ($next_bin < $end)
     {
-        $bin = new TimeBin($next_bin);
-
-        $bin->sentiment_group(-1);
-        $bin->sentiment_group(0);
-        $bin->sentiment_group(1);
-
-        $bins[] = $bin;
+        $groups->get_group(1)->add_bin($next_bin);
+        $groups->get_group(0)->add_bin($next_bin);
+        $groups->get_group(-1)->add_bin($next_bin);
 
         $next_bin += $interval;
     }
@@ -65,24 +61,21 @@ for ($current_start = (int) $params->from; $current_start < $end; $current_start
             $next_bin += $interval;
         }
 
-        $current_bin = $bins[$bin_index];
-        $current_bin->count = $row[$count_field];
+        $positive_bin = $groups->get_group(1)->get_bin($bin_index);
+        $positive_bin->count = (int) $row[$positive_count_field];
 
-        $negative_group = $current_bin->sentiment_group(-1);
-        $negative_group->count = (int) $row[$negative_count_field];
+        $negative_bin = $groups->get_group(-1)->get_bin($bin_index);
+        $negative_bin->count = (int) $row[$negative_count_field];
 
-        $neutral_group = $current_bin->sentiment_group(0);
-        $neutral_group->count = (int) $row[$neutral_count_field];
-
-        $positive_group = $current_bin->sentiment_group(1);
-        $positive_group->count = (int) $row[$positive_count_field];
+        $neutral_bin = $groups->get_group(0)->get_bin($bin_index);
+        $neutral_bin->count = (int) $row[$neutral_count_field];
 
         $next_bin += $interval;
         $bin_index += 1;
     }
     $result->free();
 
-    $histograms[] = $bins;
+    $histograms[] = $groups;
     $perf->stop('processing');
 }
 $request->response($histograms);
