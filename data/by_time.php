@@ -14,7 +14,7 @@ $interval = $timeParams->interval;
 $noise_threshold = (int) $params->noise_threshold;
 
 $perf = $request->timing();
-$db = new Queries('localhost', 'root', '', 'twitter_sagawards');
+$db = new Queries('db.ini');
 $db->record_timing($perf);
 
 $positive_count_field = 'positive';

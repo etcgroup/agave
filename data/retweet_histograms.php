@@ -14,7 +14,7 @@ $to = new DateTime("@$params->to");
 $interval = (int) $params->interval;
 
 $perf = $request->timing();
-$db = new Queries('localhost', 'root', '', 'twitter_sagawards');
+$db = new Queries('db.ini');
 $db->record_timing($perf);
 
 $count_field = 'count';

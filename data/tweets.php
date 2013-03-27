@@ -17,7 +17,7 @@ if ($noise_threshold === NULL)
 }
 
 $perf = $request->timing();
-$db = new Queries('localhost', 'root', '', 'twitter_sagawards');
+$db = new Queries('db.ini');
 $db->record_timing($perf);
 
 $utc = new DateTimeZone('UTC');

@@ -7,9 +7,30 @@ class Queries {
     private $originals;
     private $performance = NULL;
 
-    public function __construct($host, $user, $password, $schema)
+    /**
+     * Construct a new Queries object.
+     *
+     * $params may either be an associative array containing 'host', 'user', 'password', and 'schema'
+     * or it may be the string name of a .ini file containing those variables.
+     *
+     * @param mixed $params
+     */
+    public function __construct($params = NULL)
     {
-        $this->db = new mysqli($host, $user, $password, $schema);
+        if (is_string($params))
+        {
+            $params = parse_ini_file('db.ini');
+        }
+        else if (!is_array($params))
+        {
+            print "No DB params";
+            die();
+        }
+
+        $this->db = new mysqli($params['host'],
+                        $params['user'],
+                        $params['password'],
+                        $params['schema']);
         $this->build_queries();
         $this->set_timezone();
     }
