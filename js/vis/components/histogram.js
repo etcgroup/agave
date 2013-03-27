@@ -160,8 +160,8 @@ define(['lib/d3', 'underscore', 'lib/rectangle', 'lib/transform'],
                 if (!arguments.length) {
                     return this._xAccessor;
                 }
-                return this;
                 this._xAccessor = fun;
+                return this;
             },
 
             yData: function(fun) {

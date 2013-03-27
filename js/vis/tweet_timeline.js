@@ -30,7 +30,7 @@ define([
                 this._sentimentScale = d3.scale.ordinal()
                 .domain([-1, 0, 1]);
 
-                this._timeScale = d3.time.scale();
+                this._timeScale = d3.time.scale.utc();
 
                 this._timeAxis = d3.svg.axis()
                 .scale(this._timeScale)
@@ -38,6 +38,29 @@ define([
 
                 this._idealBinCount = 50;
                 this._noiseThreshold = 1;
+
+                this._utcOffset = 0;
+
+                var self = this;
+                this._timeAccessor = function(d) {
+                    return d.time + self._utcOffset;
+                }
+            },
+
+            utcOffsetMillis: function(offset) {
+                if (!arguments.length) {
+                    return this._utcOffset;
+                }
+                this._utcOffset = offset;
+                return this;
+            },
+
+            noiseThreshold: function(threshold) {
+                if (!arguments.length) {
+                    return this._noiseThreshold;
+                }
+                this._noiseThreshold = threshold;
+                return this;
             },
 
             interpolate: function(interpolation) {
@@ -320,6 +343,7 @@ define([
                 .className('noise')
                 .container(this._svg)
                 .box(this.boxes.noise)
+                .xData(this._timeAccessor)
                 .xScale(this._timeScale)
                 .yScaleDomainAuto(data)
                 .interpolate(this._interpolation)
@@ -328,8 +352,8 @@ define([
                 this._noiseHistogram.cache()
                 .requester(function(zoomLevel, extent) {
                     return $.getJSON('http://localhost/twittervis/data/noise.php', {
-                        from: Math.round(extent[0]),
-                        to: Math.round(extent[1]),
+                        from: Math.round(extent[0] - self._utcOffset),
+                        to: Math.round(extent[1] - self._utcOffset),
                         interval: Math.round(zoomLevel),
                         noise_threshold: self._noiseThreshold
                     }, 'json');
@@ -355,16 +379,18 @@ define([
                 .container(this._svg)
                 .flipped(true)
                 .box(this.boxes.retweets)
+                .xData(this._timeAccessor)
                 .xScale(this._timeScale)
                 .yScaleDomainAuto(data)
                 .interpolate(this._interpolation)
                 .render();
 
+                var self = this;
                 this._retweetHistogram.cache()
                 .requester(function(zoomLevel, extent) {
                     return $.getJSON('http://localhost/twittervis/data/retweets.php', {
-                        from: Math.round(extent[0]),
-                        to: Math.round(extent[1]),
+                        from: Math.round(extent[0] - self._utcOffset),
+                        to: Math.round(extent[1] - self._utcOffset),
                         interval: Math.round(zoomLevel)
                     }, 'json');
                 });
@@ -387,6 +413,7 @@ define([
                 .className('originals')
                 .container(this._svg)
                 .box(this.boxes.originals)
+                .xData(this._timeAccessor)
                 .xScale(this._timeScale)
                 .colorScale(this._sentimentScale)
                 .interpolate(this._interpolation)
@@ -400,8 +427,8 @@ define([
                 this._originalsHistogram.cache()
                 .requester(function(zoomLevel, extent) {
                     return $.getJSON('http://localhost/twittervis/data/by_time.php', {
-                        from: Math.round(extent[0]),
-                        to: Math.round(extent[1]),
+                        from: Math.round(extent[0] - self._utcOffset),
+                        to: Math.round(extent[1] - self._utcOffset),
                         interval: Math.round(zoomLevel),
                         noise_threshold: self._noiseThreshold
                     }, 'json');
