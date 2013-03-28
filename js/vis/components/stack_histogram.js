@@ -131,10 +131,10 @@ define(['lib/d3', 'underscore', 'lib/rectangle', 'lib/transform'],
 
                 //Redo the y scale
                 if (this._flipped) {
-                    self._bumpValue = 1;
+                    this._bumpValue = 1;
                     this._yScale.range([0, this._box.height()]);
                 } else {
-                    self._bumpValue = -1;
+                    this._bumpValue = -1;
                     this._yScale.range([this._box.height(), 0]);
                 }
             },

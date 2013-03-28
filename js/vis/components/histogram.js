@@ -38,7 +38,9 @@ define(['lib/d3', 'underscore', 'lib/rectangle', 'lib/transform'],
                     return self._yScale(self._yAccessor(d));
                 }
 
-                this._area = d3.svg.area().x(this._scaledX);
+                this._area = d3.svg.area()
+                .x(this._scaledX)
+                .y1(this._scaledY);
             },
 
             _updateScales: function() {
@@ -49,17 +51,11 @@ define(['lib/d3', 'underscore', 'lib/rectangle', 'lib/transform'],
                 //Redo the y scale
                 if (this._flipped) {
                     this._yScale.range([0, this._box.height()]);
-
-                    this._area
-                    .y1(this._yScale(0))
-                    .y0(this._scaledY);
                 } else {
                     this._yScale.range([this._box.height(), 0]);
-
-                    this._area
-                    .y1(this._scaledY)
-                    .y0(this._yScale(0));
                 }
+
+                this._area.y0(this._yScale(0));
             },
 
             container: function(selection) {

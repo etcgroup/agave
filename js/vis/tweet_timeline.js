@@ -44,12 +44,30 @@ define([
 
                 this._utcOffset = 0;
 
+                this._onZoomChanged = null;
+
                 var self = this;
                 this._timeAccessor = function(d) {
                     return d.time + self._utcOffset;
                 }
 
                 this._searchQuery = null;
+            },
+
+            timeExtent: function(extent) {
+                if (!arguments.length) {
+                    return this._timeScale.domain();
+                }
+                this._timeScale.domain([extent[0] + this._utcOffset, extent[1] + this._utcOffset]);
+                return this;
+            },
+
+            onZoomChanged: function(fun) {
+                if (!arguments.length) {
+                    return this._onZoomChanged;
+                }
+                this._onZoomChanged = fun;
+                return this;
             },
 
             utcOffsetMillis: function(offset) {
@@ -228,9 +246,19 @@ define([
                     self._updateContent();
                 });
 
+                var zoomChange = function() {
+                    if (self._onZoomChanged) {
+                        var domain = self._timeScale.domain();
+                        var utcDomain = [domain[0] - self._utcOffset, domain[1] - self._utcOffset];
+                        self._onZoomChanged(utcDomain);
+                    }
+                }
+
                 this._svg.append('rect')
                 .classed('foreground', true)
-                .call(this._zoom);
+                .call(this._zoom)
+                .on('mouseup.zchange', zoomChange)
+                .on('mousewheel.zchange', zoomChange);
 
                 this._updateForeground();
             },
@@ -363,7 +391,7 @@ define([
                 .render();
 
                 this._noiseHistogram
-                .on_load(function() {
+                .onLoad(function() {
                     self._svg.select('g.noise.axis.chart-label')
                     .transition()
                     .style('opacity', 1);
@@ -432,7 +460,7 @@ define([
                 .render();
 
                 this._retweetHistogram
-                .on_load(function() {
+                .onLoad(function() {
                     self._svg.select('g.retweet.axis.chart-label')
                     .transition()
                     .style('opacity', 1);
@@ -504,7 +532,7 @@ define([
                 .datum(this._dummyGroupData());
 
                 this._originalsHistogram
-                .on_load(function() {
+                .onLoad(function() {
                     self._container.select('div.graph-align-toggle')
                     .transition()
                     .style('opacity', 1)
