@@ -110,6 +110,27 @@ class Queries {
             echo "Prepare grouped_originals failed: (" . $this->db->errno . ") " . $this->db->error;
         }
 
+        $this->queries->grouped_originals_like = $this->db->prepare(
+                "SELECT UNIX_TIMESTAMP(?) + ? * FLOOR((UNIX_TIMESTAMP(created_at)-UNIX_TIMESTAMP(?)) / ?) AS binned_time,
+                    COUNT(*) as count,
+                    SUM(IF(sentiment=1,1,0)) AS positive,
+                    SUM(IF(sentiment=0,1,0)) AS neutral,
+                    SUM(IF(sentiment=-1,1,0)) AS negative
+                FROM tweets
+                WHERE NOT is_retweet
+                AND created_at >= ?
+                AND created_at < ?
+                AND retweet_count >= ?
+                AND text LIKE ?
+                GROUP BY binned_time
+                ORDER BY binned_time"
+        );
+
+        if (!$this->queries->grouped_originals_like)
+        {
+            echo "Prepare grouped_originals_like failed: (" . $this->db->errno . ") " . $this->db->error;
+        }
+
         $this->queries->grouped_retweets = $this->db->prepare(
                 "SELECT UNIX_TIMESTAMP(?) + ? * FLOOR((UNIX_TIMESTAMP(created_at)-UNIX_TIMESTAMP(?)) / ?) AS binned_time,
                     COUNT(*) as count
@@ -124,6 +145,23 @@ class Queries {
         if (!$this->queries->grouped_retweets)
         {
             echo "Prepare grouped_retweets failed: (" . $this->db->errno . ") " . $this->db->error;
+        }
+
+        $this->queries->grouped_retweets_like = $this->db->prepare(
+                "SELECT UNIX_TIMESTAMP(?) + ? * FLOOR((UNIX_TIMESTAMP(created_at)-UNIX_TIMESTAMP(?)) / ?) AS binned_time,
+                    COUNT(*) as count
+                FROM tweets
+                WHERE is_retweet
+                AND created_at >= ?
+                AND created_at < ?
+                AND text LIKE ?
+                GROUP BY binned_time
+                ORDER BY binned_time"
+        );
+
+        if (!$this->queries->grouped_retweets_like)
+        {
+            echo "Prepare grouped_retweets_like failed: (" . $this->db->errno . ") " . $this->db->error;
         }
 
         $this->queries->grouped_retweets_of_id = $this->db->prepare(
@@ -179,6 +217,23 @@ class Queries {
         {
             echo "Prepare grouped_noise failed: (" . $this->db->errno . ") " . $this->db->error;
         }
+
+        $this->queries->grouped_noise_like = $this->db->prepare(
+                "SELECT UNIX_TIMESTAMP(?) + ? * FLOOR((UNIX_TIMESTAMP(created_at)-UNIX_TIMESTAMP(?)) / ?) AS binned_time,
+                    COUNT(*) as count
+                FROM tweets
+                WHERE NOT is_retweet
+                AND created_at >= ?
+                AND created_at < ?
+                AND retweet_count < ?
+                AND text LIKE ?
+                GROUP BY binned_time
+                ORDER BY binned_time"
+        );
+        if (!$this->queries->grouped_noise_like)
+        {
+            echo "Prepare grouped_noise_like failed: (" . $this->db->errno . ") " . $this->db->error;
+        }
     }
 
     /**
@@ -215,21 +270,40 @@ class Queries {
      * @param int $noise_threshold The minimum retweet count to be returned.
      * @return mysqli_result
      */
-    public function get_grouped_originals($start_datetime, $stop_datetime, $group_seconds, $noise_threshold)
+    public function get_grouped_originals($start_datetime, $stop_datetime, $group_seconds, $noise_threshold, $text_search = NULL)
     {
         $start_datetime = $start_datetime->format('Y-m-d H:i:s');
         $stop_datetime = $stop_datetime->format('Y-m-d H:i:s');
 
-        $this->queries->grouped_originals->bind_param('sisissi',
-                $start_datetime, $group_seconds, $start_datetime,
-                $group_seconds, $start_datetime, $stop_datetime,
-                $noise_threshold);
+        if ($text_search === NULL)
+        {
+            $this->queries->grouped_originals->bind_param('sisissi',
+                    $start_datetime, $group_seconds, $start_datetime,
+                    $group_seconds, $start_datetime, $stop_datetime,
+                    $noise_threshold);
 
-        $this->start('grouped_originals');
-        $this->queries->grouped_originals->execute();
+            $this->start('grouped_originals');
+            $this->queries->grouped_originals->execute();
 
-        $result = $this->queries->grouped_originals->get_result();
-        $this->stop('grouped_originals');
+            $result = $this->queries->grouped_originals->get_result();
+            $this->stop('grouped_originals');
+        }
+        else
+        {
+            $search = "%$text_search%";
+            $this->queries->grouped_originals_like->bind_param('sisissis',
+                    $start_datetime, $group_seconds, $start_datetime,
+                    $group_seconds, $start_datetime, $stop_datetime,
+                    $noise_threshold, $search);
+
+            $this->start('grouped_originals_like');
+            $this->queries->grouped_originals_like->execute();
+
+            $result = $this->queries->grouped_originals_like->get_result();
+            $this->stop('grouped_originals_like');
+        }
+
+
 
         return $result;
     }
@@ -242,20 +316,39 @@ class Queries {
      * @param int $group_seconds
      * @return mysqli_result
      */
-    public function get_grouped_retweets($start_datetime, $stop_datetime, $group_seconds)
+    public function get_grouped_retweets($start_datetime, $stop_datetime, $group_seconds, $text_search = NULL)
     {
         $start_datetime = $start_datetime->format('Y-m-d H:i:s');
         $stop_datetime = $stop_datetime->format('Y-m-d H:i:s');
 
-        $this->queries->grouped_retweets->bind_param('sisiss', $start_datetime,
-                $group_seconds, $start_datetime, $group_seconds,
-                $start_datetime, $stop_datetime);
+        if ($text_search === NULL)
+        {
+            $this->queries->grouped_retweets->bind_param('sisiss',
+                    $start_datetime, $group_seconds, $start_datetime,
+                    $group_seconds, $start_datetime, $stop_datetime);
 
-        $this->start('grouped_retweets');
-        $this->queries->grouped_retweets->execute();
+            $this->start('grouped_retweets');
+            $this->queries->grouped_retweets->execute();
 
-        $result = $this->queries->grouped_retweets->get_result();
-        $this->stop('grouped_retweets');
+            $result = $this->queries->grouped_retweets->get_result();
+            $this->stop('grouped_retweets');
+        }
+        else
+        {
+            $search = "%$text_search%";
+            $this->queries->grouped_retweets_like->bind_param('sisisss',
+                    $start_datetime, $group_seconds, $start_datetime,
+                    $group_seconds, $start_datetime, $stop_datetime,
+                    $search);
+
+            $this->start('grouped_retweets_like');
+            $this->queries->grouped_retweets_like->execute();
+
+            $result = $this->queries->grouped_retweets_like->get_result();
+            $this->stop('grouped_retweets_like');
+        }
+
+
 
         return $result;
     }
@@ -328,20 +421,38 @@ class Queries {
      * @param int $noise_threshold The maximum retweet count to return.
      * @return mysqli_result
      */
-    public function get_grouped_noise($start_datetime, $stop_datetime, $group_seconds, $noise_threshold)
+    public function get_grouped_noise($start_datetime, $stop_datetime, $group_seconds, $noise_threshold, $text_search = NULL)
     {
         $start_datetime = $start_datetime->format('Y-m-d H:i:s');
         $stop_datetime = $stop_datetime->format('Y-m-d H:i:s');
 
-        $this->queries->grouped_noise->bind_param('sisissi', $start_datetime,
-                $group_seconds, $start_datetime, $group_seconds,
-                $start_datetime, $stop_datetime, $noise_threshold);
+        if ($text_search === NULL)
+        {
+            $this->queries->grouped_noise->bind_param('sisissi',
+                    $start_datetime, $group_seconds, $start_datetime,
+                    $group_seconds, $start_datetime, $stop_datetime,
+                    $noise_threshold);
 
-        $this->start('grouped_noise');
-        $this->queries->grouped_noise->execute();
+            $this->start('grouped_noise');
+            $this->queries->grouped_noise->execute();
 
-        $result = $this->queries->grouped_noise->get_result();
-        $this->stop('grouped_noise');
+            $result = $this->queries->grouped_noise->get_result();
+            $this->stop('grouped_noise');
+        }
+        else
+        {
+            $search = "%$text_search%";
+            $this->queries->grouped_noise_like->bind_param('sisissis',
+                    $start_datetime, $group_seconds, $start_datetime,
+                    $group_seconds, $start_datetime, $stop_datetime,
+                    $noise_threshold, $search);
+
+            $this->start('grouped_noise_like');
+            $this->queries->grouped_noise_like->execute();
+
+            $result = $this->queries->grouped_noise_like->get_result();
+            $this->stop('grouped_noise_like');
+        }
 
         return $result;
     }

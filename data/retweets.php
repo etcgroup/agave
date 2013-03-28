@@ -6,7 +6,7 @@ include_once 'util/request.php';
 
 $request = new Request();
 $params = $request->get(
-        array(), array('of_id', 'of_from', 'of_to')
+        array(), array('of_id', 'of_from', 'of_to', 'query')
 );
 
 $timeParams = $request->binnedTimeParams();
@@ -41,7 +41,7 @@ else if ($params->of_from !== NULL && $params->of_to !== NULL)
 }
 else
 {
-    $result = $db->get_grouped_retweets($from, $to, $interval);
+    $result = $db->get_grouped_retweets($from, $to, $interval, $params->query);
     $hasSentiment = FALSE;
 }
 

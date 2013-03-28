@@ -45,6 +45,8 @@ define([
                 this._timeAccessor = function(d) {
                     return d.time + self._utcOffset;
                 }
+
+                this._searchQuery = null;
             },
 
             utcOffsetMillis: function(offset) {
@@ -52,6 +54,14 @@ define([
                     return this._utcOffset;
                 }
                 this._utcOffset = offset;
+                return this;
+            },
+
+            searchQuery: function(query) {
+                if (!arguments.length) {
+                    return this._searchQuery;
+                }
+                this._searchQuery = query;
                 return this;
             },
 
@@ -351,12 +361,16 @@ define([
 
                 this._noiseHistogram.cache()
                 .requester(function(zoomLevel, extent) {
-                    return $.getJSON('http://localhost/twittervis/data/noise.php', {
+                    var query = {
                         from: Math.round(extent[0] - self._utcOffset),
                         to: Math.round(extent[1] - self._utcOffset),
                         interval: Math.round(zoomLevel),
                         noise_threshold: self._noiseThreshold
-                    }, 'json');
+                    };
+                    if (self._searchQuery) {
+                        query['query'] = self._searchQuery;
+                    }
+                    return $.getJSON('http://localhost/twittervis/data/noise.php', query, 'json');
                 });
 
                 this._noiseHistogram.semantic(this._semantic);
@@ -388,11 +402,16 @@ define([
                 var self = this;
                 this._retweetHistogram.cache()
                 .requester(function(zoomLevel, extent) {
-                    return $.getJSON('http://localhost/twittervis/data/retweets.php', {
+                    var query = {
                         from: Math.round(extent[0] - self._utcOffset),
                         to: Math.round(extent[1] - self._utcOffset),
-                        interval: Math.round(zoomLevel)
-                    }, 'json');
+                        interval: Math.round(zoomLevel),
+                        noise_threshold: self._noiseThreshold
+                    };
+                    if (self._searchQuery) {
+                        query['query'] = self._searchQuery;
+                    }
+                    return $.getJSON('http://localhost/twittervis/data/retweets.php', query, 'json');
                 });
 
                 this._retweetHistogram.semantic(this._semantic);
@@ -426,12 +445,16 @@ define([
                 var self = this;
                 this._originalsHistogram.cache()
                 .requester(function(zoomLevel, extent) {
-                    return $.getJSON('http://localhost/twittervis/data/by_time.php', {
+                    var query = {
                         from: Math.round(extent[0] - self._utcOffset),
                         to: Math.round(extent[1] - self._utcOffset),
                         interval: Math.round(zoomLevel),
                         noise_threshold: self._noiseThreshold
-                    }, 'json');
+                    };
+                    if (self._searchQuery) {
+                        query['query'] = self._searchQuery;
+                    }
+                    return $.getJSON('http://localhost/twittervis/data/by_time.php', query, 'json');
                 });
 
                 this._originalsHistogram.semantic(this._semantic);

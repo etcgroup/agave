@@ -5,7 +5,7 @@ include_once 'util/data.php';
 include_once 'util/request.php';
 
 $request = new Request();
-$params = $request->get(array('noise_threshold'));
+$params = $request->get(array('noise_threshold'), array('query'));
 $timeParams = $request->binnedTimeParams();
 
 $from = $timeParams->from;
@@ -19,7 +19,7 @@ $db->record_timing($perf);
 
 $count_field = 'count';
 $time_field = 'binned_time';
-$result = $db->get_grouped_noise($from, $to, $interval, $noise_threshold);
+$result = $db->get_grouped_noise($from, $to, $interval, $noise_threshold, $params->query);
 
 $perf->start('processing');
 
