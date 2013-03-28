@@ -11,6 +11,7 @@ define(['underscore',
             this._dataAccessor = function(response) {
                 return response.payload;
             }
+            this._on_load = null;
         }
 
         _.extend(ZoomHistogram.prototype, {
@@ -35,6 +36,14 @@ define(['underscore',
                     return this._cache;
                 }
                 this._cache = cache;
+                return this;
+            },
+
+            on_load: function(fun) {
+                if (!arguments.length) {
+                    return this._on_load;
+                }
+                this._on_load = fun;
                 return this;
             },
 
@@ -81,6 +90,10 @@ define(['underscore',
                         self._histogram.update();
 
                         alreadyUpdated = true;
+
+                        if (self._on_load) {
+                            self._on_load();
+                        }
                     });
                 }
 

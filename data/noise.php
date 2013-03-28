@@ -49,7 +49,7 @@ while ($row = $result->fetch_assoc())
     }
 
     $current_bin = $bins[$bin_index];
-    $current_bin->count = $row[$count_field];
+    $current_bin->count = $row[$count_field] / (double)$interval;
 
     $next_bin += $interval;
     $bin_index += 1;

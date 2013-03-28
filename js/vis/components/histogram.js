@@ -31,25 +31,35 @@ define(['lib/d3', 'underscore', 'lib/rectangle', 'lib/transform'],
                 this._yScale = d3.scale.linear();
 
                 //Private immutable functions
-                var scaledX = function(d) {
+                this._scaledX = function(d) {
                     return self._xScale(self._xAccessor(d));
                 }
-                var scaledY = function(d) {
+                this._scaledY = function(d) {
                     return self._yScale(self._yAccessor(d));
                 }
 
-                this._area = d3.svg.area().x(scaledX).y1(scaledY).y0(0);
+                this._area = d3.svg.area().x(this._scaledX);
             },
 
             _updateScales: function() {
                 //Redo the x scale
                 this._xScale.range([0, this._box.width()]);
+                this.yScaleDomainAuto(this.target().datum());
 
                 //Redo the y scale
-                this._yScale.range([0, this._box.height()]);
+                if (this._flipped) {
+                    this._yScale.range([0, this._box.height()]);
 
+                    this._area
+                    .y1(this._yScale(0))
+                    .y0(this._scaledY);
+                } else {
+                    this._yScale.range([this._box.height(), 0]);
 
-                this.yScaleDomainAuto(this.target().datum());
+                    this._area
+                    .y1(this._scaledY)
+                    .y0(this._yScale(0));
+                }
             },
 
             container: function(selection) {
@@ -116,14 +126,6 @@ define(['lib/d3', 'underscore', 'lib/rectangle', 'lib/transform'],
             _updateTargetSize: function() {
                 //Make the box the right size
                 this._svg.call(this._box);
-
-                //Flip the target over
-                if (!this._flipped) {
-                    var transformAttr = new Transform('translate', 0, this._box.height())
-                    .and('scale', 1, -1);
-
-                    this._target.attr('transform', transformAttr);
-                }
             },
 
             _renderPath: function() {

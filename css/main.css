@@ -7,8 +7,11 @@ body {
 .axis path,
 .axis line {
     fill: none;
-    stroke: #000;
+    stroke: #ddd;
     shape-rendering: crispEdges;
+}
+.axis text {
+    fill: #ddd;
 }
 
 .area {
@@ -46,10 +49,6 @@ body {
 .chart-label {
     fill: #DDD;
     font-size: 12px;
-}
-
-.axis line, .axis path {
-    stroke: transparent;
 }
 
 .graph-align-toggle {

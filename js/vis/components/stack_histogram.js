@@ -71,18 +71,23 @@ define(['lib/d3', 'underscore', 'lib/rectangle', 'lib/transform'],
                 .out(stackOut)
                 .offset(expand);
 
+                self._bumpValue = -1;
+
                 //Private immutable functions for building areas
-                var scaledX = function(d) {
+                this._scaledX = function(d) {
                     return self._xScale(self._xAccessor(d));
                 }
-                var scaledY = function(d) {
-                    return Math.round(self._yScale(d.y0) + self._yScale(d.y)) + 1;
+                this._scaledY = function(d) {
+                    return Math.round(self._yScale(d.y0 + d.y)) + self._bumpValue;
                 }
-                var scaledY0 = function(d) {
+                this._scaledY0 = function(d) {
                     return Math.round(self._yScale(d.y0));
                 }
 
-                this._area = d3.svg.area().x(scaledX).y1(scaledY).y0(scaledY0);
+                this._area = d3.svg.area()
+                .x(this._scaledX)
+                .y1(this._scaledY0)
+                .y0(this._scaledY);
 
                 this._colorValue = function(grp) {
                     return self._colorScale(self._groupIdAccessor(grp));
@@ -123,7 +128,15 @@ define(['lib/d3', 'underscore', 'lib/rectangle', 'lib/transform'],
 
                     this._yScale.domain([min, max]);
                 }
-                this._yScale.range([0, this._box.height()]);
+
+                //Redo the y scale
+                if (this._flipped) {
+                    self._bumpValue = 1;
+                    this._yScale.range([0, this._box.height()]);
+                } else {
+                    self._bumpValue = -1;
+                    this._yScale.range([this._box.height(), 0]);
+                }
             },
 
             stack: function() {
@@ -198,14 +211,6 @@ define(['lib/d3', 'underscore', 'lib/rectangle', 'lib/transform'],
             _updateTargetSize: function() {
                 //Make the box the right size
                 this._svg.call(this._box);
-
-                //Flip the target over
-                if (!this._flipped) {
-                    var transformAttr = new Transform('translate', 0, this._box.height())
-                    .and('scale', 1, -1);
-
-                    this._target.attr('transform', transformAttr);
-                }
             },
 
             _updatePath: function(stacked) {

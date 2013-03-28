@@ -1,6 +1,8 @@
 define(['underscore'],
     function(_) {
 
+        var globalRequestCounter = 0;
+
         var dummyRequest = function(zoomLevel, extent) {
             console.log('requesting data for ' + extent + ' at zoom ' + zoomLevel);
         }
@@ -44,23 +46,24 @@ define(['underscore'],
                 if (cached) {
                     if (extent[0] >= cached.extent[0] &&
                         extent[1] <= cached.extent[1]) {
-                        console.log('using cached data for ' + extent + ' at zoom ' + zoomLevel);
+                        console.log('using cached data from ' + cached.id + ' for ' + extent + ' at zoom ' + zoomLevel);
                         return cached.request;
                     }
                 }
+                var requestId = globalRequestCounter++;
 
-                console.log('submitting a new request for ' + extent + ' at zoom ' + zoomLevel);
-                var request = this._requester(zoomLevel, extent);
-                this._cacheRequest(zoomLevel, extent, request);
+                console.log('new request #' + requestId + ' for ' + extent + ' at zoom ' + zoomLevel);
+                var request = this._requester(requestId, zoomLevel, extent);
+                this._cacheRequest(requestId, zoomLevel, extent, request);
 
                 request.done(function() {
-                    console.log('request fulfilled');
+                    console.log('request #' + requestId + ' fulfilled');
                 });
-                
+
                 return request;
             },
 
-            _cacheRequest: function(zoomLevel, extent, request) {
+            _cacheRequest: function(id, zoomLevel, extent, request) {
                 if (this._cache[zoomLevel]) {
 
                     var existing = this._cache[zoomLevel];
@@ -69,13 +72,14 @@ define(['underscore'],
                         if (!existing.request.state || existing.request.state() === 'pending') {
                             //There's already a request cached
                             //so cancel the request
-                            console.log("Canceling request for " + existing.extent + " at zoom " + zoomLevel);
+                            console.log("Canceling request #" + existing.id + " for " + existing.extent + " at zoom " + zoomLevel);
                             existing.request.abort();
                         }
                     }
                 }
 
                 this._cache[zoomLevel] = {
+                    id: id,
                     extent: extent,
                     request: request
                 }

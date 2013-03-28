@@ -9,6 +9,8 @@ define([
     'vis/components/semzoom'],
     function($, d3, _, Rectangle, Transform, ZoomHistogram, StackHistogram, SemanticZoom) {
 
+        var AXIS_OFFSET = 3;
+
         var TweetTimeline = function() {
             this.initialize();
         }
@@ -34,6 +36,7 @@ define([
 
                 this._timeAxis = d3.svg.axis()
                 .scale(this._timeScale)
+                .tickSubdivide(true)
                 .orient("bottom");
 
                 this._idealBinCount = 50;
@@ -247,14 +250,14 @@ define([
             _buildBoxes: function() {
 
                 var margin = {
-                    left: 20,
+                    left: 40,
                     right: 20,
-                    top: 20,
-                    bottom: 20
+                    top: 10,
+                    bottom: 25
                 }
 
-                var originalsTopMargin = 5;
-                var originalsBottomMargin = 5;
+                var originalsTopMargin = 10;
+                var originalsBottomMargin = 10;
 
                 this.boxes = {};
 
@@ -359,9 +362,19 @@ define([
                 .interpolate(this._interpolation)
                 .render();
 
+                this._noiseHistogram
+                .on_load(function() {
+                    self._svg.select('g.noise.axis.chart-label')
+                    .transition()
+                    .style('opacity', 1);
+
+                    self._updateNoiseAxis();
+                });
+
                 this._noiseHistogram.cache()
-                .requester(function(zoomLevel, extent) {
+                .requester(function(id, zoomLevel, extent) {
                     var query = {
+                        rid: id,
                         from: Math.round(extent[0] - self._utcOffset),
                         to: Math.round(extent[1] - self._utcOffset),
                         interval: Math.round(zoomLevel),
@@ -375,11 +388,30 @@ define([
 
                 this._noiseHistogram.semantic(this._semantic);
 
+                this._noiseAxis = d3.svg.axis()
+                .scale(this._noiseHistogram.histogram().yScale())
+                .ticks(3)
+                .orient('left');
+
+                //Add an x axis
+                this._svg.append('g')
+                .classed('noise axis chart-label', true)
+                .style('opacity', 0);
+
                 this._updateNoiseHistogram();
             },
 
             _updateNoiseHistogram: function() {
                 this._noiseHistogram.update();
+                this._updateNoiseAxis();
+            },
+
+            _updateNoiseAxis: function() {
+                //Position and render the axis
+                this._svg.select('g.noise.axis.chart-label')
+                .attr('transform', new Transform('translate',
+                    this.boxes.inner.left() - AXIS_OFFSET, this.boxes.inner.top()))
+                .call(this._noiseAxis);
             },
 
             _renderRetweetHistogram: function() {
@@ -399,10 +431,20 @@ define([
                 .interpolate(this._interpolation)
                 .render();
 
+                this._retweetHistogram
+                .on_load(function() {
+                    self._svg.select('g.retweet.axis.chart-label')
+                    .transition()
+                    .style('opacity', 1);
+
+                    self._updateRetweetAxis();
+                });
+
                 var self = this;
                 this._retweetHistogram.cache()
-                .requester(function(zoomLevel, extent) {
+                .requester(function(id, zoomLevel, extent) {
                     var query = {
+                        rid: id,
                         from: Math.round(extent[0] - self._utcOffset),
                         to: Math.round(extent[1] - self._utcOffset),
                         interval: Math.round(zoomLevel),
@@ -416,11 +458,30 @@ define([
 
                 this._retweetHistogram.semantic(this._semantic);
 
+                this._retweetAxis = d3.svg.axis()
+                .scale(this._retweetHistogram.histogram().yScale())
+                .ticks(3)
+                .orient('left');
+
+                //Add an x axis
+                this._svg.append('g')
+                .classed('retweet axis chart-label', true)
+                .style('opacity', 0);
+
                 this._updateRetweetHistogram();
             },
 
             _updateRetweetHistogram: function() {
                 this._retweetHistogram.update();
+                this._updateRetweetAxis();
+            },
+
+            _updateRetweetAxis: function() {
+                //Position and render the axis
+                this._svg.select('g.retweet.axis.chart-label')
+                .attr('transform', new Transform('translate',
+                    this.boxes.inner.left() - AXIS_OFFSET, this.boxes.retweets.top()))
+                .call(this._retweetAxis);
             },
 
             _renderOriginalsHistogram: function() {
@@ -442,10 +503,20 @@ define([
                 .target()
                 .datum(this._dummyGroupData());
 
+                this._originalsHistogram
+                .on_load(function() {
+                    self._container.select('div.graph-align-toggle')
+                    .transition()
+                    .style('opacity', 1)
+
+                    self._updateOriginalsAxis();
+                });
+
                 var self = this;
                 this._originalsHistogram.cache()
-                .requester(function(zoomLevel, extent) {
+                .requester(function(id, zoomLevel, extent) {
                     var query = {
+                        rid: id,
                         from: Math.round(extent[0] - self._utcOffset),
                         to: Math.round(extent[1] - self._utcOffset),
                         interval: Math.round(zoomLevel),
@@ -459,11 +530,38 @@ define([
 
                 this._originalsHistogram.semantic(this._semantic);
 
+                this._originalsAxis = d3.svg.axis()
+                .scale(this._originalsHistogram.histogram().yScale())
+                .ticks(10)
+                .orient('left');
+
+                //Add an x axis
+                this._svg.append('g')
+                .classed('originals axis chart-label', true)
+                .style('opacity', 0);
+
                 this._updateOriginalsHistogram();
             },
 
             _updateOriginalsHistogram: function() {
                 this._originalsHistogram.update()
+                this._updateOriginalsAxis();
+            },
+
+            _updateOriginalsAxis: function() {
+                //Position and render the axis
+                if (!this._normalize) {
+                    this._svg.select('g.originals.axis.chart-label')
+                    .attr('transform', new Transform('translate',
+                        this.boxes.inner.left() - AXIS_OFFSET, this.boxes.originals.top()))
+                    .call(this._originalsAxis)
+                    .transition()
+                    .style('opacity', 1);
+                } else {
+                    this._svg.select('g.originals.axis.chart-label')
+                    .transition()
+                    .style('opacity', 0);
+                }
             },
 
             _renderTimeAxis: function() {
@@ -475,12 +573,10 @@ define([
             },
 
             _updateTimeAxis: function() {
-                //Update the x axis scale
-                this._timeAxis.scale(this._timeScale);
-
                 //Position and render the axis
                 this._svg.select('g.x.axis.chart-label')
-                .attr('transform', new Transform('translate', this.boxes.inner.left(), this.boxes.inner.bottom()))
+                .attr('transform', new Transform('translate',
+                    this.boxes.inner.left(), this.boxes.inner.bottom() + AXIS_OFFSET))
                 .call(this._timeAxis);
             },
 
@@ -490,21 +586,24 @@ define([
 
             _renderToggleButton: function() {
                 var newButton = this._container.append('div')
-                .classed('graph-align-toggle', true);
+                .classed('graph-align-toggle', true)
+                .style('opacity', 0);
 
                 var icon = newButton.append('i')
                 .classed('icon-white', true);
 
                 var self = this;
                 newButton.on('click', function() {
-                    var toNormalize = !icon.classed('normalized');
+                    self._normalize = !icon.classed('normalized');
 
                     //self.originalsGraph.setBarsNormalized(toNormalize);
-                    icon.classed('icon-align-left', !toNormalize)
-                    .classed('icon-align-justify normalized', toNormalize);
+                    icon.classed('icon-align-left', !self._normalize)
+                    .classed('icon-align-justify normalized', self._normalize);
 
-                    self._originalsHistogram.histogram().expand(toNormalize);
+                    self._originalsHistogram.histogram().expand(self._normalize);
                     self._originalsHistogram.update();
+
+                    self._updateOriginalsAxis();
                 });
 
                 this._updateToggleButton();
@@ -512,8 +611,8 @@ define([
 
             _updateToggleButton: function() {
                 var toggleButtonOffset = {
-                    top: 14,
-                    left: 18
+                    top: 5,
+                    left: -5
                 };
 
                 //Update the button's position

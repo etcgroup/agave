@@ -83,18 +83,18 @@ while ($row = $result->fetch_assoc())
     }
 
     $current_bin = $totals[$bin_index];
-    $current_bin->count = $row[$count_field];
+    $current_bin->count = $row[$count_field] / (double)$interval;
 
     if ($hasSentiment)
     {
         $positive_bin = $groups->get_group(1)->get_bin($bin_index);
-        $positive_bin->count = (int) $row[$positive_count_field];
+        $positive_bin->count = (int) $row[$positive_count_field] / (double)$interval;
 
         $negative_bin = $groups->get_group(-1)->get_bin($bin_index);
-        $negative_bin->count = (int) $row[$negative_count_field];
+        $negative_bin->count = (int) $row[$negative_count_field] / (double)$interval;
 
         $neutral_bin = $groups->get_group(0)->get_bin($bin_index);
-        $neutral_bin->count = (int) $row[$neutral_count_field];
+        $neutral_bin->count = (int) $row[$neutral_count_field] / (double)$interval;
     }
 
     $next_bin += $interval;
