@@ -95,3 +95,26 @@ body {
     -ms-user-select: none;
     user-select: none;
 }
+
+
+#tweet-list {
+    border-radius: 4px;
+    background: #fff;
+}
+
+#tweet-list ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#tweet-list ul li {
+    list-style: none;
+
+    border-bottom: 1px solid #ddd;
+    padding: 12px;
+}
+
+#tweet-list ul li:last-child {
+    border-bottom: none;
+}

@@ -44,6 +44,7 @@ class Request {
             $response['performance'] = $this->performance;
         }
 
+        header('Content-type: application/json');
         echo json_encode($response);
     }
 
@@ -86,23 +87,31 @@ class Request {
         return $this->request;
     }
 
-    public function binnedTimeParams()
-    {
-        $params = $this->get(array('from', 'to', 'interval'));
+    public function timeParameters() {
+        $params = $this->get(array('from', 'to'));
 
         $from = (int) ($params->from / 1000);
         $to = (int) ($params->to / 1000);
+
+        return (object) array(
+            'from' => new DateTime("@$from"),
+            'to' => new DateTime("@$to"),
+        );
+    }
+
+    public function binnedTimeParams()
+    {
+        $bundle = $this->timeParameters();
+
+        $params = $this->get(array('interval'));
         $interval = (int) ($params->interval / 1000);
 
         if ($interval == 0)
             $interval = 1;
-        
-        $bundle = array(
-            'from' => new DateTime("@$from"),
-            'to' => new DateTime("@$to"),
-            'interval' => (int) $interval
-        );
-        return (object) $bundle;
+
+        $bundle->interval = (int)$interval;
+
+        return $bundle;
     }
 
 }

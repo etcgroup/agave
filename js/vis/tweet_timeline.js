@@ -196,6 +196,11 @@ define([
                     return this._container;
                 }
                 this._container = selection;
+
+                if (typeof this._container == 'string') {
+                    this._container = d3.select(this._container);
+                }
+                
                 return this;
             },
 

@@ -5,12 +5,14 @@ include_once 'util/data.php';
 include_once 'util/request.php';
 
 $request = new Request();
-$params = $request->get(array('from', 'to'), array('noise_threshold'));
+$params = $request->get(array('limit'), array('noise_threshold', 'search'));
+$timeParams = $request->timeParameters();
 
-
-$start = new DateTime("@$params->from");
-$end = new DateTime("@$params->to");
+$from = $timeParams->from;
+$to = $timeParams->to;
+$limit = $params->limit;
 $noise_threshold = $params->noise_threshold;
+$search = $params->search;
 if ($noise_threshold === NULL)
 {
     $noise_threshold = 0;
@@ -22,7 +24,7 @@ $db->record_timing($perf);
 
 $utc = new DateTimeZone('UTC');
 
-$result = $db->get_originals($start, $end, $noise_threshold);
+$result = $db->get_originals($from, $to, $limit, $noise_threshold, $search);
 
 $perf->start('processing');
 

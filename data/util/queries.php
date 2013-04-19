@@ -1,5 +1,18 @@
 <?php
 
+//http://php.net/manual/en/mysqli-stmt.bind-param.php
+function refValues($arr)
+{
+    if (strnatcmp(phpversion(), '5.3') >= 0) //Reference is required for PHP 5.3+
+    {
+        $refs = array();
+        foreach ($arr as $key => $value)
+            $refs[$key] = &$arr[$key];
+        return $refs;
+    }
+    return $arr;
+}
+
 class Queries {
 
     private $db;
@@ -33,6 +46,7 @@ class Queries {
                         $params['schema']);
         $this->build_queries();
         $this->set_timezone();
+        $this->set_encoding();
     }
 
     /**
@@ -70,6 +84,14 @@ class Queries {
     }
 
     /**
+     * Set the encoding to utf8mb4
+     */
+    private function set_encoding()
+    {
+        $this->db->query('set names utf8mb4');
+    }
+
+    /**
      * Initialize the prepared statements.
      */
     private function build_queries()
@@ -83,11 +105,28 @@ class Queries {
                 AND created_at >= ?
                 AND created_at < ?
                 AND retweet_count > ?
-                ORDER BY created_at"
+                ORDER BY created_at
+                LIMIT ?"
         );
         if (!$this->queries->originals)
         {
             echo "Prepare originals failed: (" . $this->db->errno . ") " . $this->db->error;
+        }
+
+        $this->queries->originals_like = $this->db->prepare(
+                "SELECT *
+                FROM tweets
+                WHERE NOT is_retweet
+                AND created_at >= ?
+                AND created_at < ?
+                AND retweet_count > ?
+                AND text LIKE ?
+                ORDER BY created_at
+                LIMIT ?"
+        );
+        if (!$this->queries->originals_like)
+        {
+            echo "Prepare originals_like failed: (" . $this->db->errno . ") " . $this->db->error;
         }
 
         $this->queries->grouped_originals = $this->db->prepare(
@@ -237,6 +276,29 @@ class Queries {
     }
 
     /**
+     * Execute a query. Expects a query name, MySQLi type string, and list of parameters to bind.
+     * @param type $queryname
+     * @param type $typestr
+     * @return type
+     */
+    private function run($queryname, $typestr = NULL)
+    {
+        $query = $this->queries->{$queryname};
+
+        $args = array_slice(func_get_args(), 1);
+        call_user_func_array(array($query, 'bind_param'), refValues($args));
+
+        $this->start($queryname);
+
+        $query->execute();
+        $result = $query->get_result();
+
+        $this->stop($queryname);
+
+        return $result;
+    }
+
+    /**
      * Gets tweets in the specified interval. Returns a MySQLi result set object.
      *
      * @param DateTime $start_datetime
@@ -245,19 +307,22 @@ class Queries {
      *
      * @return mysqli_result
      */
-    public function get_originals($start_datetime, $stop_datetime, $noise_threshold)
+    public function get_originals($start_datetime, $stop_datetime, $limit, $noise_threshold, $text_search = NULL)
     {
         $start_datetime = $start_datetime->format('Y-m-d H:i:s');
         $stop_datetime = $stop_datetime->format('Y-m-d H:i:s');
 
-        $this->queries->originals->bind_param('ssi', $start_datetime,
-                $stop_datetime, $noise_threshold);
-
-        $this->start('originals');
-        $this->queries->originals->execute();
-
-        $result = $this->queries->originals->get_result();
-        $this->stop('originals');
+        if ($text_search === NULL)
+        {
+            $result = $this->run('originals', 'ssii', $start_datetime,
+                    $stop_datetime, $noise_threshold, $limit);
+        }
+        else
+        {
+            $search = "%$text_search%";
+            $result = $this->run('originals_like', 'ssisi', $start_datetime,
+                    $stop_datetime, $noise_threshold, $search, $limit);
+        }
         return $result;
     }
 
@@ -277,30 +342,18 @@ class Queries {
 
         if ($text_search === NULL)
         {
-            $this->queries->grouped_originals->bind_param('sisissi',
+            $result = $this->run('grouped_originals', 'sisissi',
                     $start_datetime, $group_seconds, $start_datetime,
                     $group_seconds, $start_datetime, $stop_datetime,
                     $noise_threshold);
-
-            $this->start('grouped_originals');
-            $this->queries->grouped_originals->execute();
-
-            $result = $this->queries->grouped_originals->get_result();
-            $this->stop('grouped_originals');
         }
         else
         {
             $search = "%$text_search%";
-            $this->queries->grouped_originals_like->bind_param('sisissis',
+            $result = $this->run('grouped_originals_like', 'sisissis',
                     $start_datetime, $group_seconds, $start_datetime,
                     $group_seconds, $start_datetime, $stop_datetime,
                     $noise_threshold, $search);
-
-            $this->start('grouped_originals_like');
-            $this->queries->grouped_originals_like->execute();
-
-            $result = $this->queries->grouped_originals_like->get_result();
-            $this->stop('grouped_originals_like');
         }
 
 
@@ -323,32 +376,17 @@ class Queries {
 
         if ($text_search === NULL)
         {
-            $this->queries->grouped_retweets->bind_param('sisiss',
-                    $start_datetime, $group_seconds, $start_datetime,
-                    $group_seconds, $start_datetime, $stop_datetime);
-
-            $this->start('grouped_retweets');
-            $this->queries->grouped_retweets->execute();
-
-            $result = $this->queries->grouped_retweets->get_result();
-            $this->stop('grouped_retweets');
+            $result = $this->run('grouped_retweets', 'sisiss', $start_datetime,
+                    $group_seconds, $start_datetime, $group_seconds,
+                    $start_datetime, $stop_datetime);
         }
         else
         {
             $search = "%$text_search%";
-            $this->queries->grouped_retweets_like->bind_param('sisisss',
+            $result = $this->run('grouped_retweets_like', 'sisisss',
                     $start_datetime, $group_seconds, $start_datetime,
-                    $group_seconds, $start_datetime, $stop_datetime,
-                    $search);
-
-            $this->start('grouped_retweets_like');
-            $this->queries->grouped_retweets_like->execute();
-
-            $result = $this->queries->grouped_retweets_like->get_result();
-            $this->stop('grouped_retweets_like');
+                    $group_seconds, $start_datetime, $stop_datetime, $search);
         }
-
-
 
         return $result;
     }
@@ -367,15 +405,9 @@ class Queries {
         $start_datetime = $start_datetime->format('Y-m-d H:i:s');
         $stop_datetime = $stop_datetime->format('Y-m-d H:i:s');
 
-        $this->queries->grouped_retweets_of_id->bind_param('sisisss',
+        $result = $this->run('grouped_retweets_of_id', 'sisisss',
                 $start_datetime, $group_seconds, $start_datetime,
                 $group_seconds, $start_datetime, $stop_datetime, $tweet_id);
-
-        $this->start('grouped_retweets_of_id');
-        $this->queries->grouped_retweets_of_id->execute();
-
-        $result = $this->queries->grouped_retweets_of_id->get_result();
-        $this->stop('grouped_retweets_of_id');
 
         return $result;
     }
@@ -398,16 +430,10 @@ class Queries {
         $start_datetime = $start_datetime->format('Y-m-d H:i:s');
         $stop_datetime = $stop_datetime->format('Y-m-d H:i:s');
 
-        $this->queries->grouped_retweets_of_range->bind_param('sisissss',
+        $result = $this->run('grouped_retweets_of_range', 'sisissss',
                 $start_datetime, $group_seconds, $start_datetime,
                 $group_seconds, $start_datetime, $stop_datetime,
                 $tweets_start_datetime, $tweets_stop_datetime);
-
-        $this->start('grouped_retweets_of_range');
-        $this->queries->grouped_retweets_of_range->execute();
-
-        $result = $this->queries->grouped_retweets_of_range->get_result();
-        $this->stop('grouped_retweets_of_range');
 
         return $result;
     }
@@ -428,30 +454,17 @@ class Queries {
 
         if ($text_search === NULL)
         {
-            $this->queries->grouped_noise->bind_param('sisissi',
-                    $start_datetime, $group_seconds, $start_datetime,
-                    $group_seconds, $start_datetime, $stop_datetime,
-                    $noise_threshold);
-
-            $this->start('grouped_noise');
-            $this->queries->grouped_noise->execute();
-
-            $result = $this->queries->grouped_noise->get_result();
-            $this->stop('grouped_noise');
+            $result = $this->run('grouped_noise', 'sisissi', $start_datetime,
+                    $group_seconds, $start_datetime, $group_seconds,
+                    $start_datetime, $stop_datetime, $noise_threshold);
         }
         else
         {
             $search = "%$text_search%";
-            $this->queries->grouped_noise_like->bind_param('sisissis',
+            $result = $this->run('grouped_noise_like', 'sisissis',
                     $start_datetime, $group_seconds, $start_datetime,
                     $group_seconds, $start_datetime, $stop_datetime,
                     $noise_threshold, $search);
-
-            $this->start('grouped_noise_like');
-            $this->queries->grouped_noise_like->execute();
-
-            $result = $this->queries->grouped_noise_like->get_result();
-            $this->stop('grouped_noise_like');
         }
 
         return $result;
