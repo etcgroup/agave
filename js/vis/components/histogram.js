@@ -66,7 +66,10 @@ define(['lib/d3', 'underscore', 'lib/rectangle'],
                 }
 
                 //Set the y domain based on the current data
-                this.yScaleDomainAuto(this.target().datum());
+                var data = this.data();
+                if (data) {
+                    this.yScaleDomainAuto(data);
+                }
 
                 //Update the area baseline with any changes to the y scale.
                 //Unlike y1, y0 does not update based on the data.
@@ -89,9 +92,6 @@ define(['lib/d3', 'underscore', 'lib/rectangle'],
 
                 //Create a group to be the rendering target.
                 this._target = this._svg.append('g');
-
-                //Bind some empty data for now
-                this._target.datum([]);
             },
 
             /**
@@ -137,10 +137,12 @@ define(['lib/d3', 'underscore', 'lib/rectangle'],
              * Update the path using the area generator.
              */
             _updatePath: function() {
-                //Adjust the path to fit the data
-                var path = this._target.select(".area")
-
-                path.attr("d", this._area);
+                //Only update if there is data
+                if (this.data()) {
+                    //Adjust the path to fit the data
+                    this._target.select(".area")
+                    .attr("d", this._area);
+                }
             },
 
             /**
@@ -174,6 +176,18 @@ define(['lib/d3', 'underscore', 'lib/rectangle'],
                     return this._container;
                 }
                 this._container = selection;
+                return this;
+            },
+
+            /**
+             * Get or set the data for the histogram
+             */
+            data: function(data) {
+                if (!arguments.length) {
+                    return this._target.datum();
+                }
+
+                this._target.datum(data);
                 return this;
             },
 

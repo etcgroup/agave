@@ -17,6 +17,9 @@ define(['underscore', 'lib/d3'],
 
         _.extend(SemanticZoom.prototype, {
 
+            /**
+             * Get or set the scale for zooming.
+             */
             scale: function(scale) {
                 if (!arguments.length) {
                     return this._scale;
@@ -25,6 +28,9 @@ define(['underscore', 'lib/d3'],
                 return this;
             },
 
+            /**
+             * Get or set the ideal bin count.
+             */
             idealBinCount: function(value) {
                 if (!arguments.length) {
                     return this._idealBinCount;
@@ -33,6 +39,12 @@ define(['underscore', 'lib/d3'],
                 return this;
             },
 
+            /**
+             * Check to see if an update is recommended.
+             *
+             * Returns true if the bin width and data interval being shown
+             * should be changed.
+             */
             update: function() {
                 var rawDomain = this._scale.domain();
                 var visibleDomain = [+rawDomain[0], +rawDomain[1]];
@@ -61,6 +73,8 @@ define(['underscore', 'lib/d3'],
                 }
 
                 if (recalculate) {
+                    //Use the tick calculation code at the bottom to
+                    //generate the new interval and bin width.
                     var desiredDataInterval = [visibleDomain[0] - domainWidth, visibleDomain[1] + domainWidth];
                     var desiredDataPoints = this._idealBinCount * 3
                     var settings = sz_ticks(desiredDataInterval, desiredDataPoints);
@@ -79,6 +93,12 @@ define(['underscore', 'lib/d3'],
                 return false;
             },
 
+            /**
+             * Get or set the data range.
+             *
+             * Set this before update, and after update it will contain the
+             * recommended value.
+             */
             interval: function(interval) {
                 if (!arguments.length) {
                     return this._dataInterval;
@@ -87,6 +107,12 @@ define(['underscore', 'lib/d3'],
                 return this;
             },
 
+            /**
+             * Get or set the data bin width.
+             *
+             * Set this before update, and after update it will contain
+             * the recommended value.
+             */
             binWidth: function(width) {
                 if (!arguments.length) {
                     return this._binWidth;
@@ -101,7 +127,7 @@ define(['underscore', 'lib/d3'],
         /////// A bunch of modified timing code from d3 //////////
         ///// allows getting time a pre-defined granularities ////
         //////////////////////////////////////////////////////////
-        
+
         var sz_time_scaleSetYear = function(y) {
             var d = new Date(y, 0, 1);
             d.setFullYear(y);

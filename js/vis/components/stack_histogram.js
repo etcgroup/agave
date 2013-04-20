@@ -41,10 +41,6 @@ define(['lib/d3', 'underscore', 'lib/extend', 'vis/components/histogram'],
             var stackXAccessor = function(d) {
                 return self._xAccessor(d);
             }
-            //                var stackOut = function(d, y0, y) {
-            //                    d.y0 = y0;
-            //                    d.y = y;
-            //                }
             var stackValuesAccessor = function(grp) {
                 return self._groupValuesAccessor(grp);
             }
@@ -55,7 +51,6 @@ define(['lib/d3', 'underscore', 'lib/extend', 'vis/components/histogram'],
             .values(stackValuesAccessor)
             .y(stackYAccessor)
             .x(stackXAccessor)
-            //                .out(stackOut)
             .offset(expand);
 
             //I can't remember what this does...
@@ -99,12 +94,19 @@ define(['lib/d3', 'underscore', 'lib/extend', 'vis/components/histogram'],
                 if (!arguments.length) {
                     return this._expand;
                 }
-                this._expand = toExpand;
+                if (toExpand != this._expand) {
+                    this._expand = toExpand;
 
-                if (toExpand) {
-                    this._stack.offset(expand);
-                } else {
-                    this._stack.offset('zero');
+                    if (toExpand) {
+                        this._stack.offset(expand);
+                    } else {
+                        this._stack.offset('zero');
+                    }
+
+                    //Re-stack the data
+                    if (this._raw_data) {
+                        this._stacked_data = this._stack(this._raw_data);
+                    }
                 }
                 return this;
             },
@@ -112,14 +114,15 @@ define(['lib/d3', 'underscore', 'lib/extend', 'vis/components/histogram'],
             /**
              * Update the x and y scales.
              */
-            _updateScales: function(data) {
+            _updateScales: function() {
                 //Redo the x scale range
                 this._xScale.range([0, this._box.width()]);
 
+                var stacked = this._stacked_data;
                 //Redo the y scale domain
-                if (data) {
-                    var lastGroupValues = this._groupValuesAccessor(data[data.length - 1]);
-                    var firstGroupValues = this._groupValuesAccessor(data[0]);
+                if (stacked) {
+                    var lastGroupValues = this._groupValuesAccessor(stacked[stacked.length - 1]);
+                    var firstGroupValues = this._groupValuesAccessor(stacked[0]);
                     var min = d3.min(firstGroupValues, function(d) {
                         return d.y0;
                     })
@@ -162,36 +165,32 @@ define(['lib/d3', 'underscore', 'lib/extend', 'vis/components/histogram'],
             },
 
             /**
-             * Use the stack layout to prepare the data.
+             * Get or set the data for the stacked histogram
              */
-            _getStackData: function() {
-                var groups = this._target.datum();
-                return this._stack(groups);
-            },
+            data: function(data) {
+                if (!arguments.length) {
+                    return this._raw_data;
+                }
 
-            /**
-             * Override the default update method.
-             *
-             * We need to prepare the data using the stacked layout and then
-             * apply the updates using the prepared data.
-             */
-            update: function() {
-                var stacked = this._getStackData();
-
-                this._updateScales(stacked);
-                this._updateTargetSize();
-                this._updatePath(stacked);
+                //Stack the data
+                this._stacked_data = this._stack(data);
+                this._raw_data = data;
+                return this;
             },
 
             /**
              * Given some stacked data, bind it to the paths
              * and redraw the areas.
              */
-            _updatePath: function(stacked) {
+            _updatePath: function() {
+                //Only update if we have data ready
+                if (!this._stacked_data) {
+                    return;
+                }
 
                 //Bind the new data
                 var bind = this._target.selectAll('path')
-                .data(stacked);
+                .data(this._stacked_data);
 
                 //Add any needed paths
                 bind.enter()

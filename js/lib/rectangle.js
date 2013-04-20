@@ -1,4 +1,22 @@
 define(['underscore'], function(_) {
+
+    /**
+     * Rectangle is a class for managing a bounding box.
+     *
+     * It should be created with an object defining the size and position
+     * of the box. The specification must be sufficient to comipletely
+     * define the width, height, and position of the box.
+     *
+     * For the vertical dimension, any of these combos work:
+     *      - top, height
+     *      - top, bottom
+     *      - height, bottom
+     *
+     * For the horizontal dimension, any of these combos work:
+     *      - left, width
+     *      - left, right
+     *      - width, right
+     */
     var Rectangle = function(options) {
         if (_.has(options, 'bottom')) {
             if (_.has(options, 'top')) {
@@ -39,6 +57,11 @@ define(['underscore'], function(_) {
     }
 
     _.extend(Rectangle.prototype, {
+        /**
+         * Calculate the position of the center of the box.
+         *
+         * An object with keys x and y is returned.
+         */
         center: function() {
             return {
                 y: this.options.top + this.options.height * 0.5,
@@ -46,34 +69,60 @@ define(['underscore'], function(_) {
             };
         },
 
+        /**
+         * Get the top of the box.
+         */
         top: function() {
             return this.options.top;
         },
 
+        /**
+         * Get the bottom of the box.
+         */
         bottom: function() {
             return this.options.top + this.options.height;
         },
 
+        /**
+         * Get the left side of the box.
+         */
         left: function() {
             return this.options.left;
         },
 
+        /**
+         * Get the right side of the box.
+         */
         right: function() {
             return this.options.left + this.options.width;
         },
 
+        /**
+         * Get the width of the box.
+         */
         width: function() {
             return this.options.width
         },
 
+        /**
+         * Get the height of the box.
+         */
         height: function() {
             return this.options.height;
         },
 
+        /**
+         * Make a new box with the same settings as this box
+         * plus some overrides.
+         */
         extend: function(options) {
             return new Rectangle(_.defaults(options, this.options));
         },
 
+        /**
+         * Use this rectangle to set x, y, width, and height
+         * attributes on a selection.
+         */
         apply: function(selection) {
             selection.attr('width', this.options.width)
             .attr('height', this.options.height)
