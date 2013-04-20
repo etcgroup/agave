@@ -1,18 +1,15 @@
 <?php
 
-//http://php.net/manual/en/mysqli-stmt.bind-param.php
-function refValues($arr)
-{
-    if (strnatcmp(phpversion(), '5.3') >= 0) //Reference is required for PHP 5.3+
-    {
-        $refs = array();
-        foreach ($arr as $key => $value)
-            $refs[$key] = &$arr[$key];
-        return $refs;
-    }
-    return $arr;
-}
-
+/**
+ * The Queries class contains all of the SQL queries for retrieving data.
+ * It also encapsulates the database connection.
+ *
+ * For convenience, each query is defined right above the function
+ * where it is used.
+ *
+ * To add new operations, add a new _build_*() function to prepare
+ * the query along with a paired get_*() function.
+ */
 class Queries {
 
     private $db;
@@ -26,13 +23,19 @@ class Queries {
      * $params may either be an associative array containing 'host', 'user', 'password', and 'schema'
      * or it may be the string name of a .ini file containing those variables.
      *
+     * If $params is not provided, 'db.ini' will be searched for parameters.
+     *
      * @param mixed $params
      */
     public function __construct($params = NULL)
     {
-        if (is_string($params))
+        if ($params === NULL)
         {
             $params = parse_ini_file('db.ini');
+        }
+        else if (is_string($params))
+        {
+            $params = parse_ini_file($params);
         }
         else if (!is_array($params))
         {
@@ -44,13 +47,15 @@ class Queries {
                         $params['user'],
                         $params['password'],
                         $params['schema']);
+
         $this->build_queries();
         $this->set_timezone();
         $this->set_encoding();
     }
 
     /**
-     * Record performance using the given tracker.
+     * Provide a performance tracker to the Queries object.
+     *
      * @param Performance $performance
      */
     public function record_timing($performance)
@@ -58,6 +63,10 @@ class Queries {
         $this->performance = $performance;
     }
 
+    /**
+     * Mark the start of a query for performance measurement.
+     * @param type $query_name
+     */
     private function start($query_name)
     {
         if ($this->performance !== NULL)
@@ -67,6 +76,10 @@ class Queries {
         }
     }
 
+    /**
+     * Mark the stop of a query for performance measurement.
+     * @param type $query_name
+     */
     private function stop($query_name)
     {
         if ($this->performance !== NULL)
@@ -93,11 +106,50 @@ class Queries {
 
     /**
      * Initialize the prepared statements.
+     *
+     * This runs all of the methods of the Queries object
+     * to find those that start with "_build".
      */
     private function build_queries()
     {
         $this->queries = new stdClass();
 
+        // Get all of the query builder methods
+        $methods = get_class_methods($this);
+        foreach ($methods as $method)
+        {
+            if (substr_compare($method, '_build', 0, 6) === 0)
+            {
+                call_user_func(array($this, $method));
+            }
+        }
+    }
+
+    /**
+     * Execute a query. Expects a query name, MySQLi type string, and list of parameters to bind.
+     * @param type $queryname
+     * @param type $typestr
+     * @return type
+     */
+    private function run($queryname, $typestr = NULL)
+    {
+        $query = $this->queries->{$queryname};
+
+        $args = array_slice(func_get_args(), 1);
+        call_user_func_array(array($query, 'bind_param'), refValues($args));
+
+        $this->start($queryname);
+
+        $query->execute();
+        $result = $query->get_result();
+
+        $this->stop($queryname);
+
+        return $result;
+    }
+
+    private function _build_originals()
+    {
         $this->queries->originals = $this->db->prepare(
                 "SELECT *
                 FROM tweets
@@ -128,7 +180,38 @@ class Queries {
         {
             echo "Prepare originals_like failed: (" . $this->db->errno . ") " . $this->db->error;
         }
+    }
 
+    /**
+     * Gets tweets in the specified interval. Returns a MySQLi result set object.
+     *
+     * @param DateTime $start_datetime
+     * @param DateTime $stop_datetime
+     * @param int $noise_threshold The minimum retweet count to be returned
+     *
+     * @return mysqli_result
+     */
+    public function get_originals($start_datetime, $stop_datetime, $limit, $noise_threshold, $text_search = NULL)
+    {
+        $start_datetime = $start_datetime->format('Y-m-d H:i:s');
+        $stop_datetime = $stop_datetime->format('Y-m-d H:i:s');
+
+        if ($text_search === NULL)
+        {
+            $result = $this->run('originals', 'ssii', $start_datetime,
+                    $stop_datetime, $noise_threshold, $limit);
+        }
+        else
+        {
+            $search = "%$text_search%";
+            $result = $this->run('originals_like', 'ssisi', $start_datetime,
+                    $stop_datetime, $noise_threshold, $search, $limit);
+        }
+        return $result;
+    }
+
+    private function _build_grouped_originals()
+    {
         $this->queries->grouped_originals = $this->db->prepare(
                 "SELECT UNIX_TIMESTAMP(?) + ? * FLOOR((UNIX_TIMESTAMP(created_at)-UNIX_TIMESTAMP(?)) / ?) AS binned_time,
                     COUNT(*) as count,
@@ -169,161 +252,6 @@ class Queries {
         {
             echo "Prepare grouped_originals_like failed: (" . $this->db->errno . ") " . $this->db->error;
         }
-
-        $this->queries->grouped_retweets = $this->db->prepare(
-                "SELECT UNIX_TIMESTAMP(?) + ? * FLOOR((UNIX_TIMESTAMP(created_at)-UNIX_TIMESTAMP(?)) / ?) AS binned_time,
-                    COUNT(*) as count
-                FROM tweets
-                WHERE is_retweet
-                AND created_at >= ?
-                AND created_at < ?
-                GROUP BY binned_time
-                ORDER BY binned_time"
-        );
-
-        if (!$this->queries->grouped_retweets)
-        {
-            echo "Prepare grouped_retweets failed: (" . $this->db->errno . ") " . $this->db->error;
-        }
-
-        $this->queries->grouped_retweets_like = $this->db->prepare(
-                "SELECT UNIX_TIMESTAMP(?) + ? * FLOOR((UNIX_TIMESTAMP(created_at)-UNIX_TIMESTAMP(?)) / ?) AS binned_time,
-                    COUNT(*) as count
-                FROM tweets
-                WHERE is_retweet
-                AND created_at >= ?
-                AND created_at < ?
-                AND text LIKE ?
-                GROUP BY binned_time
-                ORDER BY binned_time"
-        );
-
-        if (!$this->queries->grouped_retweets_like)
-        {
-            echo "Prepare grouped_retweets_like failed: (" . $this->db->errno . ") " . $this->db->error;
-        }
-
-        $this->queries->grouped_retweets_of_id = $this->db->prepare(
-                "SELECT UNIX_TIMESTAMP(?) + ? * FLOOR((UNIX_TIMESTAMP(created_at)-UNIX_TIMESTAMP(?)) / ?) AS binned_time,
-                    COUNT(*) as count
-                FROM tweets
-                WHERE is_retweet
-                AND created_at >= ?
-                AND created_at < ?
-                AND retweet_of_status_id = ?
-                GROUP BY binned_time
-                ORDER BY binned_time"
-        );
-
-        if (!$this->queries->grouped_retweets_of_id)
-        {
-            echo "Prepare grouped_retweets_of_id failed: (" . $this->db->errno . ") " . $this->db->error;
-        }
-
-        $this->queries->grouped_retweets_of_range = $this->db->prepare(
-                "SELECT UNIX_TIMESTAMP(?) + ? * FLOOR((UNIX_TIMESTAMP(rt.created_at)-UNIX_TIMESTAMP(?)) / ?) AS binned_time,
-                    COUNT(*) as count,
-                    SUM(IF(rt.sentiment=1,1,0)) AS positive,
-                    SUM(IF(rt.sentiment=0,1,0)) AS neutral,
-                    SUM(IF(rt.sentiment=-1,1,0)) AS negative
-                FROM tweets t0, tweets rt
-                WHERE t0.id = rt.retweet_of_status_id
-                AND rt.created_at >= ?
-                AND rt.created_at < ?
-                AND t0.created_at >= ?
-                AND t0.created_at < ?
-                GROUP BY binned_time
-                ORDER BY binned_time"
-        );
-
-        if (!$this->queries->grouped_retweets_of_range)
-        {
-            echo "Prepare grouped_retweets_of_range failed: (" . $this->db->errno . ") " . $this->db->error;
-        }
-
-        $this->queries->grouped_noise = $this->db->prepare(
-                "SELECT UNIX_TIMESTAMP(?) + ? * FLOOR((UNIX_TIMESTAMP(created_at)-UNIX_TIMESTAMP(?)) / ?) AS binned_time,
-                    COUNT(*) as count
-                FROM tweets
-                WHERE NOT is_retweet
-                AND created_at >= ?
-                AND created_at < ?
-                AND retweet_count < ?
-                GROUP BY binned_time
-                ORDER BY binned_time"
-        );
-        if (!$this->queries->grouped_noise)
-        {
-            echo "Prepare grouped_noise failed: (" . $this->db->errno . ") " . $this->db->error;
-        }
-
-        $this->queries->grouped_noise_like = $this->db->prepare(
-                "SELECT UNIX_TIMESTAMP(?) + ? * FLOOR((UNIX_TIMESTAMP(created_at)-UNIX_TIMESTAMP(?)) / ?) AS binned_time,
-                    COUNT(*) as count
-                FROM tweets
-                WHERE NOT is_retweet
-                AND created_at >= ?
-                AND created_at < ?
-                AND retweet_count < ?
-                AND text LIKE ?
-                GROUP BY binned_time
-                ORDER BY binned_time"
-        );
-        if (!$this->queries->grouped_noise_like)
-        {
-            echo "Prepare grouped_noise_like failed: (" . $this->db->errno . ") " . $this->db->error;
-        }
-    }
-
-    /**
-     * Execute a query. Expects a query name, MySQLi type string, and list of parameters to bind.
-     * @param type $queryname
-     * @param type $typestr
-     * @return type
-     */
-    private function run($queryname, $typestr = NULL)
-    {
-        $query = $this->queries->{$queryname};
-
-        $args = array_slice(func_get_args(), 1);
-        call_user_func_array(array($query, 'bind_param'), refValues($args));
-
-        $this->start($queryname);
-
-        $query->execute();
-        $result = $query->get_result();
-
-        $this->stop($queryname);
-
-        return $result;
-    }
-
-    /**
-     * Gets tweets in the specified interval. Returns a MySQLi result set object.
-     *
-     * @param DateTime $start_datetime
-     * @param DateTime $stop_datetime
-     * @param int $noise_threshold The minimum retweet count to be returned
-     *
-     * @return mysqli_result
-     */
-    public function get_originals($start_datetime, $stop_datetime, $limit, $noise_threshold, $text_search = NULL)
-    {
-        $start_datetime = $start_datetime->format('Y-m-d H:i:s');
-        $stop_datetime = $stop_datetime->format('Y-m-d H:i:s');
-
-        if ($text_search === NULL)
-        {
-            $result = $this->run('originals', 'ssii', $start_datetime,
-                    $stop_datetime, $noise_threshold, $limit);
-        }
-        else
-        {
-            $search = "%$text_search%";
-            $result = $this->run('originals_like', 'ssisi', $start_datetime,
-                    $stop_datetime, $noise_threshold, $search, $limit);
-        }
-        return $result;
     }
 
     /**
@@ -361,6 +289,42 @@ class Queries {
         return $result;
     }
 
+    private function _build_grouped_retweets()
+    {
+        $this->queries->grouped_retweets = $this->db->prepare(
+                "SELECT UNIX_TIMESTAMP(?) + ? * FLOOR((UNIX_TIMESTAMP(created_at)-UNIX_TIMESTAMP(?)) / ?) AS binned_time,
+                    COUNT(*) as count
+                FROM tweets
+                WHERE is_retweet
+                AND created_at >= ?
+                AND created_at < ?
+                GROUP BY binned_time
+                ORDER BY binned_time"
+        );
+
+        if (!$this->queries->grouped_retweets)
+        {
+            echo "Prepare grouped_retweets failed: (" . $this->db->errno . ") " . $this->db->error;
+        }
+
+        $this->queries->grouped_retweets_like = $this->db->prepare(
+                "SELECT UNIX_TIMESTAMP(?) + ? * FLOOR((UNIX_TIMESTAMP(created_at)-UNIX_TIMESTAMP(?)) / ?) AS binned_time,
+                    COUNT(*) as count
+                FROM tweets
+                WHERE is_retweet
+                AND created_at >= ?
+                AND created_at < ?
+                AND text LIKE ?
+                GROUP BY binned_time
+                ORDER BY binned_time"
+        );
+
+        if (!$this->queries->grouped_retweets_like)
+        {
+            echo "Prepare grouped_retweets_like failed: (" . $this->db->errno . ") " . $this->db->error;
+        }
+    }
+
     /**
      * Get retweet counts grouped over a time interval.
      *
@@ -391,6 +355,26 @@ class Queries {
         return $result;
     }
 
+    private function _build_grouped_retweets_of_id()
+    {
+        $this->queries->grouped_retweets_of_id = $this->db->prepare(
+                "SELECT UNIX_TIMESTAMP(?) + ? * FLOOR((UNIX_TIMESTAMP(created_at)-UNIX_TIMESTAMP(?)) / ?) AS binned_time,
+                    COUNT(*) as count
+                FROM tweets
+                WHERE is_retweet
+                AND created_at >= ?
+                AND created_at < ?
+                AND retweet_of_status_id = ?
+                GROUP BY binned_time
+                ORDER BY binned_time"
+        );
+
+        if (!$this->queries->grouped_retweets_of_id)
+        {
+            echo "Prepare grouped_retweets_of_id failed: (" . $this->db->errno . ") " . $this->db->error;
+        }
+    }
+
     /**
      * Get retweet counts of a specific tweet, grouped over a time interval.
      *
@@ -410,6 +394,30 @@ class Queries {
                 $group_seconds, $start_datetime, $stop_datetime, $tweet_id);
 
         return $result;
+    }
+
+    private function _build_grouped_retweets_of_range()
+    {
+        $this->queries->grouped_retweets_of_range = $this->db->prepare(
+                "SELECT UNIX_TIMESTAMP(?) + ? * FLOOR((UNIX_TIMESTAMP(rt.created_at)-UNIX_TIMESTAMP(?)) / ?) AS binned_time,
+                    COUNT(*) as count,
+                    SUM(IF(rt.sentiment=1,1,0)) AS positive,
+                    SUM(IF(rt.sentiment=0,1,0)) AS neutral,
+                    SUM(IF(rt.sentiment=-1,1,0)) AS negative
+                FROM tweets t0, tweets rt
+                WHERE t0.id = rt.retweet_of_status_id
+                AND rt.created_at >= ?
+                AND rt.created_at < ?
+                AND t0.created_at >= ?
+                AND t0.created_at < ?
+                GROUP BY binned_time
+                ORDER BY binned_time"
+        );
+
+        if (!$this->queries->grouped_retweets_of_range)
+        {
+            echo "Prepare grouped_retweets_of_range failed: (" . $this->db->errno . ") " . $this->db->error;
+        }
     }
 
     /**
@@ -436,6 +444,42 @@ class Queries {
                 $tweets_start_datetime, $tweets_stop_datetime);
 
         return $result;
+    }
+
+    private function _build_grouped_noise()
+    {
+        $this->queries->grouped_noise = $this->db->prepare(
+                "SELECT UNIX_TIMESTAMP(?) + ? * FLOOR((UNIX_TIMESTAMP(created_at)-UNIX_TIMESTAMP(?)) / ?) AS binned_time,
+                    COUNT(*) as count
+                FROM tweets
+                WHERE NOT is_retweet
+                AND created_at >= ?
+                AND created_at < ?
+                AND retweet_count < ?
+                GROUP BY binned_time
+                ORDER BY binned_time"
+        );
+        if (!$this->queries->grouped_noise)
+        {
+            echo "Prepare grouped_noise failed: (" . $this->db->errno . ") " . $this->db->error;
+        }
+
+        $this->queries->grouped_noise_like = $this->db->prepare(
+                "SELECT UNIX_TIMESTAMP(?) + ? * FLOOR((UNIX_TIMESTAMP(created_at)-UNIX_TIMESTAMP(?)) / ?) AS binned_time,
+                    COUNT(*) as count
+                FROM tweets
+                WHERE NOT is_retweet
+                AND created_at >= ?
+                AND created_at < ?
+                AND retweet_count < ?
+                AND text LIKE ?
+                GROUP BY binned_time
+                ORDER BY binned_time"
+        );
+        if (!$this->queries->grouped_noise_like)
+        {
+            echo "Prepare grouped_noise_like failed: (" . $this->db->errno . ") " . $this->db->error;
+        }
     }
 
     /**
@@ -470,4 +514,24 @@ class Queries {
         return $result;
     }
 
+}
+
+/**
+ * Converts an array of values into references.
+ *
+ * http://php.net/manual/en/mysqli-stmt.bind-param.php
+ *
+ * @param type $arr
+ * @return type
+ */
+function refValues($arr)
+{
+    if (strnatcmp(phpversion(), '5.3') >= 0) //Reference is required for PHP 5.3+
+    {
+        $refs = array();
+        foreach ($arr as $key => $value)
+            $refs[$key] = &$arr[$key];
+        return $refs;
+    }
+    return $arr;
 }

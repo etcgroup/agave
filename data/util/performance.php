@@ -1,16 +1,38 @@
 <?php
 
+/**
+ * A timer class for measuring performance of multiple
+ * events during execution.
+ *
+ * Each event to be measured has a unique name, which is provided
+ * to the start and stop methods to record times.
+ *
+ * Performance can also measure counts of events, via the counter method.
+ */
 class Performance {
 
     public $counts = array();
     public $times = array();
     private $start_times = array();
 
+    /**
+     * Mark the start of an event specified by name.
+     *
+     * If an event of the same name was already recorded,
+     * it will be overwritten.
+     *
+     * @param type $name
+     */
     public function start($name)
     {
         $this->start_times[$name] = microtime(TRUE);
     }
 
+    /**
+     * Mark the stop of an event by name.
+     *
+     * @param type $name
+     */
     public function stop($name)
     {
         if (!array_key_exists($name, $this->times)) {
@@ -20,6 +42,10 @@ class Performance {
         $this->times[$name] += microtime(TRUE) - $this->start_times[$name];
     }
 
+    /**
+     * Increment a counter with the given name.
+     * @param type $name
+     */
     public function counter($name) {
         if (!array_key_exists($name, $this->counts)) {
             $this->counts[$name] = 0;

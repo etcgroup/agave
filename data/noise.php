@@ -1,10 +1,31 @@
 <?php
+/**
+ * noise.php is used to retrieve counts of "noisey" tweets
+ * over time.
+ *
+ * For now, noisey tweets are tweets with less than some threshold number
+ * of retweets.
+ *
+ * The noisy tweets are binned by time and the tweet count in
+ * each bin is returned.
+ */
 
-include_once 'util/queries.php';
 include_once 'util/data.php';
 include_once 'util/request.php';
 
 $request = new Request();
+$perf = $request->timing();
+$db = $request->db();
+
+/**
+ * Requests to /noise.php should provide the binned time parameters:
+ * from, to, and interval.
+ *
+ * Additionally, requests should provide a noise_threshold,
+ * used to filter the result to tweets with no more than this many retweets.
+ *
+ * Optionally, a text search parameter can be provided.
+ */
 $params = $request->get(array('noise_threshold'), array('search'));
 $timeParams = $request->binnedTimeParams();
 
@@ -12,50 +33,42 @@ $from = $timeParams->from;
 $to = $timeParams->to;
 $interval = $timeParams->interval;
 $noise_threshold = (int) $params->noise_threshold;
+$search = $params->search;
 
-$perf = $request->timing();
-$db = new Queries('db.ini');
-$db->record_timing($perf);
-
+//Field name constants
 $count_field = 'count';
 $time_field = 'binned_time';
-$result = $db->get_grouped_noise($from, $to, $interval, $noise_threshold, $params->search);
+$result = $db->get_grouped_noise($from, $to, $interval, $noise_threshold, $search);
 
 $perf->start('processing');
 
-$bins = array();
+//We're only getting a single series of counts
+//so the id doesn't matter.
+$group = new CountGroup(0);
 
+//Initialize all bins to 0
 $next_bin = $from->getTimestamp();
 $end = $to->getTimestamp();
 while ($next_bin < $end)
 {
-    $bin = new CountBin($next_bin);
-    $bins[] = $bin;
+    $group->add_bin($next_bin);
 
     $next_bin += $interval;
 }
 
-$next_bin = $from->getTimestamp();
-$bin_index = 0;
 while ($row = $result->fetch_assoc())
 {
 
     $binned_time = $row[$time_field];
 
-    while ($next_bin !== $binned_time)
-    {
-        $bin_index += 1;
-        $next_bin += $interval;
-    }
+    $current_bin = $group->get_bin_at($binned_time);
 
-    $current_bin = $bins[$bin_index];
     $current_bin->count = $row[$count_field] / (double)$interval;
 
     $next_bin += $interval;
-    $bin_index += 1;
 }
 $result->free();
 
 $perf->stop('processing');
 
-$request->response($bins);
+$request->response($group->values);

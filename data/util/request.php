@@ -1,16 +1,26 @@
 <?php
 
 include_once 'performance.php';
+include_once 'queries.php';
 
+/**
+ * The Request class collects together several disparate pieces of information that
+ * are relevant to each request:
+ *      - request parameters
+ *      - database connection
+ *      - performance stats
+ *
+ * The bulk of the class is a utility for processesing $_GET parameters, the get()
+ * method, which is used to retreive specific $_GET variables as an object.
+ *
+ * It also defines some convenience methods for handling common parameters,
+ * such as times, which need to be converted from ms to DateTime objects.
+ */
 class Request {
 
     private $request = NULL;
     private $performance = NULL;
-
-    public function __construct()
-    {
-
-    }
+    private $db = NULL;
 
     /**
      * Get a performance timer for this request.
@@ -19,14 +29,38 @@ class Request {
     public function timing()
     {
         $this->performance = new Performance();
+
+        if ($this->db) {
+            //If the db is already initialized, share the performance tracker with it
+            $this->db->record_timing($this->performance);
+        }
+
         return $this->performance;
     }
 
     /**
-     * Print the response
+     * Initialize and get the database connection for this request.
+     * @param type $params
+     */
+    public function db($params=NULL)
+    {
+        $this->db = new Queries($params);
+
+        if ($this->performance) {
+            //If the performance tracker is already initialized, share it with the db
+            $this->db->record_timing($this->performance);
+        }
+
+        return $this->db;
+    }
+
+    /**
+     * JSON encode and print the response.
+     *
+     * The response will be an object containing the payload,
+     * as well as request and performance data for debugging.
      *
      * @param mixed $payload
-     * @param Performance $performance
      */
     public function response($payload)
     {
@@ -50,6 +84,12 @@ class Request {
 
     /**
      * Collects GET request parameters.
+     *
+     * The first argument is an array of required parameters names.
+     * If a required parameter is missing, an Exception will be thrown.
+     *
+     * The second argument (optional) is an array of optional parameters to
+     * look for. Any of these that are missing will default to NULL in the result.
      *
      * @param array $required The required parameters
      * @param array $optional The optional parameters (optional)
@@ -87,18 +127,30 @@ class Request {
         return $this->request;
     }
 
-    public function timeParameters() {
+    /**
+     * Get 'from' and 'to' DateTimes.
+     *
+     * @return type
+     */
+    public function timeParameters()
+    {
         $params = $this->get(array('from', 'to'));
 
         $from = (int) ($params->from / 1000);
         $to = (int) ($params->to / 1000);
 
         return (object) array(
-            'from' => new DateTime("@$from"),
-            'to' => new DateTime("@$to"),
+                    'from' => new DateTime("@$from"),
+                    'to' => new DateTime("@$to"),
         );
     }
 
+    /**
+     * Get 'from' and 'to' DateTimes, as well as
+     * a grouping 'interval'.
+     *
+     * @return type
+     */
     public function binnedTimeParams()
     {
         $bundle = $this->timeParameters();
@@ -109,7 +161,7 @@ class Request {
         if ($interval == 0)
             $interval = 1;
 
-        $bundle->interval = (int)$interval;
+        $bundle->interval = (int) $interval;
 
         return $bundle;
     }
