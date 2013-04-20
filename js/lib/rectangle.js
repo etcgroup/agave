@@ -116,6 +116,7 @@ define(['underscore'], function(_) {
          * plus some overrides.
          */
         extend: function(options) {
+            options || ( options = {} );
             return new Rectangle(_.defaults(options, this.options));
         },
 
