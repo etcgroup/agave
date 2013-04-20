@@ -756,7 +756,7 @@ define([
                         noise_threshold: self._noiseThreshold
                     };
                     if (self._searchQuery) {
-                        query['query'] = self._searchQuery;
+                        query['search'] = self._searchQuery;
                     }
                     return $.getJSON('data/by_time.php', query, 'json');
                 });
