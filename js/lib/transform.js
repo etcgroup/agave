@@ -1,9 +1,23 @@
-define(['underscore'], function(_) {
+define([], function() {
+    /**
+     * An object that can be used to build an SVG transform string.
+     *
+     * The constructor, as well as the and() method, expect
+     * arguments that describe the transform:
+     *      - Transform("translate", 3, 6)
+     *      - Transform("scale", 1.2, 5)
+     * etc...
+     */
     var Transform = function() {
         this._transforms = [];
-        this.and.apply(this, arguments);
+        if (arguments.length) {
+            this.and.apply(this, arguments);
+        }
     };
 
+    /**
+     * Append another transform.
+     */
     Transform.prototype.and = function() {
 
         var transform = arguments[0];
@@ -13,9 +27,12 @@ define(['underscore'], function(_) {
         return this;
     }
 
+    /**
+     * Get the transform string.
+     */
     Transform.prototype.toString = function() {
         return this._transforms.join(',');
     }
-    
+
     return Transform;
 });
