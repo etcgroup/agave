@@ -37,6 +37,7 @@ $time_field = 'binned_time';
 $positive_count_field = 'positive';
 $negative_count_field = 'negative';
 $neutral_count_field = 'neutral';
+$count_field = 'count';
 
 //Depending on what was requested, the result may have sentiment division included
 //or not. $hasSentiment is set depending on which type of query will be run.
@@ -98,10 +99,15 @@ while ($row = $result->fetch_assoc())
 
         $negative_bin = $groups->get_group(-1)->get_bin_at($binned_time);
         $negative_bin->count = (int) $row[$negative_count_field] / (double) $interval;
-    }
 
-    $neutral_bin = $groups->get_group(0)->get_bin_at($binned_time);
-    $neutral_bin->count = (int) $row[$neutral_count_field] / (double) $interval;
+        $neutral_bin = $groups->get_group(0)->get_bin_at($binned_time);
+        $neutral_bin->count = (int) $row[$neutral_count_field] / (double) $interval;
+    }
+    else
+    {
+        $count_bin = $groups->get_group(0)->get_bin_at($binned_time);
+        $count_bin->count = (int) $row[$count_field] / (double) $interval;
+    }
 }
 $result->free();
 
@@ -115,5 +121,5 @@ if ($hasSentiment)
 else
 {
     //We need to output only one series
-    $request->response($groups->get_group(0));
+    $request->response($groups->get_group(0)->values);
 }
