@@ -12,6 +12,20 @@ define(['underscore'],
         dummyRequest.prototype.abort = function() {
         }
 
+
+        /**
+         * Class for caching data requests.
+         *
+         * If you ask it for data with a particular extent and zoom level,
+         * it will give you back a jQuery ajax promise object.
+         *
+         * You can call done(function(data){}) on the object and get back
+         * some data, which will either happen immediately if the data is cached,
+         * or eventually if it needs to be requested fresh.
+         *
+         * It currently caches values for multiple zoom levels, but only one request for each
+         * zoom level.
+         */
         var DataCache = function() {
             this._requester = function(zoomLevel, extent) {
                 return new dummyRequest(zoomLevel, extent);

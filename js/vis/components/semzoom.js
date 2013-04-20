@@ -1,5 +1,107 @@
 define(['underscore', 'lib/d3'],
     function(_, d3) {
+
+        /**
+         * Class for managing semantic zooming.
+         *
+         * This listens to changes in from the d3 zoom behavior.
+         *
+         * When the visible time range becomes too large or small,
+         * it triggers a request for data at a new granularity.
+         */
+        var SemanticZoom = function() {
+            this._dataInterval = [0,1];
+            this._binWidth = 0.1;
+            this._scale = d3.time.scale();
+        }
+
+        _.extend(SemanticZoom.prototype, {
+
+            scale: function(scale) {
+                if (!arguments.length) {
+                    return this._scale;
+                }
+                this._scale = scale;
+                return this;
+            },
+
+            idealBinCount: function(value) {
+                if (!arguments.length) {
+                    return this._idealBinCount;
+                }
+                this._idealBinCount = value;
+                return this;
+            },
+
+            update: function() {
+                var rawDomain = this._scale.domain();
+                var visibleDomain = [+rawDomain[0], +rawDomain[1]];
+
+                var recalculate = false;
+
+                //Check the data interval to see if we are close to the edge
+                var domainCenter = (visibleDomain[0] + visibleDomain[1]) * 0.5;
+                var domainWidth = visibleDomain[1] - visibleDomain[0];
+                var dataCenter = (this._dataInterval[0] + this._dataInterval[1]) * 0.5;
+
+                var centerOffset = Math.abs((domainCenter - dataCenter) / domainWidth);
+                var dataBufferMinWidth = Math.min(this._dataInterval[1] - visibleDomain[1],
+                    visibleDomain[0] - this._dataInterval[0]) / domainWidth;
+                if (centerOffset > 0.5 || dataBufferMinWidth < 0.25) {
+                    //We've shifted by over 50% of the visible domain, so adjust the data interval
+                    recalculate = true;
+                }
+
+                //Check the number of visible bins to see if we need to load more/less data
+                var visibleBins = domainWidth / this._binWidth;
+                var distanceFromIdeal = Math.abs(visibleBins - this._idealBinCount) / this._idealBinCount;
+                if (distanceFromIdeal > 0.5) {
+                    //We've deviated from the ideal by over 50%, so adjust the granularity
+                    recalculate = true;
+                }
+
+                if (recalculate) {
+                    var desiredDataInterval = [visibleDomain[0] - domainWidth, visibleDomain[1] + domainWidth];
+                    var desiredDataPoints = this._idealBinCount * 3
+                    var settings = sz_ticks(desiredDataInterval, desiredDataPoints);
+
+                    var newDataInterval = [+settings[0], +settings[1]];
+                    var newBinWidth = settings[2];
+
+                    if (newDataInterval[0] != this._dataInterval[0] ||
+                        newDataInterval[1] != this._dataInterval[1] ||
+                        newBinWidth != this._binWidth) {
+                        this._dataInterval = newDataInterval;
+                        this._binWidth = newBinWidth;
+                        return true;
+                    }
+                }
+                return false;
+            },
+
+            interval: function(interval) {
+                if (!arguments.length) {
+                    return this._dataInterval;
+                }
+                this._dataInterval = interval;
+                return this;
+            },
+
+            binWidth: function(width) {
+                if (!arguments.length) {
+                    return this._binWidth;
+                }
+                this._binWidth = width;
+                return this;
+            }
+
+        });
+
+        //////////////////////////////////////////////////////////
+        /////// A bunch of modified timing code from d3 //////////
+        ///// allows getting time a pre-defined granularities ////
+        //////////////////////////////////////////////////////////
+        
         var sz_time_scaleSetYear = function(y) {
             var d = new Date(y, 0, 1);
             d.setFullYear(y);
@@ -109,94 +211,6 @@ define(['underscore', 'lib/d3'],
             //            var endPoint = units.floor(extent[1]);
             return [startPoint, endPoint, width];
         }
-
-        var SemanticZoom = function() {
-            this._dataInterval = [0,1];
-            this._binWidth = 0.1;
-            this._scale = d3.time.scale();
-        }
-
-        _.extend(SemanticZoom.prototype, {
-
-            scale: function(scale) {
-                if (!arguments.length) {
-                    return this._scale;
-                }
-                this._scale = scale;
-                return this;
-            },
-
-            idealBinCount: function(value) {
-                if (!arguments.length) {
-                    return this._idealBinCount;
-                }
-                this._idealBinCount = value;
-                return this;
-            },
-
-            update: function() {
-                var rawDomain = this._scale.domain();
-                var visibleDomain = [+rawDomain[0], +rawDomain[1]];
-
-                var recalculate = false;
-
-                //Check the data interval to see if we are close to the edge
-                var domainCenter = (visibleDomain[0] + visibleDomain[1]) * 0.5;
-                var domainWidth = visibleDomain[1] - visibleDomain[0];
-                var dataCenter = (this._dataInterval[0] + this._dataInterval[1]) * 0.5;
-
-                var centerOffset = Math.abs((domainCenter - dataCenter) / domainWidth);
-                var dataBufferMinWidth = Math.min(this._dataInterval[1] - visibleDomain[1],
-                    visibleDomain[0] - this._dataInterval[0]) / domainWidth;
-                if (centerOffset > 0.5 || dataBufferMinWidth < 0.25) {
-                    //We've shifted by over 50% of the visible domain, so adjust the data interval
-                    recalculate = true;
-                }
-
-                //Check the number of visible bins to see if we need to load more/less data
-                var visibleBins = domainWidth / this._binWidth;
-                var distanceFromIdeal = Math.abs(visibleBins - this._idealBinCount) / this._idealBinCount;
-                if (distanceFromIdeal > 0.5) {
-                    //We've deviated from the ideal by over 50%, so adjust the granularity
-                    recalculate = true;
-                }
-
-                if (recalculate) {
-                    var desiredDataInterval = [visibleDomain[0] - domainWidth, visibleDomain[1] + domainWidth];
-                    var desiredDataPoints = this._idealBinCount * 3
-                    var settings = sz_ticks(desiredDataInterval, desiredDataPoints);
-
-                    var newDataInterval = [+settings[0], +settings[1]];
-                    var newBinWidth = settings[2];
-
-                    if (newDataInterval[0] != this._dataInterval[0] ||
-                        newDataInterval[1] != this._dataInterval[1] ||
-                        newBinWidth != this._binWidth) {
-                        this._dataInterval = newDataInterval;
-                        this._binWidth = newBinWidth;
-                        return true;
-                    }
-                }
-                return false;
-            },
-
-            interval: function(interval) {
-                if (!arguments.length) {
-                    return this._dataInterval;
-                }
-                this._dataInterval = interval;
-                return this;
-            },
-
-            binWidth: function(width) {
-                if (!arguments.length) {
-                    return this._binWidth;
-                }
-                this._binWidth = width;
-                return this;
-            }
-
-        });
 
         return SemanticZoom;
     });

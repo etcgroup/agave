@@ -4,6 +4,14 @@ define(['underscore',
     'vis/components/semzoom'],
     function(_, Histogram, DataCache, SemanticZoom) {
 
+        /**
+         * A class that combines the functionality of semantic zoom,
+         * data caching, and a histogram into one object.
+         *
+         * The bulk of this happens in the update() function below.
+         *
+         * This can work with multiple histogram types and probably for other chart types as well.
+         */
         var ZoomHistogram = function() {
             this._histogram = new Histogram();
             this._cache = new DataCache();

@@ -1,6 +1,7 @@
-define(['lib/d3', 'underscore', 'lib/rectangle', 'lib/transform'],
-    function(d3, _, Rectangle, Transform) {
+define(['lib/d3', 'underscore', 'lib/rectangle'],
+    function(d3, _, Rectangle) {
 
+        //Modified expand mode for area generator, based on d3
         var expand = function(data) {
             var n = data.length, m = data[0].length, k = 0, i, j, o, y0 = [];
             for (j = 0; j < m; ++j) {
@@ -11,6 +12,9 @@ define(['lib/d3', 'underscore', 'lib/rectangle', 'lib/transform'],
             return y0;
         }
 
+        /**
+         * A class for rendering stacked histograms. Uses d3's stacked layout.
+         */
         var StackHistogram = function() {
             this.initialize();
         }

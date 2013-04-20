@@ -1,6 +1,9 @@
-define(['lib/d3', 'underscore', 'lib/rectangle', 'lib/transform'],
-    function(d3, _, Rectangle, Transform) {
+define(['lib/d3', 'underscore', 'lib/rectangle'],
+    function(d3, _, Rectangle) {
 
+        /**
+         * Basic histogram visualization, created via an area chart.
+         */
         var Histogram = function() {
             this.initialize();
         }

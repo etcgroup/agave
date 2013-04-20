@@ -2,18 +2,24 @@ define(['jquery', 'underscore',
     'vis/tweet_timeline',
     'vis/tweet_list'],
     function($, _, TweetTimeline, TweetList) {
-        //        //For the SAGAwards data
+
+        //        //Old config for the SAGAwards data
         //        var from = 1359327600*1000;
         //        var to = 1359334800*1000;
         //        var interval = 60*2*1000;
         //        var min_important_rt = 1;
 
+        //Default time interval (UTC seconds) for the superbowl data set
         var SB_START = 1359932400;
         var SB_END = 1359952200;
+        //Minimum number of retweets to be considered important
         var min_important_rt = 1;
+        //The UTC offset for Eastern Time (during the Super Bowl)
         var utcOffsetMillis = -5 * 60 * 60 * 1000;
 
-
+        /**
+         * This class orchestrates the overall setup of the application.
+         */
         var App = function() {
             this.initQuery();
             this.initUI();
@@ -23,6 +29,9 @@ define(['jquery', 'underscore',
         }
 
         _.extend(App.prototype, {
+            /**
+             * Set up the query object, based on the url.
+             */
             initQuery: function() {
                 this.query = {};
 
@@ -33,6 +42,9 @@ define(['jquery', 'underscore',
                 this.query.search = getParameterByName(params, 'search', null);
             },
 
+            /**
+             * Grab some regions for rendering UI components
+             */
             initUI: function() {
                 this.ui = {};
 
@@ -42,6 +54,9 @@ define(['jquery', 'underscore',
                 this.ui.tweetList = $('#tweet-list');
             },
 
+            /**
+             * Set up the main timeline visualization.
+             */
             initTimeline: function() {
                 this.timeline = new TweetTimeline();
 
@@ -57,34 +72,54 @@ define(['jquery', 'underscore',
                 .idealBinCount(200)
                 .timeExtent([this.query.from, this.query.to])
                 .onZoomChanged(function(extent) {
+
+                    //When the timeline zoom/pan changes, we need to update the query object
                     self.query.from = extent[0];
                     self.query.to = extent[1];
 
-                    self.updateState();
+                    //and update the url
+                    self.updateUrl();
                 });
 
+                //Set the container and render
                 this.timeline.container(this.ui.timeline.selector)
                 .render();
             },
 
+            /**
+             * Set up the search box.
+             */
             initSearchBox: function() {
                 var self = this;
 
+                //The initial value comes from the query object
                 this.ui.searchInput.val(this.query.search);
 
+                //When someone presses enter in the search box, update.
                 this.ui.searchForm.on('submit', function(e) {
+
+                    self.updateUrl();
+                    //Major TODO: update all the other components given the new search term
+
+                    //Prevent form submission
                     e.preventDefault();
-                    self.updateState();
                     return false;
                 });
             },
 
+            /**
+             * Set up the tweet list component
+             */
             initTweetList: function() {
                 this.tweetList = new TweetList(this.ui.tweetList);
+                //Load the tweets for the current query
                 this.tweetList.update(this.query);
             },
 
-            updateState: function() {
+            /**
+             * Update the url based on the current query.
+             */
+            updateUrl: function() {
                 var search = this.ui.searchInput.val();
                 var from = this.query.from / 1000;
                 var to = this.query.to / 1000;
@@ -95,11 +130,14 @@ define(['jquery', 'underscore',
                     to: to
                 }
 
+                //Fancy HTML5 history management
                 history.pushState(state, '', '?' + $.param(state));
             }
         });
 
-
+        /**
+         * Utility for extracting url parameters. Obtained from SO probably.
+         */
         function getParameterByName(queryString, name, defaultValue)
         {
             name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
@@ -112,6 +150,6 @@ define(['jquery', 'underscore',
                 return decodeURIComponent(results[1].replace(/\+/g, " "));
         }
 
-
+        //Start the app
         window.app = new App();
     });
