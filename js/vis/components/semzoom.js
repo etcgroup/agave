@@ -10,8 +10,7 @@ define(['underscore', 'lib/d3'],
          * needs to be updated.
          */
         var SemanticZoom = function() {
-            this._dataInterval = [0,1];
-            this._binWidth = 0.1;
+            this._idealBinCount = 30;
             this._scale = d3.time.scale();
         }
 
@@ -39,16 +38,22 @@ define(['underscore', 'lib/d3'],
                 return this;
             },
 
-            _is_center_off: function(visibleDomain, dataInterval) {
+            /**
+             * True if the center of the data is more than 50% of the
+             * visible domain away from the center of the visible domain.
+             */
+            _is_center_off: function(visibleDomain, dataCenter) {
                 var domainCenter = (visibleDomain[0] + visibleDomain[1]) * 0.5;
-                var dataCenter = (dataInterval[0] + dataInterval[1]) * 0.5;
                 var domainWidth = visibleDomain[1] - visibleDomain[0];
 
                 var centerOffset = Math.abs((domainCenter - dataCenter) / domainWidth);
-
                 return centerOffset > 0.5;
             },
 
+            /**
+             * True if the amount of buffer data available on either side
+             * is less than 25% of the visible domain.
+             */
             _is_close_to_edge: function(visibleDomain, dataInterval) {
                 var domainWidth = visibleDomain[1] - visibleDomain[0];
 
@@ -58,6 +63,10 @@ define(['underscore', 'lib/d3'],
                 return dataBufferMinWidth < 0.25;
             },
 
+            /**
+             * Given the ideal bin count, returns true if the number
+             * of currently visible bins is more than 50% different from the ideal.
+             */
             _is_bin_count_wrong: function(visibleDomain, binWidth) {
                 var domainWidth = visibleDomain[1] - visibleDomain[0];
 
@@ -67,7 +76,7 @@ define(['underscore', 'lib/d3'],
                 return distanceFromIdeal > 0.5;
             },
 
-            _recalculate: function(visibleDomain, dataInterval, binWidth) {
+            _recalculate: function(visibleDomain) {
                 var domainWidth = visibleDomain[1] - visibleDomain[0];
 
                 //Use the tick calculation code at the bottom to
@@ -76,19 +85,10 @@ define(['underscore', 'lib/d3'],
                 var desiredDataPoints = this._idealBinCount * 3
                 var settings = sz_ticks(desiredDataInterval, desiredDataPoints);
 
-                var newDataInterval = [+settings[0], +settings[1]];
-                var newBinWidth = settings[2];
-
-                if (newDataInterval[0] != dataInterval[0] ||
-                    newDataInterval[1] != dataInterval[1] ||
-                    newBinWidth != binWidth) {
-                    return {
-                        interval: newDataInterval,
-                        binWidth: newBinWidth
-                    }
+                return {
+                    interval: [+settings[0], +settings[1]],
+                    binWidth: settings[2]
                 }
-                
-                return null;
             },
 
             /**
@@ -100,6 +100,8 @@ define(['underscore', 'lib/d3'],
              * it returns an object containing the new interval and binWidth.
              */
             recommend: function(interval, binWidth) {
+                var recommendation;
+
                 var rawDomain = this._scale.domain();
                 var visibleDomain = [+rawDomain[0], +rawDomain[1]];
 
@@ -109,13 +111,27 @@ define(['underscore', 'lib/d3'],
                 recalculate || (recalculate = this._is_close_to_edge(visibleDomain, interval));
 
                 //Check to see if the center is way off
-                recalculate || (recalculate = this._is_center_off(visibleDomain, interval));
+                var dataCenter = (interval[0] + interval[1]) * 0.5;
+                recalculate || (recalculate = this._is_center_off(visibleDomain, dataCenter));
+
+                //Do we have a sliding update?
+                if (recalculate) {
+                    recommendation = this._recalculate(visibleDomain);
+                    if (recommendation.interval[0] != interval[0] ||
+                        recommendation.interval[1] != interval[1]) {
+                        return recommendation;
+                    }
+                }
 
                 //Check the number of visible bins to see if we need to load more/less data
-                recalculate || (recalculate = this._is_bin_count_wrong(visibleDomain, binWidth));
-
-                if (recalculate) {
-                    return this._recalculate(visibleDomain, interval, binWidth);
+                if (this._is_bin_count_wrong(visibleDomain, binWidth)) {
+                    recommendation = this._recalculate(visibleDomain);
+                    //If it is a bin update, only return if we actually
+                    //managed to change the bin width.
+                    //This avoids finicky time threshold updates.
+                    if (recommendation.binWidth != binWidth) {
+                        return recommendation;
+                    }
                 }
                 return false;
             }

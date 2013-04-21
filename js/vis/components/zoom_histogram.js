@@ -117,18 +117,14 @@ define(['underscore',
             update: function() {
                 var self = this;
 
-                console.log(this.extent().toString());
                 //Check if the semantic zoom controller recommends new data.
                 var change = this._semantic.recommend(this.extent(), this.zoomLevel());
-                console.log(change);
                 var alreadyUpdated = false;
 
                 if (change) {
                     //Ask the semantic zoom controller what the new data should cover
                     var binWidth = change.binWidth;
                     var interval = change.interval;
-
-                    console.log(this.extent()[0] - interval[0]);
 
                     //Save the current zoom level and extent
                     //This prevents multiple redundant loads while waiting.
