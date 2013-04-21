@@ -139,8 +139,7 @@ define(['underscore',
 
                     //Load the data from the cache (or request).
                     //done() will execute now or later
-                    this._cache.load(binWidth, interval)
-                    .done(function(response) {
+                    this._cache.load(binWidth, interval, function(response) {
 
                         //Ignore late responses for the wrong bin width
                         if (binWidth != self._latestBinWidth && self._latestBinWidthReceived) {

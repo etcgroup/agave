@@ -16,13 +16,6 @@ define(['underscore'],
         /**
          * Class for caching data requests.
          *
-         * If you ask it for data with a particular extent and zoom level,
-         * it will give you back a jQuery ajax promise object.
-         *
-         * You can call done(function(data){}) on the object and get back
-         * some data, which will either happen immediately if the data is cached,
-         * or eventually if it needs to be requested fresh.
-         *
          * It currently caches values for multiple zoom levels, but only one request for each
          * zoom level.
          */
@@ -44,32 +37,49 @@ define(['underscore'],
              * and extent. The extent must be a range array [min, max], while
              * the zoom level can be whatever.
              *
-             * An ajax promise is returned, meaning that you can call
-             * done() on the result with a callback function. The callback
-             * function will be invoked immediately if the data is available already (from cache).
-             *
-             * Otherwise the callback will be invoked once the data has loaded.
+             * The callback will be called with the parsed response data
+             * once the request has completed, or immediately if the response
+             * was cached.
              */
-            load: function(zoomLevel, extent) {
+            load: function(zoomLevel, extent, callback) {
                 var cached = this._cache[zoomLevel];
                 if (cached) {
                     if (extent[0] >= cached.extent[0] &&
                         extent[1] <= cached.extent[1]) {
                         console.log('using cached data from ' + cached.id + ' for ' + extent + ' at zoom ' + zoomLevel);
-                        return cached.request;
+
+                        cached.request.done(callback);
                     }
                 }
                 var requestId = globalRequestCounter++;
 
                 console.log('new request #' + requestId + ' for ' + extent + ' at zoom ' + zoomLevel);
-                var request = this._requester(requestId, zoomLevel, extent);
-                this._cacheRequest(requestId, zoomLevel, extent, request);
+                var self = this;
+                var tries = 0;
+                var tryRequest = function() {
+                    var request = self._requester(requestId, zoomLevel, extent);
+                    tries++;
 
-                request.done(function() {
-                    console.log('request #' + requestId + ' fulfilled');
-                });
+                    self._cacheRequest(requestId, zoomLevel, extent, request);
 
-                return request;
+                    request.done(function(data) {
+                        console.log('request #' + requestId + ' fulfilled');
+                        callback(data);
+                    });
+
+                    request.fail(function(xhr) {
+                        if (xhr.statusText != 'abort') {
+                            if (tries < 2) {
+                                console.log('retrying request #' + requestId + ' for ' + extent + ' at zoom ' + zoomLevel);
+                                tryRequest();
+                            } else {
+                                console.log('giving up on request #' + requestId);
+                            }
+                        }
+                    });
+                };
+
+                tryRequest();
             },
 
             /**
