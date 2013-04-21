@@ -112,57 +112,67 @@ define(['underscore',
             },
 
             /**
+             * Causes data to be loaded from the cache controller with the
+             * given parameters.
+             *
+             * Returns true if the data was already available and the histogram
+             * update was completed.
+             */
+            _load_data: function(binWidth, interval) {
+                var alreadyUpdated = false;
+
+                //Save the current zoom level and extent
+                //This prevents multiple redundant loads while waiting.
+                this.zoomLevel(binWidth)
+                this.extent(interval);
+
+                //Save the bin width so we know which response to save.
+                //If we emit multiple requests quickly, we can get them
+                //back in the wrong order.
+                this._latestBinWidth = binWidth;
+                this._latestBinWidthReceived = false;
+
+                //Load the data from the cache (or request).
+                //done() will execute now or later
+                var self = this;
+                this._cache.load(binWidth, interval, function(response) {
+
+                    //Ignore late responses for the wrong bin width
+                    if (binWidth != self._latestBinWidth && self._latestBinWidthReceived) {
+                        console.log("ignoring late request for width " + binWidth);
+                        return;
+                    } else if (binWidth == self._latestBinWidth) {
+                        //Note that we've already received the latest data
+                        self._latestBinWidthReceived = true;
+                    }
+
+                    //Send the data to the histogram
+                    self._histogram
+                    .data(self._dataAccessor(response))
+                    .update();
+
+                    //In case this executed right away, don't do another update
+                    alreadyUpdated = true;
+
+                    //Call the onload callback if it is set.
+                    if (self._onLoad) {
+                        self._onLoad();
+                    }
+                });
+
+                return alreadyUpdated;
+            },
+
+            /**
              * Update the zoom histogram.
              */
             update: function() {
-                var self = this;
-
                 //Check if the semantic zoom controller recommends new data.
                 var change = this._semantic.recommend(this.extent(), this.zoomLevel());
                 var alreadyUpdated = false;
 
                 if (change) {
-                    //Ask the semantic zoom controller what the new data should cover
-                    var binWidth = change.binWidth;
-                    var interval = change.interval;
-
-                    //Save the current zoom level and extent
-                    //This prevents multiple redundant loads while waiting.
-                    self.zoomLevel(binWidth)
-                    self.extent(interval);
-
-                    //Save the bin width so we know which response to save.
-                    //If we emit multiple requests quickly, we can get them
-                    //back in the wrong order.
-                    this._latestBinWidth = binWidth;
-                    this._latestBinWidthReceived = false;
-
-                    //Load the data from the cache (or request).
-                    //done() will execute now or later
-                    this._cache.load(binWidth, interval, function(response) {
-
-                        //Ignore late responses for the wrong bin width
-                        if (binWidth != self._latestBinWidth && self._latestBinWidthReceived) {
-                            console.log("ignoring late request for width " + binWidth);
-                            return;
-                        } else if (binWidth == self._latestBinWidth) {
-                            //Note that we've already received the latest data
-                            self._latestBinWidthReceived = true;
-                        }
-
-                        //Send the data to the histogram
-                        self._histogram
-                        .data(self._dataAccessor(response))
-                        .update();
-
-                        //In case this executed right away, don't do another update
-                        alreadyUpdated = true;
-
-                        //Call the onload callback if it is set.
-                        if (self._onLoad) {
-                            self._onLoad();
-                        }
-                    });
+                    alreadyUpdated = this._load_data(change.binWidth, change.interval);
                 }
 
                 //Update the histogram because the zoom has changed
