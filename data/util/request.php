@@ -18,7 +18,6 @@ include_once 'queries.php';
  */
 class Request {
 
-    private $request = NULL;
     private $performance = NULL;
     private $db = NULL;
 
@@ -68,10 +67,7 @@ class Request {
             'payload' => $payload
         );
 
-        if ($this->request !== NULL)
-        {
-            $response['request'] = $this->request;
-        }
+        $response['request'] = $_GET;
 
         if ($this->performance !== NULL)
         {
@@ -122,9 +118,7 @@ class Request {
             }
         }
 
-        $this->request = (object) $request;
-
-        return $this->request;
+        return (object) $request;
     }
 
     /**
