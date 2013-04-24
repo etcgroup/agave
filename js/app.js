@@ -1,8 +1,9 @@
 define(['jquery', 'underscore',
     'lib/bootstrap',
+    'util/query',
     'components/tweet_timeline',
     'components/tweet_list'],
-    function($, _, bootstrap, TweetTimeline, TweetList) {
+    function ($, _, bootstrap, Query, TweetTimeline, TweetList) {
 
         //        //Old config for the SAGAwards data
         //        var from = 1359327600*1000;
@@ -21,7 +22,7 @@ define(['jquery', 'underscore',
         /**
          * This class orchestrates the overall setup of the application.
          */
-        var App = function() {
+        var App = function () {
 
             this.initQueryModels();
             this.initUI();
@@ -40,7 +41,7 @@ define(['jquery', 'underscore',
         /**
          * Set up the query object, based on the url.
          */
-        App.prototype.initQueryModels = function() {
+        App.prototype.initQueryModels = function () {
             this.query = {};
 
             var params = document.location.search;
@@ -53,7 +54,7 @@ define(['jquery', 'underscore',
         /**
          * Grab some regions for rendering UI components
          */
-        App.prototype.initUI = function() {
+        App.prototype.initUI = function () {
             this.ui = {};
 
             this.ui.explorer = $('#explorer');
@@ -64,14 +65,14 @@ define(['jquery', 'underscore',
         /**
          * Set up the small context timeline visualization.
          */
-        App.prototype.initContextTimeline = function() {
+        App.prototype.initContextTimeline = function () {
             this.ui.overviewTimeline = $('#tweet-overview');
         }
 
         /**
          * Set up the larger focus timeline visualization.
          */
-        App.prototype.initFocusTimeline = function() {
+        App.prototype.initFocusTimeline = function () {
             this.ui.focusTimeline = $('#tweet-timeline');
 
             this.focusTimeline = new TweetTimeline();
@@ -79,56 +80,49 @@ define(['jquery', 'underscore',
             var self = this;
 
             this.focusTimeline.width(this.ui.focusTimeline.width())
-            .height(this.ui.focusTimeline.height())
-            .retweetHeight(70)
-            .noiseHeight(70)
-            .noiseThreshold(min_important_rt)
-            .searchQuery(this.query.search)
-            .utcOffsetMillis(utcOffsetMillis)
-            .idealBinCount(200)
-            .timeExtent([this.query.from, this.query.to])
-            .onZoomChanged(function(extent) {
+                .height(this.ui.focusTimeline.height())
+                .retweetHeight(70)
+                .noiseHeight(70)
+                .noiseThreshold(min_important_rt)
+                .searchQuery(this.query.search)
+                .utcOffsetMillis(utcOffsetMillis)
+                .idealBinCount(200)
+                .timeExtent([this.query.from, this.query.to])
+                .onZoomChanged(function (extent) {
 
-                //When the timeline zoom/pan changes, we need to update the query object
-                self.query.from = extent[0];
-                self.query.to = extent[1];
+                    //When the timeline zoom/pan changes, we need to update the query object
+                    self.query.from = extent[0];
+                    self.query.to = extent[1];
 
-                //and update the url
-                self.updateUrl();
-            });
+                    //and update the url
+                    self.updateUrl();
+                });
 
             //Set the container and render
             this.focusTimeline.container(this.ui.focusTimeline.selector)
-            .render();
+                .render();
         }
 
         /**
          * Set up the search box.
          */
-        App.prototype.initQueryPanel = function() {
+        App.prototype.initQueryPanel = function () {
             this.ui.queryPanel = $('#queries');
 
+            var queries = this.ui.queryPanel.find('.query');
+
+            queries.each(function(index) {
+                var ui = $(this);
+                var query = new Query(ui);
+            });
+
             var self = this;
-
-            //The initial value comes from the query object
-            //this.ui.searchInput.val(this.query.search);
-
-            //When someone presses enter in the search box, update.
-            //this.ui.searchForm.on('submit', function(e) {
-
-                //self.updateUrl();
-                //Major TODO: update all the other components given the new search term
-
-                //Prevent form submission
-                //e.preventDefault();
-                //return false;
-            //});
         }
 
         /**
          * Set up the tweet list component
          */
-        App.prototype.initTweetList = function() {
+        App.prototype.initTweetList = function () {
 
             this.ui.tweetList = $('#tweet-list');
 
@@ -137,48 +131,47 @@ define(['jquery', 'underscore',
             this.tweetList.update(this.query);
         }
 
-        App.prototype.initDetailsPanel = function() {
+        App.prototype.initDetailsPanel = function () {
             this.ui.detailsPanel = $('#details');
         }
 
-        App.prototype.windowResize = function() {
+        App.prototype.windowResize = function () {
             var self = this;
-            $(window).on('resize', function() {
+            $(window).on('resize', function () {
                 self.focusTimeline
-                .width(self.ui.focusTimeline.width())
-                .height(self.ui.focusTimeline.height())
-                .update();
+                    .width(self.ui.focusTimeline.width())
+                    .height(self.ui.focusTimeline.height())
+                    .update();
             });
         }
 
         /**
          * Update the url based on the current query.
          */
-        App.prototype.updateUrl = function() {
-            var search = this.ui.searchInput.val();
-            var from = this.query.from / 1000;
-            var to = this.query.to / 1000;
+        App.prototype.updateUrl = function () {
+            //var search = this.ui.searchInput.val();
+            //var from = this.query.from / 1000;
+            //var to = this.query.to / 1000;
 
-            var state = {
-                search: search,
-                from: from,
-                to: to
-            }
+            //var state = {
+            //    search: search,
+            //    from: from,
+            //    to: to
+            //}
 
             //Fancy HTML5 history management
-            history.pushState(state, '', '?' + $.param(state));
+            //history.pushState(state, '', '?' + $.param(state));
         }
 
         /**
          * Utility for extracting url parameters. Obtained from SO probably.
          */
-        function getParameterByName(queryString, name, defaultValue)
-        {
+        function getParameterByName(queryString, name, defaultValue) {
             name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
             var regexS = "[\\?&]" + name + "=([^&#]*)";
             var regex = new RegExp(regexS);
             var results = regex.exec(queryString);
-            if(results == null)
+            if (results == null)
                 return defaultValue;
             else
                 return decodeURIComponent(results[1].replace(/\+/g, " "));
