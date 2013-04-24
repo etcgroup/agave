@@ -1,4 +1,4 @@
-define(['vis/components/semzoom'],
+define(['util/semzoom'],
     function(SemanticZoom) {
 
         describe("SemanticZoom", function() {

@@ -1,4 +1,4 @@
-define(['lib/extend'],
+define(['util/extend'],
     function(extend) {
 
         describe("OO extend utility", function() {

@@ -1,4 +1,4 @@
-define(['lib/rectangle'],
+define(['util/rectangle'],
     function(Rectangle) {
 
         describe("Rectangle", function() {

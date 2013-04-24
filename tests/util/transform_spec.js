@@ -1,4 +1,4 @@
-define(['lib/transform'],
+define(['util/transform'],
     function(Transform) {
 
         describe("Transform", function() {
