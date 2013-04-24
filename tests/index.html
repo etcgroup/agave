@@ -6,7 +6,11 @@
 
     <script type="text/javascript" src="vendor/jasmine-1.2.0/jasmine.js"></script>
     <script type="text/javascript" src="vendor/jasmine-1.2.0/jasmine-html.js"></script>
-    <!--<script type="text/javascript" src="vendor/jasmine-jquery.js"></script>-->
+    <script type="text/javascript" src="vendor/jasmine-jquery.js"></script>
+
+    <script type="text/javascript">
+        jasmine.getFixtures().fixturesPath = 'fixtures';
+    </script>
 
     <!-- Get Require.js set up -->
     <script type="text/javascript">
@@ -40,7 +44,8 @@
             'util/extend_spec',
             'util/transform_spec',
             'util/semzoom_spec',
-            'util/events_spec'
+            'util/events_spec',
+            'util/query_spec'
         ]
 
         for (var i in tests) {
