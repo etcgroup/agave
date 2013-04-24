@@ -31,122 +31,119 @@ define(['jquery', 'underscore',
             this.windowResize();
         }
 
-        _.extend(App.prototype, {
-            /**
+        /**
              * Set up the query object, based on the url.
              */
-            initQuery: function() {
-                this.query = {};
+        App.prototype.initQuery = function() {
+            this.query = {};
 
-                var params = document.location.search;
+            var params = document.location.search;
 
-                this.query.from = getParameterByName(params, 'from', SB_START) * 1000;
-                this.query.to = getParameterByName(params, 'to', SB_END) * 1000;
-                this.query.search = getParameterByName(params, 'search', null);
-            },
-
-            /**
+            this.query.from = getParameterByName(params, 'from', SB_START) * 1000;
+            this.query.to = getParameterByName(params, 'to', SB_END) * 1000;
+            this.query.search = getParameterByName(params, 'search', null);
+        }
+        /**
              * Grab some regions for rendering UI components
              */
-            initUI: function() {
-                this.ui = {};
+        App.prototype.initUI = function() {
+            this.ui = {};
 
-                this.ui.searchInput = $('#search-query-input');
-                this.ui.searchForm = $('#search-form');
-                this.ui.timeline = $('#tweet-timeline');
-                this.ui.tweetList = $('#tweet-list');
-            },
+            this.ui.searchInput = $('#search-query-input');
+            this.ui.searchForm = $('#search-form');
+            this.ui.timeline = $('#tweet-timeline');
+            this.ui.tweetList = $('#tweet-list');
+        }
 
-            /**
+        /**
              * Set up the main timeline visualization.
              */
-            initTimeline: function() {
-                this.timeline = new TweetTimeline();
+        App.prototype.initTimeline = function() {
+            this.timeline = new TweetTimeline();
 
-                var self = this;
+            var self = this;
 
-                this.timeline.width(this.ui.timeline.width())
-                .height(this.ui.timeline.height())
-                .retweetHeight(70)
-                .noiseHeight(70)
-                .noiseThreshold(min_important_rt)
-                .searchQuery(this.query.search)
-                .utcOffsetMillis(utcOffsetMillis)
-                .idealBinCount(200)
-                .timeExtent([this.query.from, this.query.to])
-                .onZoomChanged(function(extent) {
+            this.timeline.width(this.ui.timeline.width())
+            .height(this.ui.timeline.height())
+            .retweetHeight(70)
+            .noiseHeight(70)
+            .noiseThreshold(min_important_rt)
+            .searchQuery(this.query.search)
+            .utcOffsetMillis(utcOffsetMillis)
+            .idealBinCount(200)
+            .timeExtent([this.query.from, this.query.to])
+            .onZoomChanged(function(extent) {
 
-                    //When the timeline zoom/pan changes, we need to update the query object
-                    self.query.from = extent[0];
-                    self.query.to = extent[1];
+                //When the timeline zoom/pan changes, we need to update the query object
+                self.query.from = extent[0];
+                self.query.to = extent[1];
 
-                    //and update the url
-                    self.updateUrl();
-                });
+                //and update the url
+                self.updateUrl();
+            });
 
-                //Set the container and render
-                this.timeline.container(this.ui.timeline.selector)
-                .render();
-            },
+            //Set the container and render
+            this.timeline.container(this.ui.timeline.selector)
+            .render();
+        }
 
-            /**
+        /**
              * Set up the search box.
              */
-            initSearchBox: function() {
-                var self = this;
+        App.prototype.initSearchBox = function() {
+            var self = this;
 
-                //The initial value comes from the query object
-                this.ui.searchInput.val(this.query.search);
+            //The initial value comes from the query object
+            this.ui.searchInput.val(this.query.search);
 
-                //When someone presses enter in the search box, update.
-                this.ui.searchForm.on('submit', function(e) {
+            //When someone presses enter in the search box, update.
+            this.ui.searchForm.on('submit', function(e) {
 
-                    self.updateUrl();
-                    //Major TODO: update all the other components given the new search term
+                self.updateUrl();
+                //Major TODO: update all the other components given the new search term
 
-                    //Prevent form submission
-                    e.preventDefault();
-                    return false;
-                });
-            },
+                //Prevent form submission
+                e.preventDefault();
+                return false;
+            });
+        }
 
-            /**
+        /**
              * Set up the tweet list component
              */
-            initTweetList: function() {
-                this.tweetList = new TweetList(this.ui.tweetList);
-                //Load the tweets for the current query
-                this.tweetList.update(this.query);
-            },
+        App.prototype.initTweetList = function() {
+            this.tweetList = new TweetList(this.ui.tweetList);
+            //Load the tweets for the current query
+            this.tweetList.update(this.query);
+        }
 
-            windowResize: function() {
-                var self = this;
-                $(window).on('resize', function() {
-                    self.timeline
-                        .width(self.ui.timeline.width())
-                        .height(self.ui.timeline.height())
-                        .update();
-                });
-            },
+        App.prototype.windowResize = function() {
+            var self = this;
+            $(window).on('resize', function() {
+                self.timeline
+                .width(self.ui.timeline.width())
+                .height(self.ui.timeline.height())
+                .update();
+            });
+        }
 
-            /**
+        /**
              * Update the url based on the current query.
              */
-            updateUrl: function() {
-                var search = this.ui.searchInput.val();
-                var from = this.query.from / 1000;
-                var to = this.query.to / 1000;
+        App.prototype.updateUrl = function() {
+            var search = this.ui.searchInput.val();
+            var from = this.query.from / 1000;
+            var to = this.query.to / 1000;
 
-                var state = {
-                    search: search,
-                    from: from,
-                    to: to
-                }
-
-                //Fancy HTML5 history management
-                history.pushState(state, '', '?' + $.param(state));
+            var state = {
+                search: search,
+                from: from,
+                to: to
             }
-        });
+
+            //Fancy HTML5 history management
+            history.pushState(state, '', '?' + $.param(state));
+        }
 
         /**
          * Utility for extracting url parameters. Obtained from SO probably.
