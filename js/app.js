@@ -162,7 +162,12 @@ define(['jquery', 'underscore',
 
             this.queries.forEach(function (query, index) {
                 for (var key in query.data) {
-                    params[parameterName(key, index)] = query.data[key];
+                    var value = query.data[key];
+                    if (key == 'rt') {
+                        value = value ? '1' : '';
+                    }
+
+                    params[parameterName(key, index)] = value;
                 }
             });
 
