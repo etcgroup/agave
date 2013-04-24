@@ -1,4 +1,5 @@
-define(['lib/d3', 'underscore', 'lib/rectangle'],
+define(['lib/d3', 'underscore',
+    'util/rectangle'],
     function(d3, _, Rectangle) {
 
         /**

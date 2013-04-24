@@ -1,4 +1,6 @@
-define(['lib/d3', 'underscore', 'lib/extend', 'vis/components/histogram'],
+define(['lib/d3', 'underscore',
+    'util/extend',
+    'vis/histogram'],
     function(d3, _, extend, Histogram) {
 
         //Modified expand mode for area generator, based on d3

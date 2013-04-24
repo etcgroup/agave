@@ -2,11 +2,11 @@ define([
     'jquery',
     'lib/d3',
     'underscore',
-    'lib/rectangle',
-    'lib/transform',
-    'vis/components/zoom_histogram',
-    'vis/components/stack_histogram',
-    'vis/components/semzoom'],
+    'util/rectangle',
+    'util/transform',
+    'vis/zoom_histogram',
+    'vis/stack_histogram',
+    'util/semzoom'],
     function($, d3, _, Rectangle, Transform, ZoomHistogram, StackHistogram, SemanticZoom) {
 
         var AXIS_OFFSET = 3;

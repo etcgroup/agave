@@ -1,7 +1,7 @@
 define(['jquery', 'underscore',
     'lib/bootstrap',
-    'vis/tweet_timeline',
-    'vis/tweet_list'],
+    'components/tweet_timeline',
+    'components/tweet_list'],
     function($, _, bootstrap, TweetTimeline, TweetList) {
 
         //        //Old config for the SAGAwards data
@@ -22,19 +22,25 @@ define(['jquery', 'underscore',
          * This class orchestrates the overall setup of the application.
          */
         var App = function() {
-            this.initQuery();
+
+            this.initQueryModels();
             this.initUI();
-            this.initSearchBox();
-            this.initTimeline();
+
+            this.initQueryPanel();
+
+            this.initContextTimeline();
+            this.initFocusTimeline();
+
             this.initTweetList();
+            this.initDetailsPanel();
 
             this.windowResize();
         }
 
         /**
-             * Set up the query object, based on the url.
-             */
-        App.prototype.initQuery = function() {
+         * Set up the query object, based on the url.
+         */
+        App.prototype.initQueryModels = function() {
             this.query = {};
 
             var params = document.location.search;
@@ -43,28 +49,37 @@ define(['jquery', 'underscore',
             this.query.to = getParameterByName(params, 'to', SB_END) * 1000;
             this.query.search = getParameterByName(params, 'search', null);
         }
+
         /**
-             * Grab some regions for rendering UI components
-             */
+         * Grab some regions for rendering UI components
+         */
         App.prototype.initUI = function() {
             this.ui = {};
 
-            this.ui.searchInput = $('#search-query-input');
-            this.ui.searchForm = $('#search-form');
-            this.ui.timeline = $('#tweet-timeline');
-            this.ui.tweetList = $('#tweet-list');
+            this.ui.explorer = $('#explorer');
+            this.ui.collaborator = $('#collaborator');
+
         }
 
         /**
-             * Set up the main timeline visualization.
-             */
-        App.prototype.initTimeline = function() {
-            this.timeline = new TweetTimeline();
+         * Set up the small context timeline visualization.
+         */
+        App.prototype.initContextTimeline = function() {
+            this.ui.overviewTimeline = $('#tweet-overview');
+        }
+
+        /**
+         * Set up the larger focus timeline visualization.
+         */
+        App.prototype.initFocusTimeline = function() {
+            this.ui.focusTimeline = $('#tweet-timeline');
+
+            this.focusTimeline = new TweetTimeline();
 
             var self = this;
 
-            this.timeline.width(this.ui.timeline.width())
-            .height(this.ui.timeline.height())
+            this.focusTimeline.width(this.ui.focusTimeline.width())
+            .height(this.ui.focusTimeline.height())
             .retweetHeight(70)
             .noiseHeight(70)
             .noiseThreshold(min_important_rt)
@@ -83,53 +98,62 @@ define(['jquery', 'underscore',
             });
 
             //Set the container and render
-            this.timeline.container(this.ui.timeline.selector)
+            this.focusTimeline.container(this.ui.focusTimeline.selector)
             .render();
         }
 
         /**
-             * Set up the search box.
-             */
-        App.prototype.initSearchBox = function() {
+         * Set up the search box.
+         */
+        App.prototype.initQueryPanel = function() {
+            this.ui.queryPanel = $('#queries');
+
             var self = this;
 
             //The initial value comes from the query object
-            this.ui.searchInput.val(this.query.search);
+            //this.ui.searchInput.val(this.query.search);
 
             //When someone presses enter in the search box, update.
-            this.ui.searchForm.on('submit', function(e) {
+            //this.ui.searchForm.on('submit', function(e) {
 
-                self.updateUrl();
+                //self.updateUrl();
                 //Major TODO: update all the other components given the new search term
 
                 //Prevent form submission
-                e.preventDefault();
-                return false;
-            });
+                //e.preventDefault();
+                //return false;
+            //});
         }
 
         /**
-             * Set up the tweet list component
-             */
+         * Set up the tweet list component
+         */
         App.prototype.initTweetList = function() {
+
+            this.ui.tweetList = $('#tweet-list');
+
             this.tweetList = new TweetList(this.ui.tweetList);
             //Load the tweets for the current query
             this.tweetList.update(this.query);
         }
 
+        App.prototype.initDetailsPanel = function() {
+            this.ui.detailsPanel = $('#details');
+        }
+
         App.prototype.windowResize = function() {
             var self = this;
             $(window).on('resize', function() {
-                self.timeline
-                .width(self.ui.timeline.width())
-                .height(self.ui.timeline.height())
+                self.focusTimeline
+                .width(self.ui.focusTimeline.width())
+                .height(self.ui.focusTimeline.height())
                 .update();
             });
         }
 
         /**
-             * Update the url based on the current query.
-             */
+         * Update the url based on the current query.
+         */
         App.prototype.updateUrl = function() {
             var search = this.ui.searchInput.val();
             var from = this.query.from / 1000;
