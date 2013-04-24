@@ -1,0 +1,100 @@
+
+#content {
+    position: absolute;
+
+    top: 51px;
+    left: 0px;
+
+    width: 100%;
+
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    padding: 0 10px 10px 10px;
+}
+
+#explorer {
+    float: left;
+    width: 66%;
+    margin: 0;
+    padding: 0;
+}
+
+#collaborator- {
+    float: left;
+    padding-left: 10px;
+    width: 34%;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+
+}
+
+#collaborator > div {
+    width: 100%;
+    height: 100%;
+    background: #666;
+}
+
+form.query {
+    margin: 0 0 10px 0;
+}
+
+form.query label {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+form.query .query-search {
+    width: 220px;
+}
+
+form.query .query-author {
+    width: 100px;
+}
+
+form.query .query-minrt {
+    width: 35px;
+}
+
+form.query .query-sentiment {
+    width: auto;
+}
+
+#tweet-timeline {
+    min-height: 270px;
+    margin-bottom: 10px;
+}
+
+#tweet-overview {
+    min-height: 60px;
+    margin-bottom: 10px;
+    background: #666;
+}
+
+#explorer-details {
+    width: 100%;
+    position: relative;
+}
+
+#tweet-list {
+    float: left;
+    height: 100%;
+    width: 50%;
+}
+
+#details-wrapper {
+    float: left;
+    height: 100%;
+    width: 50%;
+    padding-left: 10px;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+}
+
+#details {
+    background: #666;
+    width: 100%;
+    height: 100%;
+}

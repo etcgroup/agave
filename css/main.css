@@ -1,8 +1,7 @@
 @import url(lib/bootstrap.css);
-
-body {
-    background-color: #222;
-}
+@import url(navbar.css);
+@import url(layout.css);
+@import url(type.css);
 
 .axis path,
 .axis line {
@@ -97,7 +96,7 @@ body {
 }
 
 
-#tweet-list {
+/*#tweet-list {
     border-radius: 4px;
     background: #fff;
 }
@@ -117,4 +116,4 @@ body {
 
 #tweet-list ul li:last-child {
     border-bottom: none;
-}
+}*/

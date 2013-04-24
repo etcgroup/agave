@@ -337,7 +337,7 @@ define([
 
                 this._updateContent();
 
-                this._udpateZoom();
+                this._updateZoom();
             },
 
             /**

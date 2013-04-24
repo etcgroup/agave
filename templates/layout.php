@@ -5,23 +5,39 @@
         <title>Twitter Vis!</title>
         <meta name="description" content="A neat twitter visualization">
         <meta name="viewport" content="width=device-width">
-
         <link rel="stylesheet" href="css/main.css">
     </head>
     <body>
-        <div class="container-fluid">
-            <div class="row-fluid">
-                <form id="search-form" style="margin:20px 0 10px 10px"><input id="search-query-input" type="search"/></form>
-            </div>
-            <div class="row-fluid">
-                <div class="span9">
-                    <div id="tweet-timeline"></div>
+        <?php echo nav_bar(); ?>
+        <div id="content">
+            <div id="explorer">
+                <div id="queries">
+                    <?php echo query_box('Series 1') ?>
+                    <?php echo query_box('Series 2') ?>
                 </div>
-                <div class="span3">
-                    <div id="tweet-list"></div>
+                <div id="tweet-timeline">
+                    focus
                 </div>
-            </div>
+                <div id="tweet-overview">
+                    context
+                </div>
 
+                <div id="explorer-details" class="clearfix">
+                    <div id="tweet-list">
+                        tweets
+                    </div>
+                    <div id="details-wrapper">
+                        <div id="details">
+                            details
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="collaborator-wrapper">
+                <div id="collaborator">
+                    discussion
+                </div>
+            </div>
         </div>
 
         <script>

@@ -1,7 +1,8 @@
 define(['jquery', 'underscore',
+    'lib/bootstrap',
     'vis/tweet_timeline',
     'vis/tweet_list'],
-    function($, _, TweetTimeline, TweetList) {
+    function($, _, bootstrap, TweetTimeline, TweetList) {
 
         //        //Old config for the SAGAwards data
         //        var from = 1359327600*1000;
@@ -26,6 +27,8 @@ define(['jquery', 'underscore',
             this.initSearchBox();
             this.initTimeline();
             this.initTweetList();
+
+            this.windowResize();
         }
 
         _.extend(App.prototype, {
@@ -63,7 +66,7 @@ define(['jquery', 'underscore',
                 var self = this;
 
                 this.timeline.width(this.ui.timeline.width())
-                .height(500)
+                .height(this.ui.timeline.height())
                 .retweetHeight(70)
                 .noiseHeight(70)
                 .noiseThreshold(min_important_rt)
@@ -114,6 +117,16 @@ define(['jquery', 'underscore',
                 this.tweetList = new TweetList(this.ui.tweetList);
                 //Load the tweets for the current query
                 this.tweetList.update(this.query);
+            },
+
+            windowResize: function() {
+                var self = this;
+                $(window).on('resize', function() {
+                    self.timeline
+                        .width(self.ui.timeline.width())
+                        .height(self.ui.timeline.height())
+                        .update();
+                });
             },
 
             /**
