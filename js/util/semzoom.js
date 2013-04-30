@@ -12,7 +12,7 @@ define(['underscore', 'lib/d3'],
         var SemanticZoom = function() {
             this._idealBinCount = 30;
             this._scale = d3.time.scale();
-        }
+        };
 
         _.extend(SemanticZoom.prototype, {
 
@@ -82,13 +82,13 @@ define(['underscore', 'lib/d3'],
                 //Use the tick calculation code at the bottom to
                 //generate the new interval and bin width.
                 var desiredDataInterval = [visibleDomain[0] - domainWidth, visibleDomain[1] + domainWidth];
-                var desiredDataPoints = this._idealBinCount * 3
+                var desiredDataPoints = this._idealBinCount * 3;
                 var settings = sz_ticks(desiredDataInterval, desiredDataPoints);
 
                 return {
                     interval: [+settings[0], +settings[1]],
                     binWidth: settings[2]
-                }
+                };
             },
 
             /**
@@ -117,8 +117,8 @@ define(['underscore', 'lib/d3'],
                 //Do we have a sliding update?
                 if (recalculate) {
                     recommendation = this._recalculate(visibleDomain);
-                    if (recommendation.interval[0] != interval[0] ||
-                        recommendation.interval[1] != interval[1]) {
+                    if (recommendation.interval[0] !== interval[0] ||
+                        recommendation.interval[1] !== interval[1]) {
                         return recommendation;
                     }
                 }
@@ -129,7 +129,7 @@ define(['underscore', 'lib/d3'],
                     //If it is a bin update, only return if we actually
                     //managed to change the bin width.
                     //This avoids finicky time threshold updates.
-                    if (recommendation.binWidth != binWidth) {
+                    if (recommendation.binWidth !== binWidth) {
                         return recommendation;
                     }
                 }
@@ -147,11 +147,11 @@ define(['underscore', 'lib/d3'],
             var d = new Date(y, 0, 1);
             d.setFullYear(y);
             return d;
-        }
+        };
         var sz_time_scaleGetYear = function(d) {
             var y = d.getFullYear(), d0 = sz_time_scaleSetYear(y), d1 = sz_time_scaleSetYear(y + 1);
             return y + (d - d0) / (d1 - d0);
-        }
+        };
         var sz_time_scaleSteps = [
         1e3,
         2e3,
@@ -210,11 +210,11 @@ define(['underscore', 'lib/d3'],
         var sz_time_scaleExtent = function(domain) {
             var start = domain[0], stop = domain[domain.length - 1];
             return start < stop ? [ start, stop ] : [ stop, start ];
-        }
+        };
 
         var sz_time_scaleDate = function(t) {
             return new Date(t);
-        }
+        };
 
         var sz_ticks = function(domain, desiredTicks) {
             var extent = sz_time_scaleExtent(domain.map(sz_time_scaleDate));
@@ -223,7 +223,7 @@ define(['underscore', 'lib/d3'],
 
             //At the end of the array -- use special years ticks
             var ticksFallback = null;
-            if (i == sz_time_scaleSteps.length) {
+            if (i === sz_time_scaleSteps.length) {
                 ticksFallback = sz_time_scaleLocalMethods.year(extent, desiredTicks);
             }
 
@@ -235,11 +235,13 @@ define(['underscore', 'lib/d3'],
             }
 
             if (ticksFallback) {
-                return [ticksFallback[0], ticksFallback[ticksFallback.length - 1], ticksFallback[1] - ticksFallback[0]]
+                return [ticksFallback[0], ticksFallback[ticksFallback.length - 1], ticksFallback[1] - ticksFallback[0]];
             }
 
             //Should we use the next smaller unit?
-            if (Math.log(target / sz_time_scaleSteps[i - 1]) < Math.log(sz_time_scaleSteps[i] / target)) --i;
+            if (Math.log(target / sz_time_scaleSteps[i - 1]) < Math.log(sz_time_scaleSteps[i] / target)) {
+                --i;
+            }
 
             //What units
             //            var units = sz_time_scaleLocalMethods[i][0];
@@ -251,7 +253,7 @@ define(['underscore', 'lib/d3'],
             //            var startPoint = units.ceil(extent[0]);
             //            var endPoint = units.floor(extent[1]);
             return [startPoint, endPoint, width];
-        }
+        };
 
         return SemanticZoom;
     });

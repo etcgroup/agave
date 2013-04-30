@@ -7,12 +7,24 @@ define(['lib/d3', 'underscore',
         var expand = function(data) {
             var n = data.length, m = data[0].length, k = 0, i, j, o, y0 = [];
             for (j = 0; j < m; ++j) {
-                for (i = 0, o = 0; i < n; i++) o += data[i][j][1];
-                if (o) for (i = 0; i < n; i++) data[i][j][1] /= o; else for (i = 0; i < n; i++) data[i][j][1] = k;
+                for (i = 0, o = 0; i < n; i++) {
+                    o += data[i][j][1];
+                }
+                if (o) {
+                    for (i = 0; i < n; i++) {
+                        data[i][j][1] /= o;
+                    }
+                } else {
+                    for (i = 0; i < n; i++) {
+                        data[i][j][1] = k;
+                    }
+                }
             }
-            for (j = 0; j < m; ++j) y0[j] = 0;
+            for (j = 0; j < m; ++j) {
+                y0[j] = 0;
+            }
             return y0;
-        }
+        };
 
         /**
          * A class for rendering stacked histograms. Uses d3's stacked layout.
@@ -24,12 +36,12 @@ define(['lib/d3', 'underscore',
             //Default accessor for the group id
             this._groupIdAccessor = function(d) {
                 return d.id;
-            }
+            };
 
             //Default accessor for group values
             this._groupValuesAccessor = function(grp) {
-                return grp.values
-            }
+                return grp.values;
+            };
 
             //Create the color scale
             this._colorScale = d3.scale.ordinal();
@@ -39,13 +51,13 @@ define(['lib/d3', 'underscore',
             //Private immutable functions for building stacks
             var stackYAccessor = function(d) {
                 return self._yAccessor(d);
-            }
+            };
             var stackXAccessor = function(d) {
                 return self._xAccessor(d);
-            }
+            };
             var stackValuesAccessor = function(grp) {
                 return self._groupValuesAccessor(grp);
-            }
+            };
 
             //Create a d3 stack layout
             this._expand = true;
@@ -61,13 +73,13 @@ define(['lib/d3', 'underscore',
             //Private immutable functions for building areas
             var _scaledX = function(d) {
                 return self._xScale(self._xAccessor(d));
-            }
+            };
             var _scaledY = function(d) {
                 return Math.round(self._yScale(d.y0 + d.y)) + self._bumpValue;
-            }
+            };
             var _scaledY0 = function(d) {
                 return Math.round(self._yScale(d.y0));
-            }
+            };
 
             //This overwrites the super class's area generator
             this._area = d3.svg.area()
@@ -77,11 +89,11 @@ define(['lib/d3', 'underscore',
 
             this._colorValue = function(grp) {
                 return self._colorScale(self._groupIdAccessor(grp));
-            }
+            };
             this._buildArea = function(grp) {
                 return self._area(self._groupValuesAccessor(grp));
-            }
-        }
+            };
+        };
 
         //Extend the base histogram class
         extend(StackHistogram, Histogram);
@@ -96,7 +108,7 @@ define(['lib/d3', 'underscore',
                 if (!arguments.length) {
                     return this._expand;
                 }
-                if (toExpand != this._expand) {
+                if (toExpand !== this._expand) {
                     this._expand = toExpand;
 
                     if (toExpand) {
@@ -127,7 +139,7 @@ define(['lib/d3', 'underscore',
                     var firstGroupValues = this._groupValuesAccessor(stacked[0]);
                     var min = d3.min(firstGroupValues, function(d) {
                         return d.y0;
-                    })
+                    });
                     var max = d3.max(lastGroupValues, function(d) {
                         return d.y0 + d.y;
                     });

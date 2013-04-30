@@ -41,20 +41,20 @@ define(['underscore'], function(_) {
         }
 
         if (!_.has(options, 'left')) {
-            throw new 'Rectangle has no left side!';
+            throw 'Rectangle has no left side!';
         }
         if (!_.has(options, 'top')) {
-            throw new 'Rectangle has no top!';
+            throw 'Rectangle has no top!';
         }
         if (!_.has(options, 'width')) {
-            throw new 'Rectangle has no width!';
+            throw 'Rectangle has no width!';
         }
         if (!_.has(options, 'height')) {
-            throw new 'Rectangle has no height!';
+            throw 'Rectangle has no height!';
         }
 
         this.options = options;
-    }
+    };
 
     _.extend(Rectangle.prototype, {
         /**
@@ -101,7 +101,7 @@ define(['underscore'], function(_) {
          * Get the width of the box.
          */
         width: function() {
-            return this.options.width
+            return this.options.width;
         },
 
         /**
@@ -128,7 +128,7 @@ define(['underscore'], function(_) {
             selection.attr('width', this.options.width)
             .attr('height', this.options.height)
             .attr('x', this.options.left)
-            .attr('y', this.options.top)
+            .attr('y', this.options.top);
         }
     });
 

@@ -3,14 +3,14 @@ define(['underscore'],
 
         var globalRequestCounter = 0;
 
-        var dummyRequest = function(zoomLevel, extent) {
+        var DummyRequest = function(zoomLevel, extent) {
             console.log('requesting data for ' + extent + ' at zoom ' + zoomLevel);
-        }
-        dummyRequest.prototype.done = function() {
+        };
+        DummyRequest.prototype.done = function() {
             return [];
-        }
-        dummyRequest.prototype.abort = function() {
-        }
+        };
+        DummyRequest.prototype.abort = function() {
+        };
 
 
         /**
@@ -23,12 +23,12 @@ define(['underscore'],
 
             //Set a default requester function
             this._requester = function(zoomLevel, extent) {
-                return new dummyRequest(zoomLevel, extent);
-            }
+                return new DummyRequest(zoomLevel, extent);
+            };
 
             //Initialize the cache
             this._cache = {};
-        }
+        };
 
         _.extend(DataCache.prototype, {
 
@@ -68,7 +68,7 @@ define(['underscore'],
                     });
 
                     request.fail(function(xhr) {
-                        if (xhr.statusText != 'abort') {
+                        if (xhr.statusText !== 'abort') {
                             if (tries < 2) {
                                 console.log('retrying request #' + requestId + ' for ' + extent + ' at zoom ' + zoomLevel);
                                 tryRequest();
@@ -108,7 +108,7 @@ define(['underscore'],
                     id: id,
                     extent: extent,
                     request: request
-                }
+                };
             },
 
             /**

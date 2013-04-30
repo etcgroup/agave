@@ -25,14 +25,14 @@ define([], function() {
 
         this._transforms.push(transform + '(' + args.join(',') + ')');
         return this;
-    }
+    };
 
     /**
      * Get the transform string.
      */
     Transform.prototype.toString = function() {
         return this._transforms.join(',');
-    }
+    };
 
     return Transform;
 });

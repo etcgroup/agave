@@ -21,7 +21,7 @@ define(['underscore',
             //An accessor for the payload part of the ajax responses.
             this._dataAccessor = function(response) {
                 return response.payload;
-            }
+            };
 
             //An optional callback for when data loads.
             this._onLoad = null;
@@ -29,7 +29,7 @@ define(['underscore',
             //Set the default zoom level and extent
             this._zoomLevel = 0;
             this._extent = [0,1];
-        }
+        };
 
         _.extend(ZoomHistogram.prototype, {
 
@@ -123,7 +123,7 @@ define(['underscore',
 
                 //Save the current zoom level and extent
                 //This prevents multiple redundant loads while waiting.
-                this.zoomLevel(binWidth)
+                this.zoomLevel(binWidth);
                 this.extent(interval);
 
                 //Save the bin width so we know which response to save.
@@ -138,10 +138,10 @@ define(['underscore',
                 this._cache.load(binWidth, interval, function(response) {
 
                     //Ignore late responses for the wrong bin width
-                    if (binWidth != self._latestBinWidth && self._latestBinWidthReceived) {
+                    if (binWidth !== self._latestBinWidth && self._latestBinWidthReceived) {
                         console.log("ignoring late request for width " + binWidth);
                         return;
-                    } else if (binWidth == self._latestBinWidth) {
+                    } else if (binWidth === self._latestBinWidth) {
                         //Note that we've already received the latest data
                         self._latestBinWidthReceived = true;
                     }

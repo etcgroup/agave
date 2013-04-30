@@ -29,7 +29,7 @@ define(['jquery', 'underscore', 'util/events'], function ($, _, events) {
         this._fillForm();
 
         this._initEvents();
-    }
+    };
 
     //Add 'on' and 'trigger'
     events(Query);
@@ -52,7 +52,7 @@ define(['jquery', 'underscore', 'util/events'], function ($, _, events) {
         this.ui.min_rt_input = form.find('.query-minrt');
         this.ui.sentiment_select = form.find('.query-sentiment');
         this.ui.update_button = form.find('.query-update');
-    }
+    };
 
     /**
      * Set up handlers for UI events.
@@ -63,7 +63,7 @@ define(['jquery', 'underscore', 'util/events'], function ($, _, events) {
         this.ui.update_button.on('click', $.proxy(this._updateClicked, this));
         this.ui.view_buttons.on('click', $.proxy(this._viewButtonClicked, this));
         this.ui.form.on('submit', $.proxy(this._formSubmitted, this));
-    }
+    };
 
     /**
      * Called when the update button is clicked for this query.
@@ -74,7 +74,7 @@ define(['jquery', 'underscore', 'util/events'], function ($, _, events) {
         if (this.collectData()) {
             this.trigger('update', this);
         }
-    }
+    };
 
     /**
      * Called when a view control button is clicked.
@@ -83,7 +83,7 @@ define(['jquery', 'underscore', 'util/events'], function ($, _, events) {
      */
     Query.prototype._viewButtonClicked = function () {
         this.trigger('view-change', this);
-    }
+    };
 
     /**
      * Called when the form is submitted (probably user pressed enter).
@@ -94,7 +94,7 @@ define(['jquery', 'underscore', 'util/events'], function ($, _, events) {
         e.preventDefault();
         this._updateClicked();
         return false;
-    }
+    };
 
     /**
      * Gather user input from the query controls.
@@ -137,7 +137,7 @@ define(['jquery', 'underscore', 'util/events'], function ($, _, events) {
         this.data.sentiment = sentiment;
 
         return true;
-    }
+    };
 
     /**
      * Place stored data into the query controls.
@@ -164,7 +164,7 @@ define(['jquery', 'underscore', 'util/events'], function ($, _, events) {
         this.ui.min_rt_input.val(this.data.min_rt);
 
         this.ui.sentiment_select.val(this.data.sentiment);
-    }
+    };
 
     return Query;
 });

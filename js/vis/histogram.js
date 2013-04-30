@@ -25,11 +25,11 @@ define(['lib/d3', 'underscore',
             //Function that retrieves the x dimension from the data
             this._xAccessor = function(d) {
                 return d.time;
-            }
+            };
             //Function that retrieves the y dimension from the data
             this._yAccessor = function(d) {
                 return d.count;
-            }
+            };
 
             //Set up the scales
             this._xScale = d3.time.scale();
@@ -39,16 +39,16 @@ define(['lib/d3', 'underscore',
             //Only the scales and the accessors should be changeable.
             var _scaledX = function(d) {
                 return self._xScale(self._xAccessor(d));
-            }
+            };
             var _scaledY = function(d) {
                 return self._yScale(self._yAccessor(d));
-            }
+            };
 
             //The svg area generator uses the scaling functions
             this._area = d3.svg.area()
             .x(_scaledX)
             .y1(_scaledY);
-        }
+        };
 
         _.extend(Histogram.prototype, {
 
@@ -128,7 +128,7 @@ define(['lib/d3', 'underscore',
              * Add the path element for rendering the area.
              */
             _renderPath: function() {
-                return this._target.append("path")
+                this._target.append("path")
                 .classed('area', true);
 
                 this._updatePath();
@@ -288,7 +288,7 @@ define(['lib/d3', 'underscore',
                 this._yScale = scale;
                 return this;
             }
-        })
+        });
 
         return Histogram;
 

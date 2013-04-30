@@ -20,7 +20,7 @@ define([
                 time: 1,
                 count: 1
             }];
-        }
+        };
 
         /**
          * Generates some dummy timeline data for grouped timelines (i.e. sentiment timeline)
@@ -36,7 +36,7 @@ define([
                 }]
             }
             ];
-        }
+        };
 
         /**
          * TweetTimeline is the class used for configuring, intitializing, and maintaining
@@ -50,7 +50,7 @@ define([
          */
         var TweetTimeline = function() {
             this.initialize();
-        }
+        };
 
         _.extend(TweetTimeline.prototype, {
 
@@ -106,7 +106,7 @@ define([
                 //we pretend it is still in UTC.
                 this._timeAccessor = function(d) {
                     return d.time + self._utcOffset;
-                }
+                };
 
                 //The search query. Storing this here a hack. It should not be maintained
                 //by the timeline.
@@ -301,7 +301,7 @@ define([
                 }
                 this._container = selection;
 
-                if (typeof this._container == 'string') {
+                if (typeof this._container === 'string') {
                     this._container = d3.select(this._container);
                 }
 
@@ -400,7 +400,7 @@ define([
                         var utcDomain = [domain[0] - self._utcOffset, domain[1] - self._utcOffset];
                         self._onZoomChanged(utcDomain);
                     }
-                }
+                };
 
                 //Add a rectangle in front of all the content to catch mouse events.
                 this._svg.append('rect')
@@ -429,7 +429,7 @@ define([
              * Update the range of the timescale in case the box has changed sizes.
              */
             _updateTimeScaleRange: function() {
-                this._timeScale.range([0, this.boxes.inner.width()])
+                this._timeScale.range([0, this.boxes.inner.width()]);
             },
 
             /**
@@ -449,7 +449,7 @@ define([
                     right: 20,
                     top: 10,
                     bottom: 25
-                }
+                };
 
                 //The margin above and below the middle timeline
                 var originalsTopMargin = 10;
@@ -740,7 +740,7 @@ define([
                 .onLoad(function() {
                     self._container.select('div.graph-align-toggle')
                     .transition()
-                    .style('opacity', 1)
+                    .style('opacity', 1);
 
                     self._updateOriginalsAxis();
                 });
@@ -777,7 +777,7 @@ define([
             },
 
             _updateOriginalsHistogram: function() {
-                this._originalsHistogram.update()
+                this._originalsHistogram.update();
                 this._updateOriginalsAxis();
             },
 

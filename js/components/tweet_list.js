@@ -17,7 +17,7 @@ define([
             this.container = container;
 
             this.initUI();
-        }
+        };
 
         _.extend(TweetList.prototype, {
             /**
@@ -32,7 +32,7 @@ define([
                     to: query.to,
                     limit: TWEET_LIMIT,
                     search: query.search
-                }
+                };
 
                 $.get('data/tweets.php', q)
                 .done(function(data) {
