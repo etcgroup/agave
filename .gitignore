@@ -3,3 +3,7 @@
 
 *.zip
 data/db.ini
+
+node_modules
+/_SpecRunner.html
+.grunt
