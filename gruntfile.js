@@ -34,7 +34,9 @@ module.exports = function (grunt) {
                 undef: true,
                 boss: true,
                 eqnull: true,
-                browser: true
+                browser: true,
+                expr: true,
+                devel: true
             },
 
             gruntfile: {
@@ -94,7 +96,10 @@ module.exports = function (grunt) {
                             'lib/d3': {
                                 exports: 'd3'
                             },
-                            'lib/bootstrap': ['jquery']
+                            'lib/bootstrap': ['jquery'],
+                            'lib/Uri': {
+                                exports: 'Uri'
+                            }
                         },
                         callback: function($) {
                             // Set up the fixtures
@@ -103,14 +108,14 @@ module.exports = function (grunt) {
                     }
                 }
             },
-            app: {
-                /* nothing new here */
-            },
             debug: {
                 options: {
                     /* save the runner file for debugging */
                     keepRunner: 'true'
                 }
+            },
+            app: {
+                /* nothing new here */
             }
         },
 

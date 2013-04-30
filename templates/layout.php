@@ -53,7 +53,10 @@
                     'lib/d3': {
                         exports: 'd3'
                     },
-                    'lib/bootstrap': ['jquery']
+                    'lib/bootstrap': ['jquery'],
+                    'lib/Uri': {
+                        exports: 'Uri'
+                    }
                 }
             };
         </script>
