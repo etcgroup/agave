@@ -1,0 +1,24 @@
+form.query {
+    margin: 0 0 10px 0;
+}
+
+form.query label {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+form.query .query-search {
+    width: 220px;
+}
+
+form.query .query-author {
+    width: 100px;
+}
+
+form.query .query-minrt {
+    width: 35px;
+}
+
+form.query .query-sentiment {
+    width: auto;
+}

@@ -1,3 +1,4 @@
+/*csslint known-properties: false*/
 @import url(lib/bootstrap.css);
 @import url(navbar.css);
 @import url(layout.css);
@@ -25,10 +26,6 @@
 .circular-border {
     fill: #222;
     /*stroke: #eee;*/
-}
-
-.dot {
-    /*fill-opacity: 0.6*/
 }
 
 .background {
@@ -63,16 +60,16 @@
 
 .graph-align-toggle:hover {
     background-color: rgba(255, 255, 255, 0.5);
-    -moz-box-shadow: 0px 0px 3px rgba(255, 255, 255, 1);
-    -webkit-box-shadow: 0px 0px 3px rgba(255, 255, 255, 1);
-    box-shadow: 0px 0px 3px rgba(255, 255, 255, 1);
+    -moz-box-shadow: 0 0 3px rgba(255, 255, 255, 1);
+    -webkit-box-shadow: 0 0 3px rgba(255, 255, 255, 1);
+    box-shadow: 0 0 3px rgba(255, 255, 255, 1);
 }
 
 .graph-align-toggle:active {
     background-color: rgba(255, 255, 255, 0.8);
-    -moz-box-shadow: 0px 0px 5px rgba(255, 255, 255, 1);
-    -webkit-box-shadow: 0px 0px 5px rgba(255, 255, 255, 1);
-    box-shadow: 0px 0px 5px rgba(255, 255, 255, 1);
+    -moz-box-shadow: 0 0 5px rgba(255, 255, 255, 1);
+    -webkit-box-shadow: 0 0 5px rgba(255, 255, 255, 1);
+    box-shadow: 0 0 5px rgba(255, 255, 255, 1);
 }
 
 .graph-align-toggle i {
@@ -85,8 +82,7 @@
     transform: rotate(90deg);
 }
 
-#tweet-timeline {
-    position: relative;
+.no-select {
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
@@ -94,7 +90,6 @@
     -ms-user-select: none;
     user-select: none;
 }
-
 
 /*#tweet-list {
     border-radius: 4px;

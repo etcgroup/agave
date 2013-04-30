@@ -9,7 +9,7 @@
     </head>
     <body>
         <?php echo nav_bar(); ?>
-        <div id="content">
+        <div id="content" class="wrapper">
             <div id="explorer">
                 <div id="queries">
                     <?php echo query_box('Series 1') ?>
@@ -26,14 +26,14 @@
                     <div id="tweet-list">
                         tweets
                     </div>
-                    <div id="details-wrapper">
+                    <div id="details-wrapper" class="wrapper">
                         <div id="details">
                             details
                         </div>
                     </div>
                 </div>
             </div>
-            <div id="collaborator-wrapper">
+            <div id="collaborator-wrapper" class="wrapper">
                 <div id="collaborator">
                     discussion
                 </div>

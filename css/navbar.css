@@ -7,7 +7,7 @@
   display: block;
 }
 
-.navbar .nav > li > span.title {
+.navbar .nav > li > .title {
     font-size: 16px;
     font-weight: bold;
 }
