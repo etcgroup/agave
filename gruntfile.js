@@ -49,8 +49,29 @@ module.exports = function (grunt) {
                     }
                 },
                 src: [
-                    '<%=dirs.src_js%>/**.js',
-                    '!<%=dirs.src_js%>/lib/**.js'
+                    '<%=dirs.src_js%>/**/*.js',
+                    '!<%=dirs.src_js%>/lib/**/*.js'
+                ]
+            },
+
+            tests: {
+                options: {
+                    globals: {
+                        define: true,
+                        jasmine: true,
+                        it: true,
+                        expect: true,
+                        spyOn: true,
+                        spyOnEvent: true,
+                        loadFixtures: true,
+                        beforeEach: true,
+                        afterEach: true,
+                        describe: true
+                    }
+                },
+                src: [
+                    '<%=dirs.tests%>/**/*.js',
+                    '!<%=dirs.tests%>/vendor/**/*.js'
                 ]
             }
         },
@@ -99,7 +120,7 @@ module.exports = function (grunt) {
             },
             gruntfile: {
                 files: ['<%=jshint.gruntfile.src%>'],
-                tasks: ['jshint:gruntfile', 'csslint', 'jshint:app', 'jasmine:app']
+                tasks: ['jshint:gruntfile']
             },
             scripts: {
                 files: ['<%=jshint.app.src%>', '<%=jasmine.options.specs%>'],
@@ -108,6 +129,10 @@ module.exports = function (grunt) {
             styles: {
                 files: ['<%=csslint.app.src%>'],
                 tasks: ['csslint']
+            },
+            tests: {
+                files: ['<%=jshint.tests.src'],
+                tasks: ['jshint:tests', 'jasmine:app']
             }
         }
     };
