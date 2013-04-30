@@ -1,31 +1,25 @@
 define(['jquery', 'underscore',
     'lib/bootstrap',
+    'util/urls',
     'util/query',
     'components/tweet_timeline',
     'components/tweet_list'],
-    function ($, _, bootstrap, Query, TweetTimeline, TweetList) {
-
-        //        //Old config for the SAGAwards data
-        //        var from = 1359327600*1000;
-        //        var to = 1359334800*1000;
-        //        var interval = 60*2*1000;
-        //        var min_important_rt = 1;
-
-        //Default time interval (UTC seconds) for the superbowl data set
-        var SB_START = 1359932400;
-        var SB_END = 1359952200;
-        //Minimum number of retweets to be considered important
-        var min_important_rt = 1;
-        //The UTC offset for Eastern Time (during the Super Bowl)
-        var utcOffsetMillis = -5 * 60 * 60 * 1000;
+    function ($, _, bootstrap, urls, Query, TweetTimeline, TweetList) {
 
         /**
          * This class orchestrates the overall setup of the application.
+         *
+         * @param config
          */
-        var App = function () {
+        var App = function (config) {
+            this.config = config;
+        };
 
+        /**
+         * Start the application.
+         */
+        App.prototype.start = function() {
             this.initUI();
-
             this.initQueries();
 
             this.initContextTimeline();
@@ -35,7 +29,7 @@ define(['jquery', 'underscore',
             this.initDetailsPanel();
 
             this.windowResize();
-        }
+        };
 
         /**
          * Set up the query object, based on the url.
@@ -44,10 +38,10 @@ define(['jquery', 'underscore',
             this.queries = [];
             this.interval = {};
 
-            var params = document.location.search;
+            var params = urls.parse();
 
-            this.interval.from = getParameterByName(params, 'from', SB_START) * 1000;
-            this.interval.to = getParameterByName(params, 'to', SB_END) * 1000;
+            this.interval.from = params.get('from', this.config.defaults.from) * 1000;
+            this.interval.to = params.get('to', this.config.defaults.to) * 1000;
 
             this.ui.queryPanel = $('#queries');
 
@@ -56,19 +50,31 @@ define(['jquery', 'underscore',
                 .each(function (index) {
                     var data = {};
 
-                    var view = getParameterByName(params, parameterName('view', index), null);
-                    var search = getParameterByName(params, parameterName('search', index), null);
-                    var author = getParameterByName(params, parameterName('author', index), null);
-                    var rt = getParameterByName(params, parameterName('rt', index), null);
-                    var min_rt = getParameterByName(params, parameterName('min_rt', index), null);
-                    var sentiment = getParameterByName(params, parameterName('sentiment', index), null);
+                    var view = params.get_at('view', index, null);
+                    var search = params.get_at('search', index, null);
+                    var author = params.get_at('author', index, null);
+                    var rt = params.get_at('rt', index, null);
+                    var min_rt = params.get_at('min_rt', index, null);
+                    var sentiment = params.get_at('sentiment', index , null);
 
-                    if (view !== null) data.view = view;
-                    if (search !== null) data.search = search;
-                    if (author !== null) data.author = author;
-                    if (rt !== null) data.rt = rt;
-                    if (min_rt !== null) data.min_rt = min_rt;
-                    if (sentiment !== null) data.sentiment = sentiment;
+                    if (view !== null) {
+                        data.view = view;
+                    }
+                    if (search !== null) {
+                        data.search = search;
+                    }
+                    if (author !== null) {
+                        data.author = author;
+                    }
+                    if (rt !== null) {
+                        data.rt = rt;
+                    }
+                    if (min_rt !== null) {
+                        data.min_rt = min_rt;
+                    }
+                    if (sentiment !== null) {
+                        data.sentiment = sentiment;
+                    }
 
                     var ui = $(this);
                     var query = new Query(ui, data);
@@ -79,7 +85,7 @@ define(['jquery', 'underscore',
                     self.queries.push(query);
                 });
 
-        }
+        };
 
         /**
          * Grab some regions for rendering UI components
@@ -90,14 +96,14 @@ define(['jquery', 'underscore',
             this.ui.explorer = $('#explorer');
             this.ui.collaborator = $('#collaborator');
 
-        }
+        };
 
         /**
          * Set up the small context timeline visualization.
          */
         App.prototype.initContextTimeline = function () {
             this.ui.overviewTimeline = $('#tweet-overview');
-        }
+        };
 
         /**
          * Set up the larger focus timeline visualization.
@@ -113,9 +119,7 @@ define(['jquery', 'underscore',
                 .height(this.ui.focusTimeline.height())
                 .retweetHeight(70)
                 .noiseHeight(70)
-                .noiseThreshold(min_important_rt)
-//                .searchQuery(this.query.search)
-                .utcOffsetMillis(utcOffsetMillis)
+                .utcOffsetMillis(this.config.utc_offset_millis)
                 .idealBinCount(200)
                 .timeExtent([this.interval.from, this.interval.to])
                 .onZoomChanged($.proxy(self.zoomChanged, self));
@@ -123,7 +127,7 @@ define(['jquery', 'underscore',
             //Set the container and render
             this.focusTimeline.container(this.ui.focusTimeline.selector)
                 .render();
-        }
+        };
 
         /**
          * Set up the tweet list component
@@ -135,11 +139,11 @@ define(['jquery', 'underscore',
             this.tweetList = new TweetList(this.ui.tweetList);
             //Load the tweets for the current query
 //            this.tweetList.update(this.query);
-        }
+        };
 
         App.prototype.initDetailsPanel = function () {
             this.ui.detailsPanel = $('#details');
-        }
+        };
 
         App.prototype.windowResize = function () {
             var self = this;
@@ -149,40 +153,33 @@ define(['jquery', 'underscore',
                     .height(self.ui.focusTimeline.height())
                     .update();
             });
-        }
+        };
 
         /**
          * Update the url based on the current query.
          */
         App.prototype.updateUrl = function () {
+            //Get the basic parameters
             var params = {
                 from: Math.round(this.interval.from / 1000),
                 to: Math.round(this.interval.to / 1000)
             };
 
-            this.queries.forEach(function (query, index) {
-                for (var key in query.data) {
-                    var value = query.data[key];
-                    if (key == 'rt') {
-                        value = value ? '1' : '';
-                    }
-
-                    params[parameterName(key, index)] = value;
-                }
+            //Get the query data objects
+            var query_data = this.queries.map(function(query) {
+                return query.data;
             });
 
-            //Fancy HTML5 history management
-            history.pushState(params, '', '?' + $.param(params));
-        }
-
+            urls.update_url(params, query_data);
+        };
 
         App.prototype.queryUpdated = function (query) {
             this.updateUrl();
-        }
+        };
 
         App.prototype.queryViewChanged = function (query) {
             this.updateUrl();
-        }
+        };
 
         App.prototype.zoomChanged = function (extent) {
             //When the timeline zoom/pan changes, we need to update the query object
@@ -191,42 +188,7 @@ define(['jquery', 'underscore',
 
             //and update the url
             this.updateUrl();
-        }
-
-        /**
-         * Utility for extracting url parameters. Obtained from SO probably.
-         */
-        function getParameterByName(queryString, name, defaultValue) {
-            name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
-            var regexS = "[\\?&]" + name + "=([^&#]*)";
-            var regex = new RegExp(regexS);
-            var results = regex.exec(queryString);
-            if (results == null)
-                return defaultValue;
-            else
-                return decodeURIComponent(results[1].replace(/\+/g, " "));
-        }
-
-        var PARAMETER_NAME_MAP = {
-            view: 'v',
-            search: 'q',
-            author: 'a',
-            rt: 'r',
-            min_rt: 'm',
-            sentiment: 'f'
         };
 
-        /**
-         * Given a nice parameter name (i.e. 'view') and
-         * the query index (1, 2), generate the short url name.
-         *
-         * @param name
-         * @param queryIndex
-         */
-        function parameterName(name, queryIndex) {
-            return PARAMETER_NAME_MAP[name] + queryIndex.toString();
-        }
-
-        //Start the app
-        window.app = new App();
+        return App;
     });

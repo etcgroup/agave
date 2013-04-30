@@ -61,6 +61,6 @@
             };
         </script>
 
-        <script src="js/lib/require.js" data-main="app"></script>
+        <script src="js/lib/require.js" data-main="main"></script>
     </body>
 </html>
