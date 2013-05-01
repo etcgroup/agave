@@ -79,18 +79,6 @@ define(['util/semzoom'],
 
             });
 
-            it('calculates recommendations at normal intervals', function() {
-                zoom.idealBinCount(10);
-
-                //0 to 10 seconds, shifted slightly
-                var visible = [1, 10*1000 + 1];
-
-                var result = zoom._recalculate(visible);
-                expect(result.binWidth).toEqual(1000);
-                expect(result.interval[0] % 1000).toBe(0);
-                expect(result.interval[1] % 1000).toBe(0);
-            });
-
             it('recommends no change when data is perfect', function() {
                 var visible = [0, 10*1000];
                 zoom.scale().domain(visible);
