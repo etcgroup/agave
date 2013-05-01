@@ -30,6 +30,7 @@ define(['underscore', 'util/normalize_range'],
                     return this._scale;
                 }
                 this._scale = scale;
+                this._domain = undefined;
                 return this;
             },
 
@@ -43,6 +44,7 @@ define(['underscore', 'util/normalize_range'],
                     return this._domain;
                 }
                 this._domain = domain;
+                this._scale = undefined;
                 return this;
             },
 

@@ -45,7 +45,7 @@ define(['jquery', 'underscore', 'lib/Uri'], function($, _, Uri) {
      * @returns {{get: Function, get_at: Function}}
      */
     urls.parse = function(url) {
-        url = url || document.location.uri;
+        url = url || document.location.href;
 
         var parsed = new Uri(url);
 
