@@ -75,8 +75,11 @@ define(function (require) {
                 //Go ahead and set up the query view at the same time
                 var ui = $(this);
 
-                //Pass the model along to the view
-                var view = new QueryControls(query);
+                //Pass the model and target along to the view
+                var view = new QueryControls({
+                    model: query,
+                    into: ui
+                });
 
                 //When the model changes, we need to know
                 query.on('update', $.proxy(self.queryUpdated, self));

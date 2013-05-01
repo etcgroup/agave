@@ -4,11 +4,14 @@ define(['model/query'],
         describe("Query Model", function () {
 
             it('takes on default field values', function() {
+                var query = new Query();
 
-                var q = new Query();
-
-                expect(q.search()).toBeDefined();
-                expect(q.search()).toBeFalsy();
+                expect(query.view()).toEqual('area');
+                expect(query.search()).toEqual('');
+                expect(query.author()).toEqual('');
+                expect(query.rt()).toEqual(false);
+                expect(query.sentiment()).toEqual('');
+                expect(query.min_rt()).toEqual(0);
 
             });
 

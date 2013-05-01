@@ -2,7 +2,7 @@ define(['util/functions'], function(functions) {
 
     describe("functions utility", function() {
 
-        describe('event_mutator factory', function() {
+        describe('evented_mutator factory', function() {
 
             var MyClass, instance;
 
@@ -56,11 +56,8 @@ define(['util/functions'], function(functions) {
 
                 instance.myval('setting 1');
 
-                expect(instance.trigger).toHaveBeenCalledWith('change', 'myval', undefined, 'setting 1');
+                expect(instance.trigger).toHaveBeenCalledWith('change', instance, 'myval');
 
-                instance.myval('setting 2');
-
-                expect(instance.trigger).toHaveBeenCalledWith('change', 'myval', 'setting 1', 'setting 2');
             });
 
             it('does not fire change events when the value does not change', function() {
@@ -99,10 +96,97 @@ define(['util/functions'], function(functions) {
 
                 instance.myval('setting 1');
 
-                expect(instance.trigger).toHaveBeenCalledWith('another-event', 'myval', undefined, 'setting 1');
+                expect(instance.trigger).toHaveBeenCalledWith('another-event', instance, 'myval');
             });
         });
 
+
+        describe('evented_setter factory', function() {
+
+            var MyClass, instance;
+
+            beforeEach(function() {
+                MyClass = function() {
+                    this.data = {};
+                };
+
+                MyClass.prototype.trigger = function() {};
+
+                instance = new MyClass();
+
+                spyOn(instance, 'trigger');
+            });
+
+            it('can set values', function() {
+
+                MyClass.prototype.set = functions.evented_setter('data');
+
+                expect(instance.data.myval).toBeUndefined();
+
+                instance.set({
+                    myval: 5
+                });
+
+                expect(instance.data.myval).toEqual(5);
+            });
+
+            it('works with different blob names', function() {
+
+                MyClass.prototype.set = functions.evented_setter('another-blob');
+
+                instance['another-blob'] = {};
+
+                instance.set({
+                    myval: 5
+                });
+
+                expect(instance['another-blob'].myval).toEqual(5);
+            });
+
+            it('triggers change when values differ', function() {
+
+                MyClass.prototype.set = functions.evented_setter('data');
+
+                expect(instance.trigger).not.toHaveBeenCalled();
+
+                instance.set({
+                    myval: 5
+                });
+
+                expect(instance.trigger).toHaveBeenCalledWith('change', instance);
+
+            });
+
+            it('does not trigger change when values do not differ', function() {
+
+                MyClass.prototype.set = functions.evented_setter('data');
+
+                instance.data.myval = 5;
+
+                expect(instance.trigger).not.toHaveBeenCalled();
+
+                instance.set({
+                    myval: 5
+                });
+
+                expect(instance.trigger).not.toHaveBeenCalled();
+
+            });
+
+            it('does not fire change events in silent mode', function() {
+
+                MyClass.prototype.set = functions.evented_setter('data');
+
+                expect(instance.trigger).not.toHaveBeenCalled();
+
+                instance.set({
+                    myval: 5
+                }, true);
+
+                expect(instance.trigger).not.toHaveBeenCalled();
+
+            });
+        });
     });
 
 });

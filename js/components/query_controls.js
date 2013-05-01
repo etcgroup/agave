@@ -1,30 +1,25 @@
-define(['jquery', 'underscore', 'util/events'], function ($, _, events) {
-
-    var DEFAULT_DATA = {
-        view: 'area',
-        search: '',
-        author: '',
-        rt: false,
-        min_rt: 0,
-        sentiment: ''
-    };
-
-    var VALID_VIEW_MODES = ['area', 'stacked', 'expand', 'hidden'];
-
-    var VALID_SENTIMENTS = ['', 'negative', 'neutral', 'positive'];
+define(['jquery', 'underscore', 'util/events', 'model/Query'], function ($, _, events, Query) {
 
     /**
      * A class for managing the controls that manipulat a query object.
      *
-     * @param targetForm
-     * @param queryModel
+     * The options parameter may have an object with 'model' (a Query) and 'ui' (a selection)
+     *
+     * The model and into parameters will be stored as query.model and query.into.
+     *
+     * A new Query will be initialized if model is not set.
+     *
+     * If into is not set, a new form element will be created for the controls.
+     *
+     * @param options
      * @constructor
      */
-    var QueryControls = function (targetForm, queryModel) {
-        queryModel = queryModel || {};
-        this.data = _.defaults(queryModel, DEFAULT_DATA);
+    var QueryControls = function (options) {
 
-        this._initUI(targetForm);
+        this.model = options.model || new Query();
+        this.into = options.into || $('<form>');
+
+        this._initUI();
         this._fillForm();
 
         this._initEvents();
@@ -36,21 +31,19 @@ define(['jquery', 'underscore', 'util/events'], function ($, _, events) {
     /**
      * Find several important UI elements.
      *
-     * @param form
      * @private
      */
-    QueryControls.prototype._initUI = function (form) {
+    QueryControls.prototype._initUI = function () {
         this.ui = {};
 
-        this.ui.form = form;
-
-        this.ui.view_buttons = form.find('.view-buttons');
-        this.ui.search_input = form.find('.query-search');
-        this.ui.author_input = form.find('.query-author');
-        this.ui.rt_checkbox = form.find('.query-rt');
-        this.ui.min_rt_input = form.find('.query-minrt');
-        this.ui.sentiment_select = form.find('.query-sentiment');
-        this.ui.update_button = form.find('.query-update');
+        this.ui.form = this.into; //an alias
+        this.ui.view_buttons = this.into.find('.view-buttons');
+        this.ui.search_input = this.into.find('.query-search');
+        this.ui.author_input = this.into.find('.query-author');
+        this.ui.rt_checkbox = this.into.find('.query-rt');
+        this.ui.min_rt_input = this.into.find('.query-minrt');
+        this.ui.sentiment_select = this.into.find('.query-sentiment');
+        this.ui.update_button = this.into.find('.query-update');
     };
 
     /**
@@ -70,9 +63,7 @@ define(['jquery', 'underscore', 'util/events'], function ($, _, events) {
      * @private
      */
     QueryControls.prototype._updateClicked = function () {
-        if (this.collectData()) {
-            this.trigger('update', this);
-        }
+        this.collectData();
     };
 
     /**
@@ -81,7 +72,12 @@ define(['jquery', 'underscore', 'util/events'], function ($, _, events) {
      * @private
      */
     QueryControls.prototype._viewButtonClicked = function () {
-        this.trigger('view-change', this);
+
+        //Get the mode of the active mode button
+        var mode = this.ui.view_buttons.find('.active').data('mode');
+
+        //Save on the model
+        this.model.view(mode);
     };
 
     /**
@@ -97,45 +93,33 @@ define(['jquery', 'underscore', 'util/events'], function ($, _, events) {
 
     /**
      * Gather user input from the query controls.
+     *
+     * Returns false if any values were invalid, and this.model.invalid will be
+     * set to a useful message.
      */
     QueryControls.prototype.collectData = function () {
 
+        var data = {};
+
         //Get the mode of the active mode button (validate)
-        var mode = this.ui.view_buttons.find('.active').data('mode');
-        if (VALID_VIEW_MODES.indexOf(mode) < 0) {
-            this.invalid = 'Invalid view mode. How did this happen!';
-            return false;
-        }
-        //It was in the list of valid modes
-        this.data.view = mode;
+        data.view = this.ui.view_buttons.find('.active').data('mode');
 
         //Get the search string
-        this.data.search = $.trim(this.ui.search_input.val());
+        data.search = $.trim(this.ui.search_input.val());
 
         //Get the author string
-        this.data.author = $.trim(this.ui.author_input.val());
+        data.author = $.trim(this.ui.author_input.val());
 
         //Get whether or not to show retweets
-        this.data.rt = this.ui.rt_checkbox.is(':checked');
+        data.rt = this.ui.rt_checkbox.is(':checked');
 
         //Get the minimum RT count (validate first)
-        var num = Number(this.ui.min_rt_input.val());
-        if (isNaN(num) || num < 0) {
-            this.invalid = 'Not a valid minimum retweet count';
-            return false;
-        }
-        //Guess it was ok
-        this.data.min_rt = num;
+        data.min_rt = Number(this.ui.min_rt_input.val());
 
         //Get the selected sentiment filter, with validation
-        var sentiment = this.ui.sentiment_select.val();
-        if (VALID_SENTIMENTS.indexOf(sentiment) < 0) {
-            this.invalid = 'Invalid sentiment. How did this happen!';
-            return false;
-        }
-        this.data.sentiment = sentiment;
+        data.sentiment = this.ui.sentiment_select.val();
 
-        return true;
+        return this.model.set(data);
     };
 
     /**
@@ -147,22 +131,22 @@ define(['jquery', 'underscore', 'util/events'], function ($, _, events) {
         //Activate the proper mode button
         this.ui.view_buttons.children().removeClass('active');
         this.ui.view_buttons
-            .find('[data-mode=' + this.data.view + ']')
+            .find('[data-mode=' + this.model.view() + ']')
             .addClass('active');
 
         //Set the search string
-        this.ui.search_input.val(this.data.search);
+        this.ui.search_input.val(this.model.search());
 
         //Set the author string
-        this.ui.author_input.val(this.data.author);
+        this.ui.author_input.val(this.model.author());
 
         //Set the retweets checkbox
-        this.ui.rt_checkbox.prop('checked', this.data.rt);
+        this.ui.rt_checkbox.prop('checked', this.model.rt());
 
         //Set the min retweets filter
-        this.ui.min_rt_input.val(this.data.min_rt);
+        this.ui.min_rt_input.val(this.model.min_rt());
 
-        this.ui.sentiment_select.val(this.data.sentiment);
+        this.ui.sentiment_select.val(this.model.sentiment());
     };
 
     return QueryControls;

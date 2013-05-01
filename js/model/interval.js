@@ -8,6 +8,8 @@ define(['underscore', 'util/events', 'util/functions'], function(_, events, func
     /**
      * A model for tracking a time interval ('from' and 'to').
      *
+     * The underlying data object can be accessed directly if you really want it.
+     *
      * @constructor
      */
     var Interval = function(data) {
@@ -17,6 +19,19 @@ define(['underscore', 'util/events', 'util/functions'], function(_, events, func
         //Initialize the data with the defaults
         this.data = _.defaults(data, DATA_DEFAULTS);
     };
+
+    /**
+     * Set a multiple fields all at once. Triggers change if any were different.
+     *
+     * Returns true on success, or false if some field was invalid.
+     * If invalid, this.invalid will be set to a useful message.
+     *
+     * TODO: validation (some useful arrays are at the top here)
+     *
+     * @param data
+     * @returns {boolean}
+     */
+    Interval.prototype.set = functions.evented_setter('data');
 
     /**
      * Get or set the 'from' value.

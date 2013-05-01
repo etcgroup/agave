@@ -1,4 +1,4 @@
-define([], function() {
+define(['underscore'], function(_) {
 
     /**
      * A collection of functions useful for *building* various other functions.
@@ -34,12 +34,36 @@ define([], function() {
 
                 //Don't trigger the event if silent was set
                 if (!silent) {
-                    this.trigger(eventName, fieldName, oldValue, fieldValue);
+                    this.trigger(eventName, this, fieldName);
                 }
             }
 
             //Return this to allow chaining
             return this;
+        };
+    };
+
+    functions.evented_setter = function(blobName, eventName) {
+        eventName = eventName || 'change';
+
+        return function(data, silent) {
+            var blob = this[blobName];
+
+            //See if there is anything to do
+            if (_.isEqual(blob, data)) {
+                //All good :)
+                return true;
+            }
+
+            //Save, keeping any non-set values
+            this[blobName] = _.defaults(data, blob);
+
+            //Don't trigger if silent was et
+            if (!silent) {
+                this.trigger('change', this);
+            }
+
+            return true;
         };
     };
 

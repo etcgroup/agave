@@ -1,5 +1,5 @@
-define(['jquery', 'components/query_controls'],
-    function ($, QueryControls) {
+define(['jquery', 'components/query_controls', 'model/query'],
+    function ($, QueryControls, Query) {
 
         describe("Query Controls View", function () {
 
@@ -35,32 +35,6 @@ define(['jquery', 'components/query_controls'],
                 refreshUI();
             });
 
-            it('has default data', function() {
-                var query = new QueryControls(ui);
-
-                expect(query.data.view).toEqual('area');
-                expect(query.data.search).toEqual('');
-                expect(query.data.author).toEqual('');
-                expect(query.data.rt).toEqual(false);
-                expect(query.data.sentiment).toEqual('');
-                expect(query.data.min_rt).toEqual(0);
-            });
-
-            it('extends provided data with defaults', function() {
-                var data = {
-                    search: 'a search string',
-                    sentiment: 'negative'
-                };
-
-                var query = new QueryControls(ui, data);
-
-                expect(query.data.search).toEqual(data.search);
-                expect(query.data.sentiment).toEqual(data.sentiment);
-
-                expect(query.data.author).toEqual('');//default
-                expect(query.data.min_rt).toEqual(0);//default
-            });
-
             it('applies data settings to query UI', function() {
                 //All non-defaults
                 var data = {
@@ -72,7 +46,10 @@ define(['jquery', 'components/query_controls'],
                     sentiment: 'neutral'
                 };
 
-                var query = new QueryControls(ui, data);
+                var query = new QueryControls({
+                    model: new Query(data),
+                    into: ui
+                });
 
                 refreshUI();
 
@@ -85,8 +62,6 @@ define(['jquery', 'components/query_controls'],
             });
 
             it('retrieves data settings from query UI', function() {
-                var query = new QueryControls(ui);
-
                 var data = {
                     view: 'stacked',
                     search: 'a search string',
@@ -95,6 +70,10 @@ define(['jquery', 'components/query_controls'],
                     min_rt: 2,
                     sentiment: 'neutral'
                 };
+
+                var query = new QueryControls({
+                    into: ui
+                });
 
                 //Disable all buttons
                 viewButtons.removeClass('active');
@@ -107,105 +86,66 @@ define(['jquery', 'components/query_controls'],
                 minRTInput.val(data.min_rt);
                 sentimentSelector.val(data.sentiment);
 
+                //Now gather all the data
                 var result = query.collectData();
 
                 expect(result).toBeTruthy();
-                expect(query.data).toEqual(data);
+                expect(query.model.data).toEqual(data);
             });
 
-            it('recognizes invalid sentiment values', function() {
-                var query = new QueryControls(ui);
+            it('changes the model on update click', function() {
+                var query = new QueryControls({
+                    into: ui
+                });
 
-                //Have to add an option for this value in order to be able to set it
-                sentimentSelector.append('<option value="some random crap">HAHAHA</option>');
-                sentimentSelector.val('some random crap');
+                spyOnEvent(query.model, 'change');
 
-                var result = query.collectData();
+                //Change something
+                searchInput.val("changing the search :)");
 
-                expect(result).toBeFalsy();
-                expect(query.invalid).toBeDefined();
-            });
-
-            it('recognizes invalid view modes', function() {
-                var query = new QueryControls(ui);
-
-                activeViewButton.attr('data-mode', 'some random mode');
-
-                var result = query.collectData();
-
-                expect(result).toBeFalsy();
-                expect(query.invalid).toBeDefined();
-            });
-
-            it('recognizes invalid min rt values', function() {
-                var query = new QueryControls(ui);
-
-                //Have to set the type to text to be able to set this value
-                minRTInput.attr('type', 'text');
-                minRTInput.val('not a number');
-                expect(minRTInput.val()).toEqual('not a number'); // just checking
-
-                var result = query.collectData();
-
-                expect(result).toBeFalsy();
-                expect(query.invalid).toBeDefined();
-            });
-
-            it('collects data on update click', function() {
-                var query = new QueryControls(ui);
-
-                spyOn(query, 'collectData').andReturn(true);
-
-                expect(query.collectData).not.toHaveBeenCalled();
+                expect('change').not.toHaveBeenTriggeredOn(query.model);
 
                 updateButton.click();
 
-                expect(query.collectData).toHaveBeenCalled();
-
+                expect('change').toHaveBeenTriggeredOn(query.model);
             });
 
-            it('fires an update event on update click', function() {
-                var query = new QueryControls(ui);
+            it('fires a model change event on view button click', function() {
+                var query = new QueryControls({
+                    into: ui
+                });
 
-                spyOnEvent(query, 'update');
+                spyOnEvent(query.model, 'change');
 
-                expect('update').not.toHaveBeenTriggeredOn(query);
+                expect('change').not.toHaveBeenTriggeredOn(query.model);
 
-                updateButton.click();
+                //Change something --
 
-                expect('update').toHaveBeenTriggeredOn(query);
-            });
-
-            it('does not fire event on update click with invalid input', function() {
-                var query = new QueryControls(ui);
-
-                activeViewButton.attr('data-mode', 'some random mode');
-
-                expect('update').not.toHaveBeenTriggeredOn(query);
-            });
-
-            it('fires a view-change event on view button click', function() {
-                var query = new QueryControls(ui);
-
-                spyOnEvent(query, 'view-change');
-
-                expect('view-change').not.toHaveBeenTriggeredOn(query);
+                //Disable all buttons
+                viewButtons.removeClass('active');
+                //Activate the right button
+                viewButtons.filter('[data-mode=stacked]').addClass('active');
 
                 viewButtons.last().click();
 
-                expect('view-change').toHaveBeenTriggeredOn(query);
+                expect('change').toHaveBeenTriggeredOn(query.model);
             });
 
-            it('prevents form submit by enter and fires update', function() {
-                var query = new QueryControls(ui);
+            it('prevents form submit by enter and fires change', function() {
+                var query = new QueryControls({
+                    into: ui
+                });
 
-                spyOnEvent(query, 'update');
+                spyOnEvent(query.model, 'change');
                 spyOnEvent(ui, 'submit');
+
+                //Change something
+                searchInput.val("changing the search :)");
 
                 ui.submit();
 
                 expect('submit').toHaveBeenPreventedOn(ui);
-                expect('update').toHaveBeenTriggeredOn(query);
+                expect('change').toHaveBeenTriggeredOn(query.model);
             });
         });
     });
