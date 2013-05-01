@@ -1,5 +1,5 @@
-define(['underscore', 'lib/d3', 'util/normalize_range'],
-    function(_, d3, normalize_range) {
+define(['underscore', 'util/normalize_range'],
+    function(_, normalize_range) {
 
         /**
          * Class for managing semantic zooming.
@@ -8,22 +8,41 @@ define(['underscore', 'lib/d3', 'util/normalize_range'],
          * are being used to display data, it can be used
          * to determine if the current data interval and bin width
          * needs to be updated.
+         *
+         * It can also be configured to use a simple [from, to] domain
+         * instead of watching a scale.
          */
         var SemanticZoom = function() {
             this._idealBinCount = 30;
-            this._scale = d3.time.scale();
+            this._domain = [0, 1];
+            this._scale = undefined;
         };
 
         _.extend(SemanticZoom.prototype, {
 
             /**
              * Get or set the scale for zooming.
+             *
+             * Use EITHER this or a domain.
              */
             scale: function(scale) {
                 if (!arguments.length) {
                     return this._scale;
                 }
                 this._scale = scale;
+                return this;
+            },
+
+            /**
+             * Get or set the domain for zooming.
+             *
+             * Use EITHER this or a scale.
+             */
+            domain: function(domain) {
+                if (!arguments.length) {
+                    return this._domain;
+                }
+                this._domain = domain;
                 return this;
             },
 
@@ -107,7 +126,9 @@ define(['underscore', 'lib/d3', 'util/normalize_range'],
 
                 var recommendation;
 
-                var rawDomain = this._scale.domain();
+                //Use either a simple domain or a scale's domain
+                var rawDomain = this._domain || this._scale.domain();
+
                 var visibleDomain = [+rawDomain[0], +rawDomain[1]];
 
                 var recalculate = false;

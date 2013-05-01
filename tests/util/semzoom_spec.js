@@ -1,5 +1,5 @@
-define(['util/semzoom'],
-    function(SemanticZoom) {
+define(['util/semzoom', 'lib/d3'],
+    function(SemanticZoom, d3) {
 
         describe("SemanticZoom", function() {
             var zoom;
@@ -10,7 +10,7 @@ define(['util/semzoom'],
 
 
             it('has reasonable defaults', function() {
-                expect(zoom.scale()).toBeDefined();
+                expect(zoom.domain()).toBeDefined();
                 expect(zoom.idealBinCount() > 0).toBe(true);
             });
 
@@ -80,7 +80,7 @@ define(['util/semzoom'],
 
             it('recommends no change when data is perfect', function() {
                 var visible = [0, 10*1000];
-                zoom.scale().domain(visible);
+                zoom.domain(visible);
                 zoom.idealBinCount(10);
 
                 var data = [-10*1000, 20*1000];
@@ -90,7 +90,7 @@ define(['util/semzoom'],
 
             it('recommends change when visible bins is too small', function() {
                 var visible = [0, 10*1000];
-                zoom.scale().domain(visible);
+                zoom.domain(visible);
                 zoom.idealBinCount(10);
 
                 var data = [-10*1000, 20*1000];
@@ -98,9 +98,20 @@ define(['util/semzoom'],
                 expect(zoom.recommend(data[0], data[1], binWidth)).toBeTruthy();
             });
 
+            it('respects setting a scale instead of a simple domain', function() {
+                var visible = [0, 10*1000];
+                zoom.scale(d3.time.scale().domain(visible));
+                zoom.idealBinCount(10);
+
+                var data = [-10*1000, 20*1000];
+                var binWidth = 5000;
+                expect(zoom.recommend(data[0], data[1], binWidth)).toBeTruthy();
+            });
+
+
             it('recommends change when visible bins is too big', function() {
                 var visible = [0, 10*1000];
-                zoom.scale().domain(visible);
+                zoom.domain(visible);
                 zoom.idealBinCount(10);
 
                 var data = [-10*1000, 20*1000];
@@ -110,7 +121,7 @@ define(['util/semzoom'],
 
             it('recommends change when buffer is too small', function() {
                 var visible = [0, 10*1000];
-                zoom.scale().domain(visible);
+                zoom.domain(visible);
                 zoom.idealBinCount(10);
 
                 var data = [-2.5*1000, 20*1000];
@@ -148,7 +159,7 @@ define(['util/semzoom'],
                 var data = [1359922518000, 1359924322000];
                 var binWidth = 2000;
 
-                zoom.scale().domain(visible);
+                zoom.domain(visible);
                 zoom.idealBinCount(200);
 
                 expect(zoom.recommend(data[0], data[1], binWidth)).toBeFalsy();
@@ -156,7 +167,7 @@ define(['util/semzoom'],
 
             it('throws exceptions if the arguments are wrong', function() {
                 var visible = [0, 10*1000];
-                zoom.scale().domain(visible);
+                zoom.domain(visible);
                 zoom.idealBinCount(10);
 
                 var data = [-10*1000, 20*1000];
