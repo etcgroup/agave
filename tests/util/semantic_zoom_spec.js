@@ -1,4 +1,4 @@
-define(['util/semzoom', 'lib/d3'],
+define(['util/semantic_zoom', 'lib/d3'],
     function(SemanticZoom, d3) {
 
         describe("SemanticZoom", function() {

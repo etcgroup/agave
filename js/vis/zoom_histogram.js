@@ -1,7 +1,7 @@
 define(['underscore',
     'vis/histogram',
     'util/data_cache',
-    'util/semzoom'],
+    'util/semantic_zoom'],
     function(_, Histogram, DataCache, SemanticZoom) {
 
         /**
