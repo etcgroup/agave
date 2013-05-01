@@ -14,25 +14,24 @@ define(['jquery', 'underscore', 'util/events'], function ($, _, events) {
     var VALID_SENTIMENTS = ['', 'negative', 'neutral', 'positive'];
 
     /**
-     * A class for managing query settings, updating a set
-     * of query controls, and updating the URL.
+     * A class for managing the controls that manipulat a query object.
      *
-     * @param ui
-     * @param data
+     * @param targetForm
+     * @param queryModel
      * @constructor
      */
-    var Query = function (ui, data) {
-        data = data || {};
-        this.data = _.defaults(data, DEFAULT_DATA);
+    var QueryControls = function (targetForm, queryModel) {
+        queryModel = queryModel || {};
+        this.data = _.defaults(queryModel, DEFAULT_DATA);
 
-        this._initUI(ui);
+        this._initUI(targetForm);
         this._fillForm();
 
         this._initEvents();
     };
 
     //Add 'on' and 'trigger'
-    events(Query);
+    events(QueryControls);
 
     /**
      * Find several important UI elements.
@@ -40,7 +39,7 @@ define(['jquery', 'underscore', 'util/events'], function ($, _, events) {
      * @param form
      * @private
      */
-    Query.prototype._initUI = function (form) {
+    QueryControls.prototype._initUI = function (form) {
         this.ui = {};
 
         this.ui.form = form;
@@ -59,7 +58,7 @@ define(['jquery', 'underscore', 'util/events'], function ($, _, events) {
      *
      * @private
      */
-    Query.prototype._initEvents = function () {
+    QueryControls.prototype._initEvents = function () {
         this.ui.update_button.on('click', $.proxy(this._updateClicked, this));
         this.ui.view_buttons.on('click', $.proxy(this._viewButtonClicked, this));
         this.ui.form.on('submit', $.proxy(this._formSubmitted, this));
@@ -70,7 +69,7 @@ define(['jquery', 'underscore', 'util/events'], function ($, _, events) {
      *
      * @private
      */
-    Query.prototype._updateClicked = function () {
+    QueryControls.prototype._updateClicked = function () {
         if (this.collectData()) {
             this.trigger('update', this);
         }
@@ -81,7 +80,7 @@ define(['jquery', 'underscore', 'util/events'], function ($, _, events) {
      *
      * @private
      */
-    Query.prototype._viewButtonClicked = function () {
+    QueryControls.prototype._viewButtonClicked = function () {
         this.trigger('view-change', this);
     };
 
@@ -90,7 +89,7 @@ define(['jquery', 'underscore', 'util/events'], function ($, _, events) {
      *
      * @private
      */
-    Query.prototype._formSubmitted = function (e) {
+    QueryControls.prototype._formSubmitted = function (e) {
         e.preventDefault();
         this._updateClicked();
         return false;
@@ -99,7 +98,7 @@ define(['jquery', 'underscore', 'util/events'], function ($, _, events) {
     /**
      * Gather user input from the query controls.
      */
-    Query.prototype.collectData = function () {
+    QueryControls.prototype.collectData = function () {
 
         //Get the mode of the active mode button (validate)
         var mode = this.ui.view_buttons.find('.active').data('mode');
@@ -144,7 +143,7 @@ define(['jquery', 'underscore', 'util/events'], function ($, _, events) {
      *
      * @private
      */
-    Query.prototype._fillForm = function () {
+    QueryControls.prototype._fillForm = function () {
         //Activate the proper mode button
         this.ui.view_buttons.children().removeClass('active');
         this.ui.view_buttons
@@ -166,5 +165,5 @@ define(['jquery', 'underscore', 'util/events'], function ($, _, events) {
         this.ui.sentiment_select.val(this.data.sentiment);
     };
 
-    return Query;
+    return QueryControls;
 });

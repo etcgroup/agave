@@ -1,10 +1,10 @@
 define(['jquery', 'underscore',
     'lib/bootstrap',
     'util/urls',
-    'util/query',
+    'util/query_controls',
     'components/tweet_timeline',
     'components/tweet_list'],
-    function ($, _, bootstrap, urls, Query, TweetTimeline, TweetList) {
+    function ($, _, bootstrap, urls, QueryControls, TweetTimeline, TweetList) {
 
         /**
          * This class orchestrates the overall setup of the application.
@@ -77,7 +77,7 @@ define(['jquery', 'underscore',
                     }
 
                     var ui = $(this);
-                    var query = new Query(ui, data);
+                    var query = new QueryControls(ui, data);
 
                     query.on('update', $.proxy(self.queryUpdated, self));
                     query.on('view-change', $.proxy(self.queryViewChanged, self));
