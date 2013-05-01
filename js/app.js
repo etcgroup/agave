@@ -1,10 +1,14 @@
-define(['jquery', 'underscore',
-    'lib/bootstrap',
-    'util/urls',
-    'components/query_controls',
-    'components/tweet_timeline',
-    'components/tweet_list'],
-    function ($, _, bootstrap, urls, QueryControls, TweetTimeline, TweetList) {
+define(function (require) {
+
+        //Using long-form syntax because there are soooo many dependencies
+        var $ = require('jquery');
+        var _ = require('underscore');
+        var urls = require('util/urls');
+        var Interval = require('model/interval');
+        var Query = require('model/query');
+        var QueryControls = require('components/query_controls');
+        var TweetTimeline = require('components/tweet_timeline');
+        var TweetList = require('components/tweet_list');
 
         /**
          * This class orchestrates the overall setup of the application.
@@ -18,7 +22,7 @@ define(['jquery', 'underscore',
         /**
          * Start the application.
          */
-        App.prototype.start = function() {
+        App.prototype.start = function () {
             this.initUI();
             this.initQueries();
 
@@ -35,56 +39,48 @@ define(['jquery', 'underscore',
          * Set up the query object, based on the url.
          */
         App.prototype.initQueries = function () {
-            this.queries = [];
-            this.interval = {};
 
+            //Parse the url
             var params = urls.parse();
 
-            this.interval.from = params.get('from', this.config.defaults.from) * 1000;
-            this.interval.to = params.get('to', this.config.defaults.to) * 1000;
+            //Initialize the interval -- multiplying by 1000 to convert from url times (seconds) to ms
+            this.interval = new Interval({
+                from: params.get('from', this.config.defaults.from) * 1000,
+                to: params.get('to', this.config.defaults.to) * 1000
+            });
 
+            //Find the queries box
             this.ui.queryPanel = $('#queries');
 
+            //The query collection
+            this.queries = [];
+
+            //One query model per query control
             var self = this;
-            this.ui.queryPanel.find('.query')
-                .each(function (index) {
-                    var data = {};
+            this.ui.queryPanel.find('.query').each(function (index) {
 
-                    var view = params.get_at('view', index, null);
-                    var search = params.get_at('search', index, null);
-                    var author = params.get_at('author', index, null);
-                    var rt = params.get_at('rt', index, null);
-                    var min_rt = params.get_at('min_rt', index, null);
-                    var sentiment = params.get_at('sentiment', index , null);
-
-                    if (view !== null) {
-                        data.view = view;
-                    }
-                    if (search !== null) {
-                        data.search = search;
-                    }
-                    if (author !== null) {
-                        data.author = author;
-                    }
-                    if (rt !== null) {
-                        data.rt = rt;
-                    }
-                    if (min_rt !== null) {
-                        data.min_rt = min_rt;
-                    }
-                    if (sentiment !== null) {
-                        data.sentiment = sentiment;
-                    }
-
-                    var ui = $(this);
-                    var query = new QueryControls(ui, data);
-
-                    query.on('update', $.proxy(self.queryUpdated, self));
-                    query.on('view-change', $.proxy(self.queryViewChanged, self));
-
-                    self.queries.push(query);
+                //Build a new query model from the URL
+                var query = new Query({
+                    view: params.get_at('view', index, null),
+                    search: params.get_at('search', index, null),
+                    author: params.get_at('author', index, null),
+                    rt: params.get_at('rt', index, null),
+                    min_rt: params.get_at('min_rt', index, null),
+                    sentiment: params.get_at('sentiment', index, null)
                 });
 
+                //Save the query in our list
+                self.queries.push(query);
+
+                //Go ahead and set up the query view at the same time
+                var ui = $(this);
+
+                //Pass the model along to the view
+                var view = new QueryControls(query);
+
+                //When the model changes, we need to know
+                query.on('update', $.proxy(self.queryUpdated, self));
+            });
         };
 
         /**
@@ -121,7 +117,7 @@ define(['jquery', 'underscore',
                 .noiseHeight(70)
                 .utcOffsetMillis(this.config.utc_offset_millis)
                 .idealBinCount(200)
-                .timeExtent([this.interval.from, this.interval.to])
+                .timeExtent([this.interval.from(), this.interval.to()])
                 .onZoomChanged($.proxy(self.zoomChanged, self));
 
             //Set the container and render
@@ -161,12 +157,12 @@ define(['jquery', 'underscore',
         App.prototype.updateUrl = function () {
             //Get the basic parameters
             var params = {
-                from: Math.round(this.interval.from / 1000),
-                to: Math.round(this.interval.to / 1000)
+                from: Math.round(this.interval.from() / 1000),
+                to: Math.round(this.interval.to() / 1000)
             };
 
             //Get the query data objects
-            var query_data = this.queries.map(function(query) {
+            var query_data = this.queries.map(function (query) {
                 return query.data;
             });
 
@@ -183,8 +179,8 @@ define(['jquery', 'underscore',
 
         App.prototype.zoomChanged = function (extent) {
             //When the timeline zoom/pan changes, we need to update the query object
-            this.interval.from = extent[0];
-            this.interval.to = extent[1];
+            this.interval.from(extent[0]);
+            this.interval.to(extent[1]);
 
             //and update the url
             this.updateUrl();

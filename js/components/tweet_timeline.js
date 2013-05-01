@@ -6,7 +6,7 @@ define([
     'util/transform',
     'vis/zoom_histogram',
     'vis/stack_histogram',
-    'util/semzoom'],
+    'util/semantic_zoom'],
     function($, d3, _, Rectangle, Transform, ZoomHistogram, StackHistogram, SemanticZoom) {
 
         var AXIS_OFFSET = 3;
