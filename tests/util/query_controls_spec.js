@@ -1,7 +1,7 @@
-define(['jquery', 'util/query'],
-    function ($, Query) {
+define(['jquery', 'util/query_controls'],
+    function ($, QueryControls) {
 
-        describe("Query", function () {
+        describe("Query Controls View", function () {
 
             var ui,
                 viewButtonGroup,
@@ -27,7 +27,7 @@ define(['jquery', 'util/query'],
                 minRTInput = ui.find('.query-minrt');
                 sentimentSelector = ui.find('.query-sentiment');
                 updateButton = ui.find('.query-update');
-            }
+            };
 
             beforeEach(function () {
                 loadFixtures('query.html');
@@ -36,7 +36,7 @@ define(['jquery', 'util/query'],
             });
 
             it('has default data', function() {
-                var query = new Query(ui);
+                var query = new QueryControls(ui);
 
                 expect(query.data.view).toEqual('area');
                 expect(query.data.search).toEqual('');
@@ -52,7 +52,7 @@ define(['jquery', 'util/query'],
                     sentiment: 'negative'
                 };
 
-                var query = new Query(ui, data);
+                var query = new QueryControls(ui, data);
 
                 expect(query.data.search).toEqual(data.search);
                 expect(query.data.sentiment).toEqual(data.sentiment);
@@ -72,7 +72,7 @@ define(['jquery', 'util/query'],
                     sentiment: 'neutral'
                 };
 
-                var query = new Query(ui, data);
+                var query = new QueryControls(ui, data);
 
                 refreshUI();
 
@@ -85,7 +85,7 @@ define(['jquery', 'util/query'],
             });
 
             it('retrieves data settings from query UI', function() {
-                var query = new Query(ui);
+                var query = new QueryControls(ui);
 
                 var data = {
                     view: 'stacked',
@@ -114,7 +114,7 @@ define(['jquery', 'util/query'],
             });
 
             it('recognizes invalid sentiment values', function() {
-                var query = new Query(ui);
+                var query = new QueryControls(ui);
 
                 //Have to add an option for this value in order to be able to set it
                 sentimentSelector.append('<option value="some random crap">HAHAHA</option>');
@@ -127,7 +127,7 @@ define(['jquery', 'util/query'],
             });
 
             it('recognizes invalid view modes', function() {
-                var query = new Query(ui);
+                var query = new QueryControls(ui);
 
                 activeViewButton.attr('data-mode', 'some random mode');
 
@@ -138,7 +138,7 @@ define(['jquery', 'util/query'],
             });
 
             it('recognizes invalid min rt values', function() {
-                var query = new Query(ui);
+                var query = new QueryControls(ui);
 
                 //Have to set the type to text to be able to set this value
                 minRTInput.attr('type', 'text');
@@ -152,7 +152,7 @@ define(['jquery', 'util/query'],
             });
 
             it('collects data on update click', function() {
-                var query = new Query(ui);
+                var query = new QueryControls(ui);
 
                 spyOn(query, 'collectData').andReturn(true);
 
@@ -165,7 +165,7 @@ define(['jquery', 'util/query'],
             });
 
             it('fires an update event on update click', function() {
-                var query = new Query(ui);
+                var query = new QueryControls(ui);
 
                 spyOnEvent(query, 'update');
 
@@ -177,7 +177,7 @@ define(['jquery', 'util/query'],
             });
 
             it('does not fire event on update click with invalid input', function() {
-                var query = new Query(ui);
+                var query = new QueryControls(ui);
 
                 activeViewButton.attr('data-mode', 'some random mode');
 
@@ -185,7 +185,7 @@ define(['jquery', 'util/query'],
             });
 
             it('fires a view-change event on view button click', function() {
-                var query = new Query(ui);
+                var query = new QueryControls(ui);
 
                 spyOnEvent(query, 'view-change');
 
@@ -197,7 +197,7 @@ define(['jquery', 'util/query'],
             });
 
             it('prevents form submit by enter and fires update', function() {
-                var query = new Query(ui);
+                var query = new QueryControls(ui);
 
                 spyOnEvent(query, 'update');
                 spyOnEvent(ui, 'submit');
