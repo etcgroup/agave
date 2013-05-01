@@ -1,7 +1,7 @@
 define(['jquery', 'underscore',
     'lib/bootstrap',
     'util/urls',
-    'util/query_controls',
+    'components/query_controls',
     'components/tweet_timeline',
     'components/tweet_list'],
     function ($, _, bootstrap, urls, QueryControls, TweetTimeline, TweetList) {

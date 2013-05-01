@@ -1,4 +1,4 @@
-define(['jquery', 'util/query_controls'],
+define(['jquery', 'components/query_controls'],
     function ($, QueryControls) {
 
         describe("Query Controls View", function () {
