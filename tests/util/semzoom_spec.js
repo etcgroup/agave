@@ -72,11 +72,10 @@ define(['util/semzoom'],
 
                 var result = zoom._recalculate(visible);
                  //three times as large, -10 to 20 seconds
-                expect(result.interval).toEqual([-10*1000, 20*1000]);
+                expect(result.from).toEqual(-10*1000);
+                expect(result.to).toEqual(20*1000);
                 //one second
-                expect(result.binWidth).toEqual(1000);
-
-
+                expect(result.bin_width).toEqual(1000);
             });
 
             it('recommends no change when data is perfect', function() {
@@ -86,7 +85,7 @@ define(['util/semzoom'],
 
                 var data = [-10*1000, 20*1000];
                 var binWidth = 1000;
-                expect(zoom.recommend(data, binWidth)).toBeFalsy();
+                expect(zoom.recommend(data[0], data[1], binWidth)).toBeFalsy();
             });
 
             it('recommends change when visible bins is too small', function() {
@@ -96,7 +95,7 @@ define(['util/semzoom'],
 
                 var data = [-10*1000, 20*1000];
                 var binWidth = 5000;
-                expect(zoom.recommend(data, binWidth)).toBeTruthy();
+                expect(zoom.recommend(data[0], data[1], binWidth)).toBeTruthy();
             });
 
             it('recommends change when visible bins is too big', function() {
@@ -106,7 +105,7 @@ define(['util/semzoom'],
 
                 var data = [-10*1000, 20*1000];
                 var binWidth = 100;
-                expect(zoom.recommend(data, binWidth)).toBeTruthy();
+                expect(zoom.recommend(data[0], data[1], binWidth)).toBeTruthy();
             });
 
             it('recommends change when buffer is too small', function() {
@@ -116,19 +115,19 @@ define(['util/semzoom'],
 
                 var data = [-2.5*1000, 20*1000];
                 var binWidth = 1000;
-                expect(zoom.recommend(data, binWidth)).toBeFalsy();
+                expect(zoom.recommend(data[0], data[1], binWidth)).toBeFalsy();
 
                 data = [-2.49*1000, 20*1000];
                 binWidth = 1000;
-                expect(zoom.recommend(data, binWidth)).toBeTruthy();
+                expect(zoom.recommend(data[0], data[1], binWidth)).toBeTruthy();
 
                 data = [-10*1000, 12.5*1000];
                 binWidth = 1000;
-                expect(zoom.recommend(data, binWidth)).toBeFalsy();
+                expect(zoom.recommend(data[0], data[1], binWidth)).toBeFalsy();
 
                 data = [-10*1000, 12.49*1000];
                 binWidth = 1000;
-                expect(zoom.recommend(data, binWidth)).toBeTruthy();
+                expect(zoom.recommend(data[0], data[1], binWidth)).toBeTruthy();
             });
 
             it('ignores tiny shifts when updating bin width', function() {
@@ -152,7 +151,32 @@ define(['util/semzoom'],
                 zoom.scale().domain(visible);
                 zoom.idealBinCount(200);
 
-                expect(zoom.recommend(data, binWidth)).toBeFalsy();
+                expect(zoom.recommend(data[0], data[1], binWidth)).toBeFalsy();
+            });
+
+            it('throws exceptions if the arguments are wrong', function() {
+                var visible = [0, 10*1000];
+                zoom.scale().domain(visible);
+                zoom.idealBinCount(10);
+
+                var data = [-10*1000, 20*1000];
+                var binWidth = 100;
+
+                var missingParams1 = function() {
+                    zoom.recommend(data[0]);
+                };
+
+                var missingParams2 = function() {
+                    zoom.recommend(data[0], data[1]);
+                }
+
+                var parameterTypes = function() {
+                    zoom.recommend(data, data, data);
+                }
+
+                expect(missingParams1).toThrow();
+                expect(missingParams2).toThrow();
+                expect(parameterTypes).toThrow();
             });
         });
     });

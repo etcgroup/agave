@@ -168,11 +168,13 @@ define(['underscore',
              */
             update: function() {
                 //Check if the semantic zoom controller recommends new data.
-                var change = this._semantic.recommend(this.extent(), this.zoomLevel());
+                var extent = this.extent();
+                var change = this._semantic.recommend(extent[0], extent[1], this.zoomLevel());
+
                 var alreadyUpdated = false;
 
                 if (change) {
-                    alreadyUpdated = this._load_data(change.binWidth, change.interval);
+                    alreadyUpdated = this._load_data(change.bin_width, [change.from, change.to]);
                 }
 
                 //Update the histogram because the zoom has changed

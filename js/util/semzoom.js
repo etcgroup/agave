@@ -85,22 +85,26 @@ define(['underscore', 'lib/d3', 'util/normalize_range'],
                 var to = visibleDomain[1] + domainWidth;
                 var desiredDataPoints = this._idealBinCount * 3;
 
-                var settings = normalize_range(from, to, desiredDataPoints);
-                return {
-                    interval: [settings.from, settings.to],
-                    binWidth: settings.bin_width
-                };
+                return normalize_range(from, to, desiredDataPoints);
             },
 
             /**
              * Check to see if an update is recommended.
              *
-             * Provide the interval and binWidth for the currently loaded data.
+             * Provide the interval (from and to) and bin_width for the currently loaded data.
              *
              * If the bin width and data interval being shown should be changed,
              * it returns an object containing the new interval and binWidth.
              */
-            recommend: function(interval, binWidth) {
+            recommend: function(from, to, bin_width) {
+                from = Number(from);
+                to = Number(to);
+                bin_width = Number(bin_width);
+
+                if (isNaN(from) || isNaN(to) || isNaN(bin_width)) {
+                    throw "Invalid parameters";
+                }
+
                 var recommendation;
 
                 var rawDomain = this._scale.domain();
@@ -109,28 +113,28 @@ define(['underscore', 'lib/d3', 'util/normalize_range'],
                 var recalculate = false;
 
                 //Check to see if we are close to the edge
-                recalculate || (recalculate = this._is_close_to_edge(visibleDomain, interval));
+                recalculate || (recalculate = this._is_close_to_edge(visibleDomain, [from, to]));
 
                 //Check to see if the center is way off
-                var dataCenter = (interval[0] + interval[1]) * 0.5;
+                var dataCenter = (from + to) * 0.5;
                 recalculate || (recalculate = this._is_center_off(visibleDomain, dataCenter));
 
                 //Do we have a sliding update?
                 if (recalculate) {
                     recommendation = this._recalculate(visibleDomain);
-                    if (recommendation.interval[0] !== interval[0] ||
-                        recommendation.interval[1] !== interval[1]) {
+                    if (recommendation.from !== from ||
+                        recommendation.to !== to) {
                         return recommendation;
                     }
                 }
 
                 //Check the number of visible bins to see if we need to load more/less data
-                if (this._is_bin_count_wrong(visibleDomain, binWidth)) {
+                if (this._is_bin_count_wrong(visibleDomain, bin_width)) {
                     recommendation = this._recalculate(visibleDomain);
                     //If it is a bin update, only return if we actually
                     //managed to change the bin width.
                     //This avoids finicky time threshold updates.
-                    if (recommendation.binWidth !== binWidth) {
+                    if (recommendation.bin_width !== bin_width) {
                         return recommendation;
                     }
                 }
