@@ -14,7 +14,7 @@ define(['jquery'], function ($) {
         var $this = $(this);
         var eventName = arguments[0];
         var data = Array.prototype.slice.call(arguments, 1);
-        return $this.trigger(eventName, data);
+        return $this.triggerHandler(eventName, data);
     };
 
     var events = function(Class) {

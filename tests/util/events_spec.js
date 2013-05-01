@@ -17,7 +17,7 @@ define(['jquery', 'util/events'],
                 expect(MyClass.prototype.off).toBeDefined();
             });
 
-            it('allows fires events to listeners', function () {
+            it('fires events to listeners', function () {
                 events(MyClass);
 
                 var foo = new MyClass();
@@ -89,6 +89,20 @@ define(['jquery', 'util/events'],
                 foo.off('asdf');
                 foo.trigger('asdf');
                 expect(callCount).toEqual(2);
-            })
+            });
+
+            it('does not execute a same-named function on the object', function() {
+                events(MyClass);
+
+                var foo = new MyClass();
+
+                foo.asdf = function() {};
+
+                spyOn(foo, 'asdf');
+
+                foo.trigger('asdf');
+
+                expect(foo.asdf).not.toHaveBeenCalled();
+            });
         });
     });
