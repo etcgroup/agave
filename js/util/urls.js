@@ -22,7 +22,9 @@ define(['jquery', 'underscore', 'lib/Uri'], function($, _, Uri) {
      * @param queryIndex
      */
     function parameterName(name, queryIndex) {
-        return PARAMETER_NAME_MAP[name] + queryIndex.toString();
+        if (name in PARAMETER_NAME_MAP) {
+            return PARAMETER_NAME_MAP[name] + queryIndex.toString();
+        }
     }
 
     /**

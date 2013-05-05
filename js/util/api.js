@@ -99,7 +99,7 @@ define(['jquery', 'underscore', 'util/events'], function($, _, events) {
         //Add the request id to the options
         var rid = this.rid_counters[request_name].sent;
 
-        console.log("Sending " + name + ":" + rid);
+        console.log("Sending " + request_name + ":" + rid);
 
         //Issue an AJAX request
         var r = $.ajax({
@@ -111,7 +111,7 @@ define(['jquery', 'underscore', 'util/events'], function($, _, events) {
         var self = this;
         r.done(function(result) {
 
-            console.log("Received " + name + ":" + rid);
+            console.log("Received " + request_name + ":" + rid);
 
             //Make sure the request is more recent than the last one received for this name
             var lastReceived = self.rid_counters[request_name].received;

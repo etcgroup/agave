@@ -89,7 +89,7 @@ define(function (require) {
                 });
 
                 //When the model changes, we need to know
-                query.on('update', $.proxy(self.queryUpdated, self));
+                query.on('change', $.proxy(self.queryUpdated, self));
             });
         };
 
