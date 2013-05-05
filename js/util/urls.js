@@ -28,6 +28,33 @@ define(['jquery', 'underscore', 'lib/Uri'], function($, _, Uri) {
     }
 
     /**
+     * Decode a string for urls.
+     * http://stackoverflow.com/questions/4292914/javascript-url-decode-function
+     * http://phpjs.org/functions/urldecode/
+     *
+     * @param str
+     * @returns {string}
+     */
+    function urldecode(str) {
+        return decodeURIComponent((str+'').replace(/\+/g, '%20'));
+    }
+
+    /**
+     * Encode a string for urls.
+     * http://phpjs.org/functions/urlencode/
+     * @param str
+     * @returns {string}
+     */
+    function urlencode(str) {
+        str = (str + '').toString();
+
+        // Tilde should be allowed unescaped in future versions of PHP (as reflected below), but if you want to reflect current
+        // PHP behavior, you would need to add ".replace(/~/g, '%7E');" to the following.
+        return encodeURIComponent(str).replace(/!/g, '%21').replace(/'/g, '%27').replace(/\(/g, '%28').
+            replace(/\)/g, '%29').replace(/\*/g, '%2A').replace(/%20/g, '+');
+    }
+
+    /**
      * Get the list of query fields supported as URL parameters.
      * @returns {Array}
      */
@@ -53,7 +80,7 @@ define(['jquery', 'underscore', 'lib/Uri'], function($, _, Uri) {
 
         return {
             get: function(name, defaultValue) {
-                var value = parsed.getQueryParamValue(name);
+                var value = urldecode(parsed.getQueryParamValue(name));
                 if (value === undefined) {
                     return defaultValue;
                 }
@@ -64,7 +91,7 @@ define(['jquery', 'underscore', 'lib/Uri'], function($, _, Uri) {
                 //Turn the field name into a URL parameter
                 name = parameterName(name, index);
 
-                var value = parsed.getQueryParamValue(name);
+                var value = urldecode(parsed.getQueryParamValue(name));
                 if (value === undefined) {
                     return defaultValue;
                 }
