@@ -153,7 +153,7 @@ class Queries
             WHERE NOT is_retweet
             AND created_at >= ?
             AND created_at < ?
-            AND retweet_count > ?
+            AND retweet_count >= ?
             ORDER BY created_at
             LIMIT ?"
         );
@@ -167,7 +167,7 @@ class Queries
             WHERE NOT is_retweet
             AND created_at >= ?
             AND created_at < ?
-            AND retweet_count > ?
+            AND retweet_count >= ?
             AND text LIKE ?
             ORDER BY created_at
             LIMIT ?"
@@ -183,7 +183,7 @@ class Queries
             WHERE NOT is_retweet
             AND created_at >= ?
             AND created_at < ?
-            AND retweet_count > ?
+            AND retweet_count >= ?
             ORDER BY retweet_count desc
             LIMIT ?"
         );
@@ -197,7 +197,7 @@ class Queries
             WHERE NOT is_retweet
             AND created_at >= ?
             AND created_at < ?
-            AND retweet_count > ?
+            AND retweet_count >= ?
             AND text LIKE ?
             ORDER BY retweet_count desc
             LIMIT ?"
