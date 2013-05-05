@@ -145,6 +145,9 @@ define(function (require) {
                 api: this.api,
                 queries: this.queries,
                 interval: this.interval,
+                from: this.config.overview_from * 1000,
+                to: this.config.overview_to * 1000,
+                binSize: 30,
                 utcOffset: this.config.utc_offset_millis
             });
 

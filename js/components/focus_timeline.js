@@ -22,6 +22,11 @@ define(['jquery',
             //Call the parent constructor
             Timeline.call(this, options);
 
+            //Store offset time internally
+            var staticExtent = this.extentFromUTC([options.from, options.to]);
+            this.from = staticExtent[0];
+            this.to = staticExtent[1];
+
             //Create a vertical scale
             this._countScale = d3.scale.linear();
 
@@ -50,12 +55,13 @@ define(['jquery',
             function request(query) {
 
                 //TODO: make this actually the right parameters
+                var utcExtent = self.extentToUTC([self.from, self.to]);
 
                 //The interval doesn't need to be translated because it is already in UTC
                 self.api.counts({
                     query_id: query.id(),
-                    from: self.interval.from(),
-                    to: self.interval.to(),
+                    from: utcExtent[0],
+                    to: utcExtent[1],
                     interval: self._binSize * 1000,
                     search: query.search()
                 });
