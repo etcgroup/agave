@@ -11,23 +11,23 @@ define(['util/extend'],
                 //Declare a testing
                 Parent = function() {
                     this.member = parent_default_member;
-                }
+                };
 
                 Parent.prototype.get = function() {
                     return this.member;
-                }
+                };
 
                 Child = function() {
                     Parent.apply(this);
 
                     this.child_member = child_default_member;
-                }
+                };
 
                 extend(Child, Parent);
 
                 Child.prototype.child_get = function() {
                     return this.child_member;
-                }
+                };
             });
 
             it('leaves the parent alone', function() {
@@ -69,7 +69,7 @@ define(['util/extend'],
             it('allows method override', function() {
                 Child.prototype.get = function() {
                     return this.child_member;
-                }
+                };
 
                 var child = new Child();
                 expect(child.get()).toEqual(child_default_member);

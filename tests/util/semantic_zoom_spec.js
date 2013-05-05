@@ -179,11 +179,11 @@ define(['util/semantic_zoom', 'lib/d3'],
 
                 var missingParams2 = function() {
                     zoom.recommend(data[0], data[1]);
-                }
+                };
 
                 var parameterTypes = function() {
                     zoom.recommend(data, data, data);
-                }
+                };
 
                 expect(missingParams1).toThrow();
                 expect(missingParams2).toThrow();

@@ -42,9 +42,9 @@ define(['util/urls'],
                     foo: 'bar'
                 };
                 var queryData = {};
-                queryData[queryField] = '536'
+                queryData[queryField] = '536';
 
-                var url = urls.make_url(parameters, [queryData])
+                var url = urls.make_url(parameters, [queryData]);
 
                 var parser = urls.parse(url);
 

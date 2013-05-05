@@ -21,6 +21,6 @@ define(['util/transform'],
                 t.and('rotate', 25);
 
                 expect(t.toString()).toEqual('scale(1,2),rotate(25)');
-            })
+            });
         });
     });

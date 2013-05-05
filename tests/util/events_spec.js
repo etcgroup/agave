@@ -68,7 +68,7 @@ define(['jquery', 'util/events'],
                 var callCount = 0;
                 var callback = function () {
                     callCount++;
-                }
+                };
 
 
                 foo.on('asdf', callback);
