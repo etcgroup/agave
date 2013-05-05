@@ -10,6 +10,7 @@ define(function (require) {
         var TweetTimeline = require('components/tweet_timeline');
         var TweetList = require('components/tweet_list');
         var OverviewTimeline = require('components/overview_timeline');
+        var FocusTimeline = require('components/focus_timeline');
         var API = require('util/api');
 
         /**
@@ -120,6 +121,12 @@ define(function (require) {
                 utcOffset: this.config.utc_offset_millis
             });
 
+            var self = this;
+            this.overviewTimeline.on('selection-change', function(e, extent) {
+                self.focusTimeline.domain(extent);
+                self.focusTimeline.update();
+            });
+
             this.overviewTimeline.render();
         };
 
@@ -127,7 +134,17 @@ define(function (require) {
          * Set up the larger focus timeline visualization.
          */
         App.prototype.initFocusTimeline = function () {
-//            this.ui.focusTimeline = $('#tweet-timeline');
+            this.ui.focusTimeline = $('#tweet-timeline');
+
+            this.focusTimeline = new FocusTimeline({
+                into: this.ui.focusTimeline,
+                api: this.api,
+                queries: this.queries,
+                interval: this.interval,
+                utcOffset: this.config.utc_offset_millis
+            });
+
+            this.focusTimeline.render();
 //
 //            this.focusTimeline = new TweetTimeline();
 //

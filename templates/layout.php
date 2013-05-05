@@ -16,7 +16,6 @@
                     <?php echo query_box('Series 2') ?>
                 </div>
                 <div id="tweet-timeline">
-                    focus
                 </div>
                 <div id="tweet-overview">
                 </div>

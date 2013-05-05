@@ -2,11 +2,7 @@
 /**
  * overview_counts.php returns the simple number of tweets over time within a time range.
  *
- * Tweets are binned by time and the count of positive, negative, and neutral
- * tweets in each time bin is returned.
- *
- * A minimum retweet-count threshold is provided. Tweets will only be counted
- * if they exceed this threshold, filtering out noisey tweets.
+ * Tweets are binned by time.
  */
 
 

@@ -101,6 +101,8 @@ define(['jquery',
 
         this._renderTimeAxis();
         this._renderHistogram();
+
+        this._requestData();
     };
 
     /**
@@ -112,6 +114,14 @@ define(['jquery',
 
         this._updateTimeAxis();
         this._updateHistogram();
+    };
+
+    /**
+     * Request some data for this histogram
+     * @private
+     */
+    Timeline.prototype._requestData = function() {
+        //Meant to be overridden
     };
 
     /**

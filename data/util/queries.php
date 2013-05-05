@@ -261,6 +261,7 @@ class Queries {
      * @param DateTime $stop_datetime
      * @param int $group_seconds
      * @param int $noise_threshold The minimum retweet count to be returned.
+     * @param string $text_search
      * @return mysqli_result
      */
     public function get_grouped_originals($start_datetime, $stop_datetime, $group_seconds, $noise_threshold, $text_search = NULL)
@@ -331,6 +332,7 @@ class Queries {
      * @param DateTime $start_datetime
      * @param DateTime $stop_datetime
      * @param int $group_seconds
+     * @param string $text_search
      * @return mysqli_result
      */
     public function get_grouped_retweets($start_datetime, $stop_datetime, $group_seconds, $text_search = NULL)
@@ -548,6 +550,78 @@ class Queries {
         $result = $this->run('grouped_counts', 'sisiss', $start_datetime,
             $group_seconds, $start_datetime, $group_seconds,
             $start_datetime, $stop_datetime);
+        return $result;
+    }
+
+    private function _build_grouped_counts_filtered()
+    {
+        $this->queries->grouped_counts_filtered = $this->db->prepare(
+            "SELECT UNIX_TIMESTAMP(?) + ? * FLOOR((UNIX_TIMESTAMP(created_at)-UNIX_TIMESTAMP(?)) / ?) AS binned_time,
+                COUNT(*) as count,
+                SUM(IF(sentiment=1,1,0)) AS positive,
+                SUM(IF(sentiment=0,1,0)) AS neutral,
+                SUM(IF(sentiment=-1,1,0)) AS negative
+            FROM tweets
+            WHERE created_at >= ?
+            AND created_at < ?
+            GROUP BY binned_time
+            ORDER BY binned_time"
+        );
+
+        if (!$this->queries->grouped_counts_filtered)
+        {
+            echo "Prepare grouped_counts_filtered failed: (" . $this->db->errno . ") " . $this->db->error;
+        }
+
+        $this->queries->grouped_counts_filtered_like = $this->db->prepare(
+            "SELECT UNIX_TIMESTAMP(?) + ? * FLOOR((UNIX_TIMESTAMP(created_at)-UNIX_TIMESTAMP(?)) / ?) AS binned_time,
+                COUNT(*) as count,
+                SUM(IF(sentiment=1,1,0)) AS positive,
+                SUM(IF(sentiment=0,1,0)) AS neutral,
+                SUM(IF(sentiment=-1,1,0)) AS negative
+            FROM tweets
+            WHERE created_at >= ?
+            AND created_at < ?
+            AND text LIKE ?
+            GROUP BY binned_time
+            ORDER BY binned_time"
+        );
+
+        if (!$this->queries->grouped_counts_filtered_like)
+        {
+            echo "Prepare grouped_counts_filtered_like failed: (" . $this->db->errno . ") " . $this->db->error;
+        }
+    }
+
+    /**
+     * Counts tweets in the specified interval, grouped by time. Returns a MySQLi result set object.
+     *
+     * @param DateTime $start_datetime
+     * @param DateTime $stop_datetime
+     * @param int $group_seconds
+     * @param string $text_search
+     * @return mysqli_result
+     */
+    public function get_grouped_counts_filtered($start_datetime, $stop_datetime, $group_seconds, $text_search = NULL)
+    {
+        $start_datetime = $start_datetime->format('Y-m-d H:i:s');
+        $stop_datetime = $stop_datetime->format('Y-m-d H:i:s');
+
+        if ($text_search === NULL)
+        {
+            $result = $this->run('grouped_counts_filtered', 'sisiss',
+                $start_datetime, $group_seconds, $start_datetime,
+                $group_seconds, $start_datetime, $stop_datetime);
+        }
+        else
+        {
+            $search = "%$text_search%";
+            $result = $this->run('grouped_counts_filtered_like', 'sisisss',
+                $start_datetime, $group_seconds, $start_datetime,
+                $group_seconds, $start_datetime, $stop_datetime,
+                $search);
+        }
+
         return $result;
     }
 }

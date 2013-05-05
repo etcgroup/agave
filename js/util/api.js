@@ -30,12 +30,6 @@ define(['jquery', 'underscore', 'util/events'], function($, _, events) {
         for (var name in URLS) {
             //Initialize the local URLS dictionary
             this.urls[name] = URLS[name];
-
-            //Initialize the request id counters
-            this.rid_counters[name] = {
-                sent: 0,
-                received: 0
-            };
         }
     };
 
@@ -47,11 +41,6 @@ define(['jquery', 'underscore', 'util/events'], function($, _, events) {
      * @param [method] an optional shorthand method to add to the API object
      */
     API.prototype.register = function(name, url, method) {
-        this.rid_counters[name] = {
-            sent: 0,
-            received: 0
-        };
-
         this.urls[name] = url;
 
         if (method) {
@@ -60,11 +49,19 @@ define(['jquery', 'underscore', 'util/events'], function($, _, events) {
     };
 
     API.prototype.get_last_rid_sent = function(name){
-        return this.rid_counters[name].sent;
+        if (name in this.rid_counters) {
+            return this.rid_counters[name].sent;
+        } else {
+            return 0;
+        }
     };
 
     API.prototype.get_last_rid_received = function(name){
-        return this.rid_counters[name].received;
+        if (name in this.rid_counters) {
+            return this.rid_counters[name].received;
+        } else {
+            return 0;
+        }
     };
 
     /**
@@ -74,6 +71,7 @@ define(['jquery', 'underscore', 'util/events'], function($, _, events) {
      * The optional parameters argument can include:
      * - params: an object containing the request parameters.
      * - post_process: a function to post-process the results before distribution
+     * - request_name: use this to override the name used to track requests
      *
      * @param method 'get', 'post'
      * @param name the API url name
@@ -85,12 +83,23 @@ define(['jquery', 'underscore', 'util/events'], function($, _, events) {
 
         var params = parameters.params || {};
         var post_process = parameters.post_process;
+        var request_name = parameters.request_name || name;
+
+        //Check if rid is initialized
+        if (!this.rid_counters[request_name]) {
+            this.rid_counters[request_name] = {
+                sent: 0,
+                received: 0
+            };
+        }
 
         //Make a new request id
-        this.rid_counters[name].sent++;
+        this.rid_counters[request_name].sent++;
 
         //Add the request id to the options
-        var rid = this.rid_counters[name].sent;
+        var rid = this.rid_counters[request_name].sent;
+
+        console.log("Sending " + name + ":" + rid);
 
         //Issue an AJAX request
         var r = $.ajax({
@@ -105,13 +114,13 @@ define(['jquery', 'underscore', 'util/events'], function($, _, events) {
             console.log("Received " + name + ":" + rid);
 
             //Make sure the request is more recent than the last one received for this name
-            var lastReceived = self.rid_counters[name].received;
+            var lastReceived = self.rid_counters[request_name].received;
             if (lastReceived >= rid) {
                 return;
             }
 
             //This is the last one received for this name
-            self.rid_counters[name].received = rid;
+            self.rid_counters[request_name].received = rid;
 
             //Push the params through a post processing step, if provided
             if (post_process) {
@@ -137,12 +146,15 @@ define(['jquery', 'underscore', 'util/events'], function($, _, events) {
      * @param parameters
      */
     API.prototype.counts = function(parameters) {
+        var queryId = parameters.query_id;
         this.request('get', 'counts', {
             params: parameters,
             post_process: function (results) {
                 //Post-processing is just extracting the payload
                 return results.payload;
-            }
+            },
+            //Have to make sure requests for different queries don't get crossed
+            request_name: 'counts-' + queryId
         });
     };
 

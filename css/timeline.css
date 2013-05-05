@@ -13,6 +13,10 @@
     fill: steelblue;
 }
 
+.focus .area {
+    opacity: 0.5;
+}
+
 .spark {
     stroke: #000;
 

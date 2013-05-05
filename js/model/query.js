@@ -50,6 +50,13 @@ define(['underscore', 'util/events', 'util/functions'], function (_, events, fun
     Query.prototype.set = functions.evented_setter('data');
 
     /**
+     * Get 'id' value.
+     */
+    Query.prototype.id = function() {
+        return this.data.id;
+    };
+
+    /**
      * Get or set the 'search' value.
      *
      * @param search

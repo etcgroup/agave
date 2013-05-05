@@ -62,6 +62,7 @@ define(['jquery',
             //Call through to parent method
             Timeline.prototype._onData.call(this, data);
 
+            this.trigger('selection-change', this._timeScale.domain());
         };
 
         /**
@@ -72,9 +73,6 @@ define(['jquery',
             Timeline.prototype.render.call(this);
 
             this._renderBrush();
-
-            //Get some data!
-            this._requestData();
         };
 
         /**
