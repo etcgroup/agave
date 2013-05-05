@@ -76,3 +76,9 @@
     -o-transform: rotate(90deg);
     transform: rotate(90deg);
 }
+
+.brush .extent {
+    stroke: #fff;
+    fill-opacity: .125;
+    shape-rendering: crispEdges;
+}

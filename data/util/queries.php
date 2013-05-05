@@ -489,6 +489,7 @@ class Queries {
      * @param DateTime $stop_datetime
      * @param int $group_seconds The bin size in seconds
      * @param int $noise_threshold The maximum retweet count to return.
+     * @param string $text_search Optional text search
      * @return mysqli_result
      */
     public function get_grouped_noise($start_datetime, $stop_datetime, $group_seconds, $noise_threshold, $text_search = NULL)
@@ -514,6 +515,41 @@ class Queries {
         return $result;
     }
 
+    private function _build_grouped_counts()
+    {
+        $this->queries->grouped_counts = $this->db->prepare(
+            "SELECT UNIX_TIMESTAMP(?) + ? * FLOOR((UNIX_TIMESTAMP(created_at)-UNIX_TIMESTAMP(?)) / ?) AS binned_time,
+                COUNT(*) as count
+            FROM tweets
+            WHERE created_at >= ?
+            AND created_at < ?
+            GROUP BY binned_time
+            ORDER BY binned_time"
+        );
+        if (!$this->queries->grouped_counts)
+        {
+            echo "Prepare grouped_tweets failed: (" . $this->db->errno . ") " . $this->db->error;
+        }
+    }
+
+    /**
+     * Count tweets in the specified interval. Returns a MySQLi result set object.
+     *
+     * @param DateTime $start_datetime
+     * @param DateTime $stop_datetime
+     * @param int $group_seconds The bin size in seconds
+     * @return mysqli_result
+     */
+    public function get_grouped_counts($start_datetime, $stop_datetime, $group_seconds)
+    {
+        $start_datetime = $start_datetime->format('Y-m-d H:i:s');
+        $stop_datetime = $stop_datetime->format('Y-m-d H:i:s');
+
+        $result = $this->run('grouped_counts', 'sisiss', $start_datetime,
+            $group_seconds, $start_datetime, $group_seconds,
+            $start_datetime, $stop_datetime);
+        return $result;
+    }
 }
 
 /**

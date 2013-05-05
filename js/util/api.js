@@ -4,7 +4,8 @@ define(['jquery', 'underscore', 'util/events'], function($, _, events) {
      * A map from API request names to urls.
      */
     var URLS = {
-        'counts': 'data/counts.php'
+        'counts': 'data/counts.php',
+        'overview_counts': 'data/overview_counts.php'
     };
 
     /**
@@ -101,6 +102,8 @@ define(['jquery', 'underscore', 'util/events'], function($, _, events) {
         var self = this;
         r.done(function(result) {
 
+            console.log("Received " + name + ":" + rid);
+
             //Make sure the request is more recent than the last one received for this name
             var lastReceived = self.rid_counters[name].received;
             if (lastReceived >= rid) {
@@ -138,6 +141,21 @@ define(['jquery', 'underscore', 'util/events'], function($, _, events) {
             params: parameters,
             post_process: function (results) {
                 //Post-processing is just extracting the payload
+                return results.payload;
+            }
+        });
+    };
+
+    /**
+     * Request tweet counts. Subscribe to the overview_counts event
+     * to receive the data when it arrives.
+     *
+     * @param parameters
+     */
+    API.prototype.overview_counts = function(parameters) {
+        this.request('get', 'overview_counts', {
+            params: parameters,
+            post_process: function(results) {
                 return results.payload;
             }
         });

@@ -16,6 +16,9 @@ define(['lib/d3', 'underscore',
                 height: 200
             });
 
+            //Whether or not the vertical baseline is auto scaled or fixed at 0
+            this._autoBaseline = false;
+
             //Optional classname to add to the histogram container
             this._className = "";
 
@@ -69,7 +72,7 @@ define(['lib/d3', 'underscore',
                 //Set the y domain based on the current data
                 var data = this.data();
                 if (data) {
-                    this.yScaleDomainAuto(data);
+                    this.yScaleDomainAuto(data, this._autoBaseline);
                 }
 
                 //Update the area baseline with any changes to the y scale.
@@ -157,8 +160,12 @@ define(['lib/d3', 'underscore',
             /**
              * Auto size the y scale domain to the data.
              */
-            yScaleDomainAuto: function(data) {
-                this._yScale.domain(d3.extent(data, this._yAccessor));
+            yScaleDomainAuto: function(data, autoBaseline) {
+                if (!autoBaseline) {
+                    this._yScale.domain([0, d3.max(data, this._yAccessor)]);
+                } else {
+                    this._yScale.domain(d3.extent(data, this._yAccessor));
+                }
                 return this;
             }
         });

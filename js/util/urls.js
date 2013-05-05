@@ -79,11 +79,10 @@ define(['jquery', 'underscore', 'lib/Uri'], function($, _, Uri) {
      * If index is provided, it will be used to specialize the key urls.
      *
      * @param queryData
-     * @param index
      * @returns {{}}
      */
-    function prepareQueryData(queryData, index) {
-        index = index || 0;
+    function prepareQueryData(queryData) {
+        var id = queryData.id || 0;
 
         var result = {};
 
@@ -92,7 +91,7 @@ define(['jquery', 'underscore', 'lib/Uri'], function($, _, Uri) {
                 value = value ? '1' : '';
             }
 
-            key = parameterName(key, index);
+            key = parameterName(key, id);
 
             //Only set the result if the key was valid
             if (key) {
@@ -115,7 +114,7 @@ define(['jquery', 'underscore', 'lib/Uri'], function($, _, Uri) {
         queries = queries || [];
 
         queries.forEach(function(query, index) {
-            query = prepareQueryData(query, index);
+            query = prepareQueryData(query);
 
             _.extend(parameters, query);
         });

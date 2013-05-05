@@ -9,6 +9,8 @@ define(function (require) {
         var QueryControls = require('components/query_controls');
         var TweetTimeline = require('components/tweet_timeline');
         var TweetList = require('components/tweet_list');
+        var OverviewTimeline = require('components/overview_timeline');
+        var API = require('util/api');
 
         /**
          * This class orchestrates the overall setup of the application.
@@ -23,6 +25,8 @@ define(function (require) {
          * Start the application.
          */
         App.prototype.start = function () {
+            this.api = new API();
+
             this.initUI();
             this.initQueries();
 
@@ -58,15 +62,17 @@ define(function (require) {
             //One query model per query control
             var self = this;
             this.ui.queryPanel.find('.query').each(function (index) {
+                var id = index;
 
                 //Build a new query model from the URL
                 var query = new Query({
-                    view: params.get_at('view', index, null),
-                    search: params.get_at('search', index, null),
-                    author: params.get_at('author', index, null),
-                    rt: params.get_at('rt', index, null),
-                    min_rt: params.get_at('min_rt', index, null),
-                    sentiment: params.get_at('sentiment', index, null)
+                    id: id,
+                    view: params.get_at('view', id, null),
+                    search: params.get_at('search', id, null),
+                    author: params.get_at('author', id, null),
+                    rt: params.get_at('rt', id, null),
+                    min_rt: params.get_at('min_rt', id, null),
+                    sentiment: params.get_at('sentiment', id, null)
                 });
 
                 //Save the query in our list
@@ -102,30 +108,43 @@ define(function (require) {
          */
         App.prototype.initContextTimeline = function () {
             this.ui.overviewTimeline = $('#tweet-overview');
+
+            this.overviewTimeline = new OverviewTimeline({
+                into: this.ui.overviewTimeline,
+                api: this.api,
+                queries: this.queries,
+                interval: this.interval,
+                from: this.config.overview_from * 1000,
+                to: this.config.overview_to * 1000,
+                binSize: this.config.overview_bin_size * 1000,
+                utcOffset: this.config.utc_offset_millis
+            });
+
+            this.overviewTimeline.render();
         };
 
         /**
          * Set up the larger focus timeline visualization.
          */
         App.prototype.initFocusTimeline = function () {
-            this.ui.focusTimeline = $('#tweet-timeline');
-
-            this.focusTimeline = new TweetTimeline();
-
-            var self = this;
-
-            this.focusTimeline.width(this.ui.focusTimeline.width())
-                .height(this.ui.focusTimeline.height())
-                .retweetHeight(70)
-                .noiseHeight(70)
-                .utcOffsetMillis(this.config.utc_offset_millis)
-                .idealBinCount(200)
-                .timeExtent([this.interval.from(), this.interval.to()])
-                .onZoomChanged($.proxy(self.zoomChanged, self));
-
-            //Set the container and render
-            this.focusTimeline.container(this.ui.focusTimeline.selector)
-                .render();
+//            this.ui.focusTimeline = $('#tweet-timeline');
+//
+//            this.focusTimeline = new TweetTimeline();
+//
+//            var self = this;
+//
+//            this.focusTimeline.width(this.ui.focusTimeline.width())
+//                .height(this.ui.focusTimeline.height())
+//                .retweetHeight(70)
+//                .noiseHeight(70)
+//                .utcOffsetMillis(this.config.utc_offset_millis)
+//                .idealBinCount(200)
+//                .timeExtent([this.interval.from(), this.interval.to()])
+//                .onZoomChanged($.proxy(self.zoomChanged, self));
+//
+//            //Set the container and render
+//            this.focusTimeline.container(this.ui.focusTimeline.selector)
+//                .render();
         };
 
         /**
@@ -147,10 +166,10 @@ define(function (require) {
         App.prototype.windowResize = function () {
             var self = this;
             $(window).on('resize', function () {
-                self.focusTimeline
-                    .width(self.ui.focusTimeline.width())
-                    .height(self.ui.focusTimeline.height())
-                    .update();
+//                self.focusTimeline
+//                    .width(self.ui.focusTimeline.width())
+//                    .height(self.ui.focusTimeline.height())
+//                    .update();
             });
         };
 

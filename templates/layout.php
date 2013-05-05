@@ -19,7 +19,6 @@
                     focus
                 </div>
                 <div id="tweet-overview">
-                    context
                 </div>
 
                 <div id="explorer-details" class="clearfix">
