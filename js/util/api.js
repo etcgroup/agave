@@ -99,7 +99,7 @@ define(['jquery', 'underscore', 'util/events'], function($, _, events) {
         //Add the request id to the options
         var rid = this.rid_counters[request_name].sent;
 
-        console.log("Sending " + request_name + ":" + rid);
+        console.log("Sending " + request_name + ":" + rid, params);
 
         //Issue an AJAX request
         var r = $.ajax({
