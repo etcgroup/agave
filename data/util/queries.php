@@ -147,22 +147,16 @@ class Queries
 
     private function _build_originals()
     {
-        $this->queries->originals = $this->db->prepare(
-            "SELECT *
+        $base_query = "SELECT *
             FROM tweets
             WHERE NOT is_retweet
             AND created_at >= ?
             AND created_at < ?
             AND retweet_count >= ?
-            ORDER BY created_at
-            LIMIT ?"
-        );
-        if (!$this->queries->originals) {
-            echo "Prepare originals failed: (" . $this->db->errno . ") " . $this->db->error;
-        }
+            ORDER BY %s
+            LIMIT ?";
 
-        $this->queries->originals_like = $this->db->prepare(
-            "SELECT *
+        $base_query_like = "SELECT *
             FROM tweets
             WHERE NOT is_retweet
             AND created_at >= ?
@@ -170,7 +164,18 @@ class Queries
             AND retweet_count >= ?
             AND text LIKE ?
             ORDER BY created_at
-            LIMIT ?"
+            LIMIT ?";
+
+
+        $this->queries->originals = $this->db->prepare(
+            sprintf($base_query, 'created_at')
+        );
+        if (!$this->queries->originals) {
+            echo "Prepare originals failed: (" . $this->db->errno . ") " . $this->db->error;
+        }
+
+        $this->queries->originals_like = $this->db->prepare(
+            sprintf($base_query_like, 'created_at')  
         );
         if (!$this->queries->originals_like) {
             echo "Prepare originals_like failed: (" . $this->db->errno . ") " . $this->db->error;
@@ -178,29 +183,14 @@ class Queries
 
         /* sorted by retweet count */
         $this->queries->originals_orderby_retweet = $this->db->prepare(
-            "SELECT *
-            FROM tweets
-            WHERE NOT is_retweet
-            AND created_at >= ?
-            AND created_at < ?
-            AND retweet_count >= ?
-            ORDER BY retweet_count desc
-            LIMIT ?"
+            sprintf($base_query, 'retweet_count')
         );
         if (!$this->queries->originals_orderby_retweet) {
             echo "Prepare originals failed: (" . $this->db->errno . ") " . $this->db->error;
         }
 
         $this->queries->originals_like_orderby_retweet = $this->db->prepare(
-            "SELECT *
-            FROM tweets
-            WHERE NOT is_retweet
-            AND created_at >= ?
-            AND created_at < ?
-            AND retweet_count >= ?
-            AND text LIKE ?
-            ORDER BY retweet_count desc
-            LIMIT ?"
+            sprintf($base_query_like, 'retweet_count');
         );
         if (!$this->queries->originals_like_orderby_retweet) {
             echo "Prepare originals_like failed: (" . $this->db->errno . ") " . $this->db->error;
