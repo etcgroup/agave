@@ -175,7 +175,39 @@ class Queries
         if (!$this->queries->originals_like) {
             echo "Prepare originals_like failed: (" . $this->db->errno . ") " . $this->db->error;
         }
+
+        /* sorted by retweet count */
+        $this->queries->originals_orderby_retweet = $this->db->prepare(
+            "SELECT *
+            FROM tweets
+            WHERE NOT is_retweet
+            AND created_at >= ?
+            AND created_at < ?
+            AND retweet_count > ?
+            ORDER BY retweet_count desc
+            LIMIT ?"
+        );
+        if (!$this->queries->originals) {
+            echo "Prepare originals failed: (" . $this->db->errno . ") " . $this->db->error;
+        }
+
+        $this->queries->originals_like_orderby_retweet = $this->db->prepare(
+            "SELECT *
+            FROM tweets
+            WHERE NOT is_retweet
+            AND created_at >= ?
+            AND created_at < ?
+            AND retweet_count > ?
+            AND text LIKE ?
+            ORDER BY retweet_count desc
+            LIMIT ?"
+        );
+        if (!$this->queries->originals_like) {
+            echo "Prepare originals_like failed: (" . $this->db->errno . ") " . $this->db->error;
+        }
+
     }
+
 
     /**
      * Gets tweets in the specified interval. Returns a MySQLi result set object.
@@ -186,17 +218,27 @@ class Queries
      *
      * @return mysqli_result
      */
-    public function get_originals($start_datetime, $stop_datetime, $limit, $noise_threshold, $text_search = NULL)
+    public function get_originals($start_datetime, $stop_datetime, $limit, $noise_threshold, $text_search = NULL, $sort = NULL)
     {
         $start_datetime = $start_datetime->format('Y-m-d H:i:s');
         $stop_datetime = $stop_datetime->format('Y-m-d H:i:s');
 
+
+
         if ($text_search === NULL) {
-            $result = $this->run('originals', 'ssii', $start_datetime,
+            $query_name = 'originals';
+            if($sort == 'retweet_count') {
+                $query_name .= '_orderby_retweet';
+            }
+            $result = $this->run($query_name, 'ssii', $start_datetime,
                 $stop_datetime, $noise_threshold, $limit);
         } else {
+            $query_name = 'originals_like';
+            if($sort == 'retweet_count') {
+                $query_name .= '_orderby_retweet';
+            }
             $search = "%$text_search%";
-            $result = $this->run('originals_like', 'ssisi', $start_datetime,
+            $result = $this->run($query_name, 'ssisi', $start_datetime,
                 $stop_datetime, $noise_threshold, $search, $limit);
         }
         return $result;

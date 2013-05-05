@@ -18,7 +18,7 @@ $db = $request->db();
  * Required parameters: grouped time parameters (from, to, interval) and limit.
  * Optional: noise_threshold and search.
  */
-$params = $request->get(array('limit'), array('noise_threshold', 'search'));
+$params = $request->get(array('limit'), array('noise_threshold', 'search', 'sort'));
 $timeParams = $request->timeParameters();
 
 $from = $timeParams->from;
@@ -26,13 +26,14 @@ $to = $timeParams->to;
 $limit = $params->limit;
 $noise_threshold = $params->noise_threshold;
 $search = $params->search;
+$sort = $params->sort;
 if ($noise_threshold === NULL)
 {
     //Default noise threshold of 0
     $noise_threshold = 0;
 }
 
-$result = $db->get_originals($from, $to, $limit, $noise_threshold, $search);
+$result = $db->get_originals($from, $to, $limit, $noise_threshold, $search, $sort);
 
 $perf->start('processing');
 
