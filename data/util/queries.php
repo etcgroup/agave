@@ -187,7 +187,7 @@ class Queries
             ORDER BY retweet_count desc
             LIMIT ?"
         );
-        if (!$this->queries->originals) {
+        if (!$this->queries->originals_orderby_retweet) {
             echo "Prepare originals failed: (" . $this->db->errno . ") " . $this->db->error;
         }
 
@@ -202,7 +202,7 @@ class Queries
             ORDER BY retweet_count desc
             LIMIT ?"
         );
-        if (!$this->queries->originals_like) {
+        if (!$this->queries->originals_like_orderby_retweet) {
             echo "Prepare originals_like failed: (" . $this->db->errno . ") " . $this->db->error;
         }
 
