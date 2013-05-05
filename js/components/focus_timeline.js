@@ -48,7 +48,10 @@ define(['jquery',
 
             //Helper to request the data for a query
             function request(query) {
+
                 //TODO: make this actually the right parameters
+
+                //The interval doesn't need to be translated because it is already in UTC
                 self.api.counts({
                     query_id: query.id(),
                     from: self.interval.from(),
@@ -72,7 +75,8 @@ define(['jquery',
          * @param domain
          */
         FocusTimeline.prototype.domain = function(domain) {
-            this._timeScale.domain(domain);
+            //don't forget to translate from utc to translated time
+            this._timeScale.domain(this.extentFromUTC(domain));
         };
 
         FocusTimeline.prototype.render = function() {
@@ -199,13 +203,13 @@ define(['jquery',
          * @param field
          * @private
          */
-        FocusTimeline.prototype._onIntervalChanged = function (e, interval, field) {
-            //Call the parent method
-            Timeline.prototype._onIntervalChanged.call(this, interval, field);
-
-            //Get new data
-            this._requestData();
-        };
+//        FocusTimeline.prototype._onIntervalChanged = function (e, interval, field) {
+//            //Call the parent method
+//            Timeline.prototype._onIntervalChanged.call(this, interval, field);
+//
+//            //Get new data
+//            this._requestData();
+//        };
 
         /**
          * When the query changes, request some new data.

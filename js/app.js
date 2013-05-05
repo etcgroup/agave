@@ -31,8 +31,8 @@ define(function (require) {
             this.initUI();
             this.initQueries();
 
-            this.initContextTimeline();
             this.initFocusTimeline();
+            this.initContextTimeline();
 
             this.initTweetList();
             this.initDetailsPanel();
@@ -127,6 +127,10 @@ define(function (require) {
                 self.focusTimeline.update();
             });
 
+            this.overviewTimeline.on('selection-end', function(e, extent) {
+                self.selectionChanged(extent);
+            });
+
             this.overviewTimeline.render();
         };
 
@@ -157,7 +161,7 @@ define(function (require) {
 //                .utcOffsetMillis(this.config.utc_offset_millis)
 //                .idealBinCount(200)
 //                .timeExtent([this.interval.from(), this.interval.to()])
-//                .onZoomChanged($.proxy(self.zoomChanged, self));
+//                .onZoomChanged($.proxy(self.selectionChanged, self));
 //
 //            //Set the container and render
 //            this.focusTimeline.container(this.ui.focusTimeline.selector)
@@ -196,7 +200,7 @@ define(function (require) {
         App.prototype.updateUrl = function () {
             //Get the basic parameters
             var params = {
-                from: Math.round(this.interval.from() / 1000),
+                from: Math.round(this.interval.from() / 1000) ,
                 to: Math.round(this.interval.to() / 1000)
             };
 
@@ -216,7 +220,7 @@ define(function (require) {
             this.updateUrl();
         };
 
-        App.prototype.zoomChanged = function (extent) {
+        App.prototype.selectionChanged = function (extent) {
             //When the timeline zoom/pan changes, we need to update the query object
             this.interval.from(extent[0]);
             this.interval.to(extent[1]);

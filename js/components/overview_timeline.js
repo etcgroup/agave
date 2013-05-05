@@ -20,11 +20,32 @@ define(['jquery',
             //Call the parent constructor
             Timeline.call(this, options);
 
-            this.from = options.from;
-            this.to = options.to;
+            //Store offset time internally
+            var staticExtent = this.extentFromUTC([options.from, options.to]);
+            this.from = staticExtent[0];
+            this.to = staticExtent[1];
+
+            //Set up the x axis domain, which stays constant, in offset time
+            this._timeScale.domain(staticExtent);
 
             //Subscribe to a data stream from the API.
             this.api.on('overview_counts', $.proxy(this._onData, this));
+        };
+
+        /**
+         * Called when the interval model changes.
+         *
+         * @param e Event
+         * @param interval
+         * @param field
+         * @private
+         */
+        OverviewTimeline.prototype._onIntervalChanged = function (e, interval, field) {
+            //Call the parent method
+            Timeline.prototype._onIntervalChanged.call(this, interval, field);
+
+            //Move the brush
+            this._brush.extent(this.extentFromUtc([interval.from(), interval.to()]));
         };
 
         //The overview extends the basic timeline
@@ -35,9 +56,13 @@ define(['jquery',
          * @private
          */
         OverviewTimeline.prototype._requestData = function () {
+
+            var utcExtent = this.extentToUTC([this.from, this.to]);
+
+            //Remember to subtract the UTC offset before sending out times
             this.api.overview_counts({
-                from: this.from,
-                to: this.to,
+                from: utcExtent[0],
+                to: utcExtent[1],
                 interval: this._binSize
             });
         };
@@ -56,13 +81,8 @@ define(['jquery',
             //Bind the data to the histogram first
             this._histogram.data(data);
 
-            //Scale the x axes to the data
-            this._histogram.xScaleDomainAuto(data);
-
             //Call through to parent method
             Timeline.prototype._onData.call(this, data);
-
-            this.trigger('selection-change', this._timeScale.domain());
         };
 
         /**
@@ -93,7 +113,15 @@ define(['jquery',
             //Set up the brush
             this._brush = d3.svg.brush()
                 .x(this._timeScale)
-                .on("brush", $.proxy(this._onBrushChange, this));
+                .on("brush", $.proxy(this._onBrushChange, this))
+                .on("brushend", $.proxy(this._onBrushEnd, this))
+
+            //Check if there is a selection
+            var selectionInterval = this.extentFromUTC([this.interval.from(), this.interval.to()]);
+            var staticDomain = [this.from, this.to];
+            if (!_.isEqual(staticDomain, selectionInterval)) {
+                this._brush.extent(selectionInterval);
+            }
 
             //Make DOM elements for the brush
             this._svg.append("g")
@@ -103,6 +131,9 @@ define(['jquery',
                 .attr("y", -6);
 
             this._updateBrush();
+
+            //Simulate a brush change to kick things off
+            this._onBrushChange();
         };
 
         /**
@@ -125,9 +156,18 @@ define(['jquery',
         OverviewTimeline.prototype._onBrushChange = function () {
             if (!this._brush.empty()) {
 
-                //Just let 'em know
-                this.trigger('selection-change', this._brush.extent());
+                //Convert to utc
+                this.trigger('selection-change', this.extentToUTC(this._brush.extent()));
+            } else {
+                //Notify the outside about our selection (in utc time)
+                var utcSelection = this.extentToUTC([this.from, this.to]);
+                this.trigger('selection-change', utcSelection);
             }
+        };
+
+        OverviewTimeline.prototype._onBrushEnd = function() {
+            //convert to utc
+            this.trigger('selection-end', this.extentToUTC(this._brush.extent()));
         };
 
         return OverviewTimeline;

@@ -36,6 +36,9 @@ define(['jquery', 'underscore', 'lib/Uri'], function($, _, Uri) {
      * @returns {string}
      */
     function urldecode(str) {
+        if (!str) {
+            return str;
+        }
         return decodeURIComponent((str+'').replace(/\+/g, '%20'));
     }
 
@@ -46,6 +49,10 @@ define(['jquery', 'underscore', 'lib/Uri'], function($, _, Uri) {
      * @returns {string}
      */
     function urlencode(str) {
+        if (!str) {
+            return str;
+        }
+
         str = (str + '').toString();
 
         // Tilde should be allowed unescaped in future versions of PHP (as reflected below), but if you want to reflect current

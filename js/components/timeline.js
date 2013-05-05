@@ -226,10 +226,35 @@ define(['jquery',
     Timeline.prototype._renderTimeAxis = function () {
         //Add an x axis
         this._svg.append('g')
-            .classed('x axis chart-label', true)
-            .style('opacity', 0); //starts faded out
+            .classed('x axis chart-label', true);
 
         this._updateTimeAxis();
+    };
+
+    /**
+     * Translate from offset time into real, external UTC time.
+     *
+     * @param extent
+     * @returns {Array}
+     */
+    Timeline.prototype.extentToUTC = function(extent) {
+        return [
+            extent[0] - this._utcOffset,
+            extent[1] - this._utcOffset
+        ]
+    };
+
+    /**
+     * Translate from real, external UTC time into offset time.
+     *
+     * @param extent
+     * @returns {Array}
+     */
+    Timeline.prototype.extentFromUTC = function(extent) {
+        return [
+            extent[0] + this._utcOffset,
+            extent[1] + this._utcOffset
+        ]
     };
 
     /**
@@ -265,11 +290,6 @@ define(['jquery',
         //Update the timeline
         this._updateHistogram();
         this._updateTimeAxis();
-
-        //Make sure the axis is visible
-        this._svg.select('g.x.axis.chart-label')
-            .transition()
-            .style('opacity', 1); //fade it in
     };
 
     Timeline.prototype._updateHistogram = function () {
