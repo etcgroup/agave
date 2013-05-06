@@ -1,10 +1,16 @@
+#query1-details ul {
+	margin: 0px;
+}
+#explorer-details > div > .tab-content {
+	height: 300px;
+}
 #tweet-list ul {
 	height: 300px;
 	width: 100%;
 	overflow-y: auto;
-	background: #fff;
 	list-style-type: none;
 	margin: 0;
+	background: #fff;
 }
 
 #tweet-list .tweet {
@@ -34,4 +40,8 @@
 	width: 20%;
 	float: left;
 	text-align: right;
+}
+
+.tab-content {
+	
 }
