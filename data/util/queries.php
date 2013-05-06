@@ -190,7 +190,7 @@ class Queries
         }
 
         $this->queries->originals_like_orderby_retweet = $this->db->prepare(
-            sprintf($base_query_like, 'retweet_count');
+            sprintf($base_query_like, 'retweet_count')
         );
         if (!$this->queries->originals_like_orderby_retweet) {
             echo "Prepare originals_like failed: (" . $this->db->errno . ") " . $this->db->error;
