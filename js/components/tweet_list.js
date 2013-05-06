@@ -34,7 +34,7 @@ define([
             this.interval = options.interval;
             this.query = options.query;
             this.tweets = null;
-            this.tweetTemplate = _.template("<li><div class='tweet'><div class='hdr'>@<%=screen_name%></div><div class='body'><%=text%></div></div></li>");
+            this.tweetTemplate = _.template("<li><div class='tweet'><div class='hdr'>@<%=screen_name%></div><div class='body'><div class='tweet_text'><%=text%></div><div class='tweet_count'><%=retweet_count%></div></div></li>");
 
 
             this.initUI();
