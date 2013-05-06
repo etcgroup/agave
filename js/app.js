@@ -12,6 +12,7 @@ define(function (require) {
         var OverviewTimeline = require('components/overview_timeline');
         var FocusTimeline = require('components/focus_timeline');
         var DiscussionList = require('components/discussion_list');
+        var DiscussionView = require('components/discussion_view');
         var API = require('util/api');
 
         /**
@@ -39,6 +40,7 @@ define(function (require) {
             this.initDetailsPanel();
 
             this.initDiscussionList();
+            this.initDiscussionView();
 
             this.windowResize();
         };
@@ -200,6 +202,29 @@ define(function (require) {
             this.discussionList = new DiscussionList({
                 into: this.ui.discussions,
                 api: this.api
+            });
+
+            var self = this;
+            this.discussionList.on('show-discussion', function(e, id) {
+                self.discussionList.hide();
+                self.discussionView.show(id);
+            });
+
+            this.discussionList.show();
+        };
+
+        App.prototype.initDiscussionView = function() {
+            this.ui.discussionView = this.ui.collaborator.find('.discussion-view');
+
+            this.discussionView = new DiscussionView({
+                into: this.ui.discussionView,
+                api: this.api
+            });
+
+            var self = this;
+            this.discussionView.on('back', function() {
+                self.discussionView.hide();
+                self.discussionList.show();
             });
         };
 

@@ -1,4 +1,9 @@
-.discussions .header {
+.discussions {
+    float: left;
+}
+
+.discussions .header,
+.discussion-view .header {
     margin-bottom: 10px;
 }
 
@@ -16,7 +21,6 @@
 .discussion-list {
     margin: 0;
     padding: 0;
-    list-style: none;
 
     background: #fff;
     color: #333;
@@ -66,5 +70,59 @@
 }
 
 .discussion .last-comment-at {
+    float: right;
+}
+
+
+.discussion-view {
+    float: right;
+}
+
+.discussion-view .user-box {
+    text-align: center;
+}
+
+.discussion-view .user-box input {
+    margin: 30px 0;
+}
+
+.discussion-view .comment-box textarea {
+    width: 100%;
+    display: block;
+    box-sizing: border-box;
+}
+
+.discussion-view .comment-box .user-display {
+    float: left;
+}
+
+.discussion-view .comment-box .send-button {
+    float: right;
+}
+
+.discussion-view .comments {
+    margin: 10px 0 0 0;
+    padding: 0;
+
+    background: #fff;
+    color: #333;
+
+    -moz-border-radius: 4px;
+    -webkit-border-radius: 4px;
+    border-radius: 4px;
+}
+.discussion-view .comment {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+}
+.discussion-view .comment:last-child {
+    border: none;
+}
+
+.discussion-view .comment .user {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+.discussion-view .comment .time {
     float: right;
 }

@@ -1,4 +1,4 @@
-define(['jquery'], function ($) {
+define(['jquery', 'util/events'], function ($, events) {
 
     var DiscussionList = function (options) {
         this.api = options.api;
@@ -7,8 +7,6 @@ define(['jquery'], function ($) {
         this._initUI();
 
         this._attachEvents();
-
-        this._requestData();
     };
 
     DiscussionList.prototype._initUI = function() {
@@ -37,13 +35,26 @@ define(['jquery'], function ($) {
     };
 
     DiscussionList.prototype._newDiscussion = function() {
-        console.log('starting new discussion');
+        this.trigger('show-discussion', null);
     };
 
     DiscussionList.prototype._discussionClicked = function(element) {
         var id = element.data('id');
         console.log('Discussion ' + id + ' selected!');
+        this.trigger('show-discussion', id);
     };
+
+    DiscussionList.prototype.hide = function() {
+        this.into.removeClass('in');
+    };
+
+    DiscussionList.prototype.show = function() {
+        this.into.addClass('in');
+
+        this._requestData();
+    };
+
+    events(DiscussionList);
 
     return DiscussionList;
 });

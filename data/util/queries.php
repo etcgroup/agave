@@ -151,7 +151,11 @@ class Queries
 
             $this->stop($queryname);
 
-            return $result;
+            if ($result) {
+                return $result;
+            } else {
+                return TRUE;
+            }
         }
     }
 
@@ -164,6 +168,15 @@ class Queries
 
         if (!$this->queries->insert_message) {
             echo "Prepare insert_messages failed: (" . $this->db->errno . ") " . $this->db->error;
+        }
+
+        $this->queries->insert_discussion = $this->db->prepare(
+            "INSERT INTO discussions (created)
+            VALUES (?)"
+        );
+
+        if (!$this->queries->insert_discussion) {
+            echo "Prepare insert_discussion failed: (" . $this->db->errno . ") " . $this->db->error;
         }
     }
 
@@ -179,16 +192,52 @@ class Queries
     {
         $now = new DateTime('now', $this->utc);
         $time = $now->format('Y-m-d H:i:s');
-        return $this->run('discussion_messages', 'sssi', $time, $user, $message, $discussion_id);
+
+        if (!$discussion_id) {
+            $this->run('insert_discussion', 's', $time);
+            $discussion_id = $this->db->insert_id;
+        }
+
+        $this->run('insert_message', 'sssi', $time, $user, $message, $discussion_id);
+        return $this->db->insert_id;
+    }
+
+    private function _build_message()
+    {
+        $this->queries->message = $this->db->prepare(
+            "SELECT id, discussion_id, UNIX_TIMESTAMP(time) as time, user, message
+             FROM messages
+             WHERE id = ?"
+        );
+
+        if (!$this->queries->message) {
+            echo "Prepare message failed: (" . $this->db->errno . ") " . $this->db->error;
+        }
+    }
+
+    /**
+     * Simply get a message by id. Returns the row.
+     *
+     * @param $message_id
+     * @return array
+     */
+    public function get_message($message_id) {
+        $result = $this->run('message', 'i', $message_id);
+
+        $row = $result->fetch_assoc();
+
+        $result->free();
+
+        return $row;
     }
 
     private function _build_discussion_messages()
     {
         $this->queries->discussion_messages = $this->db->prepare(
-            "SELECT *
+            "SELECT id, discussion_id, UNIX_TIMESTAMP(time) as time, user, message
             FROM messages
             WHERE discussion_id = ?
-            ORDER BY time"
+            ORDER BY time desc"
         );
 
         if (!$this->queries->discussion_messages) {

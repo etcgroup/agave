@@ -16,7 +16,8 @@ include_once 'queries.php';
  * It also defines some convenience methods for handling common parameters,
  * such as times, which need to be converted from ms to DateTime objects.
  */
-class Request {
+class Request
+{
 
     private $performance = NULL;
     private $db = NULL;
@@ -41,7 +42,7 @@ class Request {
      * Initialize and get the database connection for this request.
      * @param type $params
      */
-    public function db($params=NULL)
+    public function db($params = NULL)
     {
         $this->db = new Queries($params);
 
@@ -69,8 +70,7 @@ class Request {
 
         $response['request'] = $_GET;
 
-        if ($this->performance !== NULL)
-        {
+        if ($this->performance !== NULL) {
             $response['performance'] = $this->performance;
         }
 
@@ -89,36 +89,53 @@ class Request {
      *
      * @param array $required The required parameters
      * @param array $optional The optional parameters (optional)
+     * @throws Exception
      * @return type
      */
     public function get($required, $optional = array())
     {
+        return $this->_retrieve_params($_GET, $required, $optional);
+    }
+
+    /**
+     * Collects POST request parameters.
+     *
+     * The first argument is an array of required parameters names.
+     * If a required parameter is missing, an Exception will be thrown.
+     *
+     * The second argument (optional) is an array of optional parameters to
+     * look for. Any of these that are missing will default to NULL in the result.
+     *
+     * @param array $required The required parameters
+     * @param array $optional The optional parameters (optional)
+     * @throws Exception
+     * @return type
+     */
+    public function post($required, $optional = array())
+    {
+        return $this->_retrieve_params($_POST, $required, $optional);
+    }
+
+    public function _retrieve_params($global, $required, $optional = array())
+    {
         $request = array();
-        foreach ($required as $param_name)
-        {
-            if (array_key_exists($param_name, $_GET))
-            {
-                $request[$param_name] = $_GET[$param_name];
-            }
-            else
-            {
+        foreach ($required as $param_name) {
+            if (array_key_exists($param_name, $global)) {
+                $request[$param_name] = $global[$param_name];
+            } else {
                 throw new Exception("Parameter $param_name is required");
             }
         }
 
-        foreach ($optional as $param_name)
-        {
-            if (array_key_exists($param_name, $_GET))
-            {
-                $request[$param_name] = $_GET[$param_name];
-            }
-            else
-            {
+        foreach ($optional as $param_name) {
+            if (array_key_exists($param_name, $global)) {
+                $request[$param_name] = $global[$param_name];
+            } else {
                 $request[$param_name] = NULL;
             }
         }
 
-        return (object) $request;
+        return (object)$request;
     }
 
     /**
@@ -130,12 +147,12 @@ class Request {
     {
         $params = $this->get(array('from', 'to'));
 
-        $from = (int) ($params->from / 1000);
-        $to = (int) ($params->to / 1000);
+        $from = (int)($params->from / 1000);
+        $to = (int)($params->to / 1000);
 
-        return (object) array(
-                    'from' => new DateTime("@$from"),
-                    'to' => new DateTime("@$to"),
+        return (object)array(
+            'from' => new DateTime("@$from"),
+            'to' => new DateTime("@$to"),
         );
     }
 
@@ -150,12 +167,12 @@ class Request {
         $bundle = $this->timeParameters();
 
         $params = $this->get(array('interval'));
-        $interval = (int) ($params->interval / 1000);
+        $interval = (int)($params->interval / 1000);
 
         if ($interval == 0)
             $interval = 1;
 
-        $bundle->interval = (int) $interval;
+        $bundle->interval = (int)$interval;
 
         return $bundle;
     }

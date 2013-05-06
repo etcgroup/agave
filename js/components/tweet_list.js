@@ -60,7 +60,7 @@ define([
                     self.list.append(self.tweetTemplate(tweet));
                 });
             }
-        }
+        };
 
         /**
          * called anytime an update occurs
@@ -68,7 +68,7 @@ define([
         TweetList.prototype.update = function() {
             var self = this;
 
-            console.log('updating tweet list')
+            console.log('updating tweet list');
 
             //Add the limit to the query object and submit
             var q = {
@@ -90,7 +90,7 @@ define([
                     alert('failed to load tweets');
                 });
 
-        }
+        };
 
 
         /**
@@ -99,7 +99,7 @@ define([
          TweetList.prototype._onIntervalChanged = function(e, interval, field) {
             console.log('interval changed');
             this.update();
-         }
+         };
 
         /**
          * Query Changed handler
@@ -107,7 +107,7 @@ define([
          TweetList.prototype._onQueryChanged = function(e, query, field) {
             console.log('query changed');
             this.update();
-         }
+         };
 
 
          /**
@@ -116,7 +116,7 @@ define([
          TweetList.prototype.initUI = function() {
             this.list = $('<ul>').appendTo(this.container);
             this.attachEvents();
-         }
+         };
 
         //Mix in events
         events(TweetList);

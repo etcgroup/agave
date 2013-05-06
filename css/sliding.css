@@ -1,0 +1,20 @@
+/*csslint adjoining-classes: false*/
+.sliding {
+    -webkit-transition: width 300ms ease-in-out 100ms, opacity 300ms;
+    -moz-transition: width 300ms ease-in-out 100ms, opacity 300ms;
+    -ms-transition: width 300ms ease-in-out 100ms, opacity 300ms;
+    -o-transition: width 300ms ease-in-out 100ms, opacity 300ms;
+    transition: width 300ms ease-in-out 100ms, opacity 300ms;
+
+    opacity: 0;
+    width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: clip;
+}
+
+.sliding.in {
+    width: 100%;
+    opacity: 1;
+}
+

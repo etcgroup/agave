@@ -1,4 +1,4 @@
-define(['jquery', 'underscore', 'util/events'], function($, _, events) {
+define(['jquery', 'underscore', 'util/events'], function ($, _, events) {
 
     /**
      * A map from API request names to urls.
@@ -6,7 +6,8 @@ define(['jquery', 'underscore', 'util/events'], function($, _, events) {
     var URLS = {
         'counts': 'data/counts.php',
         'overview_counts': 'data/overview_counts.php',
-        'discussions': 'data/discussions.php'
+        'discussions': 'data/discussions.php',
+        'messages': 'data/messages.php'
     };
 
     /**
@@ -23,7 +24,7 @@ define(['jquery', 'underscore', 'util/events'], function($, _, events) {
      *
      * Data events are triggered with an object containing request params and the data (result).
      */
-    var API = function() {
+    var API = function () {
 
         this.urls = {};
         this.rid_counters = {};
@@ -41,7 +42,7 @@ define(['jquery', 'underscore', 'util/events'], function($, _, events) {
      * @param url the url to request from
      * @param [method] an optional shorthand method to add to the API object
      */
-    API.prototype.register = function(name, url, method) {
+    API.prototype.register = function (name, url, method) {
         this.urls[name] = url;
 
         if (method) {
@@ -49,7 +50,7 @@ define(['jquery', 'underscore', 'util/events'], function($, _, events) {
         }
     };
 
-    API.prototype.get_last_rid_sent = function(name){
+    API.prototype.get_last_rid_sent = function (name) {
         if (name in this.rid_counters) {
             return this.rid_counters[name].sent;
         } else {
@@ -57,7 +58,7 @@ define(['jquery', 'underscore', 'util/events'], function($, _, events) {
         }
     };
 
-    API.prototype.get_last_rid_received = function(name){
+    API.prototype.get_last_rid_received = function (name) {
         if (name in this.rid_counters) {
             return this.rid_counters[name].received;
         } else {
@@ -79,7 +80,7 @@ define(['jquery', 'underscore', 'util/events'], function($, _, events) {
      * @param [parameters] {{}}
      * @private
      */
-    API.prototype.request = function(method, name, parameters) {
+    API.prototype.request = function (method, name, parameters) {
         parameters = parameters || {};
 
         var params = parameters.params || {};
@@ -110,7 +111,7 @@ define(['jquery', 'underscore', 'util/events'], function($, _, events) {
         });
 
         var self = this;
-        r.done(function(result) {
+        r.done(function (result) {
 
             console.log("Received " + request_name + ":" + rid);
 
@@ -146,7 +147,7 @@ define(['jquery', 'underscore', 'util/events'], function($, _, events) {
      *
      * @param parameters
      */
-    API.prototype.counts = function(parameters) {
+    API.prototype.counts = function (parameters) {
         var queryId = parameters.query_id;
         this.request('get', 'counts', {
             params: parameters,
@@ -165,10 +166,10 @@ define(['jquery', 'underscore', 'util/events'], function($, _, events) {
      *
      * @param parameters
      */
-    API.prototype.overview_counts = function(parameters) {
+    API.prototype.overview_counts = function (parameters) {
         this.request('get', 'overview_counts', {
             params: parameters,
-            post_process: function(results) {
+            post_process: function (results) {
                 return results.payload;
             }
         });
@@ -180,10 +181,39 @@ define(['jquery', 'underscore', 'util/events'], function($, _, events) {
      *
      * @param parameters
      */
-    API.prototype.discussions = function(parameters) {
+    API.prototype.discussions = function (parameters) {
         this.request('get', 'discussions', {
             params: parameters,
-            post_process: function(results) {
+            post_process: function (results) {
+                return results.payload;
+            }
+        });
+    };
+
+    /**
+     * Request messages for a discussion. Subscribe to the messages event to receive data
+     * when it arrives.
+     *
+     * @param parameters
+     */
+    API.prototype.messages = function (parameters) {
+        this.request('get', 'messages', {
+            params: parameters,
+            post_process: function (results) {
+                return results.payload;
+            }
+        });
+    };
+
+    /**
+     * Send a message. The result will be an updated message list.
+     *
+     * @param parameters
+     */
+    API.prototype.send_message = function(parameters) {
+        this.request('post', 'messages', {
+            params: parameters,
+            post_process: function (results) {
                 return results.payload;
             }
         });

@@ -23,30 +23,42 @@ $perf = $request->timing();
  *
  * Optionally, fields for a new message can be provided.
  */
-$params = $request->get(array('discussion_id'));
-$discussion_id = $params->discussion_id;
-
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $post = $request->post(array('user', 'message'));
-    $user = $post->user;
-    $message = htmlspecialchars($post->message);
+    $params = $request->post(array('user', 'message'), array('discussion_id'));
+    $user = $params->user;
+    $message = htmlspecialchars($params->message);
+    $discussion_id = $params->discussion_id;
 
-    if (!$db->insert_message($user, $message, $discussion_id)) {
+    $inserted_id = $db->insert_message($user, $message, $discussion_id);
+    if (!$inserted_id) {
         echo 'Failure.';
         return -1;
     }
+
+    if (!$discussion_id) {
+        $message = $db->get_message($inserted_id);
+        $discussion_id = $message['discussion_id'];
+    }
+} else {
+    $params = $request->get(array('discussion_id'));
+    $discussion_id = $params->discussion_id;
 }
-
-$result = $db->get_discussion_messages($discussion_id);
-
-$perf->start('processing');
 
 $rendered = array();
-while ($row = $result->fetch_assoc()) {
-    $rendered[] = discussion_message($row);
-}
-$result->free();
 
-$perf->stop('processing');
+if ($discussion_id) {
+
+    $result = $db->get_discussion_messages($discussion_id);
+
+    $perf->start('processing');
+
+
+    while ($row = $result->fetch_assoc()) {
+        $rendered[] = discussion_message($row);
+    }
+    $result->free();
+
+    $perf->stop('processing');
+}
 
 $request->response(join("", $rendered));

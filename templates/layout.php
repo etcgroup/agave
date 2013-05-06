@@ -33,15 +33,28 @@
             </div>
             <div id="collaborator-wrapper" class="wrapper">
                 <div id="collaborator">
-                    <div class="discussions">
+                    <div class="discussions sliding in">
                         <div class="header clearfix">
                             <div class="title">Discussions</div>
                             <div class="btn new-button">New Discussion</div>
                         </div>
                         <p>Join an existing discussion</p>
-                        <ul class="discussion-list"></ul>
+                        <div class="discussion-list"></div>
                     </div>
-                    <div class="comments">
+                    <div class="discussion-view sliding">
+                        <div class="header clearfix">
+                            <div class="btn back-button"><i class="icon-arrow-left"></i> Back to discussion list</div>
+                        </div>
+                        <div class="user-box form-inline collapse in">
+                            <input type="text" placeholder="Choose a user name"/>
+                            <button type="button" class="user-submit btn btn-primary">Sign in</button>
+                        </div>
+                        <div class="comment-box clearfix collapse">
+                            <textarea></textarea>
+                            <span class="user-display"></span>
+                            <button type="button" class="send-button btn btn-primary">Post message</button>
+                        </div>
+                        <div class="comments"></div>
                     </div>
                 </div>
             </div>
