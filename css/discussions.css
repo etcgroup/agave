@@ -1,0 +1,65 @@
+.discussions .header {
+    margin-bottom: 10px;
+}
+
+.discussions .header .title {
+    font-weight: normal;
+    line-height: 30px;
+    font-size: 20px;
+    display: inline;
+}
+
+.discussions .new-button {
+    float: right;
+}
+
+.discussion-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    background: #fff;
+    color: #333;
+
+    -moz-border-radius: 4px;
+    -webkit-border-radius: 4px;
+    border-radius: 4px;
+}
+
+.discussion {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+    position: relative;
+}
+
+.discussion:last-child {
+    border-bottom: none;
+}
+
+.discussion .subject {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    margin-right: 40px;
+    margin-bottom: 5px;
+}
+
+.discussion .message-count {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+}
+
+.discussion .users,
+.discussion .last-comment-at {
+    font-size: 12px;
+}
+
+.discussion .users {
+    float: left;
+}
+
+.discussion .last-comment-at {
+    float: right;
+}

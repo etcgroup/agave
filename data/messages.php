@@ -1,15 +1,15 @@
 <?php
 /**
- * messages.php returns the number of tweets over time, divided
- * by sentiment classification as -1, 0, or 1.
+ * messages.php retrieves and renders discussion messages for a specific discussion.
  *
- * Tweets are binned by time and the count of positive, negative, and neutral
- * tweets in each time bin is returned.
+ * POSTing to messages.php will add a new message to the database, and render
+ * all of the messages.
  */
 
 
 include_once 'util/data.php';
 include_once 'util/request.php';
+include_once '../elements/message.php';
 
 $request = new Request();
 
@@ -19,33 +19,34 @@ $db = $request->db();
 $perf = $request->timing();
 
 /**
- * Requests to /counts.php should provide the binned time parameters:
- * from, to, and interval.
+ * Requests to /messages.php should provide a discussion id.
  *
- * Optionally, a text search parameter can be provided.
+ * Optionally, fields for a new message can be provided.
  */
-$params = $request->get(array(), array('search'));
+$params = $request->get(array('discussion_id'));
+$discussion_id = $params->discussion_id;
 
-if(isset($_POST) && isset($_POST["type"]) && $_POST["type"] == "send") {
-		if(!isset($_POST["message"]) && !isset($_POST["user"])) {
-	header('Content-type: application/json');
-			echo json_encode(array("error" => true, "reason" => "Missing message data"));
-			die();
-		}
-		$query = $DB->prepare('INSERT INTO chat (`chat_id`, `user`, `ip`, `message`, `timestamp`) VALUES (NULL, :user, :ip, :message, :time)');
-		$query->bindValue(':user', $_POST["user"], PDO::PARAM_STR);
-		$query->bindValue(':ip', $_SERVER["REMOTE_ADDR"], PDO::PARAM_STR);
-		$query->bindValue(':message', str_replace("\n", "<br>", htmlspecialchars($_POST["message"])), PDO::PARAM_STR);
-		$query->bindValue(':time', time(), PDO::PARAM_INT);
-		$query->execute();
-	}
-	
-	$query = $DB->query('SELECT chat_id, user, message, timestamp FROM chat order by timestamp');
-	$messages = array();
-	foreach($query as $row) { ?>
-					<message>
-						<userid id="c_<?=$row["chat_id"]?>"><?=$row["user"] ?></userid>
-						<p id="message_text"><?=$row["message"]?></p>
-						<timestamp><?=date("M j, Y g:ia", $row["timestamp"])?></timestamp>
-					</message>				
-<? } ?>
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $post = $request->post(array('user', 'message'));
+    $user = $post->user;
+    $message = htmlspecialchars($post->message);
+
+    if (!$db->insert_message($user, $message, $discussion_id)) {
+        echo 'Failure.';
+        return -1;
+    }
+}
+
+$result = $db->get_discussion_messages($discussion_id);
+
+$perf->start('processing');
+
+$rendered = array();
+while ($row = $result->fetch_assoc()) {
+    $rendered[] = discussion_message($row);
+}
+$result->free();
+
+$perf->stop('processing');
+
+$request->response(join("", $rendered));

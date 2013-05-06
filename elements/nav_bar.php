@@ -2,6 +2,7 @@
 
 function nav_bar()
 {
+    ob_start();
     ?>
     <div class="navbar navbar-static-top">
         <div class="navbar-inner">
@@ -17,4 +18,5 @@ function nav_bar()
         </div>
     </div>
     <?php
+    return ob_get_clean();
 }
