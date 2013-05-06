@@ -51,10 +51,10 @@
     position: relative;
 }
 
-#tweet-list {
+#query1-details {
     float: left;
     height: 100%;
-    width: 50%;
+    width: 49%;
 }
 
 #details-wrapper {

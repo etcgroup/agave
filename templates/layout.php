@@ -21,8 +21,10 @@
                 </div>
 
                 <div id="explorer-details" class="clearfix">
-                    <div id="tweet-list">
-                        tweets
+                    <div id="query1-details">
+                        <div id="tweet-list">
+                            tweets
+                        </div>
                     </div>
                     <div id="details-wrapper" class="wrapper">
                         <div id="details">
