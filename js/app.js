@@ -183,13 +183,12 @@ define(function (require) {
 
             this.ui.tweetList = $('#tweet-list');
 
-            this.tweetList = new TweetList({ 
+            this.tweetList = new TweetList({
+                api: this.api,
                 interval: this.interval,
                 query: this.queries[0],
-                container: this.ui.tweetList
+                into: this.ui.tweetList
             });
-            //Load the tweets for the current query
-//            this.tweetList.update(this.query);
         };
 
         App.prototype.initDetailsPanel = function () {

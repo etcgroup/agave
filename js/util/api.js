@@ -7,7 +7,8 @@ define(['jquery', 'underscore', 'util/events'], function ($, _, events) {
         'counts': 'data/counts.php',
         'overview_counts': 'data/overview_counts.php',
         'discussions': 'data/discussions.php',
-        'messages': 'data/messages.php'
+        'messages': 'data/messages.php',
+        'tweets': 'data/tweets.php'
     };
 
     /**
@@ -216,6 +217,24 @@ define(['jquery', 'underscore', 'util/events'], function ($, _, events) {
             post_process: function (results) {
                 return results.payload;
             }
+        });
+    };
+
+    /**
+     * Request tweets that satisfy a set of filters.
+     *
+     * @param parameters
+     */
+    API.prototype.tweets = function(parameters) {
+        var queryId = parameters.query_id;
+
+        this.request('get', 'tweets', {
+            params: parameters,
+            post_process: function(results) {
+                return results.payload;
+            },
+            //Have to make sure requests for different queries don't get crossed
+            request_name: 'tweets-' + queryId
         });
     };
 
