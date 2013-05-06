@@ -7,7 +7,7 @@ define([
     'lib/bootstrap'],
     function ($, _, events, Transform, Rectangle, Bootstrap) {
 
-        var TWEET_TEMPLATE = _.template("<li><div class='tweet'>" +
+        var TWEET_TEMPLATE = _.template("<li><div class='tweet' data-id='<%=id%>'>" +
             "<div class='hdr'>@<%=screen_name%></div>" +
             "<div class='body'>" +
             "<div class='tweet_text'><%=text%></div>" +
