@@ -294,6 +294,11 @@ define(['jquery',
 
     Timeline.prototype._updateHistogram = function () {
 
+        var data = this._histogram.data();
+        if (data) {
+            this._histogram.yScaleDomainAuto(data);
+        }
+
         this._histogram.update();
 
     };

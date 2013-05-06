@@ -69,12 +69,6 @@ define(['lib/d3', 'underscore',
                     this._yScale.range([this._box.height(), 0]);
                 }
 
-                //Set the y domain based on the current data
-                var data = this.data();
-                if (data) {
-                    this.yScaleDomainAuto(data, this._autoBaseline);
-                }
-
                 //Update the area baseline with any changes to the y scale.
                 //Unlike y1, y0 does not update based on the data.
                 this._area.y0(this._yScale(0));
