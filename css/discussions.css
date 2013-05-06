@@ -30,6 +30,11 @@
     padding: 12px;
     border-bottom: 1px solid #eee;
     position: relative;
+    cursor:pointer;
+}
+
+.discussion:hover {
+    text-decoration: underline;
 }
 
 .discussion:last-child {

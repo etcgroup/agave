@@ -38,6 +38,7 @@
                             <div class="title">Discussions</div>
                             <div class="btn new-button">New Discussion</div>
                         </div>
+                        <p>Join an existing discussion</p>
                         <ul class="discussion-list"></ul>
                     </div>
                     <div class="comments">
