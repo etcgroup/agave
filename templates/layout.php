@@ -21,24 +21,32 @@
                 </div>
 
                 <div id="explorer-details" class="clearfix">
-                    <div id="query1-details">
-                        <ul class="nav nav-tabs" id="query1-details-tabs">
-                            <li class="active"><a data-target="#tweet-list" data-toggle="tab">Retweet Count</a></li>
-                            <li><a data-target="#reply-list" data-toggle="tab">Reply Count</a></li>
-                            <li><a data-target="#users-list" data-toggle="tab">Users</a></li>
-                            <li><a data-target="#keywords-list" data-toggle="tab">Keywords</a></li>
+                    <div class="tab-group">
+                        <ul class="nav nav-tabs">
+                            <li class="active"><a data-target="#tweet-list-1" data-toggle="tab">Tweets</a></li>
+                            <li><a data-target="#users-list-1" data-toggle="tab">Users</a></li>
+                            <li><a data-target="#keywords-list-1" data-toggle="tab">Keywords</a></li>
                         </ul>
                          
                         <div class="tab-content">
-                          <div class="tab-pane active" id="tweet-list"></div>
-                          <div class="tab-pane" id="reply-list">...</div>
-                          <div class="tab-pane" id="users-list">...</div>
-                          <div class="tab-pane" id="keywords-list">...</div>
+                          <div class="tab-pane active tweet-list" id="tweet-list-1"></div>
+                          <div class="tab-pane users-list" id="users-list-1">...</div>
+                          <div class="tab-pane keywords-list" id="keywords-list-1">...</div>
                         </div>
                     </div>
-                    <div id="details-wrapper" class="wrapper">
-                        <div id="details">
-                            details
+                    <div id="tab-group-wrapper" class="wrapper">
+                        <div class="tab-group">
+                            <ul class="nav nav-tabs">
+                                <li class="active"><a data-target="#retweet-list-2" data-toggle="tab">Tweets</a></li>
+                                <li><a data-target="#users-list-2" data-toggle="tab">Users</a></li>
+                                <li><a data-target="#keywords-list-2" data-toggle="tab">Keywords</a></li>
+                            </ul>
+
+                            <div class="tab-content">
+                                <div class="tab-pane active tweet-list" id="tweet-list-2"></div>
+                                <div class="tab-pane users-list" id="users-list-2">...</div>
+                                <div class="tab-pane keywords-list" id="keywords-list-2">...</div>
+                            </div>
                         </div>
                     </div>
                 </div>

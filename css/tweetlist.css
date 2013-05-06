@@ -1,10 +1,10 @@
-#query1-details ul {
-	margin: 0px;
+.tab-group ul {
+	margin: 0;
 }
-#explorer-details > div > .tab-content {
+.tab-group .tab-content {
 	height: 300px;
 }
-#tweet-list ul {
+.tweet-list ul {
 	height: 300px;
 	width: 100%;
 	overflow-y: auto;
@@ -13,35 +13,32 @@
 	background: #fff;
 }
 
-#tweet-list .tweet {
+.tweet-list .tweet {
 	color: #333;
 	padding: 12px;
 }
 
-#tweet-list .tweet .hdr {
+.tweet-list .tweet .hdr {
 	color: #888;
 	font-size: 80%;
 }
 
-.tweet .body {
+.tweet-list .tweet .body {
 	overflow: auto;
 }
 
-#tweet-list li {
+.tweet-list li {
 	border-bottom: 1px solid #ccc;
 }
 
-.tweet .tweet_text {
+.tweet-list .tweet .tweet_text {
 	width: 80%;
 	float: left;
 }
 
-.tweet .tweet_count {
+.tweet-list .tweet .tweet_count {
 	width: 20%;
 	float: left;
 	text-align: right;
 }
 
-.tab-content {
-	
-}

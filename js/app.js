@@ -1,162 +1,162 @@
 define(function (require) {
 
-        //Using long-form syntax because there are soooo many dependencies
-        var $ = require('jquery');
-        var _ = require('underscore');
-        var urls = require('util/urls');
-        var Interval = require('model/interval');
-        var Query = require('model/query');
-        var QueryControls = require('components/query_controls');
-        var TweetTimeline = require('components/tweet_timeline');
-        var TweetList = require('components/tweet_list');
-        var OverviewTimeline = require('components/overview_timeline');
-        var FocusTimeline = require('components/focus_timeline');
-        var DiscussionList = require('components/discussion_list');
-        var DiscussionView = require('components/discussion_view');
-        var API = require('util/api');
+    //Using long-form syntax because there are soooo many dependencies
+    var $ = require('jquery');
+    var _ = require('underscore');
+    var urls = require('util/urls');
+    var Interval = require('model/interval');
+    var Query = require('model/query');
+    var QueryControls = require('components/query_controls');
+    var TweetTimeline = require('components/tweet_timeline');
+    var TweetList = require('components/tweet_list');
+    var OverviewTimeline = require('components/overview_timeline');
+    var FocusTimeline = require('components/focus_timeline');
+    var DiscussionList = require('components/discussion_list');
+    var DiscussionView = require('components/discussion_view');
+    var API = require('util/api');
 
-        /**
-         * This class orchestrates the overall setup of the application.
-         *
-         * @param config
-         */
-        var App = function (config) {
-            this.config = config;
-        };
+    /**
+     * This class orchestrates the overall setup of the application.
+     *
+     * @param config
+     */
+    var App = function (config) {
+        this.config = config;
+    };
 
-        /**
-         * Start the application.
-         */
-        App.prototype.start = function () {
-            this.api = new API();
+    /**
+     * Start the application.
+     */
+    App.prototype.start = function () {
+        this.api = new API();
 
-            this.initUI();
-            this.initQueries();
+        this.initUI();
+        this.initQueries();
 
-            this.initFocusTimeline();
-            this.initContextTimeline();
+        this.initFocusTimeline();
+        this.initContextTimeline();
 
-            this.initTweetList();
-            this.initDetailsPanel();
+        this.initDetailsPanel();
+        this.initTweetList();
 
-            this.initDiscussionList();
-            this.initDiscussionView();
+        this.initDiscussionList();
+        this.initDiscussionView();
 
-            this.windowResize();
-        };
+        this.windowResize();
+    };
 
-        /**
-         * Set up the query object, based on the url.
-         */
-        App.prototype.initQueries = function () {
+    /**
+     * Set up the query object, based on the url.
+     */
+    App.prototype.initQueries = function () {
 
-            //Parse the url
-            var params = urls.parse();
+        //Parse the url
+        var params = urls.parse();
 
-            //Initialize the interval -- multiplying by 1000 to convert from url times (seconds) to ms
-            this.interval = new Interval({
-                from: params.get('from', this.config.defaults.from) * 1000,
-                to: params.get('to', this.config.defaults.to) * 1000
+        //Initialize the interval -- multiplying by 1000 to convert from url times (seconds) to ms
+        this.interval = new Interval({
+            from: params.get('from', this.config.defaults.from) * 1000,
+            to: params.get('to', this.config.defaults.to) * 1000
+        });
+
+        //Find the queries box
+        this.ui.queryPanel = $('#queries');
+
+        //The query collection
+        this.queries = [];
+
+        //One query model per query control
+        var self = this;
+        this.ui.queryPanel.find('.query').each(function (index) {
+            var id = index;
+
+            //Build a new query model from the URL
+            var query = new Query({
+                id: id,
+                view: params.get_at('view', id, null),
+                search: params.get_at('search', id, null),
+                author: params.get_at('author', id, null),
+                rt: params.get_at('rt', id, null),
+                min_rt: params.get_at('min_rt', id, null),
+                sentiment: params.get_at('sentiment', id, null)
             });
 
-            //Find the queries box
-            this.ui.queryPanel = $('#queries');
+            //Save the query in our list
+            self.queries.push(query);
 
-            //The query collection
-            this.queries = [];
+            //Go ahead and set up the query view at the same time
+            var ui = $(this);
 
-            //One query model per query control
-            var self = this;
-            this.ui.queryPanel.find('.query').each(function (index) {
-                var id = index;
-
-                //Build a new query model from the URL
-                var query = new Query({
-                    id: id,
-                    view: params.get_at('view', id, null),
-                    search: params.get_at('search', id, null),
-                    author: params.get_at('author', id, null),
-                    rt: params.get_at('rt', id, null),
-                    min_rt: params.get_at('min_rt', id, null),
-                    sentiment: params.get_at('sentiment', id, null)
-                });
-
-                //Save the query in our list
-                self.queries.push(query);
-
-                //Go ahead and set up the query view at the same time
-                var ui = $(this);
-
-                //Pass the model and target along to the view
-                var view = new QueryControls({
-                    model: query,
-                    into: ui
-                });
-
-                //When the model changes, we need to know
-                query.on('change', $.proxy(self.queryUpdated, self));
-            });
-        };
-
-        /**
-         * Grab some regions for rendering UI components
-         */
-        App.prototype.initUI = function () {
-            this.ui = {};
-
-            this.ui.explorer = $('#explorer');
-            this.ui.collaborator = $('#collaborator');
-
-        };
-
-        /**
-         * Set up the small context timeline visualization.
-         */
-        App.prototype.initContextTimeline = function () {
-            this.ui.overviewTimeline = $('#tweet-overview');
-
-            this.overviewTimeline = new OverviewTimeline({
-                into: this.ui.overviewTimeline,
-                api: this.api,
-                queries: this.queries,
-                interval: this.interval,
-                from: this.config.overview_from * 1000,
-                to: this.config.overview_to * 1000,
-                binSize: this.config.overview_bin_size * 1000,
-                utcOffset: this.config.utc_offset_millis
+            //Pass the model and target along to the view
+            var view = new QueryControls({
+                model: query,
+                into: ui
             });
 
-            var self = this;
-            this.overviewTimeline.on('selection-change', function(e, extent) {
-                self.focusTimeline.domain(extent);
-                self.focusTimeline.update();
-            });
+            //When the model changes, we need to know
+            query.on('change', $.proxy(self.queryUpdated, self));
+        });
+    };
 
-            this.overviewTimeline.on('selection-end', function(e, extent) {
-                self.selectionChanged(extent);
-            });
+    /**
+     * Grab some regions for rendering UI components
+     */
+    App.prototype.initUI = function () {
+        this.ui = {};
 
-            this.overviewTimeline.render();
-        };
+        this.ui.explorer = $('#explorer');
+        this.ui.collaborator = $('#collaborator');
 
-        /**
-         * Set up the larger focus timeline visualization.
-         */
-        App.prototype.initFocusTimeline = function () {
-            this.ui.focusTimeline = $('#tweet-timeline');
+    };
 
-            this.focusTimeline = new FocusTimeline({
-                into: this.ui.focusTimeline,
-                api: this.api,
-                queries: this.queries,
-                interval: this.interval,
-                from: this.config.overview_from * 1000,
-                to: this.config.overview_to * 1000,
-                binSize: 30,
-                utcOffset: this.config.utc_offset_millis
-            });
+    /**
+     * Set up the small context timeline visualization.
+     */
+    App.prototype.initContextTimeline = function () {
+        this.ui.overviewTimeline = $('#tweet-overview');
 
-            this.focusTimeline.render();
+        this.overviewTimeline = new OverviewTimeline({
+            into: this.ui.overviewTimeline,
+            api: this.api,
+            queries: this.queries,
+            interval: this.interval,
+            from: this.config.overview_from * 1000,
+            to: this.config.overview_to * 1000,
+            binSize: this.config.overview_bin_size * 1000,
+            utcOffset: this.config.utc_offset_millis
+        });
+
+        var self = this;
+        this.overviewTimeline.on('selection-change', function (e, extent) {
+            self.focusTimeline.domain(extent);
+            self.focusTimeline.update();
+        });
+
+        this.overviewTimeline.on('selection-end', function (e, extent) {
+            self.selectionChanged(extent);
+        });
+
+        this.overviewTimeline.render();
+    };
+
+    /**
+     * Set up the larger focus timeline visualization.
+     */
+    App.prototype.initFocusTimeline = function () {
+        this.ui.focusTimeline = $('#tweet-timeline');
+
+        this.focusTimeline = new FocusTimeline({
+            into: this.ui.focusTimeline,
+            api: this.api,
+            queries: this.queries,
+            interval: this.interval,
+            from: this.config.overview_from * 1000,
+            to: this.config.overview_to * 1000,
+            binSize: 30,
+            utcOffset: this.config.utc_offset_millis
+        });
+
+        this.focusTimeline.render();
 //
 //            this.focusTimeline = new TweetTimeline();
 //
@@ -174,103 +174,121 @@ define(function (require) {
 //            //Set the container and render
 //            this.focusTimeline.container(this.ui.focusTimeline.selector)
 //                .render();
-        };
+    };
 
-        /**
-         * Set up the tweet list component
-         */
-        App.prototype.initTweetList = function () {
+    /**
+     * Find the details panel and tab groups
+     */
+    App.prototype.initDetailsPanel = function () {
+        this.ui.detailsPanel = $('#explorer-details');
+        this.ui.detailsTabGroups = [];
 
-            this.ui.tweetList = $('#tweet-list');
-
-            this.tweetList = new TweetList({
-                api: this.api,
-                interval: this.interval,
-                query: this.queries[0],
-                into: this.ui.tweetList
+        var self = this;
+        this.ui.detailsPanel.find('.tab-group').each(function (index, tabGroup) {
+            self.ui.detailsTabGroups.push({
+                root: $(tabGroup)
             });
-        };
+        });
+    };
 
-        App.prototype.initDetailsPanel = function () {
-            this.ui.detailsPanel = $('#details');
-        };
+    /**
+     * Set up the tweet list component
+     */
+    App.prototype.initTweetList = function () {
 
-        App.prototype.initDiscussionList = function() {
-            this.ui.discussions = this.ui.collaborator.find('.discussions');
+        this.tweetLists = [];
 
-            this.discussionList = new DiscussionList({
-                into: this.ui.discussions,
-                api: this.api
-            });
+        var self = this;
+        this.ui.detailsTabGroups.forEach(function(group, index) {
+            var query = self.queries[index];
 
-            var self = this;
-            this.discussionList.on('show-discussion', function(e, id) {
-                self.discussionList.hide();
-                self.discussionView.show(id);
-            });
+            group.tweetList = group.root.find('.tweet-list');
 
-            this.discussionList.show();
-        };
+            self.tweetLists.push(new TweetList({
+                api: self.api,
+                interval: self.interval,
+                query: query,
+                into: group.tweetList
+            }));
+        });
+    };
 
-        App.prototype.initDiscussionView = function() {
-            this.ui.discussionView = this.ui.collaborator.find('.discussion-view');
+    App.prototype.initDiscussionList = function () {
+        this.ui.discussions = this.ui.collaborator.find('.discussions');
 
-            this.discussionView = new DiscussionView({
-                into: this.ui.discussionView,
-                api: this.api
-            });
+        this.discussionList = new DiscussionList({
+            into: this.ui.discussions,
+            api: this.api
+        });
 
-            var self = this;
-            this.discussionView.on('back', function() {
-                self.discussionView.hide();
-                self.discussionList.show();
-            });
-        };
+        var self = this;
+        this.discussionList.on('show-discussion', function (e, id) {
+            self.discussionList.hide();
+            self.discussionView.show(id);
+        });
 
-        App.prototype.windowResize = function () {
-            var self = this;
-            $(window).on('resize', function () {
+        this.discussionList.show();
+    };
+
+    App.prototype.initDiscussionView = function () {
+        this.ui.discussionView = this.ui.collaborator.find('.discussion-view');
+
+        this.discussionView = new DiscussionView({
+            into: this.ui.discussionView,
+            api: this.api
+        });
+
+        var self = this;
+        this.discussionView.on('back', function () {
+            self.discussionView.hide();
+            self.discussionList.show();
+        });
+    };
+
+    App.prototype.windowResize = function () {
+        var self = this;
+        $(window).on('resize', function () {
 //                self.focusTimeline
 //                    .width(self.ui.focusTimeline.width())
 //                    .height(self.ui.focusTimeline.height())
 //                    .update();
-            });
+        });
+    };
+
+    /**
+     * Update the url based on the current query.
+     */
+    App.prototype.updateUrl = function () {
+        //Get the basic parameters
+        var params = {
+            from: Math.round(this.interval.from() / 1000),
+            to: Math.round(this.interval.to() / 1000)
         };
 
-        /**
-         * Update the url based on the current query.
-         */
-        App.prototype.updateUrl = function () {
-            //Get the basic parameters
-            var params = {
-                from: Math.round(this.interval.from() / 1000) ,
-                to: Math.round(this.interval.to() / 1000)
-            };
+        //Get the query data objects
+        var query_data = this.queries.map(function (query) {
+            return query.data;
+        });
 
-            //Get the query data objects
-            var query_data = this.queries.map(function (query) {
-                return query.data;
-            });
+        urls.update_url(params, query_data);
+    };
 
-            urls.update_url(params, query_data);
-        };
+    App.prototype.queryUpdated = function (query) {
+        this.updateUrl();
+    };
 
-        App.prototype.queryUpdated = function (query) {
-            this.updateUrl();
-        };
+    App.prototype.queryViewChanged = function (query) {
+        this.updateUrl();
+    };
 
-        App.prototype.queryViewChanged = function (query) {
-            this.updateUrl();
-        };
+    App.prototype.selectionChanged = function (extent) {
+        //When the timeline zoom/pan changes, we need to update the query object
+        this.interval.from(extent[0]);
+        this.interval.to(extent[1]);
 
-        App.prototype.selectionChanged = function (extent) {
-            //When the timeline zoom/pan changes, we need to update the query object
-            this.interval.from(extent[0]);
-            this.interval.to(extent[1]);
+        //and update the url
+        this.updateUrl();
+    };
 
-            //and update the url
-            this.updateUrl();
-        };
-
-        return App;
-    });
+    return App;
+});
