@@ -3,8 +3,9 @@ define([
     'underscore',
     'util/events',
     'util/transform',
-    'util/rectangle'],
-    function($, _, events, Transform, Rectangle) {
+    'util/rectangle',
+    'lib/bootstrap'],
+    function($, _, events, Transform, Rectangle, Bootstrap) {
 
         //The max number of tweets to load.
         var TWEET_LIMIT = 50;
