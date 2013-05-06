@@ -43,11 +43,22 @@ define(['underscore'], function(_) {
         };
     };
 
+    /**
+     * Utility to construct a mass 'set' method
+     * that can be used to set a bunch of properties of an object at once.
+     *
+     * @param blobName the name of the object on 'this' that should be changed
+     * @param [eventName] the name of the event to trigger (defaults to 'change')
+     * @returns {Function}
+     */
     functions.evented_setter = function(blobName, eventName) {
         eventName = eventName || 'change';
 
         return function(data, silent) {
             var blob = this[blobName];
+
+            //Pull any non-set values from the current data blob
+            data = _.defaults(data, blob);
 
             //See if there is anything to do
             if (_.isEqual(blob, data)) {
@@ -55,8 +66,8 @@ define(['underscore'], function(_) {
                 return true;
             }
 
-            //Save, keeping any non-set values
-            this[blobName] = _.defaults(data, blob);
+            //Save
+            this[blobName] = data;
 
             //Don't trigger if silent was et
             if (!silent) {

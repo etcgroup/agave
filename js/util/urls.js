@@ -1,4 +1,4 @@
-define(['jquery', 'underscore', 'lib/Uri'], function($, _, Uri) {
+define(['jquery', 'underscore', 'lib/Uri'], function ($, _, Uri) {
 
     var urls = {};
 
@@ -12,6 +12,25 @@ define(['jquery', 'underscore', 'lib/Uri'], function($, _, Uri) {
         rt: 'r',
         min_rt: 'm',
         sentiment: 'f'
+    };
+
+    /**
+     * Map from query data field names to functions that convert the value for URLs.
+     */
+    var TO_URL_CONVERSION = {
+        rt: function (value) {
+            return value ? '1' : '';
+        }
+    };
+
+    /**
+     * Map from query data field names to functions that conver the value from URLs.
+     */
+    var FROM_URL_CONVERSION = {
+        rt: function (value) {
+            return value === '1';
+        },
+        min_rt: Number
     };
 
     /**
@@ -39,7 +58,7 @@ define(['jquery', 'underscore', 'lib/Uri'], function($, _, Uri) {
         if (!str) {
             return str;
         }
-        return decodeURIComponent((str+'').replace(/\+/g, '%20'));
+        return decodeURIComponent((str + '').replace(/\+/g, '%20'));
     }
 
     /**
@@ -65,7 +84,7 @@ define(['jquery', 'underscore', 'lib/Uri'], function($, _, Uri) {
      * Get the list of query fields supported as URL parameters.
      * @returns {Array}
      */
-    urls.get_supported_query_field = function() {
+    urls.get_supported_query_field = function () {
         return _.keys(PARAMETER_NAME_MAP);
     };
 
@@ -80,27 +99,31 @@ define(['jquery', 'underscore', 'lib/Uri'], function($, _, Uri) {
      * @param url
      * @returns {{get: Function, get_at: Function}}
      */
-    urls.parse = function(url) {
+    urls.parse = function (url) {
         url = url || document.location.href;
 
         var parsed = new Uri(url);
 
         return {
-            get: function(name, defaultValue) {
-                var value = urldecode(parsed.getQueryParamValue(name));
+            get: function (key, defaultValue) {
+                var value = urldecode(parsed.getQueryParamValue(key));
                 if (value === undefined) {
                     return defaultValue;
                 }
                 return value;
             },
-            get_at: function(name, index, defaultValue) {
+            get_at: function (key, index, defaultValue) {
 
                 //Turn the field name into a URL parameter
-                name = parameterName(name, index);
+                var name = parameterName(key, index);
 
                 var value = urldecode(parsed.getQueryParamValue(name));
                 if (value === undefined) {
                     return defaultValue;
+                }
+
+                if (key in FROM_URL_CONVERSION) {
+                    value = FROM_URL_CONVERSION[key](value);
                 }
 
                 return value;
@@ -122,9 +145,9 @@ define(['jquery', 'underscore', 'lib/Uri'], function($, _, Uri) {
 
         var result = {};
 
-        _.each(queryData, function(value, key) {
-            if (key === 'rt') {
-                value = value ? '1' : '';
+        _.each(queryData, function (value, key) {
+            if (key in TO_URL_CONVERSION) {
+                value = TO_URL_CONVERSION[key](value);
             }
 
             key = parameterName(key, id);
@@ -145,11 +168,11 @@ define(['jquery', 'underscore', 'lib/Uri'], function($, _, Uri) {
      * @param queries
      * @returns {string}
      */
-    urls.make_url = function(parameters, queries) {
+    urls.make_url = function (parameters, queries) {
         parameters = parameters || {};
         queries = queries || [];
 
-        queries.forEach(function(query, index) {
+        queries.forEach(function (query, index) {
             query = prepareQueryData(query);
 
             _.extend(parameters, query);
@@ -164,7 +187,7 @@ define(['jquery', 'underscore', 'lib/Uri'], function($, _, Uri) {
      * @param parameters An object containing generic parameter settings.
      * @param queries A list of query data objects. These may be specially processed.
      */
-    urls.update_url = function(parameters, queries) {
+    urls.update_url = function (parameters, queries) {
 
         var url = urls.make_url(parameters, queries);
 
