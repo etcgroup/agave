@@ -34,8 +34,10 @@ define(['jquery', 'util/events', 'lib/bootstrap'], function($, events, bootstrap
         var self = this;
         this.ui.userInput.on('keydown', function(e) {
             if (e.which === 13) {
+                e.preventDefault();
                 //pressed enter
                 self._onUserSubmitted();
+                return false;
             }
         });
 
