@@ -119,6 +119,12 @@ module.exports = function (grunt) {
             }
         },
 
+        phplint: {
+            app: {
+                src: ['data/**/*.php', 'elements/**/*.php', 'templates/**/*.php', 'index.php']
+            }
+        },
+
         watch: {
             options: {
                 interrupt: true
@@ -136,8 +142,12 @@ module.exports = function (grunt) {
                 tasks: ['csslint']
             },
             tests: {
-                files: ['<%=jshint.tests.src'],
+                files: ['<%=jshint.tests.src%>'],
                 tasks: ['jshint:tests', 'jasmine:app']
+            },
+            php: {
+                files: ['<%=phplint.app.src%>'],
+                tasks: ['phplint:app']
             }
         }
     };
@@ -153,6 +163,8 @@ module.exports = function (grunt) {
 
     grunt.loadNpmTasks('grunt-contrib-jasmine');
 
+    grunt.loadNpmTasks('grunt-phplint');
+
     // Define your tasks here
-    grunt.registerTask('default', ['jshint', 'csslint', 'jasmine:app']);
+    grunt.registerTask('default', ['phplint', 'jshint', 'csslint', 'jasmine:app']);
 };
