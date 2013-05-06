@@ -178,7 +178,11 @@ define(function (require) {
 
             this.ui.tweetList = $('#tweet-list');
 
-            this.tweetList = new TweetList(this.ui.tweetList);
+            this.tweetList = new TweetList({ 
+                interval: this.interval,
+                query: this.queries[0],
+                container: this.ui.tweetList
+            });
             //Load the tweets for the current query
 //            this.tweetList.update(this.query);
         };
