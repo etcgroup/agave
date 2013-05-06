@@ -147,23 +147,25 @@ class Queries
 
     private function _build_originals()
     {
-        $base_query = "SELECT *
-            FROM tweets
-            WHERE NOT is_retweet
-            AND created_at >= ?
-            AND created_at < ?
-            AND retweet_count >= ?
-            ORDER BY %s
+        $base_query = "SELECT t.*, u.screen_name
+            FROM tweets t
+            INNER JOIN users u on u.id = t.user_id
+            WHERE NOT t.is_retweet
+            AND t.created_at >= ?
+            AND t.created_at < ?
+            AND t.retweet_count >= ?
+            ORDER BY t.%s desc
             LIMIT ?";
 
-        $base_query_like = "SELECT *
-            FROM tweets
-            WHERE NOT is_retweet
-            AND created_at >= ?
-            AND created_at < ?
-            AND retweet_count >= ?
-            AND text LIKE ?
-            ORDER BY created_at
+        $base_query_like = "SELECT t.*, u.screen_name
+            FROM tweets t
+            INNER JOIN users u on u.id = t.user_id
+            WHERE NOT t.is_retweet
+            AND t.created_at >= ?
+            AND t.created_at < ?
+            AND t.retweet_count >= ?
+            AND t.text LIKE ?
+            ORDER BY t.%s desc
             LIMIT ?";
 
 
