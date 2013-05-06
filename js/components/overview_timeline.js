@@ -1,9 +1,10 @@
 define(['jquery',
+    'underscore',
     'util/extend',
     'util/transform',
     'components/timeline',
     'lib/d3'],
-    function ($, extend, Transform, Timeline, d3) {
+    function ($, _, extend, Transform, Timeline, d3) {
 
         /**
          * A class for rendering and maintaining an overview timeline,
@@ -114,7 +115,7 @@ define(['jquery',
             this._brush = d3.svg.brush()
                 .x(this._timeScale)
                 .on("brush", $.proxy(this._onBrushChange, this))
-                .on("brushend", $.proxy(this._onBrushEnd, this))
+                .on("brushend", $.proxy(this._onBrushEnd, this));
 
             //Check if there is a selection
             var selectionInterval = this.extentFromUTC([this.interval.from(), this.interval.to()]);
