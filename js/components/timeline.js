@@ -241,7 +241,7 @@ define(['jquery',
         return [
             extent[0] - this._utcOffset,
             extent[1] - this._utcOffset
-        ]
+        ];
     };
 
     /**
@@ -254,7 +254,7 @@ define(['jquery',
         return [
             extent[0] + this._utcOffset,
             extent[1] + this._utcOffset
-        ]
+        ];
     };
 
     /**

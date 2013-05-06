@@ -5,7 +5,8 @@ define(['jquery', 'underscore', 'util/events'], function($, _, events) {
      */
     var URLS = {
         'counts': 'data/counts.php',
-        'overview_counts': 'data/overview_counts.php'
+        'overview_counts': 'data/overview_counts.php',
+        'discussions': 'data/discussions.php'
     };
 
     /**
@@ -166,6 +167,21 @@ define(['jquery', 'underscore', 'util/events'], function($, _, events) {
      */
     API.prototype.overview_counts = function(parameters) {
         this.request('get', 'overview_counts', {
+            params: parameters,
+            post_process: function(results) {
+                return results.payload;
+            }
+        });
+    };
+
+    /**
+     * Request discussions. Subscribe to the discussions event to receive data
+     * when it arrives.
+     *
+     * @param parameters
+     */
+    API.prototype.discussions = function(parameters) {
+        this.request('get', 'discussions', {
             params: parameters,
             post_process: function(results) {
                 return results.payload;

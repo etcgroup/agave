@@ -11,6 +11,7 @@ define(function (require) {
         var TweetList = require('components/tweet_list');
         var OverviewTimeline = require('components/overview_timeline');
         var FocusTimeline = require('components/focus_timeline');
+        var DiscussionList = require('components/discussion_list');
         var API = require('util/api');
 
         /**
@@ -36,6 +37,8 @@ define(function (require) {
 
             this.initTweetList();
             this.initDetailsPanel();
+
+            this.initDiscussionList();
 
             this.windowResize();
         };
@@ -189,6 +192,15 @@ define(function (require) {
 
         App.prototype.initDetailsPanel = function () {
             this.ui.detailsPanel = $('#details');
+        };
+
+        App.prototype.initDiscussionList = function() {
+            this.ui.discussions = this.ui.collaborator.find('.discussions');
+
+            this.discussionList = new DiscussionList({
+                into: this.ui.discussions,
+                api: this.api
+            });
         };
 
         App.prototype.windowResize = function () {

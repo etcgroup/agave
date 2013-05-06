@@ -17,6 +17,7 @@ class Queries
     private $queries;
     private $originals;
     private $performance = NULL;
+    private $utc;
 
     /**
      * Construct a new Queries object.
@@ -30,6 +31,8 @@ class Queries
      */
     public function __construct($params = NULL)
     {
+        $this->utc = new DateTimeZone('UTC');
+
         if ($params === NULL) {
             $params = parse_ini_file('db.ini');
         } else if (is_string($params)) {
@@ -133,15 +136,106 @@ class Queries
         $query = $this->queries->{$queryname};
 
         $args = array_slice(func_get_args(), 1);
-        call_user_func_array(array($query, 'bind_param'), refValues($args));
+        if ($args) {
+            call_user_func_array(array($query, 'bind_param'), refValues($args));
+        }
 
         $this->start($queryname);
 
-        $query->execute();
-        $result = $query->get_result();
+        if ($query->execute() === FALSE) {
+            echo "Execute $queryname failed: ({$this->db->errno}) {$this->db->error}";
+            $this->stop($queryname);
 
-        $this->stop($queryname);
+        } else {
+            $result = $query->get_result();
 
+            $this->stop($queryname);
+
+            return $result;
+        }
+    }
+
+    private function _build_insert_message()
+    {
+        $this->queries->insert_message = $this->db->prepare(
+            "INSERT INTO messages (time, user, message, discussion_id)
+            VALUES (?, ?, ?, ?)"
+        );
+
+        if (!$this->queries->insert_message) {
+            echo "Prepare insert_messages failed: (" . $this->db->errno . ") " . $this->db->error;
+        }
+    }
+
+    /**
+     * Gets message for the given discussion. Returns a MySQLi result set object.
+     *
+     * @param string $user
+     * @param string $message
+     * @param int $discussion_id
+     * @return mysqli_result
+     */
+    public function insert_message($user, $message, $discussion_id)
+    {
+        $now = new DateTime('now', $this->utc);
+        $time = $now->format('Y-m-d H:i:s');
+        return $this->run('discussion_messages', 'sssi', $time, $user, $message, $discussion_id);
+    }
+
+    private function _build_discussion_messages()
+    {
+        $this->queries->discussion_messages = $this->db->prepare(
+            "SELECT *
+            FROM messages
+            WHERE discussion_id = ?
+            ORDER BY time"
+        );
+
+        if (!$this->queries->discussion_messages) {
+            echo "Prepare discussion_messages failed: (" . $this->db->errno . ") " . $this->db->error;
+        }
+    }
+
+    /**
+     * Gets message for the given discussion. Returns a MySQLi result set object.
+     *
+     * @param int $discussion_id
+     *
+     * @return mysqli_result
+     */
+    public function get_discussion_messages($discussion_id)
+    {
+        $result = $this->run('discussion_messages', 'i', $discussion_id);
+        return $result;
+    }
+
+    private function _build_discussions()
+    {
+        $this->queries->discussions = $this->db->prepare(
+            "SELECT discussion_id AS id,
+                COUNT(*) as message_count,
+                GROUP_CONCAT(DISTINCT user ORDER BY time DESC SEPARATOR ', ') AS users,
+                GROUP_CONCAT(message SEPARATOR '... ') as subject,
+                UNIX_TIMESTAMP(MIN(time)) AS started_at,
+                UNIX_TIMESTAMP(MAX(time)) AS last_comment_at
+            FROM messages
+            GROUP BY discussion_id
+            ORDER BY last_comment_at desc;"
+        );
+
+        if (!$this->queries->discussions) {
+            echo "Prepare discussions failed: (" . $this->db->errno . ") " . $this->db->error;
+        }
+    }
+
+    /**
+     * Gets a list of discussions.
+     *
+     * @return mysqli_result
+     */
+    public function get_discussions()
+    {
+        $result = $this->run('discussions');
         return $result;
     }
 

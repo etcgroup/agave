@@ -45,7 +45,15 @@
             </div>
             <div id="collaborator-wrapper" class="wrapper">
                 <div id="collaborator">
-                    discussion
+                    <div class="discussions">
+                        <div class="header clearfix">
+                            <div class="title">Discussions</div>
+                            <div class="btn new-button">New Discussion</div>
+                        </div>
+                        <ul class="discussion-list"></ul>
+                    </div>
+                    <div class="comments">
+                    </div>
                 </div>
             </div>
         </div>

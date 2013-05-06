@@ -1,0 +1,76 @@
+body {
+  background: #193441;
+  font-family: Arial; }
+
+chat, chattitle, messageset, messages,
+messageinput, message, userid, timestamp,
+userinfo {
+  display: block; }
+chat2 {
+  background: #3e606f;
+  width: 700px; 
+  padding: 15px;
+  border-radius: 10px;
+  float: right; }
+chat {
+  background: #3e606f;
+  width: 550px; 
+  height: 500px;
+  margin: auto;
+  padding: 15px;
+  border-radius: 10px;
+  float: left;}
+  chat chattitle {
+    background: #91aa9d;
+    border-radius: 5px;
+    color: #fcfff5;
+    font-weight: bold;
+    padding: 10px; }
+  chat messageset {
+    background: #d1dbbd;
+    border-radius: 5px;
+    margin-top: 15px;
+    padding: 10px; }
+  chat messages {
+    background: #fcfff5;
+    border-radius: 5px;
+    height: 300px;
+    overflow-y: scroll; }
+    chat messages message {
+      padding: 10px;
+      border-bottom: 1px solid #91aa9d; }
+      chat messages message:hover {
+        background: #e8edde; }
+      chat messages message userid {
+        font-weight: bold;
+        font-size: 12pt;
+        color: #23363e; }
+      chat messages message p {
+        font-size: 11pt;
+        word-wrap: break-word;
+        margin: 0; }
+      chat messages message p.user {
+        text-align: right; }
+      chat messages message timestamp {
+        text-align: right;
+        font-style: italic;
+        font-size: 8pt; }
+  chat messageinput {
+    margin-top: 10px; }
+    chat messageinput textarea, chat messageinput button {
+      vertical-align: middle; }
+    chat messageinput button {
+      width: 70px;
+      height: 30px;
+      margin-left: 5px; }
+    chat messageinput textarea {
+      border: 1px solid #bac99c;
+      width: 480px;
+      height: 35px; }
+  chat userinfo {
+    text-align: center;
+    margin-top: 10px; }
+    chat userinfo input {
+      border: 1px solid #bac99c; }
+    chat userinfo button {
+      padding: 0 15px; }

@@ -2,6 +2,7 @@
 
 function query_box($name)
 {
+    ob_start();
     ?>
     <form class="query form-inline">
         <div class="btn-group view-buttons" data-toggle="buttons-radio">
@@ -28,4 +29,5 @@ function query_box($name)
         <button type="button" class="btn query-update">Update</button>
     </form>
     <?php
+    return ob_get_clean();
 }
