@@ -13,24 +13,17 @@ define([
          * A class for rendering the tweet list
          *
          * Options must include:
-         * - api: An API object
-         * - into: a selection
-         * - queries: a collection of Query objects
+         * - container: a jquery selector of the containing element
+         * - interval: the interval model
+         * - query: query model
          * - interval: an Interval object
-         *
-         * Options may include:
-         * - width
-         * - height
-         * - binSize
-         * - utcOffset
-         * - interpolation
          *
          * @param options
          * @constructor
          */
 
         var TweetList = function(options) {
-            this.container = options.container || '#tweet-list';
+            this.container = options.container || $('#tweet-list');
             this.interval = options.interval;
             this.query = options.query;
             this.tweets = null;
@@ -51,6 +44,9 @@ define([
             this.query.on('change', $.proxy(this._onQueryChanged, this));
         };
 
+        /**
+         * renders the list
+         */
         TweetList.prototype.render = function() {
             if(this.tweets !== undefined && this.tweets != null) {
                 var self = this;
@@ -66,7 +62,9 @@ define([
             }
         }
 
-
+        /**
+         * called anytime an update occurs
+         */
         TweetList.prototype.update = function() {
             var self = this;
 
@@ -112,6 +110,9 @@ define([
          }
 
 
+         /**
+          * renders the UI
+          */
          TweetList.prototype.initUI = function() {
             this.list = $('<ul>').appendTo(this.container);
             this.attachEvents();

@@ -1,0 +1,37 @@
+#tweet-list ul {
+	height: 300px;
+	width: 100%;
+	overflow-y: auto;
+	background: #fff;
+	list-style-type: none;
+	margin: 0;
+}
+
+#tweet-list .tweet {
+	color: #333;
+	padding: 12px;
+}
+
+#tweet-list .tweet .hdr {
+	color: #888;
+	font-size: 80%;
+}
+
+.tweet .body {
+	overflow: auto;
+}
+
+#tweet-list li {
+	border-bottom: 1px solid #ccc;
+}
+
+.tweet .tweet_text {
+	width: 80%;
+	float: left;
+}
+
+.tweet .tweet_count {
+	width: 20%;
+	float: left;
+	text-align: right;
+}
