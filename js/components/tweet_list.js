@@ -7,13 +7,13 @@ define([
     'lib/bootstrap'],
     function ($, _, events, Transform, Rectangle, Bootstrap) {
 
-        var TWEET_TEMPLATE = _.template("<li><div class='tweet' data-id='<%=id%>'>" +
+        var TWEET_TEMPLATE = _.template("<li class='tweet' data-id='<%=id%>'>" +
             "<div class='hdr'>@<%=screen_name%></div>" +
             "<div class='body'>" +
             "<div class='tweet_text'><%=text%></div>" +
             "<div class='tweet_count'><%=retweet_count%></div>" +
             "</div>" +
-            "</div></li>");
+            "</li>");
 
         //The max number of tweets to load.
         var TWEET_LIMIT = 50;
@@ -120,7 +120,7 @@ define([
                 var tweetUI = $(TWEET_TEMPLATE(tweet));
 
                 //Bind the tweet data to the tweet element
-                tweetUI.find('.tweet').data('tweet', tweet);
+                tweetUI.data('tweet', tweet);
 
                 self.ui.tweetList.append(tweetUI);
             });

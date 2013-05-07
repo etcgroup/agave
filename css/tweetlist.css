@@ -14,8 +14,15 @@
 }
 
 .tweet-list .tweet {
+    border-bottom: 1px solid #ccc;
 	color: #333;
 	padding: 12px;
+
+    -webkit-transition: background 200ms ;
+    -moz-transition: background 200ms ;
+    -ms-transition: background 200ms ;
+    -o-transition: background 200ms ;
+    transition: background 200ms ;
 }
 
 .tweet-list .tweet .hdr {
@@ -25,10 +32,6 @@
 
 .tweet-list .tweet .body {
 	overflow: auto;
-}
-
-.tweet-list li {
-	border-bottom: 1px solid #ccc;
 }
 
 .tweet-list .tweet .tweet_text {
@@ -42,3 +45,6 @@
 	text-align: right;
 }
 
+.tweet-list .tweet:hover {
+    background: #efefef;
+}
