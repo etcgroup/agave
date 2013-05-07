@@ -52,7 +52,6 @@ if ($discussion_id) {
 
     $perf->start('processing');
 
-
     while ($row = $result->fetch_assoc()) {
         $rendered[] = discussion_message($row);
     }

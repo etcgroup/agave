@@ -159,10 +159,64 @@ class Queries
         }
     }
 
+    private function _build_insert_annotation()
+    {
+        $this->queries->insert_annotation = $this->db->prepare(
+            "INSERT INTO annotations (created, user, label, time)
+            VALUES (?, ?, ?, ?)"
+        );
+
+        if (!$this->queries->insert_annotation) {
+            echo "Prepare insert_annotation failed: (" . $this->db->errno . ") " . $this->db->error;
+        }
+    }
+
+    /**
+     * Insert an annotation into the database.
+     *
+     * @param $user
+     * @param $label
+     * @param $datetime
+     * @return mixed
+     */
+    public function insert_annotation($user, $label, $datetime)
+    {
+        $now = new DateTime('now', $this->utc);
+        $created = $now->format('Y-m-d H:i:s');
+
+        $datetime = $datetime->format('Y-m-d H:i:s');
+
+        $this->run('insert_message', 'ssss', $created, $user, $label, $datetime);
+        return $this->db->insert_id;
+    }
+
+    private function _build_annotations() {
+        $this->queries->annotations = $this->db->prepare(
+            "SELECT UNIX_TIMESTAMP(created) as created,
+            user, label,
+            UNIX_TIMESTAMP(time) as time
+            FROM annotations"
+        );
+
+        if (!$this->queries->annotations) {
+            echo "Prepare annotations failed: (" . $this->db->errno . ") " . $this->db->error;
+        }
+    }
+
+    /**
+     * Retrieve annotations from the database.
+     *
+     * @return mixed
+     */
+    public function get_annotations()
+    {
+        return $this->run('annotations');
+    }
+
     private function _build_insert_message()
     {
         $this->queries->insert_message = $this->db->prepare(
-            "INSERT INTO messages (time, user, message, discussion_id)
+            "INSERT INTO messages (created, user, message, discussion_id)
             VALUES (?, ?, ?, ?)"
         );
 
@@ -205,7 +259,7 @@ class Queries
     private function _build_message()
     {
         $this->queries->message = $this->db->prepare(
-            "SELECT id, discussion_id, UNIX_TIMESTAMP(time) as time, user, message
+            "SELECT id, discussion_id, UNIX_TIMESTAMP(created) as created, user, message
              FROM messages
              WHERE id = ?"
         );
@@ -234,7 +288,7 @@ class Queries
     private function _build_discussion_messages()
     {
         $this->queries->discussion_messages = $this->db->prepare(
-            "SELECT id, discussion_id, UNIX_TIMESTAMP(time) as time, user, message
+            "SELECT id, discussion_id, UNIX_TIMESTAMP(created) as created, user, message
             FROM messages
             WHERE discussion_id = ?
             ORDER BY time desc"
@@ -265,8 +319,8 @@ class Queries
                 COUNT(*) as message_count,
                 GROUP_CONCAT(DISTINCT user ORDER BY time DESC SEPARATOR ', ') AS users,
                 GROUP_CONCAT(message SEPARATOR '... ') as subject,
-                UNIX_TIMESTAMP(MIN(time)) AS started_at,
-                UNIX_TIMESTAMP(MAX(time)) AS last_comment_at
+                UNIX_TIMESTAMP(MIN(created)) AS started_at,
+                UNIX_TIMESTAMP(MAX(created)) AS last_comment_at
             FROM messages
             GROUP BY discussion_id
             ORDER BY last_comment_at desc;"
