@@ -213,6 +213,16 @@ define(['jquery',
             //A list of highlighted points in time
             this._highlights = [];
 
+            function findIndexOf(id) {
+                //Remove the highlight with that id
+                for (var i = 0; i < self._highlights.length; i++) {
+                    if (self._highlights[i].id === id) {
+                        return i;
+                    }
+                }
+                return null;
+            }
+
             //A function for positioning highlights
             this._highlightXPosition = function(d) {
                 return self._timeScale(self._timeAccessor(d));
@@ -224,18 +234,15 @@ define(['jquery',
                 .call(this.boxes.inner);
 
             this.api.on('highlight-time', function(e, highlight) {
-                self._highlights.push(highlight);
-                self._updateHighlights();
+                if (findIndexOf(highlight.id) === null) {
+                    self._highlights.push(highlight);
+                    self._updateHighlights();
+                }
             });
 
             this.api.on('highlight-remove', function(e, id) {
-                //Remove the highlight with that id
-                for (var i = 0; i < self._highlights.length; i++) {
-                    if (self._highlights[i].id === id) {
-                        self._highlights.splice(i, 1);
-                        break;
-                    }
-                }
+                var index = findIndexOf(id);
+                self._highlights.splice(index, 1);
                 self._updateHighlights();
             });
         };
@@ -250,14 +257,25 @@ define(['jquery',
             var bind = this.ui.highlightGroup.selectAll('line')
                 .data(this._highlights);
 
-            bind.enter().append('line');
+            var boxHeight = this.boxes.inner.height();
 
-            bind.exit().remove();
+            bind.enter().append('line')
+                .attr('x1', this._highlightXPosition)
+                .attr('x2', this._highlightXPosition)
+                .attr('y1', boxHeight)
+                .attr('y2', boxHeight);
 
-            bind.attr('x1', this._highlightXPosition)
+            bind.exit()
+                .transition()
+                .attr('y1', boxHeight)
+                .attr('y2', boxHeight)
+                .remove();
+
+            bind.transition()
+                .attr('x1', this._highlightXPosition)
                 .attr('x2', this._highlightXPosition)
                 .attr('y1', 0)
-                .attr('y2', this.boxes.inner.height());
+                .attr('y2', boxHeight);
         };
 
         /**
