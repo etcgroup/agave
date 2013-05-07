@@ -37,7 +37,7 @@
                     <div id="tab-group-wrapper" class="wrapper">
                         <div class="tab-group">
                             <ul class="nav nav-tabs">
-                                <li class="active"><a data-target="#retweet-list-2" data-toggle="tab">Tweets</a></li>
+                                <li class="active"><a data-target="#tweet-list-2" data-toggle="tab">Tweets</a></li>
                                 <li><a data-target="#users-list-2" data-toggle="tab">Users</a></li>
                                 <li><a data-target="#keywords-list-2" data-toggle="tab">Keywords</a></li>
                             </ul>
