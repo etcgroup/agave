@@ -41,6 +41,7 @@ class Request
     /**
      * Initialize and get the database connection for this request.
      * @param type $params
+     * @return \Queries
      */
     public function db($params = NULL)
     {
@@ -141,7 +142,7 @@ class Request
     /**
      * Get 'from' and 'to' DateTimes.
      *
-     * @return type
+     * @return object
      */
     public function timeParameters()
     {
@@ -160,7 +161,7 @@ class Request
      * Get 'from' and 'to' DateTimes, as well as
      * a grouping 'interval'.
      *
-     * @return type
+     * @return object
      */
     public function binnedTimeParams()
     {

@@ -125,7 +125,7 @@ define(['jquery',
             }
 
             //Make DOM elements for the brush
-            this._svg.append("g")
+            this.ui.svg.append("g")
                 .attr("class", "x brush")
                 .call(this._brush)
                 .selectAll("rect")
@@ -143,7 +143,7 @@ define(['jquery',
          */
         OverviewTimeline.prototype._updateBrush = function() {
             //Update the height of the brush
-            this._svg.selectAll('g.x.brush')
+            this.ui.svg.selectAll('g.x.brush')
                 .attr('transform', new Transform('translate', this.boxes.inner.left(), this.boxes.inner.top()))
                 .selectAll('rect')
                 .attr("height", this.boxes.inner.height() + 7);

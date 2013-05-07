@@ -55,6 +55,30 @@ define([
 
             //Listen for new tweets on the API
             this.api.on('tweets', $.proxy(this._onData, this));
+
+            var self = this;
+            this.ui.tweetList.on('mouseenter', '.tweet', function() {
+                self._tweetMouseEntered($(this));
+            });
+
+            this.ui.tweetList.on('mouseleave', '.tweet', function() {
+                self._tweetMouseLeft($(this));
+            });
+        };
+
+        TweetList.prototype._tweetMouseEntered = function(tweetUI) {
+            var tweet = tweetUI.data('tweet');
+
+            this.api.trigger('highlight-time', {
+                id: tweet.id,
+                time: tweet.created_at
+            });
+        };
+
+        TweetList.prototype._tweetMouseLeft = function(tweetUI) {
+            var tweet = tweetUI.data('tweet');
+
+            this.api.trigger('highlight-remove', tweet.id);
         };
 
         /**
@@ -92,7 +116,13 @@ define([
             //Add each tweet
             tweets.forEach(function (tweet) {
                 //Render the tweet using the template and append
-                self.ui.tweetList.append(TWEET_TEMPLATE(tweet));
+
+                var tweetUI = $(TWEET_TEMPLATE(tweet));
+
+                //Bind the tweet data to the tweet element
+                tweetUI.find('.tweet').data('tweet', tweet);
+
+                self.ui.tweetList.append(tweetUI);
             });
         };
 

@@ -40,6 +40,8 @@ $perf->start('processing');
 $tweets = array();
 while ($row = $result->fetch_assoc())
 {
+    //Convert the created_at unix timestamp field to ms
+    $row['created_at'] = $row['created_at'] * 1000;
     $tweets[] = $row;
 }
 $result->free();

@@ -29,9 +29,6 @@ define(['jquery',
 
             //Create a vertical scale
             this._countScale = d3.scale.linear();
-
-            //Subscribe to a data stream from the API.
-            this.api.on('counts', $.proxy(this._onData, this));
         };
 
         //The focus extends the basic timeline
@@ -88,7 +85,15 @@ define(['jquery',
         FocusTimeline.prototype.render = function() {
             Timeline.prototype.render.call(this);
 
+            this._initHighlights();
             this._renderCountAxis();
+        };
+
+        FocusTimeline.prototype.attachEvents = function() {
+            Timeline.prototype.attachEvents.call(this);
+
+            //Subscribe to a data stream from the API.
+            this.api.on('counts', $.proxy(this._onData, this));
         };
 
         FocusTimeline.prototype._renderCountAxis = function() {
@@ -97,7 +102,7 @@ define(['jquery',
                 .ticks(10)
                 .orient('left');
 
-            this._svg.append('g')
+            this.ui.svg.append('g')
                 .classed('counts axis chart-label', true)
                 .style('opacity', 0);
 
@@ -105,7 +110,7 @@ define(['jquery',
         };
 
         FocusTimeline.prototype._updateCountAxis = function() {
-            this._svg.select('g.counts.axis.chart-label')
+            this.ui.svg.select('g.counts.axis.chart-label')
                 .attr('transform', new Transform('translate',
                     this.boxes.inner.left() - AXIS_OFFSET, this.boxes.inner.top()))
                 .call(this._verticalAxis);
@@ -126,7 +131,7 @@ define(['jquery',
                 //Configure the histogram itself
                 histogram
                     .className('focus histogram id-' + query.id())
-                    .container(self._svg)
+                    .container(self.ui.svg)
                     .box(self.boxes.inner)
                     .xData(self._timeAccessor)
                     .xScale(self._timeScale)
@@ -190,7 +195,7 @@ define(['jquery',
             this._countScale.domain([0, maxCount]);
 
             //Fade in the counts axis
-            this._svg.select('g.counts.axis.chart-label')
+            this.ui.svg.select('g.counts.axis.chart-label')
                 .transition()
                 .style('opacity', 1);
 
@@ -199,6 +204,60 @@ define(['jquery',
 
             //Call the parent method
             Timeline.prototype._onData.call(this, data);
+        };
+
+        FocusTimeline.prototype._initHighlights = function() {
+
+            var self = this;
+
+            //A list of highlighted points in time
+            this._highlights = [];
+
+            //A function for positioning highlights
+            this._highlightXPosition = function(d) {
+                return self._timeScale(self._timeAccessor(d));
+            };
+
+            //A group element for containing the highlight points
+            this.ui.highlightGroup = this.ui.svg.append('g')
+                .classed('highlights', true)
+                .call(this.boxes.inner);
+
+            this.api.on('highlight-time', function(e, highlight) {
+                self._highlights.push(highlight);
+                self._updateHighlights();
+            });
+
+            this.api.on('highlight-remove', function(e, id) {
+                //Remove the highlight with that id
+                for (var i = 0; i < self._highlights.length; i++) {
+                    if (self._highlights[i].id === id) {
+                        self._highlights.splice(i, 1);
+                        break;
+                    }
+                }
+                self._updateHighlights();
+            });
+        };
+
+        FocusTimeline.prototype._updateHighlights = function() {
+
+            //Set the box size
+            this.ui.highlightGroup
+                .attr('transform', new Transform('translate', this.boxes.inner.left(), this.boxes.inner.top()));
+
+            //Set the highlight positions
+            var bind = this.ui.highlightGroup.selectAll('line')
+                .data(this._highlights);
+
+            bind.enter().append('line');
+
+            bind.exit().remove();
+
+            bind.attr('x1', this._highlightXPosition)
+                .attr('x2', this._highlightXPosition)
+                .attr('y1', 0)
+                .attr('y2', this.boxes.inner.height());
         };
 
         /**

@@ -34,8 +34,6 @@ define(['jquery',
         this.interval = options.interval;
         this.queries = options.queries;
 
-        this.attachEvents();
-
         //Get the dimensions from the target if set
         if (options.into) {
             this._height = options.height || options.into.height();
@@ -72,6 +70,8 @@ define(['jquery',
         this._timeAccessor = function (d) {
             return d.time + self._utcOffset;
         };
+
+        this.attachEvents();
     };
 
     /**
@@ -91,6 +91,8 @@ define(['jquery',
      * Subsequently, use update.
      */
     Timeline.prototype.render = function () {
+
+        this.ui = {};
 
         this._buildBoxes();
         this._updateTimeScaleRange();
@@ -128,7 +130,7 @@ define(['jquery',
      * Render and configure the main svg element.
      */
     Timeline.prototype._renderTarget = function () {
-        this._svg = d3.select(this.into.selector)
+        this.ui.svg = d3.select(this.into.selector)
             .append('svg');
 
         this._updateTarget();
@@ -139,7 +141,7 @@ define(['jquery',
      * Update the svg element configuration.
      */
     Timeline.prototype._updateTarget = function () {
-        this._svg.call(this.boxes.outer);
+        this.ui.svg.call(this.boxes.outer);
     };
 
     /**
@@ -147,7 +149,7 @@ define(['jquery',
      */
     Timeline.prototype._renderBackground = function () {
         //Add a background
-        this._svg.append('rect')
+        this.ui.svg.append('rect')
             .classed('main background', true);
 
         this._updateBackground();
@@ -159,7 +161,7 @@ define(['jquery',
      */
     Timeline.prototype._updateBackground = function () {
         //Size the background
-        this._svg.select('rect.main.background')
+        this.ui.svg.select('rect.main.background')
             .call(this.boxes.outer);
     };
 
@@ -213,7 +215,7 @@ define(['jquery',
         //Configure the histogram itself
         this._histogram
             .className('histogram')
-            .container(this._svg)
+            .container(this.ui.svg)
             .box(this.boxes.inner)
             .xData(this._timeAccessor)
             .xScale(this._timeScale)
@@ -225,7 +227,7 @@ define(['jquery',
 
     Timeline.prototype._renderTimeAxis = function () {
         //Add an x axis
-        this._svg.append('g')
+        this.ui.svg.append('g')
             .classed('x axis chart-label', true);
 
         this._updateTimeAxis();
@@ -305,7 +307,7 @@ define(['jquery',
 
     Timeline.prototype._updateTimeAxis = function () {
         //Update the time axis
-        this._svg.select('g.x.axis.chart-label')
+        this.ui.svg.select('g.x.axis.chart-label')
             .attr('transform', new Transform('translate',
                 this.boxes.inner.left(), this.boxes.inner.bottom() + AXIS_OFFSET))
             .call(this._timeAxis);

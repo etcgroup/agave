@@ -290,7 +290,7 @@ class Queries
 
     private function _build_originals()
     {
-        $base_query = "SELECT t.*, u.screen_name
+        $base_query = "SELECT t.*, UNIX_TIMESTAMP(t.created_at) AS created_at, u.screen_name
             FROM tweets t
             INNER JOIN users u on u.id = t.user_id
             WHERE NOT t.is_retweet
@@ -300,7 +300,7 @@ class Queries
             ORDER BY t.%s desc
             LIMIT ?";
 
-        $base_query_like = "SELECT t.*, u.screen_name
+        $base_query_like = "SELECT t.*, UNIX_TIMESTAMP(t.created_at) AS created_at, u.screen_name
             FROM tweets t
             INNER JOIN users u on u.id = t.user_id
             WHERE NOT t.is_retweet
