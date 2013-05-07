@@ -87,6 +87,23 @@
     shape-rendering: crispEdges;
 }
 
-.tweet-highlights line {
+.tweet-highlight {
     stroke: cyan;
+}
+
+.annotation-group rect {
+    stroke: orange;
+    stroke-width: 2px;
+    fill: none;
+
+    pointer-events: all;
+}
+
+.annotation-group text {
+    fill: #FFF;
+    font-size: 11px;
+}
+
+.annotation-group line {
+    stroke: yellow;
 }

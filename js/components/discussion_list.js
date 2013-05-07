@@ -12,15 +12,32 @@ define(['jquery', 'util/events'], function ($, events) {
     DiscussionList.prototype._initUI = function() {
         this.ui = {};
 
-        this.ui.newDisussionButton = this.into.find('.new-button');
-        this.ui.discussionList = this.into.find('.discussion-list');
+        this.ui.discussionControls = this.into.find('.discussion-controls');
+        this.ui.newDisussionButton = this.ui.discussionControls.find('.new-button');
+        this.ui.discussionList = this.ui.discussionControls.find('.discussion-list');
+
+        this.ui.userBox = this.into.find('.user-box');
+        this.ui.userInput = this.ui.userBox.find('input');
+        this.ui.userSubmit = this.ui.userBox.find('.user-submit');
     };
 
     DiscussionList.prototype._attachEvents = function () {
         this.api.on('discussions', $.proxy(this._onData, this));
+        this.api.on('user', $.proxy(this._userAvailable, this));
+
+        var self = this;
+        this.ui.userInput.on('keydown', function(e) {
+            if (e.which === 13) {
+                e.preventDefault();
+                //pressed enter
+                self._onUserSubmitted();
+                return false;
+            }
+        });
+        this.ui.userSubmit.on('click', $.proxy(this._onUserSubmitted, this));
+
 
         this.ui.newDisussionButton.on('click', $.proxy(this._newDiscussion, this));
-        var self = this;
         this.ui.discussionList.on('click', '.discussion', function(e) {
             self._discussionClicked($(this));
         });
@@ -32,6 +49,21 @@ define(['jquery', 'util/events'], function ($, events) {
 
     DiscussionList.prototype._onData = function(e, result) {
         this.ui.discussionList.html(result.data);
+    };
+
+    DiscussionList.prototype._onUserSubmitted = function() {
+        var user = $.trim(this.ui.userInput.val());
+        if (!user) {
+            alert("Come on... type a user name :)");
+            return;
+        }
+
+        this.api.trigger('user', user);
+    };
+
+    DiscussionList.prototype._userAvailable = function(e, user) {
+        this.ui.userBox.collapse('hide');
+        this.ui.discussionControls.collapse('show');
     };
 
     DiscussionList.prototype._newDiscussion = function() {

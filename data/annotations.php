@@ -27,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     $user = $params->user;
     $label = htmlspecialchars($params->label);
-    $time = $params->time / 1000; //converting from ms to s
+    $time = floor($params->time / 1000); //converting from ms to s
     $time = new DateTime("@$time"); // converting to a DateTime
 
     $inserted_id = $db->insert_annotation($user, $label, $time);

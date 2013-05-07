@@ -1,11 +1,13 @@
 define(['jquery',
     'util/extend',
     'util/transform',
+    'util/poll',
     'components/timeline',
     'vis/histogram',
     'lib/d3'],
-    function ($, extend, Transform, Timeline, Histogram, d3) {
+    function ($, extend, Transform, Poll, Timeline, Histogram, d3) {
 
+        var ANNOTATION_POLL_INTERVAL = 10000;
         var AXIS_OFFSET = 3;
 
         /**
@@ -29,6 +31,13 @@ define(['jquery',
 
             //Create a vertical scale
             this._countScale = d3.scale.linear();
+
+            this._annotationsPoll = new Poll({
+                callback: $.proxy(this._requestAnnotations, this),
+                interval: ANNOTATION_POLL_INTERVAL
+            });
+
+            this._annotationsPoll.start();
         };
 
         //The focus extends the basic timeline
@@ -73,6 +82,30 @@ define(['jquery',
 
 
         /**
+         * Submit a request for new annotation data.
+         *
+         * @private
+         */
+        FocusTimeline.prototype._requestAnnotations = function() {
+            this.api.annotations();
+        };
+
+        /**
+         * Called when new annotation data arrives.
+         * @private
+         */
+        FocusTimeline.prototype._onAnnotationData = function(result) {
+
+            var annotations = result.data;
+
+            console.log(annotations);
+
+            //Attach event handlers, position, etc
+
+        };
+
+
+        /**
          * Set the time scale domain.
          *
          * @param domain
@@ -94,6 +127,9 @@ define(['jquery',
 
             //Subscribe to a data stream from the API.
             this.api.on('counts', $.proxy(this._onData, this));
+            this.api.on('user', $.proxy(this._userAvailable, this));
+
+            this.ui.svg.on('click', $.proxy(this.beginAnnotation, this));
         };
 
         FocusTimeline.prototype._renderCountAxis = function() {
@@ -153,6 +189,10 @@ define(['jquery',
             this._histograms.forEach(function (histogram) {
                 histogram.update();
             });
+        };
+
+        FocusTimeline.prototype._userAvailable = function(e, user) {
+            this.user = user;
         };
 
         /**
@@ -234,10 +274,6 @@ define(['jquery',
             };
 
             //A group element for containing the highlight points
-            this.ui.tweetHighlightGroup = this.ui.svg.append('g')
-                .classed('tweet-highlights', true)
-                .call(this.boxes.inner);
-
             this.api.on('highlight-tweet', function(e, highlight) {
                 if (findIndexOf(highlight.id) === null) {
                     self._tweetHighlights.push(highlight);
@@ -254,18 +290,15 @@ define(['jquery',
 
         FocusTimeline.prototype._updateTweetHighlights = function() {
 
-            //Set the highlight group position
-            this.ui.tweetHighlightGroup
-                .attr('transform', new Transform('translate', this.boxes.inner.left(), this.boxes.inner.top()));
-
             var boxHeight = this.boxes.inner.height();
 
             //Set the highlight positions
-            var bind = this.ui.tweetHighlightGroup.selectAll('line')
+            var bind = this.ui.chartGroup.selectAll('line.tweet-highlight')
                 .data(this._tweetHighlights);
 
             //Create new lines and position them, but make them have no height
             bind.enter().append('line')
+                .classed('tweet-highlight', true)
                 .attr('x1', this._highlightXPosition)
                 .attr('x2', this._highlightXPosition)
                 .attr('y1', boxHeight)
@@ -316,6 +349,152 @@ define(['jquery',
 
             //Get new data
             this._requestData(query);
+        };
+
+        /**
+         * Call this to put the timeline in annotation mode.
+         */
+        FocusTimeline.prototype.beginAnnotation = function() {
+            if (this._annotationMode) {
+                //Already annotating
+                return;
+            }
+
+            this._annotationMode = true;
+            console.log('entering annotation mode');
+
+            //Add a new group for containing the annotation controls
+            this.ui.annotationGroup = this.ui.chartGroup.append('g')
+                .style('opacity', 0)
+                .classed('annotation-group', true);
+
+            //Add a label - we put this behind the box
+            this.ui.annotationGroup
+                .append('text')
+                .attr('x', 3)
+                .attr('y', 13)
+                .text('Click to label a time');
+
+            //Add a box to show that annotation mode is active
+            this.ui.annotationIndicator = this.ui.annotationGroup.append('rect')
+                .attr('width', this.boxes.inner.width())
+                .attr('height', this.boxes.inner.height());
+
+            //Add a line for showing where the annotation will fall
+            this.ui.annotationTarget = this.ui.annotationGroup.append('line');
+
+            //And fade it in
+            this.ui.annotationGroup
+                .transition()
+                .style('opacity', 1);
+
+            //When the mouse moves, we need to update the annotation target
+            this.ui.annotationIndicator.on('mousemove', $.proxy(this._updateAnnotationTarget, this));
+
+            //At this point, clicking on the timeline creates a new annotation
+            this.ui.annotationIndicator.on('click', $.proxy(this._createAnnotation, this));
+            this.ui.annotationTarget.on('click', $.proxy(this._createAnnotation, this));
+        };
+
+        /**
+         * Called when an existing annotation is clicked.
+         * @private
+         */
+        FocusTimeline.prototype._selectAnnotation = function() {
+            //Don't let this event go anywhere else
+            d3.event.preventDefault();
+            d3.event.stopPropagation();
+
+            var target = d3.event.target;
+            debugger;
+        };
+
+        /**
+         * This is called when the user selects a time for annotation.
+         *
+         * @private
+         */
+        FocusTimeline.prototype._createAnnotation = function() {
+            if (!this._annotationMode) {
+                //Not annotating
+                return;
+            }
+
+            //Don't let this event go anywhere else
+            d3.event.preventDefault();
+            d3.event.stopPropagation();
+
+            //Get the coordinate that was clicked
+            var x = d3.event.offsetX - this.boxes.inner.left();
+
+            //Convert to a time, in real UTC
+            var time = this._timeScale.invert(x) - this._utcOffset;
+
+            console.log('creating annotation at time ' + time);
+
+            if (this.user) {
+                var label = prompt("Label this time");
+
+                //Send the annotation up to the server
+                var annotation = {
+                    time: time,
+                    label: label,
+                    user: this.user
+                };
+                this.api.annotate(annotation);
+
+                this.trigger('new-annotation', annotation);
+            } else {
+                alert('You must sign in to annotate.');
+            }
+
+            //And we're done annotating
+            this.endAnnotation();
+
+            return false;
+        };
+
+        /**
+         * Called when the annotation target line needs to be updated.
+         *
+         * @private
+         */
+        FocusTimeline.prototype._updateAnnotationTarget = function() {
+            if (!this._annotationMode) {
+                //Not annotating
+                return;
+            }
+
+            //Get the coordinate of the mouse
+            var x = d3.event.offsetX - this.boxes.inner.left();
+
+            this.ui.annotationTarget
+                .attr('x1', x)
+                .attr('x2', x)
+                .attr('y1', 0)
+                .attr('y2', this.boxes.inner.height());
+        };
+
+        /**
+         * Call this to take the timeline out of annotation mode.
+         */
+        FocusTimeline.prototype.endAnnotation = function() {
+            if (!this._annotationMode) {
+                //Not annotating
+                return;
+            }
+
+            console.log('leaving annotation mode');
+            this._annotationMode = false;
+
+            this.ui.annotationGroup
+                .transition()
+                .style('opacity', 0)
+                .remove();
+
+            this.ui.annotationGroup = null;
+            this.ui.annotationIndicator = null;
+            this.ui.annotationTarget = null;
         };
 
         return FocusTimeline;

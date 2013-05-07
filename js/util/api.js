@@ -8,7 +8,8 @@ define(['jquery', 'underscore', 'util/events'], function ($, _, events) {
         'overview_counts': 'data/overview_counts.php',
         'discussions': 'data/discussions.php',
         'messages': 'data/messages.php',
-        'tweets': 'data/tweets.php'
+        'tweets': 'data/tweets.php',
+        'annotations': 'data/annotations.php'
     };
 
     /**
@@ -235,6 +236,24 @@ define(['jquery', 'underscore', 'util/events'], function ($, _, events) {
             },
             //Have to make sure requests for different queries don't get crossed
             request_name: 'tweets-' + queryId
+        });
+    };
+
+    API.prototype.annotations = function(parameters) {
+        this.request('get', 'annotations', {
+            params: parameters,
+            post_process: function (results) {
+                return results.payload;
+            }
+        });
+    };
+
+    API.prototype.annotate = function(parameters) {
+        this.request('post', 'annotations', {
+            params: parameters,
+            post_process: function (results) {
+                return results.payload;
+            }
         });
     };
 

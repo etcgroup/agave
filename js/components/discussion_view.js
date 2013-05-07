@@ -1,4 +1,7 @@
-define(['jquery', 'util/events', 'lib/bootstrap'], function($, events, bootstrap) {
+define(['jquery',
+    'util/events',
+    'util/poll',
+    'lib/bootstrap'], function($, events, Poll, bootstrap) {
 
     //Check for messages every 10 seconds
     var POLL_INTERVAL = 10000;
@@ -9,6 +12,11 @@ define(['jquery', 'util/events', 'lib/bootstrap'], function($, events, bootstrap
 
         this._initUI();
         this._attachEvents();
+
+        this.poll = new Poll({
+            callback: $.proxy(this._requestData, this),
+            interval: POLL_INTERVAL
+        });
     };
 
     DiscussionView.prototype._initUI = function() {
@@ -21,37 +29,13 @@ define(['jquery', 'util/events', 'lib/bootstrap'], function($, events, bootstrap
         this.ui.commentInput = this.ui.commentBox.find('textarea');
         this.ui.userDisplay = this.ui.commentBox.find('.user-display');
         this.ui.commentSubmit = this.ui.commentBox.find('.send-button');
-
-        this.ui.userBox = this.into.find('.user-box');
-        this.ui.userInput = this.ui.userBox.find('input');
-        this.ui.userSubmit = this.ui.userBox.find('.user-submit');
     };
 
     DiscussionView.prototype._attachEvents = function() {
         this.ui.backButton.on('click', $.proxy(this._onBackClicked, this));
         this.ui.commentSubmit.on('click', $.proxy(this._onSendClicked, this));
-
-        var self = this;
-        this.ui.userInput.on('keydown', function(e) {
-            if (e.which === 13) {
-                e.preventDefault();
-                //pressed enter
-                self._onUserSubmitted();
-                return false;
-            }
-        });
-
-        this.ui.userSubmit.on('click', $.proxy(this._onUserSubmitted, this));
-
+        this.api.on('user', $.proxy(this._userAvailable, this));
         this.api.on('messages', $.proxy(this._onData, this));
-    };
-
-    DiscussionView.prototype._startPolling = function() {
-        this.pollInterval = setInterval($.proxy(this._requestData, this), POLL_INTERVAL);
-    };
-
-    DiscussionView.prototype._stopPolling = function() {
-        clearInterval(this.pollInterval);
     };
 
     DiscussionView.prototype.show = function(discussion_id) {
@@ -64,19 +48,15 @@ define(['jquery', 'util/events', 'lib/bootstrap'], function($, events, bootstrap
 
         this.into.addClass('in');
 
-        this._startPolling();
+        this.poll.start();
 
-        if (!this.user) {
-            this.ui.userInput.focus();
-        } else {
-            this.ui.commentInput.focus();
-        }
+        this.ui.commentInput.focus();
     };
 
     DiscussionView.prototype.hide = function() {
         this.into.removeClass('in');
 
-        this._stopPolling();
+        this.poll.stop();
     };
 
     DiscussionView.prototype._onBackClicked = function() {
@@ -97,19 +77,9 @@ define(['jquery', 'util/events', 'lib/bootstrap'], function($, events, bootstrap
         }
     };
 
-    DiscussionView.prototype._onUserSubmitted = function() {
-        var user = $.trim(this.ui.userInput.val());
-        if (!user) {
-            alert("Come on... type a user name :)");
-            return;
-        }
-
+    DiscussionView.prototype._userAvailable = function(e, user) {
         this.user = user;
         this.ui.userDisplay.html('Hello, <b>' + user + '</b>!');
-        this.ui.userBox.collapse('hide');
-        this.ui.commentBox.collapse('show');
-
-        this.ui.commentInput.focus();
     };
 
     DiscussionView.prototype._onSendClicked = function() {

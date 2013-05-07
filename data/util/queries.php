@@ -186,7 +186,7 @@ class Queries
 
         $datetime = $datetime->format('Y-m-d H:i:s');
 
-        $this->run('insert_message', 'ssss', $created, $user, $label, $datetime);
+        $this->run('insert_annotation', 'ssss', $created, $user, $label, $datetime);
         return $this->db->insert_id;
     }
 

@@ -71,6 +71,7 @@ define(['jquery',
             return d.time + self._utcOffset;
         };
 
+        this.initUI();
         this.attachEvents();
     };
 
@@ -87,22 +88,33 @@ define(['jquery',
     };
 
     /**
+     * Sets up the UI container and svg element.
+     */
+    Timeline.prototype.initUI = function() {
+        this.ui = {};
+        this.ui.svg = d3.select(this.into.selector)
+            .append('svg');
+    };
+
+    /**
      * Render the timeline. Only should be called once.
      * Subsequently, use update.
      */
     Timeline.prototype.render = function () {
 
-        this.ui = {};
-
         this._buildBoxes();
         this._updateTimeScaleRange();
 
-        this._renderTarget();
+        this._updateTarget();
 
         this._renderBackground();
 
         this._renderTimeAxis();
         this._renderHistogram();
+
+        //A convenient container for anything that needs to be
+        //in the same place as the inner box
+        this.ui.chartGroup = this.ui.svg.append('g');
 
         this._requestData();
     };
@@ -114,8 +126,15 @@ define(['jquery',
         this._buildBoxes();
         this._updateTimeScaleRange();
 
+        this._updateTarget();
+        this._updateBackground();
+
         this._updateTimeAxis();
         this._updateHistogram();
+
+        this.ui.chartGroup
+            .attr('transform', new Transform('translate',
+                this.boxes.inner.left(), this.boxes.inner.top()));
     };
 
     /**
@@ -124,16 +143,6 @@ define(['jquery',
      */
     Timeline.prototype._requestData = function() {
         //Meant to be overridden
-    };
-
-    /**
-     * Render and configure the main svg element.
-     */
-    Timeline.prototype._renderTarget = function () {
-        this.ui.svg = d3.select(this.into.selector)
-            .append('svg');
-
-        this._updateTarget();
     };
 
 

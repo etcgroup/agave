@@ -18,6 +18,14 @@
     float: right;
 }
 
+.discussions .user-box {
+    text-align: center;
+}
+
+.discussions .user-box input {
+    margin: 30px 0;
+}
+
 .discussion-list {
     margin: 0;
     padding: 0;
@@ -76,14 +84,6 @@
 
 .discussion-view {
     float: right;
-}
-
-.discussion-view .user-box {
-    text-align: center;
-}
-
-.discussion-view .user-box input {
-    margin: 30px 0;
 }
 
 .discussion-view .comment-box textarea {
