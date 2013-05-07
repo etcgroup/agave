@@ -291,7 +291,7 @@ class Queries
             "SELECT id, discussion_id, UNIX_TIMESTAMP(created) as created, user, message
             FROM messages
             WHERE discussion_id = ?
-            ORDER BY time desc"
+            ORDER BY created desc"
         );
 
         if (!$this->queries->discussion_messages) {
@@ -317,7 +317,7 @@ class Queries
         $this->queries->discussions = $this->db->prepare(
             "SELECT discussion_id AS id,
                 COUNT(*) as message_count,
-                GROUP_CONCAT(DISTINCT user ORDER BY time DESC SEPARATOR ', ') AS users,
+                GROUP_CONCAT(DISTINCT user ORDER BY created DESC SEPARATOR ', ') AS users,
                 GROUP_CONCAT(message SEPARATOR '... ') as subject,
                 UNIX_TIMESTAMP(MIN(created)) AS started_at,
                 UNIX_TIMESTAMP(MAX(created)) AS last_comment_at

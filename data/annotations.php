@@ -52,4 +52,4 @@ $result->free();
 
 $perf->stop('processing');
 
-$request->response(join("", $annotations));
+$request->response($annotations);
