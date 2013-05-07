@@ -206,17 +206,22 @@ define(['jquery',
             Timeline.prototype._onData.call(this, data);
         };
 
+        /**
+         * Set up timeline highlighting.
+         *
+         * @private
+         */
         FocusTimeline.prototype._initHighlights = function() {
 
             var self = this;
 
             //A list of highlighted points in time
-            this._highlights = [];
+            this._tweetHighlights = [];
 
             function findIndexOf(id) {
                 //Remove the highlight with that id
-                for (var i = 0; i < self._highlights.length; i++) {
-                    if (self._highlights[i].id === id) {
+                for (var i = 0; i < self._tweetHighlights.length; i++) {
+                    if (self._tweetHighlights[i].id === id) {
                         return i;
                     }
                 }
@@ -229,48 +234,51 @@ define(['jquery',
             };
 
             //A group element for containing the highlight points
-            this.ui.highlightGroup = this.ui.svg.append('g')
-                .classed('highlights', true)
+            this.ui.tweetHighlightGroup = this.ui.svg.append('g')
+                .classed('tweet-highlights', true)
                 .call(this.boxes.inner);
 
-            this.api.on('highlight-time', function(e, highlight) {
+            this.api.on('highlight-tweet', function(e, highlight) {
                 if (findIndexOf(highlight.id) === null) {
-                    self._highlights.push(highlight);
-                    self._updateHighlights();
+                    self._tweetHighlights.push(highlight);
+                    self._updateTweetHighlights();
                 }
             });
 
-            this.api.on('highlight-remove', function(e, id) {
+            this.api.on('unhighlight-tweet', function(e, id) {
                 var index = findIndexOf(id);
-                self._highlights.splice(index, 1);
-                self._updateHighlights();
+                self._tweetHighlights.splice(index, 1);
+                self._updateTweetHighlights();
             });
         };
 
-        FocusTimeline.prototype._updateHighlights = function() {
+        FocusTimeline.prototype._updateTweetHighlights = function() {
 
-            //Set the box size
-            this.ui.highlightGroup
+            //Set the highlight group position
+            this.ui.tweetHighlightGroup
                 .attr('transform', new Transform('translate', this.boxes.inner.left(), this.boxes.inner.top()));
-
-            //Set the highlight positions
-            var bind = this.ui.highlightGroup.selectAll('line')
-                .data(this._highlights);
 
             var boxHeight = this.boxes.inner.height();
 
+            //Set the highlight positions
+            var bind = this.ui.tweetHighlightGroup.selectAll('line')
+                .data(this._tweetHighlights);
+
+            //Create new lines and position them, but make them have no height
             bind.enter().append('line')
                 .attr('x1', this._highlightXPosition)
                 .attr('x2', this._highlightXPosition)
                 .attr('y1', boxHeight)
                 .attr('y2', boxHeight);
 
+            //Transition un-needed lines out and remove
             bind.exit()
                 .transition()
                 .attr('y1', boxHeight)
                 .attr('y2', boxHeight)
                 .remove();
 
+            //Position the lines where they ought to be
             bind.transition()
                 .attr('x1', this._highlightXPosition)
                 .attr('x2', this._highlightXPosition)

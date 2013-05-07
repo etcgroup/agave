@@ -87,6 +87,6 @@
     shape-rendering: crispEdges;
 }
 
-.highlights line {
-    stroke: orange;
+.tweet-highlights line {
+    stroke: cyan;
 }

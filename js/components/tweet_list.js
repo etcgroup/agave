@@ -69,7 +69,7 @@ define([
         TweetList.prototype._tweetMouseEntered = function(tweetUI) {
             var tweet = tweetUI.data('tweet');
 
-            this.api.trigger('highlight-time', {
+            this.api.trigger('highlight-tweet', {
                 id: tweet.id,
                 time: tweet.created_at
             });
@@ -78,7 +78,7 @@ define([
         TweetList.prototype._tweetMouseLeft = function(tweetUI) {
             var tweet = tweetUI.data('tweet');
 
-            this.api.trigger('highlight-remove', tweet.id);
+            this.api.trigger('unhighlight-tweet', tweet.id);
         };
 
         /**
