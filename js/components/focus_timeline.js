@@ -1,14 +1,19 @@
 define(['jquery',
+    'underscore',
     'util/extend',
     'util/transform',
     'util/poll',
     'components/timeline',
     'vis/histogram',
+    'util/tooltip',
     'lib/d3'],
-    function ($, extend, Transform, Poll, Timeline, Histogram, d3) {
+    function ($, _, extend, Transform, Poll, Timeline, Histogram, Tooltip, d3) {
 
         var ANNOTATION_POLL_INTERVAL = 10000;
         var AXIS_OFFSET = 3;
+        var ANNOTATION_TOOLTIP_TEMPLATE = _.template(
+            "<%=label%> <span class='muted'>(<%=user%>)</span>"
+        );
 
         /**
          * A class for rendering and maintaining a focus timeline.
@@ -38,6 +43,8 @@ define(['jquery',
             });
 
             this._annotationsPoll.start();
+
+            this.tooltip = new Tooltip();
         };
 
         //The focus extends the basic timeline
@@ -116,10 +123,19 @@ define(['jquery',
 
             var annotations = result.data;
 
-            var bind = this.ui.annotations.selectAll('line')
+            var bind = this.ui.annotations.selectAll('rect')
                 .data(annotations);
 
-            bind.enter().append('line');
+            var self = this;
+            bind.enter().append('rect')
+                .attr('y', 0)
+                .attr('width', 2)
+                .on('mousemove', function(d) {
+                    self._onAnnotationHover(d3.event, d, true);
+                })
+                .on('mouseout', function(d) {
+                    self._onAnnotationHover(d3.event, d, false);
+                });
 
             //Remove un-needed lines
             bind.exit()
@@ -128,14 +144,25 @@ define(['jquery',
             this._updateAnnotations();
         };
 
+        FocusTimeline.prototype._onAnnotationHover = function(event, data, mouseHovering) {
+            if (mouseHovering) {
+                var label = ANNOTATION_TOOLTIP_TEMPLATE(data);
+
+                this.tooltip.show({
+                    top: event.pageY,
+                    left: event.pageX
+                }, label);
+            } else {
+                this.tooltip.hide();
+            }
+        };
+
         FocusTimeline.prototype._updateAnnotations = function() {
             var boxHeight = this.boxes.inner.height();
 
-            this.ui.annotations.selectAll('line')
-                .attr('x1', this._highlightXPosition)
-                .attr('x2', this._highlightXPosition)
-                .attr('y1', 0)
-                .attr('y2', boxHeight);
+            this.ui.annotations.selectAll('rect')
+                .attr('x', this._highlightXPosition)
+                .attr('height', boxHeight);
         };
 
         /**
@@ -348,14 +375,12 @@ define(['jquery',
 
             //Transition un-needed lines out and remove
             bind.exit()
-                .transition()
                 .attr('y1', boxHeight)
                 .attr('y2', boxHeight)
                 .remove();
 
             //Position the lines where they ought to be
-            bind.transition()
-                .attr('x1', this._highlightXPosition)
+            bind.attr('x1', this._highlightXPosition)
                 .attr('x2', this._highlightXPosition)
                 .attr('y1', 0)
                 .attr('y2', boxHeight);

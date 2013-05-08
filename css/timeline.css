@@ -109,8 +109,16 @@
     shape-rendering: crispEdges;
 }
 
-.annotations line {
-    stroke: yellow;
-    stroke-width: 2px;
+.annotations rect {
+    fill: gold;
+    stroke: transparent;
+    stroke-width: 4px;
     shape-rendering: crispEdges;
+
+    pointer-events: all;
+    cursor: pointer;
+}
+
+.annotations rect:hover {
+    fill: yellow;
 }
