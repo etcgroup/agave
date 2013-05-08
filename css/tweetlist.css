@@ -1,13 +1,4 @@
-.tab-group ul {
-	margin: 0;
-}
-.tab-group .tab-content {
-	height: 300px;
-}
 .tweet-list ul {
-	height: 300px;
-	width: 100%;
-	overflow-y: auto;
 	list-style-type: none;
 	margin: 0;
 	background: #fff;

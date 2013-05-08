@@ -6,6 +6,7 @@ define(function (require) {
     var urls = require('util/urls');
     var Interval = require('model/interval');
     var Query = require('model/query');
+    var User = require('model/user');
     var QueryControls = require('components/query_controls');
     var TweetTimeline = require('components/tweet_timeline');
     var TweetList = require('components/tweet_list');
@@ -13,6 +14,7 @@ define(function (require) {
     var FocusTimeline = require('components/focus_timeline');
     var DiscussionList = require('components/discussion_list');
     var DiscussionView = require('components/discussion_view');
+    var SignIn = require('components/sign_in');
     var API = require('util/api');
 
     /**
@@ -39,6 +41,7 @@ define(function (require) {
         this.initDetailsPanel();
         this.initTweetList();
 
+        this.initSignInView();
         this.initDiscussionList();
         this.initDiscussionView();
 
@@ -59,8 +62,11 @@ define(function (require) {
             to: params.get('to', this.config.defaults.to) * 1000
         });
 
+        //Initialize the user model
+        this.user = new User();
+
         //Find the queries box
-        this.ui.queryPanel = $('#queries');
+        this.ui.queryPanel = this.ui.explorer.find('.queries');
 
         //The query collection
         this.queries = [];
@@ -104,8 +110,9 @@ define(function (require) {
     App.prototype.initUI = function () {
         this.ui = {};
 
-        this.ui.explorer = $('#explorer');
-        this.ui.collaborator = $('#collaborator');
+        var content = $('body > .content');
+        this.ui.explorer = content.find('.explorer');
+        this.ui.collaborator = content.find('.collaborator');
 
     };
 
@@ -113,7 +120,7 @@ define(function (require) {
      * Set up the small context timeline visualization.
      */
     App.prototype.initContextTimeline = function () {
-        this.ui.overviewTimeline = $('#tweet-overview');
+        this.ui.overviewTimeline = this.ui.explorer.find('.tweet-overview');
 
         this.overviewTimeline = new OverviewTimeline({
             into: this.ui.overviewTimeline,
@@ -143,7 +150,7 @@ define(function (require) {
      * Set up the larger focus timeline visualization.
      */
     App.prototype.initFocusTimeline = function () {
-        this.ui.focusTimeline = $('#tweet-timeline');
+        this.ui.focusTimeline = this.ui.explorer.find('.tweet-timeline');
 
         this.focusTimeline = new FocusTimeline({
             into: this.ui.focusTimeline,
@@ -180,7 +187,7 @@ define(function (require) {
      * Find the details panel and tab groups
      */
     App.prototype.initDetailsPanel = function () {
-        this.ui.detailsPanel = $('#explorer-details');
+        this.ui.detailsPanel = this.ui.explorer.find('.details');
         this.ui.detailsTabGroups = [];
 
         var self = this;
@@ -213,21 +220,47 @@ define(function (require) {
         });
     };
 
+    App.prototype.setDiscussionState = function(cssClass) {
+        this.ui.collaborator
+            .removeClass('show-left show-mid show-right')
+            .addClass(cssClass);
+    };
+
+    App.prototype.initSignInView = function() {
+        this.ui.signIn = this.ui.collaborator.find('.user-box');
+
+        this.signIn = new SignIn({
+            into: this.ui.signIn,
+            user: this.user
+        });
+
+        var self = this;
+
+        //When a user is available...
+        this.user.on('change', function() {
+            //Hide the sign-in box, show the discussions
+            self.discussionList.show();
+            self.signIn.hide();
+            self.setDiscussionState('show-mid');
+        });
+
+    };
+
     App.prototype.initDiscussionList = function () {
         this.ui.discussions = this.ui.collaborator.find('.discussions');
 
         this.discussionList = new DiscussionList({
             into: this.ui.discussions,
-            api: this.api
+            api: this.api,
+            user: this.user
         });
 
         var self = this;
         this.discussionList.on('show-discussion', function (e, id) {
             self.discussionList.hide();
             self.discussionView.show(id);
+            self.setDiscussionState('show-right');
         });
-
-        this.discussionList.show();
     };
 
     App.prototype.initDiscussionView = function () {
@@ -235,13 +268,15 @@ define(function (require) {
 
         this.discussionView = new DiscussionView({
             into: this.ui.discussionView,
-            api: this.api
+            api: this.api,
+            user: this.user
         });
 
         var self = this;
         this.discussionView.on('back', function () {
             self.discussionView.hide();
             self.discussionList.show();
+            self.setDiscussionState('show-mid');
         });
     };
 

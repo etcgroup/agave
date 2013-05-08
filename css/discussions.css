@@ -1,6 +1,3 @@
-.discussions {
-    float: left;
-}
 
 .discussions .header,
 .discussion-view .header {
@@ -49,9 +46,6 @@
     text-decoration: underline;
 }
 
-.discussion:last-child {
-    border-bottom: none;
-}
 
 .discussion .subject {
     overflow: hidden;
@@ -86,10 +80,15 @@
     float: right;
 }
 
+.discussion-view .comment-box .back-button {
+    margin-bottom: 10px;
+}
+
 .discussion-view .comment-box textarea {
     width: 100%;
     display: block;
     box-sizing: border-box;
+    resize: none;
 }
 
 .discussion-view .comment-box .user-display {
@@ -114,9 +113,6 @@
 .discussion-view .comment {
     padding: 12px;
     border-bottom: 1px solid #eee;
-}
-.discussion-view .comment:last-child {
-    border: none;
 }
 
 .discussion-view .comment .user {

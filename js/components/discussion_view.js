@@ -9,6 +9,7 @@ define(['jquery',
     var DiscussionView = function(options) {
         this.into = options.into || $('<div>');
         this.api = options.api;
+        this.user = options.user;
 
         this._initUI();
         this._attachEvents();
@@ -34,7 +35,7 @@ define(['jquery',
     DiscussionView.prototype._attachEvents = function() {
         this.ui.backButton.on('click', $.proxy(this._onBackClicked, this));
         this.ui.commentSubmit.on('click', $.proxy(this._onSendClicked, this));
-        this.api.on('user', $.proxy(this._userAvailable, this));
+        this.user.on('change', $.proxy(this._userChanged, this));
         this.api.on('messages', $.proxy(this._onData, this));
     };
 
@@ -46,16 +47,12 @@ define(['jquery',
 
         this._requestData();
 
-        this.into.addClass('in');
-
         this.poll.start();
 
         this.ui.commentInput.focus();
     };
 
     DiscussionView.prototype.hide = function() {
-        this.into.removeClass('in');
-
         this.poll.stop();
     };
 
@@ -77,16 +74,15 @@ define(['jquery',
         }
     };
 
-    DiscussionView.prototype._userAvailable = function(e, user) {
-        this.user = user;
-        this.ui.userDisplay.html('Hello, <b>' + user + '</b>!');
+    DiscussionView.prototype._userChanged = function(e, user) {
+        this.ui.userDisplay.html('Hello, <b>' + user.name() + '</b>!');
     };
 
     DiscussionView.prototype._onSendClicked = function() {
         this._disableCommentBox();
 
         this.api.send_message({
-            user: this.user,
+            user: this.user.name(),
             message: this.ui.commentInput.val(),
             discussion_id: this.discussion_id
         });

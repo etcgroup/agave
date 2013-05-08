@@ -1,3 +1,14 @@
+.navbar .navbar-inner {
+    /* Simulating .navbar-fixed-top */
+    border-width: 0 0 1px;
+
+    padding-right: 0;
+    padding-left: 0;
+    -webkit-border-radius: 0;
+    -moz-border-radius: 0;
+    border-radius: 0;
+}
+
 .navbar .nav > li > span {
   float: none;
   padding: 10px 15px 10px;
