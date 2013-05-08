@@ -90,20 +90,53 @@ define(['jquery',
             this.api.annotations();
         };
 
+
+        /**
+         * Set up for the display of already created annotations.
+         *
+         * @private
+         */
+        FocusTimeline.prototype._initAnnotations = function() {
+
+            this.api.on('annotations', $.proxy(this._onAnnotationData, this));
+
+            //A group for containing static annotations
+            this.ui.annotations = this.ui.chartGroup.append('g')
+                .classed('annotations', true);
+
+        };
+
         /**
          * Called when new annotation data arrives.
          * @private
          */
-        FocusTimeline.prototype._onAnnotationData = function(result) {
+        FocusTimeline.prototype._onAnnotationData = function(e, result) {
+
+            var boxHeight = this.boxes.inner.height();
 
             var annotations = result.data;
 
-            console.log(annotations);
+            var bind = this.ui.annotations.selectAll('line')
+                .data(annotations);
 
-            //Attach event handlers, position, etc
+            bind.enter().append('line');
 
+            //Remove un-needed lines
+            bind.exit()
+                .remove();
+
+            this._updateAnnotations();
         };
 
+        FocusTimeline.prototype._updateAnnotations = function() {
+            var boxHeight = this.boxes.inner.height();
+
+            this.ui.annotations.selectAll('line')
+                .attr('x1', this._highlightXPosition)
+                .attr('x2', this._highlightXPosition)
+                .attr('y1', 0)
+                .attr('y2', boxHeight);
+        };
 
         /**
          * Set the time scale domain.
@@ -119,7 +152,16 @@ define(['jquery',
             Timeline.prototype.render.call(this);
 
             this._initHighlights();
+            this._initAnnotations();
             this._renderCountAxis();
+
+            this._requestAnnotations();
+        };
+
+        FocusTimeline.prototype.update = function() {
+            Timeline.prototype.update.call(this);
+
+            this._updateAnnotations();
         };
 
         FocusTimeline.prototype.attachEvents = function() {
@@ -351,6 +393,8 @@ define(['jquery',
             this._requestData(query);
         };
 
+
+
         /**
          * Call this to put the timeline in annotation mode.
          */
@@ -364,27 +408,27 @@ define(['jquery',
             console.log('entering annotation mode');
 
             //Add a new group for containing the annotation controls
-            this.ui.annotationGroup = this.ui.chartGroup.append('g')
+            this.ui.annotationControls = this.ui.chartGroup.append('g')
                 .style('opacity', 0)
-                .classed('annotation-group', true);
+                .classed('annotation-controls', true);
 
             //Add a label - we put this behind the box
-            this.ui.annotationGroup
+            this.ui.annotationControls
                 .append('text')
                 .attr('x', 3)
                 .attr('y', 13)
                 .text('Click to label a time');
 
             //Add a box to show that annotation mode is active
-            this.ui.annotationIndicator = this.ui.annotationGroup.append('rect')
+            this.ui.annotationIndicator = this.ui.annotationControls.append('rect')
                 .attr('width', this.boxes.inner.width())
                 .attr('height', this.boxes.inner.height());
 
             //Add a line for showing where the annotation will fall
-            this.ui.annotationTarget = this.ui.annotationGroup.append('line');
+            this.ui.annotationTarget = this.ui.annotationControls.append('line');
 
             //And fade it in
-            this.ui.annotationGroup
+            this.ui.annotationControls
                 .transition()
                 .style('opacity', 1);
 
@@ -406,7 +450,7 @@ define(['jquery',
             d3.event.stopPropagation();
 
             var target = d3.event.target;
-            debugger;
+            //debugger;
         };
 
         /**
@@ -487,12 +531,12 @@ define(['jquery',
             console.log('leaving annotation mode');
             this._annotationMode = false;
 
-            this.ui.annotationGroup
+            this.ui.annotationControls
                 .transition()
                 .style('opacity', 0)
                 .remove();
 
-            this.ui.annotationGroup = null;
+            this.ui.annotationControls = null;
             this.ui.annotationIndicator = null;
             this.ui.annotationTarget = null;
         };
