@@ -51,7 +51,7 @@ while ($next_bin < $end)
 }
 
 //Now go through the database results and fill in the binned data
-while ($row = $result->fetch_assoc())
+foreach ($result as $row)
 {
     //The time for this row
     $binned_time = $row[$time_field];
@@ -60,7 +60,7 @@ while ($row = $result->fetch_assoc())
     $neutral_bin = $groups->get_group(0)->get_bin_at($binned_time);
     $neutral_bin->count = (int) $row[$count_field] / (double)$interval;
 }
-$result->free();
+
 
 $perf->stop('processing');
 

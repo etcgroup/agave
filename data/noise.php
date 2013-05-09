@@ -56,7 +56,7 @@ while ($next_bin < $end)
     $next_bin += $interval;
 }
 
-while ($row = $result->fetch_assoc())
+foreach ($result as $row)
 {
 
     $binned_time = $row[$time_field];
@@ -67,7 +67,7 @@ while ($row = $result->fetch_assoc())
 
     $next_bin += $interval;
 }
-$result->free();
+
 
 $perf->stop('processing');
 

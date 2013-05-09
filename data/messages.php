@@ -52,10 +52,10 @@ if ($discussion_id) {
 
     $perf->start('processing');
 
-    while ($row = $result->fetch_assoc()) {
+    foreach ($result as $row) {
         $rendered[] = discussion_message($row);
     }
-    $result->free();
+
 
     $perf->stop('processing');
 }

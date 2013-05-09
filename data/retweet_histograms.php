@@ -65,7 +65,7 @@ for ($current_start = $from_ts; $current_start < $end; $current_start += $interv
 
     //Fill the bins
     $next_bin = (int) $params->from;
-    while ($row = $result->fetch_assoc())
+    foreach ($result as $row)
     {
         $binned_time = $row[$time_field];
 
@@ -80,7 +80,7 @@ for ($current_start = $from_ts; $current_start < $end; $current_start += $interv
 
         $next_bin += $interval;
     }
-    $result->free();
+
 
     $histograms[] = $groups;
     $perf->stop('processing');

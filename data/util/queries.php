@@ -15,6 +15,7 @@ class Queries
 
     private $db;
     private $queries;
+    private $types;
     private $originals;
     private $performance = NULL;
     private $utc;
@@ -46,11 +47,12 @@ class Queries
             $params['port'] = 3306;
         }
 
-        $this->db = new mysqli($params['host'],
-            $params['user'],
-            $params['password'],
-            $params['schema'],
-            $params['port']);
+        $pdo_string = "mysql:host=${params['host']};dbname=${params['schema']};port=${params['port']}";
+
+        //Create a persistent PDO connection
+        $this->db = new PDO($pdo_string, $params['user'], $params['password'], array(
+            PDO::ATTR_PERSISTENT => true
+        ));
 
         $this->build_queries();
         $this->set_timezone();
@@ -115,6 +117,7 @@ class Queries
     private function build_queries()
     {
         $this->queries = new stdClass();
+        $this->types = new stdClass();
 
         // Get all of the query builder methods
         $methods = get_class_methods($this);
@@ -126,28 +129,67 @@ class Queries
     }
 
     /**
-     * Execute a query. Expects a query name, MySQLi type string, and list of parameters to bind.
-     * @param type $queryname
-     * @param type $typestr
-     * @return type
+     * Prepare a named query. The '$types' parameters should be a MySQLi-style type string,
+     * e.g. 'ssii'. Returns FALSE on failure, TRUE on success.
+     *
+     * @param $queryname
+     * @param $querystr
+     * @param string $types
+     * @return bool
      */
-    private function run($queryname, $typestr = NULL)
+    private function prepare($queryname, $querystr, $types='') {
+        $pdoTypes = array();
+        for ($i = 0; $i < strlen($types); $i++) {
+            $c = $types[$i];
+            $t = PDO::PARAM_STR;
+            if ($c === 'i') {
+                $t = PDO::PARAM_INT;
+            }
+            $pdoTypes[] = $t;
+        }
+
+        $this->queries->{$queryname} = $this->db->prepare($querystr);
+        $this->types->{$queryname} = $pdoTypes;
+
+        if (!$this->queries->{$queryname}) {
+            echo "Prepare ${$queryname} failed: (" . $this->db->errorCode() . ")";
+            print_r($this->db->errorInfo());
+            return FALSE;
+        }
+
+        return TRUE;
+    }
+
+    /**
+     * Execute a query. Expects a query name, MySQLi type string, and list of parameters to bind.
+     * @param string $queryname
+     * @return array
+     */
+    private function run($queryname)
     {
         $query = $this->queries->{$queryname};
-
-        $args = array_slice(func_get_args(), 1);
-        if ($args) {
-            call_user_func_array(array($query, 'bind_param'), refValues($args));
-        }
+        $paramTypes = $this->types->{$queryname};
 
         $this->start($queryname);
 
-        if ($query->execute() === FALSE) {
-            echo "Execute $queryname failed: ({$this->db->errno}) {$this->db->error}";
-            $this->stop($queryname);
+        $args = array_slice(func_get_args(), 1);
+        if ($args) {
+            foreach ($args as $i=>$value) {
+                $type = $paramTypes[$i];
+                $query->bindValue($i + 1, $value, $type);
+            }
+        }
 
+        $success = $query->execute();
+
+        if ($success === FALSE) {
+            echo "Execute $queryname failed: ({$query->errorCode()})";
+            print_r($query->errorInfo());
+            print_r($args);
+            $query->debugDumpParams();
+            $this->stop($queryname);
         } else {
-            $result = $query->get_result();
+            $result = $query->fetchAll(PDO::FETCH_ASSOC);
 
             $this->stop($queryname);
 
@@ -161,14 +203,11 @@ class Queries
 
     private function _build_insert_annotation()
     {
-        $this->queries->insert_annotation = $this->db->prepare(
+        $this->prepare('insert_annotation',
             "INSERT INTO annotations (created, user, label, time)
-            VALUES (?, ?, ?, ?)"
+            VALUES (?, ?, ?, ?)",
+            'ssss'
         );
-
-        if (!$this->queries->insert_annotation) {
-            echo "Prepare insert_annotation failed: (" . $this->db->errno . ") " . $this->db->error;
-        }
     }
 
     /**
@@ -186,21 +225,18 @@ class Queries
 
         $datetime = $datetime->format('Y-m-d H:i:s');
 
-        $this->run('insert_annotation', 'ssss', $created, $user, $label, $datetime);
+        $this->run('insert_annotation', $created, $user, $label, $datetime);
         return $this->db->insert_id;
     }
 
     private function _build_annotations() {
-        $this->queries->annotations = $this->db->prepare(
+        $this->prepare('annotations',
             "SELECT UNIX_TIMESTAMP(created) as created,
             id, user, label,
             UNIX_TIMESTAMP(time) as time
             FROM annotations"
         );
 
-        if (!$this->queries->annotations) {
-            echo "Prepare annotations failed: (" . $this->db->errno . ") " . $this->db->error;
-        }
     }
 
     /**
@@ -215,23 +251,17 @@ class Queries
 
     private function _build_insert_message()
     {
-        $this->queries->insert_message = $this->db->prepare(
+        $this->prepare('insert_message',
             "INSERT INTO messages (created, user, message, discussion_id)
-            VALUES (?, ?, ?, ?)"
+            VALUES (?, ?, ?, ?)",
+            'sssi'
         );
 
-        if (!$this->queries->insert_message) {
-            echo "Prepare insert_messages failed: (" . $this->db->errno . ") " . $this->db->error;
-        }
-
-        $this->queries->insert_discussion = $this->db->prepare(
+        $this->prepare('insert_discussion',
             "INSERT INTO discussions (created)
-            VALUES (?)"
+            VALUES (?)",
+            's'
         );
-
-        if (!$this->queries->insert_discussion) {
-            echo "Prepare insert_discussion failed: (" . $this->db->errno . ") " . $this->db->error;
-        }
     }
 
     /**
@@ -248,25 +278,22 @@ class Queries
         $time = $now->format('Y-m-d H:i:s');
 
         if (!$discussion_id) {
-            $this->run('insert_discussion', 's', $time);
+            $this->run('insert_discussion', $time);
             $discussion_id = $this->db->insert_id;
         }
 
-        $this->run('insert_message', 'sssi', $time, $user, $message, $discussion_id);
+        $this->run('insert_message', $time, $user, $message, $discussion_id);
         return $this->db->insert_id;
     }
 
     private function _build_message()
     {
-        $this->queries->message = $this->db->prepare(
+        $this->prepare('message',
             "SELECT id, discussion_id, UNIX_TIMESTAMP(created) as created, user, message
              FROM messages
-             WHERE id = ?"
+             WHERE id = ?",
+            'i'
         );
-
-        if (!$this->queries->message) {
-            echo "Prepare message failed: (" . $this->db->errno . ") " . $this->db->error;
-        }
     }
 
     /**
@@ -276,27 +303,23 @@ class Queries
      * @return array
      */
     public function get_message($message_id) {
-        $result = $this->run('message', 'i', $message_id);
+        $result = $this->run('message', $message_id);
 
-        $row = $result->fetch_assoc();
-
-        $result->free();
-
-        return $row;
+        if (count($result) > 0) {
+            $row = $result[0];
+            return $row;
+        }
     }
 
     private function _build_discussion_messages()
     {
-        $this->queries->discussion_messages = $this->db->prepare(
+        $this->prepare('discussion_messages',
             "SELECT id, discussion_id, UNIX_TIMESTAMP(created) as created, user, message
             FROM messages
             WHERE discussion_id = ?
-            ORDER BY created desc"
+            ORDER BY created desc",
+            'i'
         );
-
-        if (!$this->queries->discussion_messages) {
-            echo "Prepare discussion_messages failed: (" . $this->db->errno . ") " . $this->db->error;
-        }
     }
 
     /**
@@ -308,13 +331,13 @@ class Queries
      */
     public function get_discussion_messages($discussion_id)
     {
-        $result = $this->run('discussion_messages', 'i', $discussion_id);
+        $result = $this->run('discussion_messages', $discussion_id);
         return $result;
     }
 
     private function _build_discussions()
     {
-        $this->queries->discussions = $this->db->prepare(
+        $this->prepare('discussions',
             "SELECT discussion_id AS id,
                 COUNT(*) as message_count,
                 GROUP_CONCAT(DISTINCT user ORDER BY created DESC SEPARATOR ', ') AS users,
@@ -326,9 +349,6 @@ class Queries
             ORDER BY last_comment_at desc;"
         );
 
-        if (!$this->queries->discussions) {
-            echo "Prepare discussions failed: (" . $this->db->errno . ") " . $this->db->error;
-        }
     }
 
     /**
@@ -366,34 +386,26 @@ class Queries
             LIMIT ?";
 
 
-        $this->queries->originals = $this->db->prepare(
-            sprintf($base_query, 'created_at')
+        $this->prepare('originals',
+            sprintf($base_query, 'created_at'),
+            'ssii'
         );
-        if (!$this->queries->originals) {
-            echo "Prepare originals failed: (" . $this->db->errno . ") " . $this->db->error;
-        }
 
-        $this->queries->originals_like = $this->db->prepare(
-            sprintf($base_query_like, 'created_at')  
+        $this->prepare('originals_like',
+            sprintf($base_query_like, 'created_at'),
+            'ssisi'
         );
-        if (!$this->queries->originals_like) {
-            echo "Prepare originals_like failed: (" . $this->db->errno . ") " . $this->db->error;
-        }
 
         /* sorted by retweet count */
-        $this->queries->originals_orderby_retweet = $this->db->prepare(
-            sprintf($base_query, 'retweet_count')
+        $this->prepare('originals_orderby_retweet',
+            sprintf($base_query, 'retweet_count'),
+            'ssii'
         );
-        if (!$this->queries->originals_orderby_retweet) {
-            echo "Prepare originals failed: (" . $this->db->errno . ") " . $this->db->error;
-        }
 
-        $this->queries->originals_like_orderby_retweet = $this->db->prepare(
-            sprintf($base_query_like, 'retweet_count')
+        $this->prepare('originals_like_orderby_retweet',
+            sprintf($base_query_like, 'retweet_count'),
+            'ssisi'
         );
-        if (!$this->queries->originals_like_orderby_retweet) {
-            echo "Prepare originals_like failed: (" . $this->db->errno . ") " . $this->db->error;
-        }
 
     }
 
@@ -403,8 +415,10 @@ class Queries
      *
      * @param DateTime $start_datetime
      * @param DateTime $stop_datetime
+     * @param int $limit
      * @param int $noise_threshold The minimum retweet count to be returned
-     *
+     * @param string $text_search
+     * @param string $sort
      * @return mysqli_result
      */
     public function get_originals($start_datetime, $stop_datetime, $limit, $noise_threshold, $text_search = NULL, $sort = NULL)
@@ -412,14 +426,13 @@ class Queries
         $start_datetime = $start_datetime->format('Y-m-d H:i:s');
         $stop_datetime = $stop_datetime->format('Y-m-d H:i:s');
 
-
-
+        $limit = (int)$limit;
         if ($text_search === NULL) {
             $query_name = 'originals';
             if($sort == 'retweet_count') {
                 $query_name .= '_orderby_retweet';
             }
-            $result = $this->run($query_name, 'ssii', $start_datetime,
+            $result = $this->run($query_name, $start_datetime,
                 $stop_datetime, $noise_threshold, $limit);
         } else {
             $query_name = 'originals_like';
@@ -427,7 +440,7 @@ class Queries
                 $query_name .= '_orderby_retweet';
             }
             $search = "%$text_search%";
-            $result = $this->run($query_name, 'ssisi', $start_datetime,
+            $result = $this->run($query_name, $start_datetime,
                 $stop_datetime, $noise_threshold, $search, $limit);
         }
         return $result;
@@ -435,7 +448,7 @@ class Queries
 
     private function _build_grouped_originals()
     {
-        $this->queries->grouped_originals = $this->db->prepare(
+        $this->prepare('grouped_originals',
             "SELECT UNIX_TIMESTAMP(?) + ? * FLOOR((UNIX_TIMESTAMP(created_at)-UNIX_TIMESTAMP(?)) / ?) AS binned_time,
                 COUNT(*) as count,
                 SUM(IF(sentiment=1,1,0)) AS positive,
@@ -447,14 +460,11 @@ class Queries
             AND created_at < ?
             AND retweet_count >= ?
             GROUP BY binned_time
-            ORDER BY binned_time"
+            ORDER BY binned_time",
+            'sisissi'
         );
 
-        if (!$this->queries->grouped_originals) {
-            echo "Prepare grouped_originals failed: (" . $this->db->errno . ") " . $this->db->error;
-        }
-
-        $this->queries->grouped_originals_like = $this->db->prepare(
+        $this->prepare('grouped_originals_like',
             "SELECT UNIX_TIMESTAMP(?) + ? * FLOOR((UNIX_TIMESTAMP(created_at)-UNIX_TIMESTAMP(?)) / ?) AS binned_time,
                 COUNT(*) as count,
                 SUM(IF(sentiment=1,1,0)) AS positive,
@@ -467,12 +477,9 @@ class Queries
             AND retweet_count >= ?
             AND text LIKE ?
             GROUP BY binned_time
-            ORDER BY binned_time"
+            ORDER BY binned_time",
+            'sisissis'
         );
-
-        if (!$this->queries->grouped_originals_like) {
-            echo "Prepare grouped_originals_like failed: (" . $this->db->errno . ") " . $this->db->error;
-        }
     }
 
     /**
@@ -491,13 +498,13 @@ class Queries
         $stop_datetime = $stop_datetime->format('Y-m-d H:i:s');
 
         if ($text_search === NULL) {
-            $result = $this->run('grouped_originals', 'sisissi',
+            $result = $this->run('grouped_originals',
                 $start_datetime, $group_seconds, $start_datetime,
                 $group_seconds, $start_datetime, $stop_datetime,
                 $noise_threshold);
         } else {
             $search = "%$text_search%";
-            $result = $this->run('grouped_originals_like', 'sisissis',
+            $result = $this->run('grouped_originals_like',
                 $start_datetime, $group_seconds, $start_datetime,
                 $group_seconds, $start_datetime, $stop_datetime,
                 $noise_threshold, $search);
@@ -509,7 +516,7 @@ class Queries
 
     private function _build_grouped_retweets()
     {
-        $this->queries->grouped_retweets = $this->db->prepare(
+        $this->prepare('grouped_retweets',
             "SELECT UNIX_TIMESTAMP(?) + ? * FLOOR((UNIX_TIMESTAMP(created_at)-UNIX_TIMESTAMP(?)) / ?) AS binned_time,
                 COUNT(*) as count
             FROM tweets
@@ -517,14 +524,11 @@ class Queries
             AND created_at >= ?
             AND created_at < ?
             GROUP BY binned_time
-            ORDER BY binned_time"
+            ORDER BY binned_time",
+            'sisiss'
         );
 
-        if (!$this->queries->grouped_retweets) {
-            echo "Prepare grouped_retweets failed: (" . $this->db->errno . ") " . $this->db->error;
-        }
-
-        $this->queries->grouped_retweets_like = $this->db->prepare(
+        $this->prepare('grouped_retweets_like',
             "SELECT UNIX_TIMESTAMP(?) + ? * FLOOR((UNIX_TIMESTAMP(created_at)-UNIX_TIMESTAMP(?)) / ?) AS binned_time,
                 COUNT(*) as count
             FROM tweets
@@ -533,12 +537,9 @@ class Queries
             AND created_at < ?
             AND text LIKE ?
             GROUP BY binned_time
-            ORDER BY binned_time"
+            ORDER BY binned_time",
+            'sisisss'
         );
-
-        if (!$this->queries->grouped_retweets_like) {
-            echo "Prepare grouped_retweets_like failed: (" . $this->db->errno . ") " . $this->db->error;
-        }
     }
 
     /**
@@ -556,12 +557,12 @@ class Queries
         $stop_datetime = $stop_datetime->format('Y-m-d H:i:s');
 
         if ($text_search === NULL) {
-            $result = $this->run('grouped_retweets', 'sisiss', $start_datetime,
+            $result = $this->run('grouped_retweets', $start_datetime,
                 $group_seconds, $start_datetime, $group_seconds,
                 $start_datetime, $stop_datetime);
         } else {
             $search = "%$text_search%";
-            $result = $this->run('grouped_retweets_like', 'sisisss',
+            $result = $this->run('grouped_retweets_like',
                 $start_datetime, $group_seconds, $start_datetime,
                 $group_seconds, $start_datetime, $stop_datetime, $search);
         }
@@ -571,7 +572,7 @@ class Queries
 
     private function _build_grouped_retweets_of_id()
     {
-        $this->queries->grouped_retweets_of_id = $this->db->prepare(
+        $this->prepare('grouped_retweets_of_id',
             "SELECT UNIX_TIMESTAMP(?) + ? * FLOOR((UNIX_TIMESTAMP(created_at)-UNIX_TIMESTAMP(?)) / ?) AS binned_time,
                 COUNT(*) as count
             FROM tweets
@@ -580,12 +581,10 @@ class Queries
             AND created_at < ?
             AND retweet_of_status_id = ?
             GROUP BY binned_time
-            ORDER BY binned_time"
+            ORDER BY binned_time",
+            'sisisss'
         );
 
-        if (!$this->queries->grouped_retweets_of_id) {
-            echo "Prepare grouped_retweets_of_id failed: (" . $this->db->errno . ") " . $this->db->error;
-        }
     }
 
     /**
@@ -602,7 +601,7 @@ class Queries
         $start_datetime = $start_datetime->format('Y-m-d H:i:s');
         $stop_datetime = $stop_datetime->format('Y-m-d H:i:s');
 
-        $result = $this->run('grouped_retweets_of_id', 'sisisss',
+        $result = $this->run('grouped_retweets_of_id',
             $start_datetime, $group_seconds, $start_datetime,
             $group_seconds, $start_datetime, $stop_datetime, $tweet_id);
 
@@ -611,7 +610,7 @@ class Queries
 
     private function _build_grouped_retweets_of_range()
     {
-        $this->queries->grouped_retweets_of_range = $this->db->prepare(
+        $this->prepare('grouped_retweets_of_range',
             "SELECT UNIX_TIMESTAMP(?) + ? * FLOOR((UNIX_TIMESTAMP(rt.created_at)-UNIX_TIMESTAMP(?)) / ?) AS binned_time,
                 COUNT(*) as count,
                 SUM(IF(rt.sentiment=1,1,0)) AS positive,
@@ -624,12 +623,10 @@ class Queries
             AND t0.created_at >= ?
             AND t0.created_at < ?
             GROUP BY binned_time
-            ORDER BY binned_time"
+            ORDER BY binned_time",
+            'sisissss'
         );
 
-        if (!$this->queries->grouped_retweets_of_range) {
-            echo "Prepare grouped_retweets_of_range failed: (" . $this->db->errno . ") " . $this->db->error;
-        }
     }
 
     /**
@@ -650,7 +647,7 @@ class Queries
         $start_datetime = $start_datetime->format('Y-m-d H:i:s');
         $stop_datetime = $stop_datetime->format('Y-m-d H:i:s');
 
-        $result = $this->run('grouped_retweets_of_range', 'sisissss',
+        $result = $this->run('grouped_retweets_of_range',
             $start_datetime, $group_seconds, $start_datetime,
             $group_seconds, $start_datetime, $stop_datetime,
             $tweets_start_datetime, $tweets_stop_datetime);
@@ -660,7 +657,7 @@ class Queries
 
     private function _build_grouped_noise()
     {
-        $this->queries->grouped_noise = $this->db->prepare(
+        $this->prepare('grouped_noise',
             "SELECT UNIX_TIMESTAMP(?) + ? * FLOOR((UNIX_TIMESTAMP(created_at)-UNIX_TIMESTAMP(?)) / ?) AS binned_time,
                 COUNT(*) as count
             FROM tweets
@@ -669,13 +666,11 @@ class Queries
             AND created_at < ?
             AND retweet_count < ?
             GROUP BY binned_time
-            ORDER BY binned_time"
+            ORDER BY binned_time",
+            'sisissi'
         );
-        if (!$this->queries->grouped_noise) {
-            echo "Prepare grouped_noise failed: (" . $this->db->errno . ") " . $this->db->error;
-        }
 
-        $this->queries->grouped_noise_like = $this->db->prepare(
+        $this->prepare('grouped_noise_like',
             "SELECT UNIX_TIMESTAMP(?) + ? * FLOOR((UNIX_TIMESTAMP(created_at)-UNIX_TIMESTAMP(?)) / ?) AS binned_time,
                 COUNT(*) as count
             FROM tweets
@@ -685,11 +680,9 @@ class Queries
             AND retweet_count < ?
             AND text LIKE ?
             GROUP BY binned_time
-            ORDER BY binned_time"
+            ORDER BY binned_time",
+            'sisissis'
         );
-        if (!$this->queries->grouped_noise_like) {
-            echo "Prepare grouped_noise_like failed: (" . $this->db->errno . ") " . $this->db->error;
-        }
     }
 
     /**
@@ -708,12 +701,12 @@ class Queries
         $stop_datetime = $stop_datetime->format('Y-m-d H:i:s');
 
         if ($text_search === NULL) {
-            $result = $this->run('grouped_noise', 'sisissi', $start_datetime,
+            $result = $this->run('grouped_noise', $start_datetime,
                 $group_seconds, $start_datetime, $group_seconds,
                 $start_datetime, $stop_datetime, $noise_threshold);
         } else {
             $search = "%$text_search%";
-            $result = $this->run('grouped_noise_like', 'sisissis',
+            $result = $this->run('grouped_noise_like',
                 $start_datetime, $group_seconds, $start_datetime,
                 $group_seconds, $start_datetime, $stop_datetime,
                 $noise_threshold, $search);
@@ -724,18 +717,16 @@ class Queries
 
     private function _build_grouped_counts()
     {
-        $this->queries->grouped_counts = $this->db->prepare(
+        $this->prepare('grouped_counts',
             "SELECT UNIX_TIMESTAMP(?) + ? * FLOOR((UNIX_TIMESTAMP(created_at)-UNIX_TIMESTAMP(?)) / ?) AS binned_time,
                 COUNT(*) as count
             FROM tweets
             WHERE created_at >= ?
             AND created_at < ?
             GROUP BY binned_time
-            ORDER BY binned_time"
+            ORDER BY binned_time",
+            'sisiss'
         );
-        if (!$this->queries->grouped_counts) {
-            echo "Prepare grouped_tweets failed: (" . $this->db->errno . ") " . $this->db->error;
-        }
     }
 
     /**
@@ -751,7 +742,7 @@ class Queries
         $start_datetime = $start_datetime->format('Y-m-d H:i:s');
         $stop_datetime = $stop_datetime->format('Y-m-d H:i:s');
 
-        $result = $this->run('grouped_counts', 'sisiss', $start_datetime,
+        $result = $this->run('grouped_counts', $start_datetime,
             $group_seconds, $start_datetime, $group_seconds,
             $start_datetime, $stop_datetime);
         return $result;
@@ -759,7 +750,7 @@ class Queries
 
     private function _build_grouped_counts_filtered()
     {
-        $this->queries->grouped_counts_filtered = $this->db->prepare(
+        $this->prepare('grouped_counts_filtered',
             "SELECT UNIX_TIMESTAMP(?) + ? * FLOOR((UNIX_TIMESTAMP(created_at)-UNIX_TIMESTAMP(?)) / ?) AS binned_time,
                 COUNT(*) as count,
                 SUM(IF(sentiment=1,1,0)) AS positive,
@@ -769,14 +760,12 @@ class Queries
             WHERE created_at >= ?
             AND created_at < ?
             GROUP BY binned_time
-            ORDER BY binned_time"
+            ORDER BY binned_time",
+            'sisiss'
         );
 
-        if (!$this->queries->grouped_counts_filtered) {
-            echo "Prepare grouped_counts_filtered failed: (" . $this->db->errno . ") " . $this->db->error;
-        }
 
-        $this->queries->grouped_counts_filtered_like = $this->db->prepare(
+        $this->prepare('grouped_counts_filtered_like',
             "SELECT UNIX_TIMESTAMP(?) + ? * FLOOR((UNIX_TIMESTAMP(created_at)-UNIX_TIMESTAMP(?)) / ?) AS binned_time,
                 COUNT(*) as count,
                 SUM(IF(sentiment=1,1,0)) AS positive,
@@ -787,12 +776,10 @@ class Queries
             AND created_at < ?
             AND text LIKE ?
             GROUP BY binned_time
-            ORDER BY binned_time"
+            ORDER BY binned_time",
+            'sisisss'
         );
 
-        if (!$this->queries->grouped_counts_filtered_like) {
-            echo "Prepare grouped_counts_filtered_like failed: (" . $this->db->errno . ") " . $this->db->error;
-        }
     }
 
     /**
@@ -810,12 +797,12 @@ class Queries
         $stop_datetime = $stop_datetime->format('Y-m-d H:i:s');
 
         if ($text_search === NULL) {
-            $result = $this->run('grouped_counts_filtered', 'sisiss',
+            $result = $this->run('grouped_counts_filtered',
                 $start_datetime, $group_seconds, $start_datetime,
                 $group_seconds, $start_datetime, $stop_datetime);
         } else {
             $search = "%$text_search%";
-            $result = $this->run('grouped_counts_filtered_like', 'sisisss',
+            $result = $this->run('grouped_counts_filtered_like',
                 $start_datetime, $group_seconds, $start_datetime,
                 $group_seconds, $start_datetime, $stop_datetime,
                 $search);

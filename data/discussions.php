@@ -24,10 +24,10 @@ $result = $db->get_discussions();
 $perf->start('processing');
 
 $rendered = array();
-while ($row = $result->fetch_assoc()) {
+foreach ($result as $row) {
     $rendered[] = discussion($row);
 }
-$result->free();
+
 
 $perf->stop('processing');
 

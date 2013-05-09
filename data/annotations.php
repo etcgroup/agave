@@ -45,7 +45,7 @@ $result = $db->get_annotations();
 
 $perf->start('processing');
 
-while ($row = $result->fetch_assoc()) {
+foreach($result as $row) {
     $row['created'] *= 1000; //convert to ms
     $row['time'] *= 1000;
 
@@ -56,7 +56,7 @@ while ($row = $result->fetch_assoc()) {
 
     $annotations[] = $row;
 }
-$result->free();
+
 
 $perf->stop('processing');
 

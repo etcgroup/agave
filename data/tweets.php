@@ -38,13 +38,13 @@ $result = $db->get_originals($from, $to, $limit, $noise_threshold, $search, $sor
 $perf->start('processing');
 
 $tweets = array();
-while ($row = $result->fetch_assoc())
+foreach ($result as $row)
 {
     //Convert the created_at unix timestamp field to ms
     $row['created_at'] = $row['created_at'] * 1000;
     $tweets[] = $row;
 }
-$result->free();
+
 
 $perf->stop('processing');
 
