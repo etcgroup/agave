@@ -107,6 +107,22 @@ define(['jquery',
         };
 
         /**
+         * Override the update histogram method slightly.
+         * @private
+         */
+        OverviewTimeline.prototype._updateHistogram = function() {
+
+            //Auto-scale the y axis
+            var data = this._histogram.data();
+            if (data) {
+                this._histogram.yScaleDomainAuto(data);
+            }
+
+            //Call the default update method now
+            Timeline.prototype._updateHistogram.call(this);
+        };
+
+        /**
          * Build the brush elements
          * @private
          */

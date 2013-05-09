@@ -118,6 +118,12 @@ define(['jquery',
 
             this.api.on('annotations', $.proxy(this._onAnnotationData, this));
 
+            var self = this;
+            //A function for generating the x position of an annotation
+            this._annotationXPosition = function (d) {
+                return self._timeScale(d.time + self._utcOffset);
+            };
+
             //A group for containing static annotations
             this.ui.annotations = this.ui.chartGroup.append('g')
                 .classed('annotations', true);
@@ -134,10 +140,12 @@ define(['jquery',
 
             var boxHeight = this.boxes.inner.height();
 
+            //Bind the new annotations data
             var bind = this.ui.annotations.selectAll('rect')
                 .data(this.annotations);
 
             var self = this;
+            //Add any new annotations
             bind.enter().append('rect')
                 .attr('y', 0)
                 .attr('width', 2)
@@ -148,6 +156,7 @@ define(['jquery',
                     self._onAnnotationHover(d3.event, d, false);
                 })
                 .on('click', function (d) {
+                    //This prevents the general click event from firing on the graph
                     d3.event.preventDefault();
                     d3.event.stopPropagation();
 
@@ -163,19 +172,35 @@ define(['jquery',
             this._updateAnnotations();
         };
 
+        /**
+         * Called when the mouse enters or leaves an annotation.
+         *
+         * @param event
+         * @param data
+         * @param mouseHovering whether or not the mouse is now hovering
+         * @private
+         */
         FocusTimeline.prototype._onAnnotationHover = function (event, data, mouseHovering) {
             if (mouseHovering) {
+                //Show a tooltip near the mouse
                 var label = ANNOTATION_TOOLTIP_TEMPLATE(data);
-
                 this.tooltip.show({
                     top: event.pageY,
                     left: event.pageX
                 }, label);
             } else {
+                //Hide the tooltip
                 this.tooltip.hide();
             }
         };
 
+        /**
+         * Update the annotations being displayed. This needs to be called
+         * when the annotation data have changed, or when the graph is being updated
+         * overall.
+         *
+         * @private
+         */
         FocusTimeline.prototype._updateAnnotations = function () {
             var boxHeight = this.boxes.inner.height();
 
@@ -189,7 +214,7 @@ define(['jquery',
         };
 
         /**
-         * Set the time scale domain.
+         * Set the time scale domain. This is used by the overview timeline.
          *
          * @param domain
          */
@@ -198,6 +223,10 @@ define(['jquery',
             this._timeScale.domain(this.extentFromUTC(domain));
         };
 
+        /**
+         * Do an initial render of the focus timeline.
+         * Overrides the parent's render method.
+         */
         FocusTimeline.prototype.render = function () {
             Timeline.prototype.render.call(this);
 
@@ -205,21 +234,29 @@ define(['jquery',
             this._initAnnotations();
             this._renderCountAxis();
 
+            //Request the annotation data now, I guess
             this._requestAnnotations();
         };
 
+        /**
+         * Update the focus timeline. Overrides the parent's update method.
+         */
         FocusTimeline.prototype.update = function () {
             Timeline.prototype.update.call(this);
 
             this._updateAnnotations();
         };
 
+        /**
+         * Attach some events for the focus timeline. Overrides the parent method.
+         */
         FocusTimeline.prototype.attachEvents = function () {
             Timeline.prototype.attachEvents.call(this);
 
             //Subscribe to a data stream from the API.
             this.api.on('counts', $.proxy(this._onData, this));
 
+            //Subscribe to another data stream
             this.api.on('tweets', $.proxy(this._onTweets, this));
 
             //If the user clicks on the svg, we'll begin annotation
@@ -236,6 +273,10 @@ define(['jquery',
             });
         };
 
+        /**
+         * Initial render of the vertical axis.
+         * @private
+         */
         FocusTimeline.prototype._renderCountAxis = function () {
             this._verticalAxis = d3.svg.axis()
                 .scale(this._countScale)
@@ -249,6 +290,10 @@ define(['jquery',
             this._updateCountAxis();
         };
 
+        /**
+         * Update the vertical axis.
+         * @private
+         */
         FocusTimeline.prototype._updateCountAxis = function () {
             this.ui.svg.select('g.counts.axis.chart-label')
                 .attr('transform', new Transform('translate',
@@ -257,7 +302,8 @@ define(['jquery',
         };
 
         /**
-         * We need to replace the histogram rendering code.
+         * We need to replace the parent's histogram rendering code entirely,
+         * because we are rendering multiple histograms.
          */
         FocusTimeline.prototype._renderHistogram = function () {
 
@@ -307,7 +353,7 @@ define(['jquery',
             var self = this;
 
             //add these items to the tweet cache, which will dedupe for us
-            _.each(result.data, function(tweet) {
+            _.each(result.data, function (tweet) {
                 self._tweetCacheLookup[tweet.id] = tweet;
             });
 
@@ -318,7 +364,7 @@ define(['jquery',
 
             //Now rebuild the cache
             var newCache = {};
-            _.each(list, function(id) {
+            _.each(list, function (id) {
                 newCache[id] = self._tweetCacheLookup[id];
             });
 
@@ -377,7 +423,7 @@ define(['jquery',
         };
 
         /**
-         * Set up timeline highlighting.
+         * Set up the display of linked tweets.
          *
          * @private
          */
@@ -388,75 +434,106 @@ define(['jquery',
             //A list of highlighted points in time
             this._tweetHighlights = [];
 
-            function findIndexOf(id) {
-                //Remove the highlight with that id
-                for (var i = 0; i < self._tweetHighlights.length; i++) {
-                    if (+self._tweetHighlights[i].id === +id) {
-                        return i;
-                    }
-                }
-                return null;
-            }
-
             //A function for positioning highlights
             this._tweetXPosition = function (d) {
                 return self._timeScale(d.created_at + self._utcOffset);
             };
 
-            this._annotationXPosition = function (d) {
-                return self._timeScale(d.time + self._utcOffset);
-            };
-
             //A group element for containing the highlight points
-            this.api.on('brush', function (e, brushed) {
-                _.each(brushed, function(item) {
+            this.api.on('brush', $.proxy(this._onBrush, this));
 
-                    switch (item.type) {
-                        case 'tweet':
-                            //Do we know about this tweet?
-                            if (!(item.id in self._tweetCacheLookup)) {
-                                return;
-                            }
+            this.api.on('unbrush', $.proxy(this._onUnBrush, this));
+        };
 
-                            //Is it already highlighted?
-                            if (findIndexOf(item.id) !== null) {
-                                return;
-                            }
 
-                            var tweet = self._tweetCacheLookup[item.id];
-                            self._tweetHighlights.push(tweet);
-                            self._updateTweetHighlights();
-                            break;
-                        case 'annotation':
-                            self._brushedAnnotations[item.id] = true;
-                            self._updateAnnotations();
-                            break;
-                    }
+        /**
+         * Checks in the brushed tweet list to see if the tweet with the given
+         * id is already there. Returns its index or null.
+         *
+         * @param id
+         * @returns {*}
+         * @private
+         */
+        FocusTimeline.prototype._findIndexOfBrushedTweet = function (id) {
+            for (var i = 0; i < this._tweetHighlights.length; i++) {
+                if (+this._tweetHighlights[i].id === +id) {
+                    return i;
+                }
+            }
+            return null;
+        };
 
-                });
-            });
+        /**
+         * Called when some elements are brushed.
+         *
+         * @param e
+         * @param brushed
+         * @private
+         */
+        FocusTimeline.prototype._onBrush = function (e, brushed) {
+            var self = this;
+            _.each(brushed, function (item) {
 
-            this.api.on('unbrush', function (e, brushed) {
-                _.each(brushed, function(item) {
+                switch (item.type) {
+                    case 'tweet':
+                        //Do we know about this tweet?
+                        if (!(item.id in self._tweetCacheLookup)) {
+                            return;
+                        }
 
-                    switch (item.type) {
-                        case 'tweet':
-                            var index = findIndexOf(item.id);
-                            if (index !== null) {
-                                self._tweetHighlights.splice(index, 1);
-                                self._updateTweetHighlights();
-                            }
-                            break;
-                        case 'annotation':
-                            delete self._brushedAnnotations[item.id];
-                            self._updateAnnotations();
-                            break;
-                    }
+                        //Is it already highlighted?
+                        if (self._findIndexOfBrushedTweet(item.id) !== null) {
+                            return;
+                        }
 
-                });
+                        var tweet = self._tweetCacheLookup[item.id];
+                        self._tweetHighlights.push(tweet);
+                        self._updateTweetHighlights();
+                        break;
+                    case 'annotation':
+                        //Add mark that the item is being brushed
+                        self._brushedAnnotations[item.id] = true;
+                        self._updateAnnotations();
+                        break;
+                }
+
             });
         };
 
+        /**
+         * Called when some elements are un-brushed.
+         *
+         * @param e
+         * @param brushed
+         * @private
+         */
+        FocusTimeline.prototype._onUnBrush = function (e, brushed) {
+            var self = this;
+            _.each(brushed, function (item) {
+
+                switch (item.type) {
+                    case 'tweet':
+                        var index = self._findIndexOfBrushedTweet(item.id);
+                        if (index !== null) {
+                            self._tweetHighlights.splice(index, 1);
+                            self._updateTweetHighlights();
+                        }
+                        break;
+                    case 'annotation':
+                        //Mark that the item is not being brushed
+                        delete self._brushedAnnotations[item.id];
+                        self._updateAnnotations();
+                        break;
+                }
+
+            });
+        };
+
+        /**
+         * Updates the display of brushed/highlighted tweets.
+         *
+         * @private
+         */
         FocusTimeline.prototype._updateTweetHighlights = function () {
 
             var boxHeight = this.boxes.inner.height();
@@ -485,22 +562,6 @@ define(['jquery',
                 .attr('y1', 0)
                 .attr('y2', boxHeight);
         };
-
-        /**
-         * Called when the interval model changes.
-         *
-         * @param e Event
-         * @param interval
-         * @param field
-         * @private
-         */
-//        FocusTimeline.prototype._onIntervalChanged = function (e, interval, field) {
-//            //Call the parent method
-//            Timeline.prototype._onIntervalChanged.call(this, interval, field);
-//
-//            //Get new data
-//            this._requestData();
-//        };
 
         /**
          * When the query changes, request some new data.
@@ -535,6 +596,18 @@ define(['jquery',
 
             this._annotationMode = true;
             console.log('entering annotation mode');
+
+            //Hide when escape is pressed
+            var self = this;
+            $(document)
+                .on('keyup.focus-timeline.annotation', function (e) {
+                    if (e.which === 27) {
+                        self.endAnnotation();
+                    }
+                })
+                .on('click.focus-timeline.annotation', function (e) {
+                    self.endAnnotation();
+                });
 
             //Add a new group for containing the annotation controls
             this.ui.annotationControls = this.ui.chartGroup.append('g')
@@ -591,7 +664,7 @@ define(['jquery',
                 return;
             }
 
-            //Don't let this event go anywhere else
+            //Don't let this event go anywhere else (such as the document, which would end annotation mode)
             d3.event.preventDefault();
             d3.event.stopPropagation();
 
@@ -642,6 +715,7 @@ define(['jquery',
             //Get the coordinate of the mouse
             var x = d3.event.offsetX - this.boxes.inner.left();
 
+            //Move the annotation target to the mouse position
             this.ui.annotationTarget
                 .attr('x1', x)
                 .attr('x2', x)
@@ -661,6 +735,11 @@ define(['jquery',
             console.log('leaving annotation mode');
             this._annotationMode = false;
 
+            //Turn off the key and click listeners
+            $(document).off('keyup.focus-timeline.annotation')
+                .off('click.focus-timeline.annotation');
+
+            //Fade out and remove
             this.ui.annotationControls
                 .transition()
                 .style('opacity', 0)

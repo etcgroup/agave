@@ -303,17 +303,18 @@ define(['jquery',
         this._updateTimeAxis();
     };
 
+    /**
+     * Update the histogram.
+     * @private
+     */
     Timeline.prototype._updateHistogram = function () {
-
-        var data = this._histogram.data();
-        if (data) {
-            this._histogram.yScaleDomainAuto(data);
-        }
-
         this._histogram.update();
-
     };
 
+    /**
+     * Update the horizontal axis labels.
+     * @private
+     */
     Timeline.prototype._updateTimeAxis = function () {
         //Update the time axis
         this.ui.svg.select('g.x.axis.chart-label')
