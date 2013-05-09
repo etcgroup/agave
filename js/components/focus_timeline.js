@@ -18,9 +18,9 @@ define(['jquery',
 
         //Color defaults
         var COLOR_DOMAIN = [-1, 0, 1];
-        var COLOR_RANGE = ["#69C5F5", "#F26522", "#F8FDFF"]
+        var COLOR_RANGE = ["#69C5F5", "#F26522", "#F8FDFF"];
 
-        var VALID_MODES = ['simple', 'stack', 'expand']
+        var VALID_MODES = ['simple', 'stack', 'expand'];
 
         /**
          * A class for rendering and maintaining a focus timeline.
