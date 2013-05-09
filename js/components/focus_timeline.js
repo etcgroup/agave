@@ -83,7 +83,11 @@ define(['jquery',
                     from: utcExtent[0],
                     to: utcExtent[1],
                     interval: self._binSize * 1000,
-                    search: query.search()
+                    search: query.search(),
+                    rt: query.rt(),
+                    min_rt: query.min_rt(),
+                    author: query.author(),
+                    sentiment: query.sentiment()
                 });
             }
 
