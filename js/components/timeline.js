@@ -94,6 +94,9 @@ define(['jquery',
         this.ui = {};
         this.ui.svg = d3.select(this.into.selector)
             .append('svg');
+
+
+        this.ui.defs = this.ui.svg.append("defs");
     };
 
     /**
@@ -112,9 +115,15 @@ define(['jquery',
         this._renderTimeAxis();
         this._renderHistogram();
 
+        //define a clipping path for the chart elements
+        this.ui.chartGroupClip = this.ui.defs.append("clipPath")
+            .attr("id", this._className + '-chart-group-clip')
+            .append("rect");
+
         //A convenient container for anything that needs to be
         //in the same place as the inner box
-        this.ui.chartGroup = this.ui.svg.append('g');
+        this.ui.chartGroup = this.ui.svg.append('g')
+            .attr('clip-path', 'url(#' + this._className + '-chart-group-clip)');
 
         this._requestData();
     };
@@ -135,6 +144,10 @@ define(['jquery',
         this.ui.chartGroup
             .attr('transform', new Transform('translate',
                 this.boxes.inner.left(), this.boxes.inner.top()));
+
+        this.ui.chartGroupClip
+            .attr("width", this.boxes.inner.width())
+            .attr("height", this.boxes.inner.height());
     };
 
     /**
@@ -210,7 +223,6 @@ define(['jquery',
             right: this.boxes.outer.width() - margin.right,
             bottom: this.boxes.outer.height() - margin.bottom
         });
-
     };
 
     /**
