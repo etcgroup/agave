@@ -93,6 +93,20 @@ define(['lib/d3', 'underscore',
             },
 
             /**
+             * Make the histogram invisible.
+             */
+            hide: function() {
+                this._svg.style('display', 'none');
+            },
+
+            /**
+             * Make the histogram visible.
+             */
+            show: function() {
+                this._svg.style('display', 'inline');
+            },
+
+            /**
              * Render the histogram.
              */
             render: function() {

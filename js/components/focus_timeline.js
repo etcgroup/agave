@@ -5,15 +5,22 @@ define(['jquery',
     'util/poll',
     'components/timeline',
     'vis/histogram',
+    'vis/stack_histogram',
     'util/tooltip',
     'lib/d3'],
-    function ($, _, extend, Transform, Poll, Timeline, Histogram, Tooltip, d3) {
+    function ($, _, extend, Transform, Poll, Timeline, Histogram, StackHistogram, Tooltip, d3) {
 
         var ANNOTATION_POLL_INTERVAL = 10000;
         var AXIS_OFFSET = 3;
         var ANNOTATION_TOOLTIP_TEMPLATE = _.template(
             "<%=label%> <span class='muted'>(<%=user%>)</span>"
         );
+
+        //Color defaults
+        var COLOR_DOMAIN = [-1, 0, 1];
+        var COLOR_RANGE = ["#69C5F5", "#F26522", "#F8FDFF"]
+
+        var VALID_MODES = ['simple', 'stack', 'expand']
 
         /**
          * A class for rendering and maintaining a focus timeline.
@@ -31,6 +38,10 @@ define(['jquery',
 
             this.user = options.user;
 
+            //Set the starting mode
+            this._mode = 'simple';
+            this._queryShown = undefined;
+
             this._brushedAnnotations = {};
 
             //A lookup object for tweets by id
@@ -43,6 +54,11 @@ define(['jquery',
 
             //Create a vertical scale
             this._countScale = d3.scale.linear();
+
+            //Create a color scale
+            this._sentimentScale = this._sentimentScale = d3.scale.ordinal()
+                .domain(COLOR_DOMAIN)
+                .range(COLOR_RANGE);
 
             this._annotationsPoll = new Poll({
                 callback: $.proxy(this._requestAnnotations, this),
@@ -242,8 +258,11 @@ define(['jquery',
          * Update the focus timeline. Overrides the parent's update method.
          */
         FocusTimeline.prototype.update = function () {
+            this._updateCountScale();
+
             Timeline.prototype.update.call(this);
 
+            this._updateCountAxis();
             this._updateAnnotations();
         };
 
@@ -291,6 +310,24 @@ define(['jquery',
         };
 
         /**
+         * Update the count scale if necessary.
+         *
+         * @private
+         */
+        FocusTimeline.prototype._updateCountScale = function() {
+            //The stack histograms manage the scale themselves, but the regular histograms do not
+            if (this._mode === 'simple') {
+                //Get the maximum count over all histograms
+                var maxCount = d3.max(this._histograms, function (hist) {
+                    return hist._maxCount || 0;
+                });
+
+                //Update the scale
+                this._countScale.domain([0, maxCount]);
+            }
+        };
+
+        /**
          * Update the vertical axis.
          * @private
          */
@@ -307,14 +344,14 @@ define(['jquery',
          */
         FocusTimeline.prototype._renderHistogram = function () {
 
+            //Two arrays for keeping track of the histogram components
             this._histograms = [];
+            this._stackHistograms = [];
 
             var self = this;
             this.queries.forEach(function (query) {
                 //Use a Histogram to draw the timeline
                 var histogram = new Histogram();
-
-                //Configure the histogram itself
                 histogram
                     .className('focus histogram id-' + query.id())
                     .container(self.ui.svg)
@@ -326,9 +363,48 @@ define(['jquery',
                     .render();
 
                 self._histograms.push(histogram);
+
+                //We also need a StackHistogram to draw the layered versions
+                var stackHistogram = new StackHistogram();
+                stackHistogram
+                    .className('focus stack-histogram id-' + query.id())
+                    .container(self.ui.svg)
+                    .box(self.boxes.inner)
+                    .xData(self._timeAccessor)
+                    .xScale(self._timeScale)
+                    .yScale(self._countScale)
+                    .colorScale(self._sentimentScale)
+                    .interpolate(self._interpolation)
+                    .render();
+
+                self._stackHistograms.push(stackHistogram);
             });
 
             this._updateHistogram();
+        };
+
+        /**
+         * Set the timeline mode. Can be either 'simple', 'stack', or 'expand'.
+         *
+         * @param mode a string, 'simple', 'stack', or 'expand'
+         * @param queryShown an integer query id
+         * @returns {*}
+         */
+        FocusTimeline.prototype.mode = function(mode, queryShown) {
+            if (!arguments.length) {
+                return this._mode;
+            }
+
+            if (VALID_MODES.indexOf(mode) < 0) {
+                throw 'Invalid mode ' + mode;
+            }
+
+            this._queryShown = queryShown;
+            this._mode = mode;
+
+            this.update();
+
+            return this;
         };
 
         /**
@@ -336,8 +412,32 @@ define(['jquery',
          */
         FocusTimeline.prototype._updateHistogram = function () {
             //Update each histogram
+            var mode = this._mode;
+
             this._histograms.forEach(function (histogram) {
-                histogram.update();
+                if (mode !== 'simple') {
+                    histogram.hide();
+                } else {
+                    histogram.show();
+                    histogram.update();
+                }
+            });
+
+            var toExpand = mode === 'expand';
+            var queryShown = this._queryShown;
+            this._stackHistograms.forEach(function (stackHistogram, index) {
+                if (mode === 'simple' || (queryShown !== undefined && index !== queryShown)) {
+                    stackHistogram.hide();
+                } else {
+                    stackHistogram.show();
+
+                    if (toExpand !== stackHistogram.expand()) {
+                        //Don't change expand unless needed, because it can be expensive
+                        stackHistogram.expand(toExpand);
+                    }
+
+                    stackHistogram.update();
+                }
             });
         };
 
@@ -383,7 +483,7 @@ define(['jquery',
             var params = result.params; //request info
 //            var data = result.data; //data
 
-            var data = result.data.reduce(function (prev, layer) {
+            var countsOnly = result.data.reduce(function (prev, layer) {
                 return {
                     values: layer.values.map(function (v, i) {
                         return {
@@ -395,31 +495,28 @@ define(['jquery',
             }).values;
 
             //Bind the new data
-            this._histograms[params.query_id].data(data);
+            this._histograms[params.query_id].data(countsOnly);
+
+            //Bind the un-transformed data
+            this._stackHistograms[params.query_id].data(result.data);
 
             //Store the max value on the histogram for efficiency
-            this._histograms[params.query_id]._maxCount = d3.max(data, function (d) {
+            this._histograms[params.query_id]._maxCount = d3.max(countsOnly, function (d) {
                 return d.count;
             });
-
-            //Get the maximum count over all histograms
-            var maxCount = d3.max(this._histograms, function (hist) {
-                return hist._maxCount || 0;
-            });
-
-            //Update the scale
-            this._countScale.domain([0, maxCount]);
 
             //Fade in the counts axis
             this.ui.svg.select('g.counts.axis.chart-label')
                 .transition()
                 .style('opacity', 1);
 
+
             //Update the counts axis
+            this._updateCountScale();
             this._updateCountAxis();
 
             //Call the parent method
-            Timeline.prototype._onData.call(this, data);
+            Timeline.prototype._onData.call(this, result);
         };
 
         /**
