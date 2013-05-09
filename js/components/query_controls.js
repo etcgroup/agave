@@ -1,4 +1,4 @@
-define(['jquery', 'underscore', 'util/events', 'model/Query'], function ($, _, events, Query) {
+define(['jquery', 'underscore', 'util/events', 'model/query'], function ($, _, events, Query) {
 
     /**
      * A class for managing the controls that manipulat a query object.
