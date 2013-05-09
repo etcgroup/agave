@@ -56,6 +56,10 @@ define([
             //Listen for new tweets on the API
             this.api.on('tweets', $.proxy(this._onData, this));
 
+            this.api.on('brush', $.proxy(this._onBrush, this));
+
+            this.api.on('unbrush', $.proxy(this._onUnBrush, this));
+
             var self = this;
             this.ui.tweetList.on('mouseenter', '.tweet', function() {
                 self._tweetMouseEntered($(this));
@@ -64,21 +68,71 @@ define([
             this.ui.tweetList.on('mouseleave', '.tweet', function() {
                 self._tweetMouseLeft($(this));
             });
+
+            this.ui.tweetList.on('click', '.tweet', function() {
+                self._tweetClicked($(this));
+            });
         };
 
         TweetList.prototype._tweetMouseEntered = function(tweetUI) {
             var tweet = tweetUI.data('tweet');
 
-            this.api.trigger('highlight-tweet', {
+            this.api.trigger('brush', [{
                 id: tweet.id,
-                time: tweet.created_at
-            });
+                type: 'tweet'
+            }]);
         };
 
         TweetList.prototype._tweetMouseLeft = function(tweetUI) {
             var tweet = tweetUI.data('tweet');
 
-            this.api.trigger('unhighlight-tweet', tweet.id);
+            this.api.trigger('unbrush', [{
+                id: tweet.id,
+                type: 'tweet'
+            }]);
+        };
+
+        TweetList.prototype._tweetClicked = function(tweetUI) {
+            var tweet = tweetUI.data('tweet');
+
+            this.api.trigger('reference-selected', {
+                type: 'tweet',
+                data: tweet
+            });
+        };
+
+        TweetList.prototype._onBrush = function(e, brushed) {
+            var tweets = this.ui.tweetList
+                .find('.tweet');
+
+            _.each(brushed, function(item) {
+                if (item.type !==  'tweet') {
+                    return;
+                }
+
+                var tweetUI = tweets.filter('[data-id=' + item.id + ']');
+
+                if (tweetUI.length) {
+                    tweetUI.addClass('highlight');
+                }
+            });
+        };
+
+        TweetList.prototype._onUnBrush = function(e, brushed) {
+            var tweets = this.ui.tweetList
+                .find('.tweet');
+
+            _.each(brushed, function(item) {
+                if (item.type !==  'tweet') {
+                    return;
+                }
+
+                var tweetUI = tweets.filter('[data-id=' + item.id + ']');
+
+                if (tweetUI.length) {
+                    tweetUI.removeClass('highlight');
+                }
+            });
         };
 
         /**

@@ -1,4 +1,4 @@
-
+/*csslint adjoining-classes: false*/
 .discussions .header,
 .discussion-view .header {
     margin-bottom: 10px;
@@ -44,6 +44,7 @@
 
 .discussion:hover {
     text-decoration: underline;
+    background-color: #eee;
 }
 
 
@@ -80,15 +81,12 @@
     float: right;
 }
 
-.discussion-view .comment-box .back-button {
-    margin-bottom: 10px;
-}
-
 .discussion-view .comment-box textarea {
     width: 100%;
     display: block;
     box-sizing: border-box;
     resize: none;
+    margin-top: 10px;
 }
 
 .discussion-view .comment-box .user-display {
@@ -97,6 +95,7 @@
 
 .discussion-view .comment-box .send-button {
     float: right;
+    margin-left: 10px;
 }
 
 .discussion-view .comments {
@@ -121,4 +120,37 @@
 }
 .discussion-view .comment .time {
     float: right;
+}
+
+.discussion-view .comment .message {
+    line-height: 25px;
+}
+
+.discussion-view .comment .message .ref {
+    background-color: #FAEDCE;
+    padding: 2px 4px;
+
+    text-decoration: underline;
+    border: 1px solid #AAA;
+
+    white-space: nowrap;
+
+    -moz-border-radius: 4px;
+    -webkit-border-radius: 4px;
+    border-radius: 4px;
+
+    cursor: pointer;
+}
+.discussion-view .comment .message .ref.highlight,
+.discussion-view .comment .message .ref:hover {
+    background-color: #ffc174;
+}
+
+.discussion-view .comment .message .ref.type-T {
+    background-color: #D9F6FA;
+}
+
+.discussion-view .comment .message .ref.type-T.highlight,
+.discussion-view .comment .message .ref.type-T:hover {
+    background-color: #a9f3fa;
 }

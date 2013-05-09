@@ -36,6 +36,7 @@
 	text-align: right;
 }
 
+.tweet-list .tweet.highlight,
 .tweet-list .tweet:hover {
-    background: #efefef;
+    background-color: #D9F6FA;
 }

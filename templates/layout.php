@@ -68,18 +68,23 @@
                             <div class="discussions col">
                                 <div class="header row">
                                     <div class="title">Discussions</div>
-                                    <div class="btn new-button">New Discussion</div>
+                                    <button type="button" class="btn new-button">New Discussion</button>
                                     <p>Join an existing discussion:</p>
                                 </div>
                                 <div class="discussion-list row scroll-y"></div>
                             </div>
                             <div class="discussion-view col">
                                 <div class="comment-box row">
-                                    <div class="btn back-button"><i class="icon-arrow-left"></i> Back to discussion list</div>
+                                    <button type="button" class="btn back-button">
+                                        <i class="icon-arrow-left"></i> Back to discussion list
+                                    </button>
                                     <br/>
                                     <textarea></textarea>
                                     <span class="user-display"></span>
-                                    <button type="button" class="send-button btn btn-primary">Post message</button>
+                                    <button type="button"
+                                            class="send-button btn btn-primary">
+                                        <i class="icon-white icon-comment"></i> Post message
+                                    </button>
                                 </div>
                                 <div class="comments row scroll-y"></div>
                             </div>

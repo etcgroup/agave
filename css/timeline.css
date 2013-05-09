@@ -110,7 +110,7 @@
 }
 
 .annotations rect {
-    fill: gold;
+    fill: yellow;
     stroke: transparent;
     stroke-width: 4px;
     shape-rendering: crispEdges;
@@ -119,6 +119,8 @@
     cursor: pointer;
 }
 
+.annotations .highlight,
 .annotations rect:hover {
-    fill: yellow;
+    fill: orange;
+    stroke: orange;
 }

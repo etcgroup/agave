@@ -36,7 +36,11 @@ define(['jquery'], function($) {
         }
 
         //Save the user data
-        this.user.name(user);
+        this.user.set({
+            name: user,
+            signed_in: true
+        });
+        this.user.trigger('signed-in');
     };
 
     SignIn.prototype.hide = function() {

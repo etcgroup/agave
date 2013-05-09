@@ -29,6 +29,13 @@ define(['jquery',
             //Call the parent constructor
             Timeline.call(this, options);
 
+            this.user = options.user;
+
+            this._brushedAnnotations = {};
+
+            //A lookup object for tweets by id
+            this._tweetCacheLookup = {};
+
             //Store offset time internally
             var staticExtent = this.extentFromUTC([options.from, options.to]);
             this.from = staticExtent[0];
@@ -93,7 +100,7 @@ define(['jquery',
          *
          * @private
          */
-        FocusTimeline.prototype._requestAnnotations = function() {
+        FocusTimeline.prototype._requestAnnotations = function () {
             this.api.annotations();
         };
 
@@ -103,7 +110,7 @@ define(['jquery',
          *
          * @private
          */
-        FocusTimeline.prototype._initAnnotations = function() {
+        FocusTimeline.prototype._initAnnotations = function () {
 
             this.api.on('annotations', $.proxy(this._onAnnotationData, this));
 
@@ -117,24 +124,32 @@ define(['jquery',
          * Called when new annotation data arrives.
          * @private
          */
-        FocusTimeline.prototype._onAnnotationData = function(e, result) {
+        FocusTimeline.prototype._onAnnotationData = function (e, result) {
+
+            this.annotations = result.data;
 
             var boxHeight = this.boxes.inner.height();
 
-            var annotations = result.data;
-
             var bind = this.ui.annotations.selectAll('rect')
-                .data(annotations);
+                .data(this.annotations);
 
             var self = this;
             bind.enter().append('rect')
                 .attr('y', 0)
                 .attr('width', 2)
-                .on('mousemove', function(d) {
+                .on('mousemove', function (d) {
                     self._onAnnotationHover(d3.event, d, true);
                 })
-                .on('mouseout', function(d) {
+                .on('mouseout', function (d) {
                     self._onAnnotationHover(d3.event, d, false);
+                })
+                .on('click', function (d) {
+                    d3.event.preventDefault();
+                    d3.event.stopPropagation();
+
+                    self._selectAnnotation(d);
+
+                    return false;
                 });
 
             //Remove un-needed lines
@@ -144,7 +159,7 @@ define(['jquery',
             this._updateAnnotations();
         };
 
-        FocusTimeline.prototype._onAnnotationHover = function(event, data, mouseHovering) {
+        FocusTimeline.prototype._onAnnotationHover = function (event, data, mouseHovering) {
             if (mouseHovering) {
                 var label = ANNOTATION_TOOLTIP_TEMPLATE(data);
 
@@ -157,11 +172,15 @@ define(['jquery',
             }
         };
 
-        FocusTimeline.prototype._updateAnnotations = function() {
+        FocusTimeline.prototype._updateAnnotations = function () {
             var boxHeight = this.boxes.inner.height();
 
+            var self = this;
             this.ui.annotations.selectAll('rect')
-                .attr('x', this._highlightXPosition)
+                .classed('highlight', function (d) {
+                    return d.id in self._brushedAnnotations;
+                })
+                .attr('x', this._annotationXPosition)
                 .attr('height', boxHeight);
         };
 
@@ -170,12 +189,12 @@ define(['jquery',
          *
          * @param domain
          */
-        FocusTimeline.prototype.domain = function(domain) {
+        FocusTimeline.prototype.domain = function (domain) {
             //don't forget to translate from utc to translated time
             this._timeScale.domain(this.extentFromUTC(domain));
         };
 
-        FocusTimeline.prototype.render = function() {
+        FocusTimeline.prototype.render = function () {
             Timeline.prototype.render.call(this);
 
             this._initHighlights();
@@ -185,23 +204,35 @@ define(['jquery',
             this._requestAnnotations();
         };
 
-        FocusTimeline.prototype.update = function() {
+        FocusTimeline.prototype.update = function () {
             Timeline.prototype.update.call(this);
 
             this._updateAnnotations();
         };
 
-        FocusTimeline.prototype.attachEvents = function() {
+        FocusTimeline.prototype.attachEvents = function () {
             Timeline.prototype.attachEvents.call(this);
 
             //Subscribe to a data stream from the API.
             this.api.on('counts', $.proxy(this._onData, this));
-            this.api.on('user', $.proxy(this._userAvailable, this));
 
-            this.ui.svg.on('click', $.proxy(this.beginAnnotation, this));
+            this.api.on('tweets', $.proxy(this._onTweets, this));
+
+            //If the user clicks on the svg, we'll begin annotation
+            var self = this;
+            this.ui.svg.on('click', function () {
+
+                //Don't propagate or the listener for outside clicks will cancel annotation mode
+                d3.event.preventDefault();
+                d3.event.stopPropagation();
+
+                self.beginAnnotation();
+
+                return false;
+            });
         };
 
-        FocusTimeline.prototype._renderCountAxis = function() {
+        FocusTimeline.prototype._renderCountAxis = function () {
             this._verticalAxis = d3.svg.axis()
                 .scale(this._countScale)
                 .ticks(10)
@@ -214,7 +245,7 @@ define(['jquery',
             this._updateCountAxis();
         };
 
-        FocusTimeline.prototype._updateCountAxis = function() {
+        FocusTimeline.prototype._updateCountAxis = function () {
             this.ui.svg.select('g.counts.axis.chart-label')
                 .attr('transform', new Transform('translate',
                     this.boxes.inner.left() - AXIS_OFFSET, this.boxes.inner.top()))
@@ -260,8 +291,34 @@ define(['jquery',
             });
         };
 
-        FocusTimeline.prototype._userAvailable = function(e, user) {
-            this.user = user;
+        /**
+         * When new tweets arrive, store them in the tweet cache.
+         * @param e
+         * @param result
+         * @returns {Function}
+         * @private
+         */
+        FocusTimeline.prototype._onTweets = function (e, result) {
+            var toKeep = 100;
+            var self = this;
+
+            //add these items to the tweet cache, which will dedupe for us
+            _.each(result.data, function(tweet) {
+                self._tweetCacheLookup[tweet.id] = tweet;
+            });
+
+            //Now limit to 100 items
+            var list = _.keys(self._tweetCacheLookup);
+            var toRemove = Math.max(0, list.length - toKeep);
+            list.splice(0, toRemove);
+
+            //Now rebuild the cache
+            var newCache = {};
+            _.each(list, function(id) {
+                newCache[id] = self._tweetCacheLookup[id];
+            });
+
+            this._tweetCacheLookup = newCache;
         };
 
         /**
@@ -291,12 +348,12 @@ define(['jquery',
             this._histograms[params.query_id].data(data);
 
             //Store the max value on the histogram for efficiency
-            this._histograms[params.query_id]._maxCount = d3.max(data, function(d) {
+            this._histograms[params.query_id]._maxCount = d3.max(data, function (d) {
                 return d.count;
             });
 
             //Get the maximum count over all histograms
-            var maxCount = d3.max(this._histograms, function(hist) {
+            var maxCount = d3.max(this._histograms, function (hist) {
                 return hist._maxCount || 0;
             });
 
@@ -320,7 +377,7 @@ define(['jquery',
          *
          * @private
          */
-        FocusTimeline.prototype._initHighlights = function() {
+        FocusTimeline.prototype._initHighlights = function () {
 
             var self = this;
 
@@ -330,7 +387,7 @@ define(['jquery',
             function findIndexOf(id) {
                 //Remove the highlight with that id
                 for (var i = 0; i < self._tweetHighlights.length; i++) {
-                    if (self._tweetHighlights[i].id === id) {
+                    if (+self._tweetHighlights[i].id === +id) {
                         return i;
                     }
                 }
@@ -338,26 +395,65 @@ define(['jquery',
             }
 
             //A function for positioning highlights
-            this._highlightXPosition = function(d) {
-                return self._timeScale(self._timeAccessor(d));
+            this._tweetXPosition = function (d) {
+                return self._timeScale(d.created_at + self._utcOffset);
+            };
+
+            this._annotationXPosition = function (d) {
+                return self._timeScale(d.time + self._utcOffset);
             };
 
             //A group element for containing the highlight points
-            this.api.on('highlight-tweet', function(e, highlight) {
-                if (findIndexOf(highlight.id) === null) {
-                    self._tweetHighlights.push(highlight);
-                    self._updateTweetHighlights();
-                }
+            this.api.on('brush', function (e, brushed) {
+                _.each(brushed, function(item) {
+
+                    switch (item.type) {
+                        case 'tweet':
+                            //Do we know about this tweet?
+                            if (!(item.id in self._tweetCacheLookup)) {
+                                return;
+                            }
+
+                            //Is it already highlighted?
+                            if (findIndexOf(item.id) !== null) {
+                                return;
+                            }
+
+                            var tweet = self._tweetCacheLookup[item.id];
+                            self._tweetHighlights.push(tweet);
+                            self._updateTweetHighlights();
+                            break;
+                        case 'annotation':
+                            self._brushedAnnotations[item.id] = true;
+                            self._updateAnnotations();
+                            break;
+                    }
+
+                });
             });
 
-            this.api.on('unhighlight-tweet', function(e, id) {
-                var index = findIndexOf(id);
-                self._tweetHighlights.splice(index, 1);
-                self._updateTweetHighlights();
+            this.api.on('unbrush', function (e, brushed) {
+                _.each(brushed, function(item) {
+
+                    switch (item.type) {
+                        case 'tweet':
+                            var index = findIndexOf(item.id);
+                            if (index !== null) {
+                                self._tweetHighlights.splice(index, 1);
+                                self._updateTweetHighlights();
+                            }
+                            break;
+                        case 'annotation':
+                            delete self._brushedAnnotations[item.id];
+                            self._updateAnnotations();
+                            break;
+                    }
+
+                });
             });
         };
 
-        FocusTimeline.prototype._updateTweetHighlights = function() {
+        FocusTimeline.prototype._updateTweetHighlights = function () {
 
             var boxHeight = this.boxes.inner.height();
 
@@ -368,8 +464,8 @@ define(['jquery',
             //Create new lines and position them, but make them have no height
             bind.enter().append('line')
                 .classed('tweet-highlight', true)
-                .attr('x1', this._highlightXPosition)
-                .attr('x2', this._highlightXPosition)
+                .attr('x1', this._tweetXPosition)
+                .attr('x2', this._tweetXPosition)
                 .attr('y1', boxHeight)
                 .attr('y2', boxHeight);
 
@@ -380,8 +476,8 @@ define(['jquery',
                 .remove();
 
             //Position the lines where they ought to be
-            bind.attr('x1', this._highlightXPosition)
-                .attr('x2', this._highlightXPosition)
+            bind.attr('x1', this._tweetXPosition)
+                .attr('x2', this._tweetXPosition)
                 .attr('y1', 0)
                 .attr('y2', boxHeight);
         };
@@ -419,13 +515,17 @@ define(['jquery',
         };
 
 
-
         /**
          * Call this to put the timeline in annotation mode.
          */
-        FocusTimeline.prototype.beginAnnotation = function() {
+        FocusTimeline.prototype.beginAnnotation = function () {
             if (this._annotationMode) {
                 //Already annotating
+                return;
+            }
+
+            if (!this.user.signed_in()) {
+                alert("You must sign in to annotate");
                 return;
             }
 
@@ -469,13 +569,11 @@ define(['jquery',
          * Called when an existing annotation is clicked.
          * @private
          */
-        FocusTimeline.prototype._selectAnnotation = function() {
-            //Don't let this event go anywhere else
-            d3.event.preventDefault();
-            d3.event.stopPropagation();
-
-            var target = d3.event.target;
-            //debugger;
+        FocusTimeline.prototype._selectAnnotation = function (data) {
+            this.api.trigger('reference-selected', {
+                type: 'annotation',
+                data: data
+            });
         };
 
         /**
@@ -483,7 +581,7 @@ define(['jquery',
          *
          * @private
          */
-        FocusTimeline.prototype._createAnnotation = function() {
+        FocusTimeline.prototype._createAnnotation = function () {
             if (!this._annotationMode) {
                 //Not annotating
                 return;
@@ -501,20 +599,23 @@ define(['jquery',
 
             console.log('creating annotation at time ' + time);
 
-            if (this.user) {
+            if (!this.user.signed_in()) {
+                alert('You must sign in to annotate.');
+            } else {
                 var label = prompt("Label this time");
 
-                //Send the annotation up to the server
-                var annotation = {
-                    time: time,
-                    label: label,
-                    user: this.user
-                };
-                this.api.annotate(annotation);
+                if (label) {
 
-                this.trigger('new-annotation', annotation);
-            } else {
-                alert('You must sign in to annotate.');
+                    //Send the annotation up to the server
+                    var annotation = {
+                        time: time,
+                        label: label,
+                        user: this.user.name()
+                    };
+                    this.api.annotate(annotation);
+
+                    this.trigger('new-annotation', annotation);
+                }
             }
 
             //And we're done annotating
@@ -528,7 +629,7 @@ define(['jquery',
          *
          * @private
          */
-        FocusTimeline.prototype._updateAnnotationTarget = function() {
+        FocusTimeline.prototype._updateAnnotationTarget = function () {
             if (!this._annotationMode) {
                 //Not annotating
                 return;
@@ -547,7 +648,7 @@ define(['jquery',
         /**
          * Call this to take the timeline out of annotation mode.
          */
-        FocusTimeline.prototype.endAnnotation = function() {
+        FocusTimeline.prototype.endAnnotation = function () {
             if (!this._annotationMode) {
                 //Not annotating
                 return;

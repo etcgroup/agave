@@ -155,6 +155,7 @@ define(function (require) {
         this.focusTimeline = new FocusTimeline({
             into: this.ui.focusTimeline,
             api: this.api,
+            user: this.user,
             queries: this.queries,
             interval: this.interval,
             from: this.config.overview_from * 1000,
@@ -237,7 +238,7 @@ define(function (require) {
         var self = this;
 
         //When a user is available...
-        this.user.on('change', function() {
+        this.user.on('signed-in', function() {
             //Hide the sign-in box, show the discussions
             self.discussionList.show();
             self.signIn.hide();
@@ -278,6 +279,8 @@ define(function (require) {
             self.discussionList.show();
             self.setDiscussionState('show-mid');
         });
+
+
     };
 
     App.prototype.windowResize = function () {

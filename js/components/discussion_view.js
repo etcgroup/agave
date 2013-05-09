@@ -1,7 +1,9 @@
 define(['jquery',
+    'underscore',
     'util/events',
     'util/poll',
-    'lib/bootstrap'], function($, events, Poll, bootstrap) {
+    'util/references',
+    'lib/bootstrap'], function($, _, events, Poll, references, bootstrap) {
 
     //Check for messages every 10 seconds
     var POLL_INTERVAL = 10000;
@@ -10,6 +12,8 @@ define(['jquery',
         this.into = options.into || $('<div>');
         this.api = options.api;
         this.user = options.user;
+
+        this.discussion_id = null;
 
         this._initUI();
         this._attachEvents();
@@ -35,8 +39,28 @@ define(['jquery',
     DiscussionView.prototype._attachEvents = function() {
         this.ui.backButton.on('click', $.proxy(this._onBackClicked, this));
         this.ui.commentSubmit.on('click', $.proxy(this._onSendClicked, this));
+
+        var self = this;
+        this.ui.commentList.on('mouseenter', '.ref', function() {
+            self._referenceMouseEntered($(this));
+        });
+
+        this.ui.commentList.on('mouseleave', '.ref', function() {
+            self._referenceMouseLeft($(this));
+        });
+
+        this.ui.commentList.on('click', '.ref', function() {
+            self._referenceClicked($(this));
+        });
+
         this.user.on('change', $.proxy(this._userChanged, this));
         this.api.on('messages', $.proxy(this._onData, this));
+
+        this.api.on('reference-selected', $.proxy(this._onReferenceInserted, this));
+
+        this.api.on('brush', $.proxy(this._onBrush, this));
+
+        this.api.on('unbrush', $.proxy(this._onUnBrush, this));
     };
 
     DiscussionView.prototype.show = function(discussion_id) {
@@ -45,6 +69,9 @@ define(['jquery',
         //Clear the current list contents
         this.ui.commentList.html('');
 
+        //Clear the input box
+        this.ui.commentInput.val('');
+
         this._requestData();
 
         this.poll.start();
@@ -52,7 +79,14 @@ define(['jquery',
         this.ui.commentInput.focus();
     };
 
+    DiscussionView.prototype.isShowing = function() {
+        //We are showing if we are polling
+        return this.poll.isPolling();
+    };
+
     DiscussionView.prototype.hide = function() {
+        this.discussion_id = null;
+
         this.poll.stop();
     };
 
@@ -88,10 +122,122 @@ define(['jquery',
         });
     };
 
+    DiscussionView.prototype._onReferenceInserted = function(e, result) {
+        if (!this.isShowing()) {
+            return;
+        }
+
+        //Get the reference type
+        var type = result.type;
+
+        //Generate a reference code
+        var referenceCode = references.build(type, result.data);
+
+        //Append to the comment input
+        var currentMsg = $.trim(this.ui.commentInput.val());
+
+        //focus and clear the input to force the cursor to the end
+        this.ui.commentInput.focus();
+        this.ui.commentInput.val('');
+
+        if (currentMsg) {
+            //Add some space if needed
+            currentMsg += " ";
+        }
+        this.ui.commentInput.val(currentMsg + referenceCode + " ");
+    };
+
+    function getReferenceType(refUI) {
+        var type = refUI.hasClass('type-T') ? 'tweet' :
+            (refUI.hasClass('type-A') ? 'annotation' : undefined);
+
+        if (!type) {
+            throw "unknown reference type!";
+        }
+
+        return type;
+    }
+
+    DiscussionView.prototype._referenceMouseEntered = function(refUI) {
+        var type = getReferenceType(refUI);
+        var id = refUI.data('id');
+
+        this.api.trigger('brush', [{
+            type: type,
+            id: id
+        }]);
+    };
+
+    DiscussionView.prototype._referenceMouseLeft = function(refUI) {
+        var type = getReferenceType(refUI);
+        var id = refUI.data('id');
+
+        this.api.trigger('unbrush', [{
+            type: type,
+            id: id
+        }]);
+    };
+
+    DiscussionView.prototype._onBrush = function (e, brush) {
+        var refs = this.ui.commentList.find('.ref');
+        _.each(brush, function(item) {
+            refs.filter('[data-id=' + item.id + ']')
+                .addClass('highlight');
+        });
+    };
+
+    DiscussionView.prototype._onUnBrush = function (e, brush) {
+        var refs = this.ui.commentList.find('.ref');
+        _.each(brush, function(item) {
+            refs.filter('[data-id=' + item.id + ']')
+                .removeClass('highlight');
+        });
+    };
+
+    DiscussionView.prototype._referenceClicked = function(refUI) {
+        var type = getReferenceType(refUI);
+        var id = refUI.data('id');
+        var text = refUI.html();
+
+        var reference = {
+            id: id
+        };
+
+        switch (type) {
+            case 'annotation':
+                reference.label = text;
+                break;
+            case 'tweet':
+                reference.text = text;
+                break;
+        }
+
+        //Send it out through the normal channels, in case anyone else is watching
+        this.api.trigger('reference-selected', {
+            type: type,
+            data: reference
+        });
+    };
+
     DiscussionView.prototype._onData = function(e, result) {
         this._enableCommentBox();
 
-        var data = result.data;
+        var data = $($.trim(result.data)).filter(function() {
+            //Remove 'text' nodes
+            return this.nodeType !== 3;
+        });
+
+        //don't bother if there are no new messages
+        if (data.length === this.ui.commentList.find('.comment').length) {
+            return;
+        }
+
+        //Format all the messages (looking for entities)
+        data.each(function(index, element) {
+            var msgElement = $(this).find('.message');
+            msgElement.html(references.replace(msgElement.html()));
+        });
+
         this.ui.commentList.html(data);
 
         if (!this.discussion_id) {

@@ -193,7 +193,7 @@ class Queries
     private function _build_annotations() {
         $this->queries->annotations = $this->db->prepare(
             "SELECT UNIX_TIMESTAMP(created) as created,
-            user, label,
+            id, user, label,
             UNIX_TIMESTAMP(time) as time
             FROM annotations"
         );

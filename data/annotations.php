@@ -17,6 +17,8 @@ $db = $request->db();
 //Get the performance tracker
 $perf = $request->timing();
 
+$inserted_id = FALSE;
+
 /**
  * Requests to /messages.php should provide a discussion id.
  *
@@ -46,6 +48,12 @@ $perf->start('processing');
 while ($row = $result->fetch_assoc()) {
     $row['created'] *= 1000; //convert to ms
     $row['time'] *= 1000;
+
+    //Mark the annotation that was new, if there was one
+    if ($inserted_id && $row['id'] === $inserted_id) {
+        $row['new'] = TRUE;
+    }
+
     $annotations[] = $row;
 }
 $result->free();
