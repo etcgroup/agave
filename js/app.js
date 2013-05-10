@@ -321,8 +321,10 @@ define(function (require) {
 
     App.prototype.selectionChanged = function (extent) {
         //When the timeline zoom/pan changes, we need to update the query object
-        this.interval.from(extent[0]);
-        this.interval.to(extent[1]);
+        this.interval.set({
+            from: extent[0],
+            to: extent[1]
+        });
 
         //and update the url
         this.updateUrl();
