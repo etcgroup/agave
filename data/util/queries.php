@@ -226,7 +226,7 @@ class Queries
         $datetime = $datetime->format('Y-m-d H:i:s');
 
         $this->run('insert_annotation', $created, $user, $label, $datetime);
-        return $this->db->insert_id;
+        return $this->db->lastInsertId();
     }
 
     private function _build_annotations() {
@@ -279,11 +279,11 @@ class Queries
 
         if (!$discussion_id) {
             $this->run('insert_discussion', $time);
-            $discussion_id = $this->db->insert_id;
+            $discussion_id = $this->db->lastInsertId();
         }
 
         $this->run('insert_message', $time, $user, $message, $discussion_id);
-        return $this->db->insert_id;
+        return $this->db->lastInsertId();
     }
 
     private function _build_message()
