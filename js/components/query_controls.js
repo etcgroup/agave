@@ -117,14 +117,11 @@ define(['jquery', 'underscore', 'util/events', 'model/query'], function ($, _, e
 
         var data = {};
 
-        //Get the mode of the active mode button (validate)
-        data.view = this.ui.view_buttons.find('.active').data('mode');
-
         //Get the search string
-        data.search = $.trim(this.ui.search_input.val());
+        data.search = $.trim(this.ui.search_input.val()) || null;
 
         //Get the author string
-        data.author = $.trim(this.ui.author_input.val());
+        data.author = $.trim(this.ui.author_input.val()) || null;
 
         //Get whether or not to show retweets
         data.rt = this.ui.rt_checkbox.is(':checked');
@@ -134,6 +131,8 @@ define(['jquery', 'underscore', 'util/events', 'model/query'], function ($, _, e
 
         //Get the selected sentiment filter, with validation
         data.sentiment = this.ui.sentiment_select.val();
+        data.sentiment = data.sentiment ? Number(data.sentiment) : null;
+
 
         return this.model.set(data);
     };
@@ -144,11 +143,6 @@ define(['jquery', 'underscore', 'util/events', 'model/query'], function ($, _, e
      * @private
      */
     QueryControls.prototype._fillForm = function () {
-        //Activate the proper mode button
-        this.ui.view_buttons.children().removeClass('active');
-        this.ui.view_buttons
-            .find('[data-mode=' + this.model.view() + ']')
-            .addClass('active');
 
         //Set the search string
         this.ui.search_input.val(this.model.search());
