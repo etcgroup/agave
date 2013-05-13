@@ -293,7 +293,7 @@ define(function (require) {
             }));
         });
 
-    }
+    };
 
 
 
@@ -395,7 +395,7 @@ define(function (require) {
     };
 
     App.prototype.displayChanged = function(e, display, changedFields) {
-        if (changedFields == 'annotations' || changedFields.indexOf('annotations') >= 0) {
+        if (changedFields === 'annotations' || changedFields.indexOf('annotations') >= 0) {
             //Don't update if annotations was the updated field.
             return;
         }

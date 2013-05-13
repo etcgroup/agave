@@ -267,7 +267,7 @@ define(['jquery', 'underscore', 'util/events'], function ($, _, events) {
                 return results.payload;
             }
         });
-    }
+    };
 
     API.prototype.users = function(parameters) {
         var queryId = parameters.query_id;
