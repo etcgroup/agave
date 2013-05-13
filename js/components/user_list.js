@@ -48,6 +48,23 @@ define([
 
             //Listen for new tweets on the API
             this.api.on('users', $.proxy(this._onData, this));
+
+            this.api.on('brush', $.proxy(this._onBrush, this));
+
+            this.api.on('unbrush', $.proxy(this._onUnBrush, this));
+
+            var self = this;
+            this.ui.userList.on('mouseenter', '.user', function() {
+                self._userMouseEntered($(this));
+            });
+
+            this.ui.userList.on('mouseleave', '.user', function() {
+                self._userMouseLeft($(this));
+            });
+
+            this.ui.userList.on('click', '.user', function() {
+                self._userClicked($(this));
+            });
         };
 
    
@@ -108,6 +125,67 @@ define([
             this.ui.userList = $('<ul>').appendTo(this.into);
         };
 
+        UserList.prototype._userMouseEntered = function(userUI) {
+            var user = userUI.data('user');
+
+            this.api.trigger('brush', [{
+                id: user.id,
+                type: 'user'
+            }]);
+        };
+
+        UserList.prototype._userMouseLeft = function(userUI) {
+            var user = userUI.data('user');
+
+            this.api.trigger('unbrush', [{
+                id: user.id,
+                type: 'user'
+            }]);
+        };
+
+        UserList.prototype._userClicked = function(userUI) {
+            var user = userUI.data('user');
+
+            this.api.trigger('reference-selected', {
+                type: 'user',
+                data: user
+            });
+        };
+
+        UserList.prototype._onBrush = function(e, brushed) {
+            var users = this.ui.userList
+                .find('.user');
+
+            _.each(brushed, function(item) {
+                if (item.type !==  'user') {
+                    return;
+                }
+
+                var userUI = users.filter('[data-id=' + item.id + ']');
+
+                if (userUI.length) {
+                    userUI.addClass('highlight');
+                }
+            });
+        };
+
+        UserList.prototype._onUnBrush = function(e, brushed) {
+            var users = this.ui.userList
+                .find('.user');
+
+            _.each(brushed, function(item) {
+                if (item.type !==  'user') {
+                    return;
+                }
+
+                var userUI = users.filter('[data-id=' + item.id + ']');
+
+                if (userUI.length) {
+                    userUI.removeClass('highlight');
+                }
+            });
+        };
+        
         //Mix in events
         events(UserList);
 
