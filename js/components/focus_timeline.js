@@ -292,8 +292,8 @@ define(['jquery',
             //Subscribe to another data stream
             this.api.on('tweets', $.proxy(this._onTweets, this));
 
+            //When the display mode changes, update
             this.display.on('change', $.proxy(this._onDisplayModeChanged, this));
-
 
             //If the user clicks on the svg, we'll begin annotation
             var self = this;
@@ -598,6 +598,12 @@ define(['jquery',
                         self._brushedAnnotations[item.id] = true;
                         self._updateAnnotations();
                         break;
+                    case 'query':
+                        //Someone brushed an entire query!
+                        if (self.display.mode() === 'simple') {
+                            self._histograms[item.id].bold(true);
+                        }
+                        break;
                 }
 
             });
@@ -626,6 +632,12 @@ define(['jquery',
                         //Mark that the item is not being brushed
                         delete self._brushedAnnotations[item.id];
                         self._updateAnnotations();
+                        break;
+                    case 'query':
+                        //Someone brushed an entire query!
+                        if (self.display.mode() === 'simple') {
+                            self._histograms[item.id].bold(false);
+                        }
                         break;
                 }
 

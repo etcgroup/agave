@@ -26,7 +26,13 @@ path.neutral {
 }
 
 .focus .area {
-    opacity: 0.5;
+    fill: rgba(73, 175, 205, 0.5);
+    stroke: rgba(73, 175, 205, 0.5);
+    stroke-width: 1px;
+}
+
+.focus .area.bold {
+    stroke: #FFF;
 }
 
 .spark {
@@ -136,3 +142,4 @@ path.neutral {
     fill: orange;
     stroke: orange;
 }
+

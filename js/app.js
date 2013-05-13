@@ -122,7 +122,8 @@ define(function (require) {
             //Pass the model and target along to the view
             var view = new QueryControls({
                 model: query,
-                into: ui
+                into: ui,
+                api: self.api
             });
 
             //When the model changes, we need to know
