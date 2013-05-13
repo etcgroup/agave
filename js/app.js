@@ -10,6 +10,7 @@ define(function (require) {
     var QueryControls = require('components/query_controls');
     var TweetTimeline = require('components/tweet_timeline');
     var TweetList = require('components/tweet_list');
+    var UserList = require('components/user_list');
     var OverviewTimeline = require('components/overview_timeline');
     var FocusTimeline = require('components/focus_timeline');
     var DiscussionList = require('components/discussion_list');
@@ -40,6 +41,7 @@ define(function (require) {
 
         this.initDetailsPanel();
         this.initTweetList();
+        this.initUserList();
 
         this.initSignInView();
         this.initDiscussionList();
@@ -217,6 +219,26 @@ define(function (require) {
                 interval: self.interval,
                 query: query,
                 into: group.tweetList
+            }));
+        });
+    };
+    
+    // Setting up the users list component
+    App.prototype.initUserList = function () {
+        
+        this.userLists = [];
+        
+        var self = this;
+        this.ui.detailsTabGroups.forEach(function(group, index) {
+            var query = self.queries[index];
+            
+            group.userList = group.root.find('.users-list');
+            
+            self.userLists.push(new UserList ( {
+                api: self.api,
+                interval: self.interval,
+                query: query,
+                into: group.userList
             }));
         });
     };
