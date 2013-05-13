@@ -40,7 +40,8 @@ $neutral_count_field = 'neutral';
 $time_field = 'binned_time';
 
 //Execute the database query
-$result = $db->get_grouped_counts_filtered($from, $to, $interval, $filter->rt, $filter->min_rt, $filter->search, $filter->sentiment, $filter->author);
+$split_sentiment = TRUE;
+$result = $db->get_grouped_counts($from, $to, $interval, $split_sentiment, $filter->rt, $filter->min_rt, $filter->search, $filter->sentiment, $filter->author);
 
 $perf->start('processing');
 

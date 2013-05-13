@@ -32,7 +32,8 @@ $time_field = 'binned_time';
 $count_field = 'count';
 
 //Execute the database query
-$result = $db->get_grouped_counts($from, $to, $interval);
+$split_sentiment = FALSE;
+$result = $db->get_grouped_counts($from, $to, $interval, $split_sentiment);
 
 $perf->start('processing');
 

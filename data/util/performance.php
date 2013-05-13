@@ -23,7 +23,7 @@ class Performance
      * If an event of the same name was already recorded,
      * it will be overwritten.
      *
-     * @param type $name
+     * @param string $name
      */
     public function start($name)
     {
@@ -45,7 +45,7 @@ class Performance
     /**
      * Mark the stop of an event by name.
      *
-     * @param type $name
+     * @param string $name
      */
     public function stop($name)
     {
@@ -58,7 +58,7 @@ class Performance
 
     /**
      * Increment a counter with the given name.
-     * @param type $name
+     * @param string $name
      */
     public function counter($name)
     {

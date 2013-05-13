@@ -17,9 +17,15 @@ class Queries
 {
 
     private $db;
+    /**
+     * @var PDOStatement[]
+     */
     private $queries;
     private $types;
-    private $performance = NULL;
+    /**
+     * @var Performance
+     */
+    private $performance;
     private $utc;
 
     /**
@@ -73,7 +79,7 @@ class Queries
 
     /**
      * Mark the start of a query for performance measurement.
-     * @param type $query_name
+     * @param string $query_name
      */
     private function start($query_name)
     {
@@ -98,7 +104,7 @@ class Queries
 
     /**
      * Mark the stop of a query for performance measurement.
-     * @param type $query_name
+     * @param string $query_name
      */
     private function stop($query_name)
     {
@@ -131,8 +137,8 @@ class Queries
      */
     private function build_queries()
     {
-        $this->queries = new stdClass();
-        $this->types = new stdClass();
+        $this->queries = array();
+        $this->types = array();
 
         // Get all of the query builder methods
         $methods = get_class_methods($this);
@@ -164,10 +170,10 @@ class Queries
             $pdoTypes[] = $t;
         }
 
-        $this->queries->{$queryname} = $this->db->prepare($querystr);
-        $this->types->{$queryname} = $pdoTypes;
+        $this->queries[$queryname] = $this->db->prepare($querystr);
+        $this->types[$queryname] = $pdoTypes;
 
-        if (!$this->queries->{$queryname}) {
+        if (!$this->queries[$queryname]) {
             echo "Prepare ${$queryname} failed: (" . $this->db->errorCode() . ")";
             print_r($this->db->errorInfo());
             return FALSE;
@@ -178,15 +184,15 @@ class Queries
 
     /**
      * Execute a query. Expects a query name, MySQLi type string, and list of parameters to bind.
-     * @param string $queryname
+     * @param $query_name
      * @return array
      */
-    private function run($queryname)
+    private function run($query_name)
     {
-        $query = $this->queries->{$queryname};
-        $paramTypes = $this->types->{$queryname};
+        $query = $this->queries[$query_name];
+        $paramTypes = $this->types[$query_name];
 
-        $this->start($queryname);
+        $this->start($query_name);
 
         $args = array_slice(func_get_args(), 1);
         if ($args) {
@@ -199,15 +205,15 @@ class Queries
         $success = $query->execute();
 
         if ($success === FALSE) {
-            echo "Execute $queryname failed: ({$query->errorCode()})";
+            echo "Execute $query_name failed: ({$query->errorCode()})";
             print_r($query->errorInfo());
             print_r($args);
             $query->debugDumpParams();
-            $this->stop($queryname);
+            $this->stop($query_name);
         } else {
             $result = $query->fetchAll(PDO::FETCH_ASSOC);
 
-            $this->stop($queryname);
+            $this->stop($query_name);
 
             if ($result) {
                 return $result;
@@ -284,7 +290,7 @@ class Queries
      *
      * @param $user
      * @param $label
-     * @param $datetime
+     * @param DateTime $datetime
      * @return mixed
      */
     public function insert_annotation($user, $label, $datetime)
@@ -518,312 +524,10 @@ class Queries
         return $this->run2($builder, $binder);
     }
 
-    private function _build_grouped_originals()
-    {
-        $this->prepare('grouped_originals',
-            "SELECT UNIX_TIMESTAMP(?) + ? * FLOOR((UNIX_TIMESTAMP(created_at)-UNIX_TIMESTAMP(?)) / ?) AS binned_time,
-                COUNT(*) AS count,
-                SUM(IF(sentiment=1,1,0)) AS positive,
-                SUM(IF(sentiment=0,1,0)) AS neutral,
-                SUM(IF(sentiment=-1,1,0)) AS negative
-            FROM tweets
-            WHERE NOT is_retweet
-            AND created_at >= ?
-            AND created_at < ?
-            AND retweet_count >= ?
-            GROUP BY binned_time
-            ORDER BY binned_time",
-            'sisissi'
-        );
-
-        $this->prepare('grouped_originals_like',
-            "SELECT UNIX_TIMESTAMP(?) + ? * FLOOR((UNIX_TIMESTAMP(created_at)-UNIX_TIMESTAMP(?)) / ?) AS binned_time,
-                COUNT(*) AS count,
-                SUM(IF(sentiment=1,1,0)) AS positive,
-                SUM(IF(sentiment=0,1,0)) AS neutral,
-                SUM(IF(sentiment=-1,1,0)) AS negative
-            FROM tweets
-            WHERE NOT is_retweet
-            AND created_at >= ?
-            AND created_at < ?
-            AND retweet_count >= ?
-            AND text LIKE ?
-            GROUP BY binned_time
-            ORDER BY binned_time",
-            'sisissis'
-        );
-    }
-
-    /**
-     * Counts tweets in the specified interval, grouped by time. Returns a MySQLi result set object.
-     *
-     * @param DateTime $start_datetime
-     * @param DateTime $stop_datetime
-     * @param int $group_seconds
-     * @param int $noise_threshold The minimum retweet count to be returned.
-     * @param string $text_search
-     * @return mysqli_result
-     */
-    public function get_grouped_originals($start_datetime, $stop_datetime, $group_seconds, $noise_threshold, $text_search = NULL)
-    {
-        $start_datetime = $start_datetime->format('Y-m-d H:i:s');
-        $stop_datetime = $stop_datetime->format('Y-m-d H:i:s');
-
-        if ($text_search === NULL) {
-            $result = $this->run('grouped_originals',
-                $start_datetime, $group_seconds, $start_datetime,
-                $group_seconds, $start_datetime, $stop_datetime,
-                $noise_threshold);
-        } else {
-            $search = "%$text_search%";
-            $result = $this->run('grouped_originals_like',
-                $start_datetime, $group_seconds, $start_datetime,
-                $group_seconds, $start_datetime, $stop_datetime,
-                $noise_threshold, $search);
-        }
-
-
-        return $result;
-    }
-
-    private function _build_grouped_retweets()
-    {
-        $this->prepare('grouped_retweets',
-            "SELECT UNIX_TIMESTAMP(?) + ? * FLOOR((UNIX_TIMESTAMP(created_at)-UNIX_TIMESTAMP(?)) / ?) AS binned_time,
-                COUNT(*) AS count
-            FROM tweets
-            WHERE is_retweet
-            AND created_at >= ?
-            AND created_at < ?
-            GROUP BY binned_time
-            ORDER BY binned_time",
-            'sisiss'
-        );
-
-        $this->prepare('grouped_retweets_like',
-            "SELECT UNIX_TIMESTAMP(?) + ? * FLOOR((UNIX_TIMESTAMP(created_at)-UNIX_TIMESTAMP(?)) / ?) AS binned_time,
-                COUNT(*) AS count
-            FROM tweets
-            WHERE is_retweet
-            AND created_at >= ?
-            AND created_at < ?
-            AND text LIKE ?
-            GROUP BY binned_time
-            ORDER BY binned_time",
-            'sisisss'
-        );
-    }
-
-    /**
-     * Get retweet counts grouped over a time interval.
-     *
-     * @param DateTime $start_datetime
-     * @param DateTime $stop_datetime
-     * @param int $group_seconds
-     * @param string $text_search
-     * @return mysqli_result
-     */
-    public function get_grouped_retweets($start_datetime, $stop_datetime, $group_seconds, $text_search = NULL)
-    {
-        $start_datetime = $start_datetime->format('Y-m-d H:i:s');
-        $stop_datetime = $stop_datetime->format('Y-m-d H:i:s');
-
-        if ($text_search === NULL) {
-            $result = $this->run('grouped_retweets', $start_datetime,
-                $group_seconds, $start_datetime, $group_seconds,
-                $start_datetime, $stop_datetime);
-        } else {
-            $search = "%$text_search%";
-            $result = $this->run('grouped_retweets_like',
-                $start_datetime, $group_seconds, $start_datetime,
-                $group_seconds, $start_datetime, $stop_datetime, $search);
-        }
-
-        return $result;
-    }
-
-    private function _build_grouped_retweets_of_id()
-    {
-        $this->prepare('grouped_retweets_of_id',
-            "SELECT UNIX_TIMESTAMP(?) + ? * FLOOR((UNIX_TIMESTAMP(created_at)-UNIX_TIMESTAMP(?)) / ?) AS binned_time,
-                COUNT(*) AS count
-            FROM tweets
-            WHERE is_retweet
-            AND created_at >= ?
-            AND created_at < ?
-            AND retweet_of_status_id = ?
-            GROUP BY binned_time
-            ORDER BY binned_time",
-            'sisisss'
-        );
-
-    }
-
-    /**
-     * Get retweet counts of a specific tweet, grouped over a time interval.
-     *
-     * @param long $tweet_id
-     * @param DateTime $start_datetime
-     * @param DateTime $stop_datetime
-     * @param int $group_seconds
-     * @return mysqli_result
-     */
-    public function get_grouped_retweets_of_id($tweet_id, $start_datetime, $stop_datetime, $group_seconds)
-    {
-        $start_datetime = $start_datetime->format('Y-m-d H:i:s');
-        $stop_datetime = $stop_datetime->format('Y-m-d H:i:s');
-
-        $result = $this->run('grouped_retweets_of_id',
-            $start_datetime, $group_seconds, $start_datetime,
-            $group_seconds, $start_datetime, $stop_datetime, $tweet_id);
-
-        return $result;
-    }
-
-    private function _build_grouped_retweets_of_range()
-    {
-        $this->prepare('grouped_retweets_of_range',
-            "SELECT UNIX_TIMESTAMP(?) + ? * FLOOR((UNIX_TIMESTAMP(rt.created_at)-UNIX_TIMESTAMP(?)) / ?) AS binned_time,
-                COUNT(*) AS count,
-                SUM(IF(rt.sentiment=1,1,0)) AS positive,
-                SUM(IF(rt.sentiment=0,1,0)) AS neutral,
-                SUM(IF(rt.sentiment=-1,1,0)) AS negative
-            FROM tweets t0, tweets rt
-            WHERE t0.id = rt.retweet_of_status_id
-            AND rt.created_at >= ?
-            AND rt.created_at < ?
-            AND t0.created_at >= ?
-            AND t0.created_at < ?
-            GROUP BY binned_time
-            ORDER BY binned_time",
-            'sisissss'
-        );
-
-    }
-
-    /**
-     * Get retweet counts of tweets in an interval, grouped over another time interval.
-     *
-     * @param DateTime $tweets_start_datetime
-     * @param DateTime $tweets_stop_datetime
-     * @param DateTime $start_datetime
-     * @param DateTime $stop_datetime
-     * @param int $group_seconds
-     * @return mysqli_result
-     */
-    public function get_grouped_retweets_of_range($tweets_start_datetime, $tweets_stop_datetime, $start_datetime, $stop_datetime, $group_seconds)
-    {
-        $tweets_start_datetime = $tweets_start_datetime->format('Y-m-d H:i:s');
-        $tweets_stop_datetime = $tweets_stop_datetime->format('Y-m-d H:i:s');
-
-        $start_datetime = $start_datetime->format('Y-m-d H:i:s');
-        $stop_datetime = $stop_datetime->format('Y-m-d H:i:s');
-
-        $result = $this->run('grouped_retweets_of_range',
-            $start_datetime, $group_seconds, $start_datetime,
-            $group_seconds, $start_datetime, $stop_datetime,
-            $tweets_start_datetime, $tweets_stop_datetime);
-
-        return $result;
-    }
-
-    private function _build_grouped_noise()
-    {
-        $this->prepare('grouped_noise',
-            "SELECT UNIX_TIMESTAMP(?) + ? * FLOOR((UNIX_TIMESTAMP(created_at)-UNIX_TIMESTAMP(?)) / ?) AS binned_time,
-                COUNT(*) AS count
-            FROM tweets
-            WHERE NOT is_retweet
-            AND created_at >= ?
-            AND created_at < ?
-            AND retweet_count < ?
-            GROUP BY binned_time
-            ORDER BY binned_time",
-            'sisissi'
-        );
-
-        $this->prepare('grouped_noise_like',
-            "SELECT UNIX_TIMESTAMP(?) + ? * FLOOR((UNIX_TIMESTAMP(created_at)-UNIX_TIMESTAMP(?)) / ?) AS binned_time,
-                COUNT(*) AS count
-            FROM tweets
-            WHERE NOT is_retweet
-            AND created_at >= ?
-            AND created_at < ?
-            AND retweet_count < ?
-            AND text LIKE ?
-            GROUP BY binned_time
-            ORDER BY binned_time",
-            'sisissis'
-        );
-    }
-
-    /**
-     * Gets noise tweets in the specified interval. Returns a MySQLi result set object.
-     *
-     * @param DateTime $start_datetime
-     * @param DateTime $stop_datetime
-     * @param int $group_seconds The bin size in seconds
-     * @param int $noise_threshold The maximum retweet count to return.
-     * @param string $text_search Optional text search
-     * @return mysqli_result
-     */
-    public function get_grouped_noise($start_datetime, $stop_datetime, $group_seconds, $noise_threshold, $text_search = NULL)
-    {
-        $start_datetime = $start_datetime->format('Y-m-d H:i:s');
-        $stop_datetime = $stop_datetime->format('Y-m-d H:i:s');
-
-        if ($text_search === NULL) {
-            $result = $this->run('grouped_noise', $start_datetime,
-                $group_seconds, $start_datetime, $group_seconds,
-                $start_datetime, $stop_datetime, $noise_threshold);
-        } else {
-            $search = "%$text_search%";
-            $result = $this->run('grouped_noise_like',
-                $start_datetime, $group_seconds, $start_datetime,
-                $group_seconds, $start_datetime, $stop_datetime,
-                $noise_threshold, $search);
-        }
-
-        return $result;
-    }
-
-    private function _build_grouped_counts()
-    {
-        $this->prepare('grouped_counts',
-            "SELECT UNIX_TIMESTAMP(?) + ? * FLOOR((UNIX_TIMESTAMP(created_at)-UNIX_TIMESTAMP(?)) / ?) AS binned_time,
-                COUNT(*) AS count
-            FROM tweets
-            WHERE created_at >= ?
-            AND created_at < ?
-            GROUP BY binned_time
-            ORDER BY binned_time",
-            'sisiss'
-        );
-    }
-
-    /**
-     * Count tweets in the specified interval. Returns a MySQLi result set object.
-     *
-     * @param DateTime $start_datetime
-     * @param DateTime $stop_datetime
-     * @param int $group_seconds The bin size in seconds
-     * @return mysqli_result
-     */
-    public function get_grouped_counts($start_datetime, $stop_datetime, $group_seconds)
-    {
-        $start_datetime = $start_datetime->format('Y-m-d H:i:s');
-        $stop_datetime = $stop_datetime->format('Y-m-d H:i:s');
-
-        $result = $this->run('grouped_counts', $start_datetime,
-            $group_seconds, $start_datetime, $group_seconds,
-            $start_datetime, $stop_datetime);
-        return $result;
-    }
-
     /**
      * Query to generate users list.
-     * @param $start_datetime
-     * @param $stop_datetime
+     * @param DateTime $start_datetime
+     * @param DateTime $stop_datetime
      * @param bool $is_rt
      * @param int $min_rt
      * @param string $text_search
@@ -875,47 +579,13 @@ class Queries
         return $this->run2($builder, $binder);
     }
 
-
-    private function _build_grouped_counts_filtered()
-    {
-        $this->prepare('grouped_counts_filtered',
-            "SELECT UNIX_TIMESTAMP(?) + ? * FLOOR((UNIX_TIMESTAMP(created_at)-UNIX_TIMESTAMP(?)) / ?) AS binned_time,
-                COUNT(*) AS count,
-                SUM(IF(sentiment=1,1,0)) AS positive,
-                SUM(IF(sentiment=0,1,0)) AS neutral,
-                SUM(IF(sentiment=-1,1,0)) AS negative
-            FROM tweets
-            WHERE created_at >= ?
-            AND created_at < ?
-            GROUP BY binned_time
-            ORDER BY binned_time",
-            'sisiss'
-        );
-
-
-        $this->prepare('grouped_counts_filtered_like',
-            "SELECT UNIX_TIMESTAMP(?) + ? * FLOOR((UNIX_TIMESTAMP(created_at)-UNIX_TIMESTAMP(?)) / ?) AS binned_time,
-                COUNT(*) AS count,
-                SUM(IF(sentiment=1,1,0)) AS positive,
-                SUM(IF(sentiment=0,1,0)) AS neutral,
-                SUM(IF(sentiment=-1,1,0)) AS negative
-            FROM tweets
-            WHERE created_at >= ?
-            AND created_at < ?
-            AND text LIKE ?
-            GROUP BY binned_time
-            ORDER BY binned_time",
-            'sisisss'
-        );
-
-    }
-
     /**
      * Counts tweets in the specified interval, grouped by time. Returns a MySQLi result set object.
      *
      * @param DateTime $start_datetime
      * @param DateTime $stop_datetime
      * @param int $group_seconds
+     * @param bool $split_sentiment
      * @param bool $is_rt
      * @param int $min_rt
      * @param string $text_search
@@ -923,7 +593,7 @@ class Queries
      * @param int $user_id
      * @return array
      */
-    public function get_grouped_counts_filtered($start_datetime, $stop_datetime, $group_seconds,
+    public function get_grouped_counts($start_datetime, $stop_datetime, $group_seconds, $split_sentiment = TRUE,
                                $is_rt = NULL, $min_rt = NULL,
                                $text_search = NULL, $sentiment = NULL, $user_id = NULL)
     {
@@ -935,13 +605,15 @@ class Queries
         $start_datetime = $binder->param('from', $start_datetime);
         $group_seconds = $binder->param('interval', $group_seconds, PDO::PARAM_INT);
 
-        $builder = new Builder('tweets');
+        $builder = new Builder('grouped_counts');
 
         $builder->select("UNIX_TIMESTAMP($start_datetime) + $group_seconds * FLOOR((UNIX_TIMESTAMP(created_at)-UNIX_TIMESTAMP($start_datetime)) / $group_seconds) AS binned_time");
         $builder->select('COUNT(*) AS count');
-        $builder->select('SUM(IF(sentiment=1,1,0)) AS positive');
-        $builder->select('SUM(IF(sentiment=0,1,0)) AS neutral');
-        $builder->select('SUM(IF(sentiment=-1,1,0)) AS negative');
+        if ($split_sentiment) {
+            $builder->select('SUM(IF(sentiment=1,1,0)) AS positive');
+            $builder->select('SUM(IF(sentiment=0,1,0)) AS neutral');
+            $builder->select('SUM(IF(sentiment=-1,1,0)) AS negative');
+        }
 
         $builder->from('tweets');
 
@@ -998,9 +670,11 @@ class Queries
     /**
      * Grabs the top burst keywords
      *
+     * @param int $window_size in seconds (should be 300 or 1200)
      * @param DateTime $start_datetime
      * @param DateTime $stop_datetime
-     * @param int $window_size in seconds (should be 300 or 1200)
+     * @param int $limit
+     * @return array
      */
     public function get_burst_keywords($window_size, $start_datetime, $stop_datetime, $limit = 10)
     {
@@ -1020,8 +694,8 @@ class Queries
  *
  * http://php.net/manual/en/mysqli-stmt.bind-param.php
  *
- * @param type $arr
- * @return type
+ * @param array $arr
+ * @return array
  */
 function refValues($arr)
 {
