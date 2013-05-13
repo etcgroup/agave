@@ -158,6 +158,42 @@ class Request
     }
 
     /**
+     * Get the query model parameters: 'min_rt', 'rt', 'search', 'author', and 'sentiment'.
+     */
+    public function queryParameters()
+    {
+        $times = $this->timeParameters();
+        $params = $this->get(array(), array('min_rt', 'rt', 'search', 'author', 'sentiment'));
+
+        //Pull in the time range
+        $params->from = $times->from;
+        $params->to = $times->to;
+
+        //Convert to boolean
+        $is_rt = $params->rt === 'true';
+
+        //Reset these ones to null if they are empty
+        $params->search = $params->search ? $params->search : NULL;
+        $params->sentiment = $params->sentiment ? $params->sentiment : NULL;
+        $params->screen_name = $params->author ? $params->author : NULL;
+
+        //Look up the author
+        if ($params->author !== NULL) {
+            $user = $this->db->get_user_by_name($params->author);
+            if ($user !== NULL) {
+                $params->author = $user['id'];
+            } else {
+                //No getting off easy if you can't find them
+                $params->author = -1;
+            }
+        } else {
+            $params->author = NULL;
+        }
+
+        return $params;
+    }
+
+    /**
      * Get 'from' and 'to' DateTimes, as well as
      * a grouping 'interval'.
      *

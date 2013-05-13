@@ -26,12 +26,12 @@ $perf = $request->timing();
  */
 $params = $request->get(array(), array('search'));
 $timeParams = $request->binnedTimeParams();
+$filter = $request->queryParameters();
 
 //Get the retrieved parameters
 $from = $timeParams->from;
 $to = $timeParams->to;
 $interval = $timeParams->interval;
-$search = $params->search;
 
 //Some constants that refer to field names in the SELECT query
 $positive_count_field = 'positive';
@@ -40,7 +40,7 @@ $neutral_count_field = 'neutral';
 $time_field = 'binned_time';
 
 //Execute the database query
-$result = $db->get_grouped_counts_filtered($from, $to, $interval, $search);
+$result = $db->get_grouped_counts_filtered($from, $to, $interval, $filter->rt, $filter->min_rt, $filter->search, $filter->sentiment, $filter->author);
 
 $perf->start('processing');
 

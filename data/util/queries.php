@@ -463,54 +463,6 @@ class Queries
         return $result;
     }
 
-    private function _build_originals()
-    {
-        $base_query = "SELECT t.*, UNIX_TIMESTAMP(t.created_at) AS created_at, u.screen_name
-            FROM tweets t
-            INNER JOIN users u ON u.id = t.user_id
-            WHERE NOT t.is_retweet
-            AND t.created_at >= ?
-            AND t.created_at < ?
-            AND t.retweet_count >= ?
-            ORDER BY t.%s DESC
-            LIMIT ?";
-
-        $base_query_like = "SELECT t.*, UNIX_TIMESTAMP(t.created_at) AS created_at, u.screen_name
-            FROM tweets t
-            INNER JOIN users u ON u.id = t.user_id
-            WHERE NOT t.is_retweet
-            AND t.created_at >= ?
-            AND t.created_at < ?
-            AND t.retweet_count >= ?
-            AND t.text LIKE ?
-            ORDER BY t.%s DESC
-            LIMIT ?";
-
-
-        $this->prepare('originals',
-            sprintf($base_query, 'created_at'),
-            'ssii'
-        );
-
-        $this->prepare('originals_like',
-            sprintf($base_query_like, 'created_at'),
-            'ssisi'
-        );
-
-        /* sorted by retweet count */
-        $this->prepare('originals_orderby_retweet',
-            sprintf($base_query, 'retweet_count'),
-            'ssii'
-        );
-
-        $this->prepare('originals_like_orderby_retweet',
-            sprintf($base_query_like, 'retweet_count'),
-            'ssisi'
-        );
-
-    }
-
-
     /**
      * Gets tweets in the specified interval.
      *
@@ -519,6 +471,8 @@ class Queries
      * @param bool $is_rt whether or not to return retweets or non-retweets
      * @param int $min_rt The minimum retweet count to be returned
      * @param string $text_search
+     * @param int $sentiment
+     * @param int $user_id
      * @param string $sort
      * @param int $limit
      * @return array
@@ -934,27 +888,57 @@ class Queries
      * @param DateTime $start_datetime
      * @param DateTime $stop_datetime
      * @param int $group_seconds
+     * @param bool $is_rt
+     * @param int $min_rt
      * @param string $text_search
-     * @return mysqli_result
+     * @param int $sentiment
+     * @param int $user_id
+     * @return array
      */
-    public function get_grouped_counts_filtered($start_datetime, $stop_datetime, $group_seconds, $text_search = NULL)
+    public function get_grouped_counts_filtered($start_datetime, $stop_datetime, $group_seconds,
+                               $is_rt = NULL, $min_rt = NULL,
+                               $text_search = NULL, $sentiment = NULL, $user_id = NULL)
     {
         $start_datetime = $start_datetime->format('Y-m-d H:i:s');
         $stop_datetime = $stop_datetime->format('Y-m-d H:i:s');
 
-        if ($text_search === NULL) {
-            $result = $this->run('grouped_counts_filtered',
-                $start_datetime, $group_seconds, $start_datetime,
-                $group_seconds, $start_datetime, $stop_datetime);
-        } else {
-            $search = "%$text_search%";
-            $result = $this->run('grouped_counts_filtered_like',
-                $start_datetime, $group_seconds, $start_datetime,
-                $group_seconds, $start_datetime, $stop_datetime,
-                $search);
-        }
+        //Declare some parameters we need now
+        $binder = new Binder();
+        $start_datetime = $binder->param('from', $start_datetime);
+        $group_seconds = $binder->param('interval', $group_seconds, PDO::PARAM_INT);
 
-        return $result;
+        $builder = new Builder('tweets');
+
+        $builder->select("UNIX_TIMESTAMP($start_datetime) + $group_seconds * FLOOR((UNIX_TIMESTAMP(created_at)-UNIX_TIMESTAMP($start_datetime)) / $group_seconds) AS binned_time");
+        $builder->select('COUNT(*) AS count');
+        $builder->select('SUM(IF(sentiment=1,1,0)) AS positive');
+        $builder->select('SUM(IF(sentiment=0,1,0)) AS neutral');
+        $builder->select('SUM(IF(sentiment=-1,1,0)) AS negative');
+
+        $builder->from('tweets');
+
+        $builder->group_by('binned_time');
+        $builder->order_by('binned_time');
+
+        //Declare the rest of the parameters
+        $stop_datetime = $binder->param('to', $stop_datetime);
+        $min_rt = $binder->param('min_rt', $min_rt, PDO::PARAM_INT);
+        $is_rt = $binder->param('rt', $is_rt, PDO::PARAM_BOOL);
+        $sentiment = $binder->param('sentiment', $sentiment);
+        $user_id = $binder->param('user_id', $user_id, PDO::PARAM_INT);
+        if ($text_search) {
+            $text_search = "%$text_search%";
+        }
+        $text_search = $binder->param('search', $text_search);
+
+        $builder->where_created_at_between($start_datetime, $stop_datetime);
+        $builder->where_retweet_count_over($min_rt);
+        $builder->where_text_like($text_search);
+        $builder->where_is_retweet_is($is_rt);
+        $builder->where_user_is($user_id);
+        $builder->where_sentiment_is($sentiment);
+
+        return $this->run2($builder, $binder);
     }
 
 
