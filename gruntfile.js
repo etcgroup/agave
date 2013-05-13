@@ -4,7 +4,10 @@ module.exports = function (grunt) {
     var taskConfig = {
         pkg: grunt.file.readJSON('package.json'),
         dirs: {
-            tests: "tests/",
+            tests: {
+                js: "tests/js",
+                php: "tests/php"
+            },
             src_js: "js/",
             src_css: "css/"
         },
@@ -72,16 +75,16 @@ module.exports = function (grunt) {
                     }
                 },
                 src: [
-                    '<%=dirs.tests%>/**/*.js',
-                    '!<%=dirs.tests%>/vendor/**/*.js'
+                    '<%=dirs.tests.js%>/**/*.js',
+                    '!<%=dirs.tests.js%>/vendor/**/*.js'
                 ]
             }
         },
 
         jasmine: {
             options: {
-                specs: '<%=dirs.tests%>/**/*_spec.js',
-                vendor: '<%=dirs.tests%>/vendor/jasmine-jquery.js',
+                specs: '<%=dirs.tests.js%>/**/*_spec.js',
+                vendor: '<%=dirs.tests.js%>/vendor/jasmine-jquery.js',
                 template: require('grunt-template-jasmine-requirejs'),
                 templateOptions: {
                     requireConfig: {
@@ -103,7 +106,7 @@ module.exports = function (grunt) {
                         },
                         callback: function($) {
                             // Set up the fixtures
-                            jasmine.getFixtures().fixturesPath = 'tests/fixtures';
+                            jasmine.getFixtures().fixturesPath = 'tests/js/fixtures';
                         }
                     }
                 }
