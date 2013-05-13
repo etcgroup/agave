@@ -8,12 +8,10 @@ define([
     function ($, _, events, Transform, Rectangle, Bootstrap) {
 
         var KEYWORD_TEMPLATE = _.template("<li class='keyword' data-id='<%=id%>'>" +
-            "<div class='hdr'>@<%=term%></div>" +
-            "<div class='body'>" +
-            "<span class='keyword_before'><%=before_count%></span>" +
-            "<span class='keyword_delta'>&nbsp;&Delta;<%=count_delta%></span>" +
-            "<div class='keyword_pct_delta'>&nbsp; (<%=count_percent_delta%> %)</div>" +
-            "</div>" +
+            "<div class='keyword_term'>@<%=term%></div>" +
+            "<div class='keyword_before'><%=before_count%></div>" +
+            "<div class='keyword_delta'>&nbsp;&Delta;<%=count_delta%></div>" +
+            "<div class='keyword_pct_delta'>(<%=count_percent_delta%> %)</div>" +
             "</li>");
 
         //The max number of keywords to load.

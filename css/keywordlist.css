@@ -8,6 +8,8 @@
     border-bottom: 1px solid #ccc;
 	color: #333;
 	padding: 12px;
+	display: block;
+	overflow: auto;
 
     -webkit-transition: background 200ms ;
     -moz-transition: background 200ms ;
@@ -17,21 +19,22 @@
 }
 
 .keywords-list .keyword .hdr {
-	color: #fff;
+	color: #000;
 }
 
 .keywords-list .keyword .body {
 	overflow: auto;
 }
 
-.keywords-list .keyword .keyword_text {
-	width: 80%;
+.keywords-list .keyword_term, .keywords-list .keyword_before, .keywords-list .keyword_delta {
+	width: 20%;
 	float: left;
+	text-align: center;
 }
 
-.keywords-list .keyword .keyword_count {
-	float: left;
-	text-align: right;
+.keywords-list .keyword_term {
+	width: 35%;
+	text-align: left;
 }
 
 .keywords-list .keyword .keyword_pct_delta {
