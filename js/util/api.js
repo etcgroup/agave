@@ -9,7 +9,8 @@ define(['jquery', 'underscore', 'util/events'], function ($, _, events) {
         'discussions': 'data/discussions.php',
         'messages': 'data/messages.php',
         'tweets': 'data/tweets.php',
-        'annotations': 'data/annotations.php'
+        'annotations': 'data/annotations.php',
+        'keywords': 'data/burst_keywords.php'
     };
 
     /**
@@ -256,6 +257,15 @@ define(['jquery', 'underscore', 'util/events'], function ($, _, events) {
             }
         });
     };
+
+    API.prototype.keywords = function(parameters) {
+        this.request('get', 'keywords', {
+            params: parameters,
+            post_process: function(results) {
+                return results.payload;
+            }
+        });
+    }
 
     //Mix in events
     events(API);

@@ -10,6 +10,7 @@ define(function (require) {
     var QueryControls = require('components/query_controls');
     var TweetTimeline = require('components/tweet_timeline');
     var TweetList = require('components/tweet_list');
+    var KeywordList = require('components/keyword_list');
     var OverviewTimeline = require('components/overview_timeline');
     var FocusTimeline = require('components/focus_timeline');
     var DiscussionList = require('components/discussion_list');
@@ -40,6 +41,7 @@ define(function (require) {
 
         this.initDetailsPanel();
         this.initTweetList();
+        this.initKeywordList();
 
         this.initSignInView();
         this.initDiscussionList();
@@ -220,6 +222,30 @@ define(function (require) {
             }));
         });
     };
+
+    /**
+     * Set up the other list
+     */
+    App.prototype.initKeywordList = function() {
+        this.keywordLists = [];
+
+        var self = this;
+        this.ui.detailsTabGroups.forEach(function(group, index) {
+            var query = self.queries[index];
+
+            group.keywordList = group.root.find('.keywords-list');
+
+            self.keywordLists.push(new KeywordList({
+                api: self.api,
+                interval: self.interval,
+                query: query,
+                into: group.keywordList
+            }));
+        });
+
+    }
+
+
 
     App.prototype.setDiscussionState = function(cssClass) {
         this.ui.collaborator
