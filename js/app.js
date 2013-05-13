@@ -12,11 +12,8 @@ define(function (require) {
     var QueryControls = require('components/query_controls');
     var TweetTimeline = require('components/tweet_timeline');
     var TweetList = require('components/tweet_list');
-<<<<<<< HEAD
     var KeywordList = require('components/keyword_list');
-=======
     var UserList = require('components/user_list');
->>>>>>> 05d7f9c54e830945b5a267bfd32041f6ae882ccc
     var OverviewTimeline = require('components/overview_timeline');
     var FocusTimeline = require('components/focus_timeline');
     var DiscussionList = require('components/discussion_list');
