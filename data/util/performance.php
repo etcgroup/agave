@@ -9,10 +9,12 @@
  *
  * Performance can also measure counts of events, via the counter method.
  */
-class Performance {
+class Performance
+{
 
     public $counts = array();
     public $times = array();
+    public $queries = array();
     private $start_times = array();
 
     /**
@@ -26,6 +28,18 @@ class Performance {
     public function start($name)
     {
         $this->start_times[$name] = microtime(TRUE);
+    }
+
+    /**
+     * Record a sql string and bound values for a query.
+     *
+     * @param $name
+     * @param $sql
+     * @param $valueMap
+     */
+    public function sql($name, $sql, $valueMap)
+    {
+        $this->queries[$name] = array($sql, $valueMap);
     }
 
     /**
@@ -46,7 +60,8 @@ class Performance {
      * Increment a counter with the given name.
      * @param type $name
      */
-    public function counter($name) {
+    public function counter($name)
+    {
         if (!array_key_exists($name, $this->counts)) {
             $this->counts[$name] = 0;
         }

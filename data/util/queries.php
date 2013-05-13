@@ -1,5 +1,8 @@
 <?php
 
+include_once 'builder.php';
+include_once 'binder.php';
+
 /**
  * The Queries class contains all of the SQL queries for retrieving data.
  * It also encapsulates the database connection.
@@ -16,7 +19,6 @@ class Queries
     private $db;
     private $queries;
     private $types;
-    private $originals;
     private $performance = NULL;
     private $utc;
 
@@ -82,6 +84,19 @@ class Queries
     }
 
     /**
+     * Record a sql string and bound values for a query.
+     * @param string $query_name
+     * @param string $sql
+     * @param array $valueMap
+     */
+    private function save_sql($query_name, $sql, $valueMap)
+    {
+        if ($this->performance !== NULL) {
+            $this->performance->sql($query_name, $sql, $valueMap);
+        }
+    }
+
+    /**
      * Mark the stop of a query for performance measurement.
      * @param type $query_name
      */
@@ -137,7 +152,8 @@ class Queries
      * @param string $types
      * @return bool
      */
-    private function prepare($queryname, $querystr, $types='') {
+    private function prepare($queryname, $querystr, $types = '')
+    {
         $pdoTypes = array();
         for ($i = 0; $i < strlen($types); $i++) {
             $c = $types[$i];
@@ -174,7 +190,7 @@ class Queries
 
         $args = array_slice(func_get_args(), 1);
         if ($args) {
-            foreach ($args as $i=>$value) {
+            foreach ($args as $i => $value) {
                 $type = $paramTypes[$i];
                 $query->bindValue($i + 1, $value, $type);
             }
@@ -197,6 +213,59 @@ class Queries
                 return $result;
             } else {
                 return TRUE;
+            }
+        }
+    }
+
+    /**
+     * @param Builder $builder
+     * @param Binder $binder
+     * @return bool
+     */
+    private function run2($builder, $binder)
+    {
+        $this->start($builder->name);
+
+        $sql = $builder->sql();
+
+        $this->save_sql($builder->name, $sql, $binder->param_map);
+
+        $query = $this->db->prepare($sql);
+
+        if (!$query) {
+            echo "Prepare {$builder->name} failed: (" . $this->db->errorCode() . ")";
+            print_r($this->db->errorInfo());
+            print_r($sql);
+            return FALSE;
+        }
+
+        $query = $binder->bind($query);
+
+        if (!$query) {
+            echo "Bind for {$builder->name} faild: (" . $this->db->errorCode() . ")";
+            print_r($this->db->errorInfo());
+            print_r($sql);
+            print_r($binder->param_map);
+            return FALSE;
+        }
+
+        $success = $query->execute();
+
+        if ($success === FALSE) {
+            echo "Execute {$builder->name} failed: ({$query->errorCode()})";
+            print_r($query->errorInfo());
+            print_r($builder);
+
+            $this->stop($builder->name);
+        } else {
+            $result = $query->fetchAll(PDO::FETCH_ASSOC);
+
+            $this->stop($builder->name);
+
+            if ($result) {
+                return $result;
+            } else {
+                return array();
             }
         }
     }
@@ -229,11 +298,12 @@ class Queries
         return $this->db->lastInsertId();
     }
 
-    private function _build_annotations() {
+    private function _build_annotations()
+    {
         $this->prepare('annotations',
-            "SELECT UNIX_TIMESTAMP(created) as created,
+            "SELECT UNIX_TIMESTAMP(created) AS created,
             id, user, label,
-            UNIX_TIMESTAMP(time) as time
+            UNIX_TIMESTAMP(time) AS time
             FROM annotations"
         );
 
@@ -289,7 +359,7 @@ class Queries
     private function _build_message()
     {
         $this->prepare('message',
-            "SELECT id, discussion_id, UNIX_TIMESTAMP(created) as created, user, message
+            "SELECT id, discussion_id, UNIX_TIMESTAMP(created) AS created, user, message
              FROM messages
              WHERE id = ?",
             'i'
@@ -302,8 +372,39 @@ class Queries
      * @param $message_id
      * @return array
      */
-    public function get_message($message_id) {
+    public function get_message($message_id)
+    {
         $result = $this->run('message', $message_id);
+
+        if (count($result) > 0) {
+            $row = $result[0];
+            return $row;
+        }
+    }
+
+    private function _build_user()
+    {
+        $this->prepare('user',
+            "SELECT users.*
+             FROM users
+             WHERE screen_name = ?",
+            's'
+        );
+    }
+
+    /**
+     * Get a single user by screen name.
+     *
+     * @param $screen_name
+     * @return mixed
+     */
+    public function get_user_by_name($screen_name) {
+        // Chop off a leading @
+        if (strlen($screen_name) > 0 && $screen_name[0] == '@') {
+            $screen_name = substr($screen_name, 1);
+        }
+
+        $result = $this->run('user', $screen_name);
 
         if (count($result) > 0) {
             $row = $result[0];
@@ -314,10 +415,10 @@ class Queries
     private function _build_discussion_messages()
     {
         $this->prepare('discussion_messages',
-            "SELECT id, discussion_id, UNIX_TIMESTAMP(created) as created, user, message
+            "SELECT id, discussion_id, UNIX_TIMESTAMP(created) AS created, user, message
             FROM messages
             WHERE discussion_id = ?
-            ORDER BY created desc",
+            ORDER BY created DESC",
             'i'
         );
     }
@@ -339,14 +440,14 @@ class Queries
     {
         $this->prepare('discussions',
             "SELECT discussion_id AS id,
-                COUNT(*) as message_count,
+                COUNT(*) AS message_count,
                 GROUP_CONCAT(DISTINCT user ORDER BY created DESC SEPARATOR ', ') AS users,
-                GROUP_CONCAT(message SEPARATOR '... ') as subject,
+                GROUP_CONCAT(message SEPARATOR '... ') AS subject,
                 UNIX_TIMESTAMP(MIN(created)) AS started_at,
                 UNIX_TIMESTAMP(MAX(created)) AS last_comment_at
             FROM messages
             GROUP BY discussion_id
-            ORDER BY last_comment_at desc;"
+            ORDER BY last_comment_at DESC;"
         );
 
     }
@@ -366,23 +467,23 @@ class Queries
     {
         $base_query = "SELECT t.*, UNIX_TIMESTAMP(t.created_at) AS created_at, u.screen_name
             FROM tweets t
-            INNER JOIN users u on u.id = t.user_id
+            INNER JOIN users u ON u.id = t.user_id
             WHERE NOT t.is_retweet
             AND t.created_at >= ?
             AND t.created_at < ?
             AND t.retweet_count >= ?
-            ORDER BY t.%s desc
+            ORDER BY t.%s DESC
             LIMIT ?";
 
         $base_query_like = "SELECT t.*, UNIX_TIMESTAMP(t.created_at) AS created_at, u.screen_name
             FROM tweets t
-            INNER JOIN users u on u.id = t.user_id
+            INNER JOIN users u ON u.id = t.user_id
             WHERE NOT t.is_retweet
             AND t.created_at >= ?
             AND t.created_at < ?
             AND t.retweet_count >= ?
             AND t.text LIKE ?
-            ORDER BY t.%s desc
+            ORDER BY t.%s DESC
             LIMIT ?";
 
 
@@ -411,46 +512,63 @@ class Queries
 
 
     /**
-     * Gets tweets in the specified interval. Returns a MySQLi result set object.
+     * Gets tweets in the specified interval.
      *
      * @param DateTime $start_datetime
      * @param DateTime $stop_datetime
-     * @param int $limit
-     * @param int $noise_threshold The minimum retweet count to be returned
+     * @param bool $is_rt whether or not to return retweets or non-retweets
+     * @param int $min_rt The minimum retweet count to be returned
      * @param string $text_search
      * @param string $sort
-     * @return mysqli_result
+     * @param int $limit
+     * @return array
      */
-    public function get_originals($start_datetime, $stop_datetime, $limit, $noise_threshold, $text_search = NULL, $sort = NULL)
+    public function get_tweets($start_datetime, $stop_datetime,
+                               $is_rt = NULL, $min_rt = NULL,
+                               $text_search = NULL, $sentiment = NULL, $user_id = NULL,
+                               $sort = NULL, $limit = NULL)
     {
         $start_datetime = $start_datetime->format('Y-m-d H:i:s');
         $stop_datetime = $stop_datetime->format('Y-m-d H:i:s');
 
-        $limit = (int)$limit;
-        if ($text_search === NULL) {
-            $query_name = 'originals';
-            if($sort == 'retweet_count') {
-                $query_name .= '_orderby_retweet';
-            }
-            $result = $this->run($query_name, $start_datetime,
-                $stop_datetime, $noise_threshold, $limit);
-        } else {
-            $query_name = 'originals_like';
-            if($sort == 'retweet_count') {
-                $query_name .= '_orderby_retweet';
-            }
-            $search = "%$text_search%";
-            $result = $this->run($query_name, $start_datetime,
-                $stop_datetime, $noise_threshold, $search, $limit);
+        $builder = new Builder('tweets');
+
+        $builder->select('tweets.*, UNIX_TIMESTAMP(tweets.created_at) AS created_at, users.screen_name');
+        $builder->from('tweets');
+        $builder->join('users', 'users.id = tweets.user_id');
+
+        $builder->order_by($sort, 'desc');
+        $builder->limit($limit);
+
+        //Declare the parameters
+        $binder = new Binder();
+        $start_datetime = $binder->param('from', $start_datetime);
+        $stop_datetime = $binder->param('to', $stop_datetime);
+        $min_rt = $binder->param('min_rt', $min_rt, PDO::PARAM_INT);
+        $is_rt = $binder->param('rt', $is_rt, PDO::PARAM_BOOL);
+        $sentiment = $binder->param('sentiment', $sentiment);
+        $user_id = $binder->param('user_id', $user_id, PDO::PARAM_INT);
+
+        if ($text_search) {
+            $text_search = "%$text_search%";
         }
-        return $result;
+        $text_search = $binder->param('search', $text_search);
+
+        $builder->where_created_at_between($start_datetime, $stop_datetime);
+        $builder->where_retweet_count_over($min_rt);
+        $builder->where_text_like($text_search);
+        $builder->where_is_retweet_is($is_rt);
+        $builder->where_user_is($user_id);
+        $builder->where_sentiment_is($sentiment);
+
+        return $this->run2($builder, $binder);
     }
 
     private function _build_grouped_originals()
     {
         $this->prepare('grouped_originals',
             "SELECT UNIX_TIMESTAMP(?) + ? * FLOOR((UNIX_TIMESTAMP(created_at)-UNIX_TIMESTAMP(?)) / ?) AS binned_time,
-                COUNT(*) as count,
+                COUNT(*) AS count,
                 SUM(IF(sentiment=1,1,0)) AS positive,
                 SUM(IF(sentiment=0,1,0)) AS neutral,
                 SUM(IF(sentiment=-1,1,0)) AS negative
@@ -466,7 +584,7 @@ class Queries
 
         $this->prepare('grouped_originals_like',
             "SELECT UNIX_TIMESTAMP(?) + ? * FLOOR((UNIX_TIMESTAMP(created_at)-UNIX_TIMESTAMP(?)) / ?) AS binned_time,
-                COUNT(*) as count,
+                COUNT(*) AS count,
                 SUM(IF(sentiment=1,1,0)) AS positive,
                 SUM(IF(sentiment=0,1,0)) AS neutral,
                 SUM(IF(sentiment=-1,1,0)) AS negative
@@ -518,7 +636,7 @@ class Queries
     {
         $this->prepare('grouped_retweets',
             "SELECT UNIX_TIMESTAMP(?) + ? * FLOOR((UNIX_TIMESTAMP(created_at)-UNIX_TIMESTAMP(?)) / ?) AS binned_time,
-                COUNT(*) as count
+                COUNT(*) AS count
             FROM tweets
             WHERE is_retweet
             AND created_at >= ?
@@ -530,7 +648,7 @@ class Queries
 
         $this->prepare('grouped_retweets_like',
             "SELECT UNIX_TIMESTAMP(?) + ? * FLOOR((UNIX_TIMESTAMP(created_at)-UNIX_TIMESTAMP(?)) / ?) AS binned_time,
-                COUNT(*) as count
+                COUNT(*) AS count
             FROM tweets
             WHERE is_retweet
             AND created_at >= ?
@@ -574,7 +692,7 @@ class Queries
     {
         $this->prepare('grouped_retweets_of_id',
             "SELECT UNIX_TIMESTAMP(?) + ? * FLOOR((UNIX_TIMESTAMP(created_at)-UNIX_TIMESTAMP(?)) / ?) AS binned_time,
-                COUNT(*) as count
+                COUNT(*) AS count
             FROM tweets
             WHERE is_retweet
             AND created_at >= ?
@@ -612,7 +730,7 @@ class Queries
     {
         $this->prepare('grouped_retweets_of_range',
             "SELECT UNIX_TIMESTAMP(?) + ? * FLOOR((UNIX_TIMESTAMP(rt.created_at)-UNIX_TIMESTAMP(?)) / ?) AS binned_time,
-                COUNT(*) as count,
+                COUNT(*) AS count,
                 SUM(IF(rt.sentiment=1,1,0)) AS positive,
                 SUM(IF(rt.sentiment=0,1,0)) AS neutral,
                 SUM(IF(rt.sentiment=-1,1,0)) AS negative
@@ -659,7 +777,7 @@ class Queries
     {
         $this->prepare('grouped_noise',
             "SELECT UNIX_TIMESTAMP(?) + ? * FLOOR((UNIX_TIMESTAMP(created_at)-UNIX_TIMESTAMP(?)) / ?) AS binned_time,
-                COUNT(*) as count
+                COUNT(*) AS count
             FROM tweets
             WHERE NOT is_retweet
             AND created_at >= ?
@@ -672,7 +790,7 @@ class Queries
 
         $this->prepare('grouped_noise_like',
             "SELECT UNIX_TIMESTAMP(?) + ? * FLOOR((UNIX_TIMESTAMP(created_at)-UNIX_TIMESTAMP(?)) / ?) AS binned_time,
-                COUNT(*) as count
+                COUNT(*) AS count
             FROM tweets
             WHERE NOT is_retweet
             AND created_at >= ?
@@ -719,7 +837,7 @@ class Queries
     {
         $this->prepare('grouped_counts',
             "SELECT UNIX_TIMESTAMP(?) + ? * FLOOR((UNIX_TIMESTAMP(created_at)-UNIX_TIMESTAMP(?)) / ?) AS binned_time,
-                COUNT(*) as count
+                COUNT(*) AS count
             FROM tweets
             WHERE created_at >= ?
             AND created_at < ?
@@ -751,37 +869,36 @@ class Queries
     private function _build_users_list()
     {
         $this->prepare('users_list',
-                "SELECT subquery.*, u.screen_name
-                from users u,
-                (SELECT t.user_id as id, count(t.user_id) as count
-                from tweets t
-                where t.created_at >= ? and t.created_at < ?
-                group by user_id
-                order by count desc
-                limit 50) as subquery
-                where u.id = subquery.id",
-                'ss'
-                );
-        
+            "SELECT subquery.*, u.screen_name
+            FROM users u,
+            (SELECT t.user_id AS id, count(t.user_id) AS count
+            FROM tweets t
+            WHERE t.created_at >= ? AND t.created_at < ?
+            GROUP BY user_id
+            ORDER BY count DESC
+            LIMIT 50) AS subquery
+            WHERE u.id = subquery.id",
+            'ss'
+        );
+
     }
-    
+
     // query to generate users list
-    public function get_users_list($start_datetime, $stop_datetime) 
+    public function get_users_list($start_datetime, $stop_datetime)
     {
         $start_datetime = $start_datetime->format('Y-m-d H:i:s');
         $stop_datetime = $stop_datetime->format('Y-m-d H:i:s');
-        
+
         $result = $this->run('users_list', $start_datetime, $stop_datetime);
         return $result;
     }
-    
-    
-    
+
+
     private function _build_grouped_counts_filtered()
     {
         $this->prepare('grouped_counts_filtered',
             "SELECT UNIX_TIMESTAMP(?) + ? * FLOOR((UNIX_TIMESTAMP(created_at)-UNIX_TIMESTAMP(?)) / ?) AS binned_time,
-                COUNT(*) as count,
+                COUNT(*) AS count,
                 SUM(IF(sentiment=1,1,0)) AS positive,
                 SUM(IF(sentiment=0,1,0)) AS neutral,
                 SUM(IF(sentiment=-1,1,0)) AS negative
@@ -796,7 +913,7 @@ class Queries
 
         $this->prepare('grouped_counts_filtered_like',
             "SELECT UNIX_TIMESTAMP(?) + ? * FLOOR((UNIX_TIMESTAMP(created_at)-UNIX_TIMESTAMP(?)) / ?) AS binned_time,
-                COUNT(*) as count,
+                COUNT(*) AS count,
                 SUM(IF(sentiment=1,1,0)) AS positive,
                 SUM(IF(sentiment=0,1,0)) AS neutral,
                 SUM(IF(sentiment=-1,1,0)) AS negative
@@ -873,7 +990,7 @@ class Queries
      * @param DateTime $stop_datetime
      * @param int $window_size in seconds (should be 300 or 1200)
      */
-    public function get_burst_keywords($window_size, $start_datetime, $stop_datetime, $limit=10)
+    public function get_burst_keywords($window_size, $start_datetime, $stop_datetime, $limit = 10)
     {
         $start_datetime = $start_datetime->format('Y-m-d H:i:s');
         $stop_datetime = $stop_datetime->format('Y-m-d H:i:s');
@@ -883,7 +1000,7 @@ class Queries
             $window_size, $start_datetime, $stop_datetime, $start_datetime, $stop_datetime, $limit);
 
         return $result;
-    }    
+    }
 }
 
 /**

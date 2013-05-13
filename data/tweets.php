@@ -18,22 +18,32 @@ $db = $request->db();
  * Required parameters: grouped time parameters (from, to, interval) and limit.
  * Optional: noise_threshold and search.
  */
-$params = $request->get(array('limit'), array('noise_threshold', 'search', 'sort'));
+$params = $request->get(array('limit'), array('min_rt', 'rt', 'search', 'author', 'sentiment', 'sort'));
 $timeParams = $request->timeParameters();
 
 $from = $timeParams->from;
 $to = $timeParams->to;
 $limit = $params->limit;
-$noise_threshold = $params->noise_threshold;
-$search = $params->search;
 $sort = $params->sort;
-if ($noise_threshold === NULL)
-{
-    //Default noise threshold of 0
-    $noise_threshold = 0;
+$min_rt = $params->min_rt;
+$is_rt = $params->rt === 'true';
+$search = $params->search ? $params->search : NULL;
+$sentiment = $params->sentiment ? $params->sentiment : NULL;
+$screen_name = $params->author ? $params->author : NULL;
+
+if ($screen_name !== NULL) {
+    $user = $db->get_user_by_name($screen_name);
+    if ($user !== NULL) {
+        $user_id = $user['id'];
+    } else {
+        //No getting off easy if you can't find them
+        $user_id = -1;
+    }
+} else {
+    $user_id = NULL;
 }
 
-$result = $db->get_originals($from, $to, $limit, $noise_threshold, $search, $sort);
+$result = $db->get_tweets($from, $to, $is_rt, $min_rt, $search, $sentiment, $user_id, $sort, $limit);
 
 $perf->start('processing');
 
