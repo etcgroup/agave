@@ -9,19 +9,19 @@
     fill: #ddd;
 }
 
-.area {
+.histogram .area {
     fill: #49afcd;
 }
 
-path.positive {
+.histogram .positive {
     fill: rgb(67, 147, 195);
 }
 
-path.negative {
+.histogram .negative {
     fill: rgb(214, 96, 77);
 }
 
-path.neutral {
+.histogram .neutral {
     fill: rgb(247, 247, 247);
 }
 

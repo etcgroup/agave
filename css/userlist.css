@@ -3,13 +3,13 @@
 }
 
 .users-list ul {
-	list-style-type: none;
-        margin: 0px;
-        background: #fff;
+    list-style-type: none;
+    margin: 0;
+    background: #fff;
 }
 
 .name, .count {
-        color: #000;
+    color: #000;
 }
 
 .user {
@@ -26,9 +26,10 @@
     float: right;
     width: 20%;
 }
+
 .users-list li {
     overflow: hidden;
-    border-bottom: 1px solid #ccc 
+    border-bottom: 1px solid #ccc
 }
 
 .users-list .user.highlight,
