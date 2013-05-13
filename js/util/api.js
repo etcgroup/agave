@@ -10,7 +10,7 @@ define(['jquery', 'underscore', 'util/events'], function ($, _, events) {
         'messages': 'data/messages.php',
         'tweets': 'data/tweets.php',
         'annotations': 'data/annotations.php',
-        'keywords': 'data/burst_keywords.php'
+        'keywords': 'data/burst_keywords.php',
         'users': 'data/users.php'
     };
 
