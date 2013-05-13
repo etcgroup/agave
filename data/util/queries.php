@@ -810,6 +810,51 @@ class Queries
 
         return $result;
     }
+
+
+    /**
+     * Grabs the keyword terms
+     *
+     *
+     *
+     *
+     *
+     *
+     */
+    private function _build_burst_keywords()
+    {
+        $this->prepare('burst_keywords',
+            "SELECT * FROM burst_keywords 
+            WHERE window_size=?
+            AND ((UNIX_TIMESTAMP(mid_point)+ window_size/2 >= UNIX_TIMESTAMP(?) AND UNIX_TIMESTAMP(mid_point) + window_size/2 <= UNIX_TIMESTAMP(?))
+            OR (UNIX_TIMESTAMP(mid_point)- window_size/2 >= UNIX_TIMESTAMP(?) AND UNIX_TIMESTAMP(mid_point) - window_size/2 <= UNIX_TIMESTAMP(?)))
+            ORDER BY COUNT_PERCENT_DELTA DESC 
+            LIMIT ?
+            ",
+            'issssi'
+        );
+
+
+    }
+
+    /**
+     * Grabs the top burst keywords
+     *
+     * @param DateTime $start_datetime
+     * @param DateTime $stop_datetime
+     * @param int $window_size in seconds (should be 300 or 1200)
+     */
+    public function get_burst_keywords($window_size, $start_datetime, $stop_datetime, $limit=10)
+    {
+        $start_datetime = $start_datetime->format('Y-m-d H:i:s');
+        $stop_datetime = $stop_datetime->format('Y-m-d H:i:s');
+
+        $limit = (int)$limit;
+        $result = $this->run('burst_keywords',
+            $window_size, $start_datetime, $stop_datetime, $start_datetime, $stop_datetime, $limit);
+
+        return $result;
+    }    
 }
 
 /**
