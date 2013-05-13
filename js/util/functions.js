@@ -61,7 +61,15 @@ define(['underscore'], function(_) {
             data = _.defaults(data, blob);
 
             //See if there is anything to do
-            if (_.isEqual(blob, data)) {
+            var changedFields = [];
+
+            for (var key in data) {
+                if (blob[key] !== data[key]) {
+                    changedFields.push(key);
+                }
+            }
+
+            if (changedFields.length == 0) {
                 //All good :)
                 return true;
             }
@@ -71,7 +79,7 @@ define(['underscore'], function(_) {
 
             //Don't trigger if silent was et
             if (!silent) {
-                this.trigger('change', this);
+                this.trigger('change', this, changedFields);
             }
 
             return true;

@@ -120,21 +120,22 @@ body {
 /*
  * These are the explorer panels
  */
-.queries.row {
+.timeline-controls.row {
     top: 0;
-    height: 80px;
+    height: 40px;
     /*min-height: 70px;*/
+    overflow: visible; /* show the overflow, for the dropdown menu */
 }
 .tweet-timeline-panel.row {
-    top: 80px;
+    top: 40px;
     height: 200px;
 }
 .tweet-overview-panel.row {
-    top: 280px;
+    top: 240px;
     height: 60px;
 }
 .details.row {
-    top: 340px;
+    top: 300px;
     bottom: 0;
 }
 
@@ -161,11 +162,11 @@ body {
  * These are the detail panel contents
  */
 .nav-tabs.row {
-    top: 0;
-    height: 38px; /* the natural height of the nav tabs */
+    top: 40;
+    height: 26px; /* the natural height of the nav tabs */
 }
 .tab-content.row {
-    top: 38px; /* the natural height of the nav tabs */
+    top: 66px; /* the natural height of the nav tabs */
     bottom: 0;
 }
 

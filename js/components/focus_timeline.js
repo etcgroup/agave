@@ -18,7 +18,7 @@ define(['jquery',
 
         //Color defaults
         var COLOR_DOMAIN = [-1, 0, 1];
-        var COLOR_RANGE = ["#69C5F5", "#F26522", "#F8FDFF"];
+        var COLOR_RANGE = ["#F26522", "#F8FDFF", "#69C5F5"];
 
         var VALID_MODES = ['simple', 'stack', 'expand'];
 
@@ -33,14 +33,12 @@ define(['jquery',
          * @constructor
          */
         var FocusTimeline = function (options) {
-            //Call the parent constructor
-            Timeline.call(this, options);
 
             this.user = options.user;
+            this.display = options.display;
 
-            //Set the starting mode
-            this._mode = 'simple';
-            this._queryShown = undefined;
+            //Call the parent constructor
+            Timeline.call(this, options);
 
             this._brushedAnnotations = {};
 
@@ -221,7 +219,23 @@ define(['jquery',
             var boxHeight = this.boxes.inner.height();
 
             var self = this;
-            this.ui.annotations.selectAll('rect')
+
+            var annotations = this.ui.annotations;
+            if (this.display.annotations()) {
+                annotations
+                    .style('display', 'inline')
+                    .transition()
+                    .style('opacity', 1);
+            } else {
+                annotations
+                    .transition()
+                    .style('opacity', 0)
+                    .each('end', function() {
+                        annotations.style('display', 'none');
+                    });
+            }
+
+            annotations.selectAll('rect')
                 .classed('highlight', function (d) {
                     return d.id in self._brushedAnnotations;
                 })
@@ -278,6 +292,9 @@ define(['jquery',
             //Subscribe to another data stream
             this.api.on('tweets', $.proxy(this._onTweets, this));
 
+            this.display.on('change', $.proxy(this._onDisplayModeChanged, this));
+
+
             //If the user clicks on the svg, we'll begin annotation
             var self = this;
             this.ui.svg.on('click', function () {
@@ -316,7 +333,7 @@ define(['jquery',
          */
         FocusTimeline.prototype._updateCountScale = function() {
             //The stack histograms manage the scale themselves, but the regular histograms do not
-            if (this._mode === 'simple') {
+            if (this.display.mode() === 'simple') {
                 //Get the maximum count over all histograms
                 var maxCount = d3.max(this._histograms, function (hist) {
                     return hist._maxCount || 0;
@@ -324,6 +341,10 @@ define(['jquery',
 
                 //Update the scale
                 this._countScale.domain([0, maxCount]);
+            } else {
+                this._stackHistograms.forEach(function(hist) {
+                    hist._updateScales();
+                });
             }
         };
 
@@ -384,27 +405,12 @@ define(['jquery',
         };
 
         /**
-         * Set the timeline mode. Can be either 'simple', 'stack', or 'expand'.
+         * Called when the display mode changes.
          *
-         * @param mode a string, 'simple', 'stack', or 'expand'
-         * @param queryShown an integer query id
-         * @returns {*}
+         * @private
          */
-        FocusTimeline.prototype.mode = function(mode, queryShown) {
-            if (!arguments.length) {
-                return this._mode;
-            }
-
-            if (VALID_MODES.indexOf(mode) < 0) {
-                throw 'Invalid mode ' + mode;
-            }
-
-            this._queryShown = queryShown;
-            this._mode = mode;
-
+        FocusTimeline.prototype._onDisplayModeChanged = function() {
             this.update();
-
-            return this;
         };
 
         /**
@@ -412,7 +418,7 @@ define(['jquery',
          */
         FocusTimeline.prototype._updateHistogram = function () {
             //Update each histogram
-            var mode = this._mode;
+            var mode = this.display.mode();
 
             this._histograms.forEach(function (histogram) {
                 if (mode !== 'simple') {
@@ -424,9 +430,9 @@ define(['jquery',
             });
 
             var toExpand = mode === 'expand';
-            var queryShown = this._queryShown;
+            var queryShown = this.display.focus();
             this._stackHistograms.forEach(function (stackHistogram, index) {
-                if (mode === 'simple' || (queryShown !== undefined && index !== queryShown)) {
+                if (mode === 'simple' || (queryShown !== null && index !== queryShown)) {
                     stackHistogram.hide();
                 } else {
                     stackHistogram.show();

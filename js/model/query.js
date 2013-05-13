@@ -1,7 +1,6 @@
 define(['underscore', 'util/events', 'util/functions'], function (_, events, functions) {
 
     var DEFAULT_DATA = {
-        view: 'area',
         search: '',
         author: '',
         rt: false,
