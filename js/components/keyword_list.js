@@ -8,7 +8,7 @@ define([
     function ($, _, events, Transform, Rectangle, Bootstrap) {
 
         var KEYWORD_TEMPLATE = _.template("<li class='keyword' data-id='<%=id%>'>" +
-            "<div class='keyword_term'>@<%=term%></div>" +
+            "<div class='keyword_term'><%=term%></div>" +
             "<div class='keyword_before'><%=before_count%></div>" +
             "<div class='keyword_delta'>&nbsp;&Delta;<%=count_delta%></div>" +
             "<div class='keyword_pct_delta'>(<%=count_percent_delta%> %)</div>" +
