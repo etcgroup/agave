@@ -6,7 +6,8 @@ define([
     function ($, _, events, Bootstrap) {
 
         var USER_TEMPLATE = _.template("<li class='user' data-id='<%=id%>'>" +
-            "<div class='hdr'>@<%=screen_name%></div>" +
+            "<div class='name'>@<%=screen_name%></div>" +
+            "<div class='count'><%=count%> <span class='muted'>tweets</span></div>" +
             "</li>");
 
         var USER_LIMIT = 50;
