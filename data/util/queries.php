@@ -748,6 +748,35 @@ class Queries
         return $result;
     }
 
+    private function _build_users_list()
+    {
+        $this->prepare('users_list',
+                "SELECT subquery.*, u.screen_name
+                from users u,
+                (SELECT t.user_id, count(t.user_id) as count
+                from tweets t
+                where t.created_at >= ? and t.created_at < ?
+                group by user_id
+                order by count desc
+                limit 50) as subquery
+                where u.id = subquery.user_id",
+                'ss'
+                );
+        
+    }
+    
+    // query to generate users list
+    public function get_users_list($start_datetime, $stop_datetime) 
+    {
+        $start_datetime = $start_datetime->format('Y-m-d H:i:s');
+        $stop_datetime = $stop_datetime->format('Y-m-d H:i:s');
+        
+        $result = $this->run('users_list', $start_datetime, $stop_datetime);
+        return $result;
+    }
+    
+    
+    
     private function _build_grouped_counts_filtered()
     {
         $this->prepare('grouped_counts_filtered',
