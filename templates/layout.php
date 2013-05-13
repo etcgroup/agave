@@ -36,7 +36,7 @@
 
                                 <div class="tab-content row scroll-y">
                                   <div class="tab-pane active tweet-list" id="tweet-list-1"></div>
-                                  <div class="tab-pane users-list" id="users-list-1">...</div>
+                                  <div class="tab-pane users-list" id="users-list-1"></div>
                                   <div class="tab-pane keywords-list" id="keywords-list-1">...</div>
                                 </div>
                             </div>
@@ -51,7 +51,7 @@
 
                                 <div class="tab-content row scroll-y">
                                     <div class="tab-pane active tweet-list" id="tweet-list-2"></div>
-                                    <div class="tab-pane users-list" id="users-list-2">...</div>
+                                    <div class="tab-pane users-list" id="users-list-2"></div>
                                     <div class="tab-pane keywords-list" id="keywords-list-2">...</div>
                                 </div>
                             </div>

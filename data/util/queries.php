@@ -753,13 +753,13 @@ class Queries
         $this->prepare('users_list',
                 "SELECT subquery.*, u.screen_name
                 from users u,
-                (SELECT t.user_id, count(t.user_id) as count
+                (SELECT t.user_id as id, count(t.user_id) as count
                 from tweets t
                 where t.created_at >= ? and t.created_at < ?
                 group by user_id
                 order by count desc
                 limit 50) as subquery
-                where u.id = subquery.user_id",
+                where u.id = subquery.id",
                 'ss'
                 );
         

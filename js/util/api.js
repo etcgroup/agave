@@ -9,7 +9,8 @@ define(['jquery', 'underscore', 'util/events'], function ($, _, events) {
         'discussions': 'data/discussions.php',
         'messages': 'data/messages.php',
         'tweets': 'data/tweets.php',
-        'annotations': 'data/annotations.php'
+        'annotations': 'data/annotations.php',
+        'users': 'data/users.php'
     };
 
     /**
@@ -254,6 +255,19 @@ define(['jquery', 'underscore', 'util/events'], function ($, _, events) {
             post_process: function (results) {
                 return results.payload;
             }
+        });
+    };
+
+    API.prototype.users = function(parameters) {
+        var queryId = parameters.query_id;
+
+        this.request('get', 'users', {
+            params: parameters,
+            post_process: function(results) {
+                return results.payload;
+            },
+            //Have to make sure requests for different queries don't get crossed
+            request_name: 'users-' + queryId
         });
     };
 
