@@ -1,0 +1,37 @@
+.tab-content.row {
+    background-color: #fff
+}
+
+.users-list ul {
+	list-style-type: none;
+        margin: 0px;
+        background: #fff;
+}
+
+.name, .count {
+        color: #000;
+}
+
+.user {
+    padding: 10px;
+}
+
+.name {
+    width: 80%;
+    float: left;
+}
+
+.count {
+    text-align: right;
+    float: right;
+    width: 20%;
+}
+.users-list li {
+    overflow: hidden;
+    border-bottom: 1px solid #ccc 
+}
+
+.users-list .user.highlight,
+.users-list .user:hover {
+    background-color: #D9F6FA;
+}
