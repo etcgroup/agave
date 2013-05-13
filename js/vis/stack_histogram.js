@@ -213,7 +213,7 @@ define(['lib/d3', 'underscore',
 
                 //Update the path based on the data
                 bind.attr('d', this._buildArea)
-                .attr('fill', this._colorValue);
+                .attr('class', this._colorValue);
 
             },
 
