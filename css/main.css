@@ -6,6 +6,7 @@
 @import url(query.css);
 @import url(discussions.css);
 @import url(tweetlist.css);
+@import url(keywordlist.css);
 
 .no-select {
     -webkit-touch-callout: none;
