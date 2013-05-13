@@ -10,7 +10,19 @@
 }
 
 .area {
-    fill: steelblue;
+    fill: #49afcd;
+}
+
+path.positive {
+    fill: rgb(103, 169, 207);
+}
+
+path.negative {
+    fill: rgb(239, 138, 98);
+}
+
+path.neutral {
+    fill: rgb(247, 247, 247);
 }
 
 .focus .area {

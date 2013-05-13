@@ -6,7 +6,7 @@ function query_box($name)
     ?>
     <form class="query form-inline">
 <!--        <label>--><?php //echo $name ?><!--</label>-->
-        <button type="button" class="btn btn-success query-update"><i class="icon-search"></i></button>
+        <button type="button" class="btn btn-info query-update"><i class="icon-search icon-white"></i></button>
         <input class="query-search" type="search" placeholder="Search tweet text"/>
         <input class="query-author" type="text" placeholder="@author"/>
         <label class="checkbox" title="Check to view retweets">

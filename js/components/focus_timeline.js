@@ -18,7 +18,7 @@ define(['jquery',
 
         //Color defaults
         var COLOR_DOMAIN = [-1, 0, 1];
-        var COLOR_RANGE = ["#F26522", "#F8FDFF", "#69C5F5"];
+        var COLOR_RANGE = ["negative", "neutral", "positive"];
 
         var VALID_MODES = ['simple', 'stack', 'expand'];
 
@@ -54,7 +54,7 @@ define(['jquery',
             this._countScale = d3.scale.linear();
 
             //Create a color scale
-            this._sentimentScale = this._sentimentScale = d3.scale.ordinal()
+            this._sentimentScale = d3.scale.ordinal()
                 .domain(COLOR_DOMAIN)
                 .range(COLOR_RANGE);
 
