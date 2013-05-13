@@ -173,12 +173,12 @@ class Request
         $is_rt = $params->rt === 'true';
 
         //Reset these ones to null if they are empty
-        $params->search = $params->search ? $params->search : NULL;
-        $params->sentiment = $params->sentiment ? $params->sentiment : NULL;
-        $params->screen_name = $params->author ? $params->author : NULL;
+        $params->search = strlen($params->search) ? $params->search : NULL;
+        $params->sentiment = strlen($params->sentiment) ? $params->sentiment : NULL;
+        $params->screen_name = strlen($params->author) ? $params->author : NULL;
 
         //Look up the author
-        if ($params->author) {
+        if (strlen($params->author)) {
             $user = $this->db->get_user_by_name($params->author);
             if ($user !== NULL) {
                 $params->author = $user['id'];
