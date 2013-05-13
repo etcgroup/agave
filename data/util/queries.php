@@ -220,7 +220,7 @@ class Queries
     /**
      * @param Builder $builder
      * @param Binder $binder
-     * @return bool
+     * @return mixed
      */
     private function run2($builder, $binder)
     {
@@ -820,31 +820,59 @@ class Queries
         return $result;
     }
 
-    private function _build_users_list()
-    {
-        $this->prepare('users_list',
-            "SELECT subquery.*, u.screen_name
-            FROM users u,
-            (SELECT t.user_id AS id, count(t.user_id) AS count
-            FROM tweets t
-            WHERE t.created_at >= ? AND t.created_at < ?
-            GROUP BY user_id
-            ORDER BY count DESC
-            LIMIT 50) AS subquery
-            WHERE u.id = subquery.id",
-            'ss'
-        );
-
-    }
-
-    // query to generate users list
-    public function get_users_list($start_datetime, $stop_datetime)
+    /**
+     * Query to generate users list.
+     * @param $start_datetime
+     * @param $stop_datetime
+     * @param bool $is_rt
+     * @param int $min_rt
+     * @param string $text_search
+     * @param int $sentiment
+     * @param int $user_id
+     * @param string $sort
+     * @param int $limit
+     * @return mixed
+     */
+    public function get_users_list($start_datetime, $stop_datetime,
+                                   $is_rt = NULL, $min_rt = NULL,
+                                   $text_search = NULL, $sentiment = NULL, $user_id = NULL,
+                                   $sort = NULL, $limit = NULL)
     {
         $start_datetime = $start_datetime->format('Y-m-d H:i:s');
         $stop_datetime = $stop_datetime->format('Y-m-d H:i:s');
 
-        $result = $this->run('users_list', $start_datetime, $stop_datetime);
-        return $result;
+        $subquery = new Builder('users_subquery');
+        $subquery->select('tweets.user_id AS id, COUNT(tweets.user_id) AS count');
+        $subquery->from('tweets');
+        $subquery->group_by('tweets.user_id');
+        $subquery->order_by($sort, 'DESC');
+        $subquery->limit($limit);
+
+        //Declare the parameters
+        $binder = new Binder();
+        $start_datetime = $binder->param('from', $start_datetime);
+        $stop_datetime = $binder->param('to', $stop_datetime);
+        $min_rt = $binder->param('min_rt', $min_rt, PDO::PARAM_INT);
+        $is_rt = $binder->param('rt', $is_rt, PDO::PARAM_BOOL);
+        $sentiment = $binder->param('sentiment', $sentiment);
+        if ($text_search) {
+            $text_search = "%$text_search%";
+        }
+        $text_search = $binder->param('search', $text_search);
+
+        $subquery->where_created_at_between($start_datetime, $stop_datetime);
+        $subquery->where_retweet_count_over($min_rt);
+        $subquery->where_text_like($text_search);
+        $subquery->where_is_retweet_is($is_rt);
+        $subquery->where_sentiment_is($sentiment);
+
+        $builder = new Builder('users');
+        $builder->select('subquery.*, users.screen_name');
+        $builder->from('users');
+        $builder->from("({$subquery->sql()}) AS subquery");
+        $builder->where('users.id', '=', 'subquery.id');
+
+        return $this->run2($builder, $binder);
     }
 
 

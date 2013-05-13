@@ -178,7 +178,7 @@ class Request
         $params->screen_name = $params->author ? $params->author : NULL;
 
         //Look up the author
-        if ($params->author !== NULL) {
+        if ($params->author) {
             $user = $this->db->get_user_by_name($params->author);
             if ($user !== NULL) {
                 $params->author = $user['id'];

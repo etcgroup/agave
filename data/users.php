@@ -14,12 +14,15 @@ $request = new Request();
 $perf = $request->timing();
 $db = $request->db();
 
+$params = $request->get(array('limit'), array('sort'));
 $timeParams = $request->timeParameters();
-
+$filter = $request->queryParameters();
 $from = $timeParams->from;
 $to = $timeParams->to;
+$sort = $params->sort;
+$limit = $params->limit;
 
-$result = $db->get_users_list($from, $to);
+$result = $db->get_users_list($from, $to, $filter->rt, $filter->min_rt, $filter->search, $filter->sentiment, $filter->author, $sort, $limit);
 
 $perf->start('processing');
 

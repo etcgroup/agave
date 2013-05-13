@@ -9,6 +9,8 @@ define([
             "<div class='hdr'>@<%=screen_name%></div>" +
             "</li>");
 
+        var USER_LIMIT = 50;
+        var USER_SORT_ORDER = 'count';
 
         /**
          * A class for rendering the tweet list
@@ -61,7 +63,9 @@ define([
                 rt: this.query.rt(),
                 min_rt: this.query.min_rt(),
                 author: this.query.author(),
-                sentiment: this.query.sentiment()
+                sentiment: this.query.sentiment(),
+                limit: USER_LIMIT,
+                sort: USER_SORT_ORDER
             });
         };
 
