@@ -9,6 +9,8 @@
 	color: #333;
 	padding: 12px;
 
+    position: relative;
+
     -webkit-transition: background 200ms ;
     -moz-transition: background 200ms ;
     -ms-transition: background 200ms ;
@@ -19,6 +21,12 @@
 .tweet-list .tweet .hdr {
 	color: #888;
 	font-size: 80%;
+}
+
+.tweet-list .tweet .twitter-link {
+    position: absolute;
+    top: 5px;
+    right: 5px;
 }
 
 .tweet-list .tweet .body {
