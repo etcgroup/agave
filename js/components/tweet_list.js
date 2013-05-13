@@ -10,7 +10,7 @@ define([
         var TWEET_TEMPLATE = _.template("<li class='tweet' data-id='<%=id%>'>" +
             "<div class='hdr'>@<%=screen_name%></div>" +
             "<div class='body'>" +
-            "<a class='twitter-link' href='https://twitter.com/<%=screen_name%>/status/<%=id%>'><i class='icon-share'>&nbsp;</i></a>" +
+            "<a class='twitter-link' target='tweet-link-tab' href='https://twitter.com/<%=screen_name%>/status/<%=id%>'><i class='icon-share'></i></a>" +
             "<div class='tweet_text'><%=text%></div>" +
             "<div class='tweet_count'><%=retweet_count%></div>" +
             "</div>" +
