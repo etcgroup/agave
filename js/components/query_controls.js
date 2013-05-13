@@ -18,6 +18,7 @@ define(['jquery', 'underscore', 'util/events', 'model/query'], function ($, _, e
 
         this.model = options.model || new Query();
         this.into = options.into || $('<form>');
+        this.api = options.api;
 
         this._initUI();
         this._fillForm();
@@ -55,6 +56,21 @@ define(['jquery', 'underscore', 'util/events', 'model/query'], function ($, _, e
         this.ui.update_button.on('click', $.proxy(this._updateClicked, this));
         this.ui.view_buttons.on('click', $.proxy(this._viewButtonClicked, this));
         this.ui.form.on('submit', $.proxy(this._formSubmitted, this));
+
+        var self = this;
+        this.ui.form.on('mouseenter', function() {
+            self.api.trigger('brush', [{
+                type: 'query',
+                id: self.model.id()
+            }]);
+        });
+
+        this.ui.form.on('mouseleave', function() {
+            self.api.trigger('unbrush', [{
+                type: 'query',
+                id: self.model.id()
+            }]);
+        });
     };
 
     /**

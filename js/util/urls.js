@@ -6,7 +6,6 @@ define(['jquery', 'underscore', 'lib/Uri'], function ($, _, Uri) {
      * Map from query data field names to url parameter names.
      */
     var PARAMETER_NAME_MAP = {
-        view: 'v',
         search: 'q',
         author: 'a',
         rt: 'r',
@@ -30,7 +29,14 @@ define(['jquery', 'underscore', 'lib/Uri'], function ($, _, Uri) {
         rt: function (value) {
             return value === '1';
         },
-        min_rt: Number
+        min_rt: Number,
+        focus: function(value) {
+            if (value) {
+                return Number(value);
+            } else {
+                return null;
+            }
+        }
     };
 
     /**
@@ -107,9 +113,15 @@ define(['jquery', 'underscore', 'lib/Uri'], function ($, _, Uri) {
         return {
             get: function (key, defaultValue) {
                 var value = urldecode(parsed.getQueryParamValue(key));
+
                 if (value === undefined) {
                     return defaultValue;
                 }
+
+                if (key in FROM_URL_CONVERSION) {
+                    value = FROM_URL_CONVERSION[key](value);
+                }
+
                 return value;
             },
             get_at: function (key, index, defaultValue) {

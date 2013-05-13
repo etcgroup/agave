@@ -4,13 +4,19 @@ define(function (require) {
     var $ = require('jquery');
     var _ = require('underscore');
     var urls = require('util/urls');
+    var Display = require('model/display');
     var Interval = require('model/interval');
     var Query = require('model/query');
     var User = require('model/user');
+    var TimelineControls = require('components/timeline_controls');
     var QueryControls = require('components/query_controls');
     var TweetTimeline = require('components/tweet_timeline');
     var TweetList = require('components/tweet_list');
+<<<<<<< HEAD
     var KeywordList = require('components/keyword_list');
+=======
+    var UserList = require('components/user_list');
+>>>>>>> 05d7f9c54e830945b5a267bfd32041f6ae882ccc
     var OverviewTimeline = require('components/overview_timeline');
     var FocusTimeline = require('components/focus_timeline');
     var DiscussionList = require('components/discussion_list');
@@ -33,8 +39,16 @@ define(function (require) {
     App.prototype.start = function () {
         this.api = new API();
 
+        //Parse the url
+        var params = urls.parse();
+
+        //Initialize the user model
+        this.user = new User();
+
         this.initUI();
-        this.initQueries();
+        this.initTimelineControls(params);
+        this.initInterval(params);
+        this.initQueryControls(params);
 
         this.initFocusTimeline();
         this.initContextTimeline();
@@ -42,6 +56,7 @@ define(function (require) {
         this.initDetailsPanel();
         this.initTweetList();
         this.initKeywordList();
+        this.initUserList();
 
         this.initSignInView();
         this.initDiscussionList();
@@ -51,37 +66,53 @@ define(function (require) {
     };
 
     /**
-     * Set up the query object, based on the url.
+     * Set up the display model and timeline controls.
      */
-    App.prototype.initQueries = function () {
+    App.prototype.initTimelineControls = function(params) {
+        this.display = new Display({
+            mode: params.get('mode', this.config.defaults.mode),
+            focus: params.get('focus', this.config.defaults.focus),
+            annotations: params.get('annotations', this.config.defaults.annotations)
+        });
 
-        //Parse the url
-        var params = urls.parse();
+        this.ui.timelineControls = this.ui.explorer.find('.timeline-controls');
 
+        this.timelineControls = new TimelineControls({
+            model: this.display,
+            into: this.ui.timelineControls
+        });
+
+        this.display.on('change', $.proxy(this.displayChanged, this));
+    };
+
+    /**
+     * Set up the interval object.
+     * @param params
+     */
+    App.prototype.initInterval = function(params) {
         //Initialize the interval -- multiplying by 1000 to convert from url times (seconds) to ms
         this.interval = new Interval({
             from: params.get('from', this.config.defaults.from) * 1000,
             to: params.get('to', this.config.defaults.to) * 1000
         });
+    };
 
-        //Initialize the user model
-        this.user = new User();
-
-        //Find the queries box
-        this.ui.queryPanel = this.ui.explorer.find('.queries');
+    /**
+     * Set up the query object, based on the url.
+     */
+    App.prototype.initQueryControls = function (params) {
 
         //The query collection
         this.queries = [];
 
         //One query model per query control
         var self = this;
-        this.ui.queryPanel.find('.query').each(function (index) {
+        this.ui.explorer.find('.query').each(function (index) {
             var id = index;
 
             //Build a new query model from the URL
             var query = new Query({
                 id: id,
-                view: params.get_at('view', id, null),
                 search: params.get_at('search', id, null),
                 author: params.get_at('author', id, null),
                 rt: params.get_at('rt', id, null),
@@ -98,7 +129,8 @@ define(function (require) {
             //Pass the model and target along to the view
             var view = new QueryControls({
                 model: query,
-                into: ui
+                into: ui,
+                api: self.api
             });
 
             //When the model changes, we need to know
@@ -160,6 +192,7 @@ define(function (require) {
             user: this.user,
             queries: this.queries,
             interval: this.interval,
+            display: this.display,
             from: this.config.overview_from * 1000,
             to: this.config.overview_to * 1000,
             binSize: 30,
@@ -219,6 +252,26 @@ define(function (require) {
                 interval: self.interval,
                 query: query,
                 into: group.tweetList
+            }));
+        });
+    };
+    
+    // Setting up the users list component
+    App.prototype.initUserList = function () {
+        
+        this.userLists = [];
+        
+        var self = this;
+        this.ui.detailsTabGroups.forEach(function(group, index) {
+            var query = self.queries[index];
+            
+            group.userList = group.root.find('.users-list');
+            
+            self.userLists.push(new UserList ( {
+                api: self.api,
+                interval: self.interval,
+                query: query,
+                into: group.userList
             }));
         });
     };
@@ -324,10 +377,13 @@ define(function (require) {
      */
     App.prototype.updateUrl = function () {
         //Get the basic parameters
-        var params = {
+        var params = _.extend({
             from: Math.round(this.interval.from() / 1000),
             to: Math.round(this.interval.to() / 1000)
-        };
+        }, {
+            mode: this.display.mode(),
+            focus: this.display.focus()
+        });
 
         //Get the query data objects
         var query_data = this.queries.map(function (query) {
@@ -337,14 +393,24 @@ define(function (require) {
         urls.update_url(params, query_data);
     };
 
-    App.prototype.queryUpdated = function (query) {
+    App.prototype.queryUpdated = function () {
         this.updateUrl();
     };
 
-    App.prototype.queryViewChanged = function (query) {
+    App.prototype.displayChanged = function(e, display, changedFields) {
+        if (changedFields == 'annotations' || changedFields.indexOf('annotations') >= 0) {
+            //Don't update if annotations was the updated field.
+            return;
+        }
+
         this.updateUrl();
     };
 
+    App.prototype.queryViewChanged = function () {
+        this.updateUrl();
+    };
+
+    //TODO: move this into the overview timeline, probably
     App.prototype.selectionChanged = function (extent) {
         //When the timeline zoom/pan changes, we need to update the query object
         this.interval.set({

@@ -10,7 +10,11 @@ define(['jquery', 'underscore', 'util/events'], function ($, _, events) {
         'messages': 'data/messages.php',
         'tweets': 'data/tweets.php',
         'annotations': 'data/annotations.php',
+<<<<<<< HEAD
         'keywords': 'data/burst_keywords.php'
+=======
+        'users': 'data/users.php'
+>>>>>>> 05d7f9c54e830945b5a267bfd32041f6ae882ccc
     };
 
     /**
@@ -258,6 +262,7 @@ define(['jquery', 'underscore', 'util/events'], function ($, _, events) {
         });
     };
 
+
     API.prototype.keywords = function(parameters) {
         this.request('get', 'keywords', {
             params: parameters,
@@ -266,6 +271,20 @@ define(['jquery', 'underscore', 'util/events'], function ($, _, events) {
             }
         });
     }
+
+    API.prototype.users = function(parameters) {
+        var queryId = parameters.query_id;
+
+        this.request('get', 'users', {
+            params: parameters,
+            post_process: function(results) {
+                return results.payload;
+            },
+            //Have to make sure requests for different queries don't get crossed
+            request_name: 'users-' + queryId
+        });
+    };
+
 
     //Mix in events
     events(API);

@@ -10,11 +10,29 @@
 }
 
 .area {
-    fill: steelblue;
+    fill: #49afcd;
+}
+
+path.positive {
+    fill: rgb(67, 147, 195);
+}
+
+path.negative {
+    fill: rgb(214, 96, 77);
+}
+
+path.neutral {
+    fill: rgb(247, 247, 247);
 }
 
 .focus .area {
-    opacity: 0.5;
+    fill: rgba(73, 175, 205, 0.5);
+    stroke: rgba(73, 175, 205, 0.5);
+    stroke-width: 1px;
+}
+
+.focus .area.bold {
+    stroke: #FFF;
 }
 
 .spark {
@@ -124,3 +142,4 @@
     fill: orange;
     stroke: orange;
 }
+

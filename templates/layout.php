@@ -12,9 +12,8 @@
         <div class="content row">
             <div class="padding-all">
                 <div class="explorer col">
-                    <div class="queries row">
-                        <?php echo query_box('Series 1') ?>
-                        <?php echo query_box('Series 2') ?>
+                    <div class="timeline-controls row">
+                        <?php echo timeline_controls(); ?>
                     </div>
                     <div class="tweet-timeline-panel row">
                         <div class="tweet-timeline padding-bottom">
@@ -26,33 +25,39 @@
                     </div>
 
                     <div class="details row">
-                        <div class="tab-group details-left col">
+                        <div class="details-left col">
                             <div class="padding-right-half">
-                                <ul class="nav nav-tabs row">
-                                    <li class="active"><a data-target="#tweet-list-1" data-toggle="tab">Tweets</a></li>
-                                    <li><a data-target="#users-list-1" data-toggle="tab">Users</a></li>
-                                    <li><a data-target="#keywords-list-1" data-toggle="tab">Keywords</a></li>
-                                </ul>
+                                <?php echo query_box('Series 1') ?>
+                                <div class="tab-group">
+                                    <ul class="nav nav-tabs row">
+                                        <li class="active"><a data-target="#tweet-list-1" data-toggle="tab">Tweets</a></li>
+                                        <li><a data-target="#users-list-1" data-toggle="tab">Users</a></li>
+                                        <li><a data-target="#keywords-list-1" data-toggle="tab">Keywords</a></li>
+                                    </ul>
 
-                                <div class="tab-content row scroll-y">
-                                  <div class="tab-pane active tweet-list" id="tweet-list-1"></div>
-                                  <div class="tab-pane users-list" id="users-list-1">...</div>
-                                  <div class="tab-pane keywords-list" id="keywords-list-1">...</div>
+                                    <div class="tab-content row scroll-y">
+                                        <div class="tab-pane active tweet-list" id="tweet-list-1"></div>
+                                        <div class="tab-pane users-list" id="users-list-1"></div>
+                                        <div class="tab-pane keywords-list" id="keywords-list-1">...</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="tab-group details-right col">
+                        <div class="details-right col">
                             <div class="padding-left-half">
-                                <ul class="nav nav-tabs row">
-                                    <li class="active"><a data-target="#tweet-list-2" data-toggle="tab">Tweets</a></li>
-                                    <li><a data-target="#users-list-2" data-toggle="tab">Users</a></li>
-                                    <li><a data-target="#keywords-list-2" data-toggle="tab">Keywords</a></li>
-                                </ul>
+                                <?php echo query_box('Series 2') ?>
+                                <div class="tab-group">
+                                    <ul class="nav nav-tabs row">
+                                        <li class="active"><a data-target="#tweet-list-2" data-toggle="tab">Tweets</a></li>
+                                        <li><a data-target="#users-list-2" data-toggle="tab">Users</a></li>
+                                        <li><a data-target="#keywords-list-2" data-toggle="tab">Keywords</a></li>
+                                    </ul>
 
-                                <div class="tab-content row scroll-y">
-                                    <div class="tab-pane active tweet-list" id="tweet-list-2"></div>
-                                    <div class="tab-pane users-list" id="users-list-2">...</div>
-                                    <div class="tab-pane keywords-list" id="keywords-list-2">...</div>
+                                    <div class="tab-content row scroll-y">
+                                        <div class="tab-pane active tweet-list" id="tweet-list-2"></div>
+                                        <div class="tab-pane users-list" id="users-list-2"></div>
+                                        <div class="tab-pane keywords-list" id="keywords-list-2">...</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

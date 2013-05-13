@@ -55,6 +55,11 @@ define(['lib/d3', 'underscore',
 
         _.extend(Histogram.prototype, {
 
+            bold: function(bolded) {
+                this._target.select(".area")
+                    .classed('bold', bolded);
+            },
+
             /**
              * Update the scales based on the data
              */
