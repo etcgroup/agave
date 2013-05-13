@@ -13,13 +13,13 @@ function query_box($name)
             <input class="query-rt" type="checkbox"> RT?
         </label>
         <label class="" title="Filter tweets with less than this many retweets">
-            <input class="query-minrt" type="number" min="0" max="10" value="0"/> RTs
+            <input class="query-minrt" type="number" min="0" value="0"/> RTs
         </label>
         <select class="query-sentiment">
             <option selected="selected"></option>
-            <option value="positive">pos</option>
-            <option value="neutral">neut</option>
-            <option value="negative">neg</option>
+            <option value="1">pos</option>
+            <option value="0">neut</option>
+            <option value="-1">neg</option>
         </select>
     </form>
     <?php

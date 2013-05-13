@@ -6,11 +6,10 @@ define(['model/query'],
             it('takes on default field values', function() {
                 var query = new Query();
 
-                expect(query.view()).toEqual('area');
-                expect(query.search()).toEqual('');
-                expect(query.author()).toEqual('');
+                expect(query.search()).toEqual(null);
+                expect(query.author()).toEqual(null);
                 expect(query.rt()).toEqual(false);
-                expect(query.sentiment()).toEqual('');
+                expect(query.sentiment()).toEqual(null);
                 expect(query.min_rt()).toEqual(0);
 
             });

@@ -58,7 +58,7 @@ define(['underscore'], function(_) {
             var blob = this[blobName];
 
             //Pull any non-set values from the current data blob
-            data = _.defaults(data, blob);
+            data = _.extend({}, blob, data);
 
             //See if there is anything to do
             var changedFields = [];
@@ -69,7 +69,7 @@ define(['underscore'], function(_) {
                 }
             }
 
-            if (changedFields.length == 0) {
+            if (changedFields.length === 0) {
                 //All good :)
                 return true;
             }

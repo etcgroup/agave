@@ -153,7 +153,7 @@ define(['util/functions'], function(functions) {
                     myval: 5
                 });
 
-                expect(instance.trigger).toHaveBeenCalledWith('change', instance);
+                expect(instance.trigger).toHaveBeenCalledWith('change', instance, ['myval']);
 
             });
 
@@ -185,6 +185,33 @@ define(['util/functions'], function(functions) {
 
                 expect(instance.trigger).not.toHaveBeenCalled();
 
+            });
+
+            it('leaves unset values alone', function() {
+                MyClass.prototype.set = functions.evented_setter('data');
+
+                instance.data.myval = 5;
+
+                instance.set({
+                    another: 7
+                });
+
+                expect(instance.data).toEqual({
+                    myval: 5,
+                    another: 7
+                });
+            });
+
+            it('allows setting null values', function() {
+                MyClass.prototype.set = functions.evented_setter('data');
+
+                instance.data.myval = 5;
+
+                instance.set({
+                    myval: null
+                });
+
+                expect(instance.data.myval).toBe(null);
             });
         });
     });

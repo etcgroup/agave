@@ -4,9 +4,6 @@ define(['jquery', 'components/query_controls', 'model/query'],
         describe("Query Controls View", function () {
 
             var ui,
-                viewButtonGroup,
-                viewButtons,
-                activeViewButton,
                 searchInput,
                 authorInput,
                 rtCheckbox,
@@ -16,10 +13,6 @@ define(['jquery', 'components/query_controls', 'model/query'],
 
             var refreshUI = function() {
                 ui = $('form.query');
-
-                viewButtonGroup = ui.find('.view-buttons');
-                viewButtons = viewButtonGroup.find('button');
-                activeViewButton = viewButtons.filter('.active');
 
                 searchInput = ui.find('.query-search');
                 authorInput = ui.find('.query-author');
@@ -35,15 +28,24 @@ define(['jquery', 'components/query_controls', 'model/query'],
                 refreshUI();
             });
 
+            it('has loaded the fixture correctly', function() {
+                expect(ui).toHaveLength(1);
+                expect(searchInput).toHaveLength(1);
+                expect(authorInput).toHaveLength(1);
+                expect(rtCheckbox).toHaveLength(1);
+                expect(minRTInput).toHaveLength(1);
+                expect(sentimentSelector).toHaveLength(1);
+                expect(updateButton).toHaveLength(1);
+            });
+
             it('applies data settings to query UI', function() {
                 //All non-defaults
                 var data = {
-                    view: 'stacked',
                     search: 'a search string',
                     author: '@ICanTweet',
                     rt: true,
                     min_rt: 2,
-                    sentiment: 'neutral'
+                    sentiment: 0
                 };
 
                 var query = new QueryControls({
@@ -53,7 +55,6 @@ define(['jquery', 'components/query_controls', 'model/query'],
 
                 refreshUI();
 
-                expect(activeViewButton).toHaveData('mode', data.view);
                 expect(searchInput).toHaveValue(data.search.toString());
                 expect(authorInput).toHaveValue(data.author.toString());
                 expect(rtCheckbox).toBeChecked();
@@ -63,22 +64,16 @@ define(['jquery', 'components/query_controls', 'model/query'],
 
             it('retrieves data settings from query UI', function() {
                 var data = {
-                    view: 'stacked',
                     search: 'a search string',
                     author: '@ICanTweet',
                     rt: true,
                     min_rt: 2,
-                    sentiment: 'neutral'
+                    sentiment: 0
                 };
 
                 var query = new QueryControls({
                     into: ui
                 });
-
-                //Disable all buttons
-                viewButtons.removeClass('active');
-                //Activate the right button
-                viewButtons.filter('[data-mode=' + data.view + ']').addClass('active');
 
                 searchInput.val(data.search);
                 authorInput.val(data.author);
@@ -106,27 +101,6 @@ define(['jquery', 'components/query_controls', 'model/query'],
                 expect('change').not.toHaveBeenTriggeredOn(query.model);
 
                 updateButton.click();
-
-                expect('change').toHaveBeenTriggeredOn(query.model);
-            });
-
-            it('fires a model change event on view button click', function() {
-                var query = new QueryControls({
-                    into: ui
-                });
-
-                spyOnEvent(query.model, 'change');
-
-                expect('change').not.toHaveBeenTriggeredOn(query.model);
-
-                //Change something --
-
-                //Disable all buttons
-                viewButtons.removeClass('active');
-                //Activate the right button
-                viewButtons.filter('[data-mode=stacked]').addClass('active');
-
-                viewButtons.last().click();
 
                 expect('change').toHaveBeenTriggeredOn(query.model);
             });
