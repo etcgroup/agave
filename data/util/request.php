@@ -170,7 +170,7 @@ class Request
         $params->to = $times->to;
 
         //Convert to boolean
-        $is_rt = $params->rt === 'true';
+        $params->rt = $params->rt === 'true';
 
         //Reset these ones to null if they are empty
         $params->search = strlen($params->search) ? $params->search : NULL;
