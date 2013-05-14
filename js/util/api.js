@@ -111,7 +111,8 @@ define(['jquery', 'underscore', 'util/events'], function ($, _, events) {
         var r = $.ajax({
             url: this.urls[name],
             data: params,
-            type: method
+            type: method,
+            dataType: 'json'
         });
 
         var self = this;
@@ -138,6 +139,10 @@ define(['jquery', 'underscore', 'util/events'], function ($, _, events) {
                 params: params,
                 data: result
             });
+        });
+
+        r.fail(function(xhr, textStatus) {
+            console.error('Error on ' + request_name + ":" + rid, textStatus, xhr);
         });
     };
 
