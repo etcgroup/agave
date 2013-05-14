@@ -30,6 +30,7 @@ $users = array();
 foreach ($result as $row)
 {
     $users[] = $row;
+    
 }
 
 

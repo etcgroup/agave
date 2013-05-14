@@ -8,6 +8,7 @@ define([
         var USER_TEMPLATE = _.template("<li class='user' data-id='<%=id%>'>" +
             "<div class='name'>@<%=screen_name%></div>" +
             "<div class='count'><%=count%> <span class='muted'>tweets</span></div>" +
+            "<div class='follower'><%=followers%> <span class='muted'>followers</span></div>" +
             "</li>");
 
         var USER_LIMIT = 50;
@@ -76,7 +77,6 @@ define([
         UserList.prototype._requestData = function () {
 
             this.loader.start();
-
             this.api.users({
                 //need to know which query these tweets pertain to
                 query_id: this.query.id(),
@@ -97,6 +97,7 @@ define([
          * @private
          */
         UserList.prototype._onData = function (e, result) {
+
             //Make sure these are tweets for our query, first of all
             if (result.params.query_id !== this.query.id()) {
                 return;
@@ -110,7 +111,7 @@ define([
             this.ui.userList.empty();
 
             var self = this;
-
+            
             //Add each tweet
             users.forEach(function (user) {
                 //Render the tweet using the template and append
