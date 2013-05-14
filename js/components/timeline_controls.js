@@ -89,7 +89,7 @@ define(['jquery', 'underscore', 'util/events', 'model/display'], function ($, _,
         this.ui.view_buttons.removeClass('active');
         clicked.addClass('active');
 
-        this.ui.view_button_label.text(clicked.text());
+        this.ui.view_button_label.html(clicked.html());
     };
 
     /**
