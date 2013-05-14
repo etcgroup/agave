@@ -132,13 +132,14 @@
     stroke: transparent;
     stroke-width: 4px;
     shape-rendering: crispEdges;
+    opacity: 0.5;
 
     pointer-events: all;
 }
 
 .reference-mode .annotations rect {
     cursor: pointer;
-    stroke: yellow;
+    opacity: 0.9;
 }
 
 .annotations .highlight,
