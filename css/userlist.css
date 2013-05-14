@@ -5,23 +5,33 @@
 .users-list ul {
     list-style-type: none;
     margin: 0;
-    background: #fff;
 }
 
-.name, .count {
+.users-list .name, .users-list .count {
     color: #000;
 }
 
-.user {
+.users-list .user {
     padding: 10px;
+
+    -webkit-transition: background 200ms ;
+    -moz-transition: background 200ms ;
+    -ms-transition: background 200ms ;
+    -o-transition: background 200ms ;
+    transition: background 200ms ;
 }
 
-.name {
+.reference-mode .users-list .user {
+    cursor: pointer;
+}
+
+
+.users-list .name {
     width: 80%;
     float: left;
 }
 
-.count {
+.users-list .count {
     text-align: right;
     float: right;
     width: 20%;

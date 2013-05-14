@@ -35,6 +35,7 @@ define(['jquery',
         this.ui.commentInput = this.ui.commentBox.find('textarea');
         this.ui.userDisplay = this.ui.commentBox.find('.user-display');
         this.ui.commentSubmit = this.ui.commentBox.find('.send-button');
+        this.ui.referenceButton = this.ui.commentBox.find('.reference-button');
 
         this.loader = loader({
             into: this.into,
@@ -45,6 +46,7 @@ define(['jquery',
     DiscussionView.prototype._attachEvents = function() {
         this.ui.backButton.on('click', $.proxy(this._onBackClicked, this));
         this.ui.commentSubmit.on('click', $.proxy(this._onSendClicked, this));
+        this.ui.referenceButton.on('click', $.proxy(this._onReferenceButtonClicked, this));
 
         var self = this;
         this.ui.commentList.on('mouseenter', '.ref', function() {
@@ -119,20 +121,37 @@ define(['jquery',
         this.ui.userDisplay.html('Hello, <b>' + user.name() + '</b>!');
     };
 
-    DiscussionView.prototype._onSendClicked = function() {
-        this._disableCommentBox();
+    DiscussionView.prototype.toggleReferenceMode = function(value) {
+        this._referenceMode = value;
+        $('body').toggleClass('reference-mode', this._referenceMode);
+    }
 
-        this.api.send_message({
-            user: this.user.name(),
-            message: this.ui.commentInput.val(),
-            discussion_id: this.discussion_id
-        });
+    DiscussionView.prototype._onReferenceButtonClicked = function() {
+        this.toggleReferenceMode(!this.ui.referenceButton.is('.active'));
+    };
+
+    DiscussionView.prototype._onSendClicked = function() {
+        var message = $.trim(this.ui.commentInput.val());
+
+        if (message) {
+            this._disableCommentBox();
+
+            this.api.send_message({
+                user: this.user.name(),
+                message: this.ui.commentInput.val(),
+                discussion_id: this.discussion_id
+            });
+        }
     };
 
     DiscussionView.prototype._onReferenceInserted = function(e, result) {
-        if (!this.isShowing()) {
+        if (!this.isShowing() || !this._referenceMode) {
             return;
         }
+
+        this.ui.referenceButton.button('toggle');
+        this.toggleReferenceMode(false);
+
 
         //Get the reference type
         var type = result.type;

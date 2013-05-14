@@ -18,6 +18,10 @@
     transition: background 200ms ;
 }
 
+.reference-mode .tweet-list .tweet {
+    cursor: pointer;
+}
+
 .tweet-list .tweet .hdr {
 	color: #888;
 	font-size: 80%;

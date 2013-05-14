@@ -18,6 +18,11 @@
     transition: background 200ms ;
 }
 
+.reference-mode .keywords-list .keyword {
+    cursor: pointer;
+}
+
+
 .keywords-list .keyword .hdr {
 	color: #000;
 }

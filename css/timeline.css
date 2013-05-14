@@ -134,7 +134,11 @@
     shape-rendering: crispEdges;
 
     pointer-events: all;
+}
+
+.reference-mode .annotations rect {
     cursor: pointer;
+    stroke: yellow;
 }
 
 .annotations .highlight,

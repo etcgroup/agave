@@ -42,14 +42,19 @@
                 <div class="collaborator-wrapper col">
                     <div class="collaborator padding-left show-left">
                         <div class="sliding-panel col">
-                            <div class="user-box form-inline col">
-                                <input type="text" placeholder="Choose a user name"/>
-                                <button type="button" class="user-submit btn btn-primary">Sign in</button>
+                            <div class="user-box col">
+                                <div class="header row">
+                                    <div class="title">Sign in to discuss!</div>
+                                </div>
+                                <div class="row form">
+                                    <input type="text" placeholder="Choose a user name"/><br/>
+                                    <button type="button" class="user-submit btn btn-large btn-primary">Sign in</button>
+                                </div>
                             </div>
                             <div class="discussions col">
                                 <div class="header row">
                                     <div class="title">Discussions</div>
-                                    <button type="button" class="btn new-button">New Discussion</button>
+                                    <button type="button" class="btn btn-primary new-button">New Discussion</button>
                                     <p>Join an existing discussion:</p>
                                 </div>
                                 <div class="discussion-list row scroll-y"></div>
@@ -59,9 +64,13 @@
                                     <button type="button" class="btn back-button">
                                         <i class="icon-arrow-left"></i> Back to discussion list
                                     </button>
+                                    <span class="user-display"></span>
                                     <br/>
                                     <textarea></textarea>
-                                    <span class="user-display"></span>
+                                    <button type="button" data-toggle="button"
+                                            class="btn-success reference-button btn">
+                                        <i class="icon-white icon-map-marker"></i> Ref. Tweet/User/Note
+                                    </button>
                                     <button type="button"
                                             class="send-button btn btn-primary">
                                         <i class="icon-white icon-comment"></i> Post message

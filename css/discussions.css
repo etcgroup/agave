@@ -1,10 +1,6 @@
 /*csslint adjoining-classes: false*/
-.discussions .header,
-.discussion-view .header {
-    margin-bottom: 10px;
-}
 
-.discussions .header .title {
+.collaborator .header .title {
     font-weight: normal;
     line-height: 30px;
     font-size: 20px;
@@ -15,12 +11,15 @@
     float: right;
 }
 
-.discussions .user-box {
+.user-box {
     text-align: center;
 }
 
-.discussions .user-box input {
-    margin: 30px 0;
+.user-box .form input {
+    font-size: 18px;
+    height: 25px;
+    line-height: 25px;
+    padding: 5px 8px;
 }
 
 .discussion-list {
@@ -90,6 +89,13 @@
 }
 
 .discussion-view .comment-box .user-display {
+    font-size: 18px;
+    line-height: 30px;
+    vertical-align: middle;
+    margin-left: 15px;
+}
+
+.discussion-view .comment-box .reference-button {
     float: left;
 }
 
@@ -131,16 +137,18 @@
     padding: 2px 4px;
 
     text-decoration: underline;
-    border: 1px solid #AAA;
-
     white-space: nowrap;
+    border: 1px solid transparent;
 
-    -moz-border-radius: 4px;
-    -webkit-border-radius: 4px;
-    border-radius: 4px;
-
-    cursor: pointer;
+    /*-moz-border-radius: 4px;*/
+    /*-webkit-border-radius: 4px;*/
+    /*border-radius: 4px;*/
 }
+.reference-mode .discussion-view .comment .message .ref {
+    cursor: pointer;
+    border-color: #AAA;
+}
+
 .discussion-view .comment .message .ref.highlight,
 .discussion-view .comment .message .ref:hover {
     background-color: #ffc174;

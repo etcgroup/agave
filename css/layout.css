@@ -200,7 +200,7 @@ body {
     margin-left: -200%;
 }
 
-.user-panel.col {
+.user-box.col {
     left: 0;
     width: 33.333%;
 }
@@ -213,6 +213,19 @@ body {
 .discussion-view.col {
     left: 66.667%;
     right: 0;
+}
+
+/*
+ * These are the sign-in panels
+ */
+.user-box .header.row {
+    top: 45px;
+    height: 40px;
+}
+
+.user-box .form {
+    top: 105px;
+    bottom: 0;
 }
 
 /*

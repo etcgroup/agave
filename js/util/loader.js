@@ -1,4 +1,4 @@
-define(['jquery', 'underscore', 'lib/spin'], function ($, _, Spinner) {
+define(['jquery', 'underscore', 'lib/spin', 'lib/bootstrap'], function ($, _, Spinner, bootstrap) {
 
     //Some handy presets
     var presets = {
