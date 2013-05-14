@@ -56,6 +56,8 @@ define(['jquery', 'underscore', 'util/events', 'model/display'], function ($, _,
             return false;
         });
         this.ui.annotations_toggle.on('change', $.proxy(this._annotationToggled, this));
+
+        this.model.on('change', $.proxy(this._fillForm, this));
     };
 
     /**

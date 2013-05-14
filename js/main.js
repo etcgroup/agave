@@ -10,7 +10,10 @@ define(['app'], function(App) {
         defaults: {
             //Default time interval (UTC seconds) for the superbowl data set
             from: 1359932400,
-            to: 1359952200
+            to: 1359952200,
+            mode: 'simple',
+            focus: null,
+            annotations: true
         },
         //Time interval (UTC seconds) for the superbowl data set
         overview_from: 1359932400,

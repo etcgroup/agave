@@ -31,7 +31,11 @@ define(['jquery',
 
             //Subscribe to a data stream from the API.
             this.api.on('overview_counts', $.proxy(this._onData, this));
+
         };
+
+        //The overview extends the basic timeline
+        extend(OverviewTimeline, Timeline);
 
         /**
          * Called when the interval model changes.
@@ -45,12 +49,21 @@ define(['jquery',
             //Call the parent method
             Timeline.prototype._onIntervalChanged.call(this, interval, field);
 
-            //Move the brush
-            this._brush.extent(this.extentFromUtc([interval.from(), interval.to()]));
-        };
+            var utc = [interval.from(), interval.to()];
+            var local = this.extentFromUTC(utc);
 
-        //The overview extends the basic timeline
-        extend(OverviewTimeline, Timeline);
+            //Move the brush
+            if (local[0] === this.from && local[1] === this.to) {
+                this._brush.clear();
+            } else {
+                this._brush.extent(local);
+            }
+
+            //Let other people know we moved
+            this.trigger('selection-change', utc);
+
+            this._updateBrush();
+        };
 
         /**
          * Submit a request for new data.
@@ -76,7 +89,6 @@ define(['jquery',
          * @private
          */
         OverviewTimeline.prototype._onData = function(e, result) {
-            var params = result.params; //request info
             var data = result.data; //data
 
             //Bind the data to the histogram first
@@ -142,10 +154,7 @@ define(['jquery',
 
             //Make DOM elements for the brush
             this.ui.svg.append("g")
-                .attr("class", "x brush")
-                .call(this._brush)
-                .selectAll("rect")
-                .attr("y", -6);
+                .attr("class", "x brush");
 
             this._updateBrush();
 
@@ -161,8 +170,10 @@ define(['jquery',
             //Update the height of the brush
             this.ui.svg.selectAll('g.x.brush')
                 .attr('transform', new Transform('translate', this.boxes.inner.left(), this.boxes.inner.top()))
+                .call(this._brush)
                 .selectAll('rect')
-                .attr("height", this.boxes.inner.height() + 7);
+                .attr("height", this.boxes.inner.height() + 7)
+                .attr("y", -6);
         };
 
         /**
@@ -184,7 +195,13 @@ define(['jquery',
 
         OverviewTimeline.prototype._onBrushEnd = function() {
             //convert to utc
-            this.trigger('selection-end', this.extentToUTC(this._brush.extent()));
+            var extent = this.extentToUTC(this._brush.extent());
+
+            //When the timeline zoom/pan changes, we need to update the query object
+            this.interval.set({
+                from: extent[0],
+                to: extent[1]
+            });
         };
 
         return OverviewTimeline;

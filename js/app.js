@@ -4,6 +4,7 @@ define(function (require) {
     var $ = require('jquery');
     var _ = require('underscore');
     var urls = require('util/urls');
+    var functions = require('util/functions');
     var Display = require('model/display');
     var Interval = require('model/interval');
     var Query = require('model/query');
@@ -35,16 +36,13 @@ define(function (require) {
     App.prototype.start = function () {
         this.api = new API();
 
-        //Parse the url
-        var params = urls.parse();
-
-        //Initialize the user model
-        this.user = new User();
-
         this.initUI();
-        this.initTimelineControls(params);
-        this.initInterval(params);
-        this.initQueryControls(params);
+        this.initModels();
+
+        this.updateModelsFromUrl();
+
+        this.initTimelineControls();
+        this.initQueryControls();
 
         this.initFocusTimeline();
         this.initContextTimeline();
@@ -59,17 +57,43 @@ define(function (require) {
         this.initDiscussionView();
 
         this.windowResize();
+
+        urls.watch_url_changes();
+        urls.on('change', $.proxy(this.updateModelsFromUrl, this));
+    };
+
+    App.prototype.initModels = function() {
+        //Initialize the user model
+        this.user = new User();
+
+        this.display = new Display();
+        this.display.on('change', $.proxy(this.displayChanged, this));
+
+        this.interval = new Interval();
+        this.interval.on('change', $.proxy(this.intervalChanged, this));
+
+        //The query collection
+        this.queries = [];
+
+        var self = this;
+        this.ui.explorer.find('.query').each(function (index) {
+            //Build a new query model from the URL
+            var query = new Query({
+                id: index
+            });
+
+            //Save the query in our list
+            self.queries.push(query);
+
+            //When the model changes, we need to know
+            query.on('change', $.proxy(self.queryUpdated, self));
+        });
     };
 
     /**
      * Set up the display model and timeline controls.
      */
-    App.prototype.initTimelineControls = function(params) {
-        this.display = new Display({
-            mode: params.get('mode', this.config.defaults.mode),
-            focus: params.get('focus', this.config.defaults.focus),
-            annotations: params.get('annotations', this.config.defaults.annotations)
-        });
+    App.prototype.initTimelineControls = function() {
 
         this.ui.timelineControls = this.ui.explorer.find('.timeline-controls');
 
@@ -77,48 +101,19 @@ define(function (require) {
             model: this.display,
             into: this.ui.timelineControls
         });
-
-        this.display.on('change', $.proxy(this.displayChanged, this));
-    };
-
-    /**
-     * Set up the interval object.
-     * @param params
-     */
-    App.prototype.initInterval = function(params) {
-        //Initialize the interval -- multiplying by 1000 to convert from url times (seconds) to ms
-        this.interval = new Interval({
-            from: params.get('from', this.config.defaults.from) * 1000,
-            to: params.get('to', this.config.defaults.to) * 1000
-        });
     };
 
     /**
      * Set up the query object, based on the url.
      */
-    App.prototype.initQueryControls = function (params) {
+    App.prototype.initQueryControls = function () {
 
-        //The query collection
-        this.queries = [];
         this.queryControls = [];
 
         //One query model per query control
         var self = this;
         this.ui.explorer.find('.query').each(function (index) {
-            var id = index;
-
-            //Build a new query model from the URL
-            var query = new Query({
-                id: id,
-                search: params.get_at('search', id, null),
-                author: params.get_at('author', id, null),
-                rt: params.get_at('rt', id, null),
-                min_rt: params.get_at('min_rt', id, null),
-                sentiment: params.get_at('sentiment', id, null)
-            });
-
-            //Save the query in our list
-            self.queries.push(query);
+            var query = self.queries[index];
 
             //Go ahead and set up the query view at the same time
             var ui = $(this);
@@ -131,8 +126,6 @@ define(function (require) {
             });
             self.queryControls.push(view);
 
-            //When the model changes, we need to know
-            query.on('change', $.proxy(self.queryUpdated, self));
         });
     };
 
@@ -169,10 +162,6 @@ define(function (require) {
         this.overviewTimeline.on('selection-change', function (e, extent) {
             self.focusTimeline.domain(extent);
             self.focusTimeline.update();
-        });
-
-        this.overviewTimeline.on('selection-end', function (e, extent) {
-            self.selectionChanged(extent);
         });
 
         this.overviewTimeline.render();
@@ -285,8 +274,6 @@ define(function (require) {
 
     };
 
-
-
     App.prototype.setDiscussionState = function(cssClass) {
         this.ui.collaborator
             .removeClass('show-left show-mid show-right')
@@ -346,7 +333,7 @@ define(function (require) {
             self.setDiscussionState('show-mid');
         });
 
-
+        this.discussionView.on('restore-state', $.proxy(this.restoreViewState, this));
     };
 
     App.prototype.windowResize = function () {
@@ -393,16 +380,69 @@ define(function (require) {
         this.updateUrl();
     };
 
-    //TODO: move this into the overview timeline, probably
-    App.prototype.selectionChanged = function (extent) {
-        //When the timeline zoom/pan changes, we need to update the query object
-        this.interval.set({
-            from: extent[0],
-            to: extent[1]
-        });
-
+    App.prototype.intervalChanged = function (extent) {
         //and update the url
         this.updateUrl();
+    };
+
+    App.prototype.restoreViewState = function(e, stateString) {
+        urls.set_query_string(stateString);
+    };
+
+    App.prototype.updateModelsFromUrl = function() {
+
+        //Parse the url
+        var params = urls.parse();
+
+        functions.queue_changes();
+
+        this.display.set({
+            mode: params.get('mode', this.config.defaults.mode),
+            focus: params.get('focus', this.config.defaults.focus)
+        }, true);
+
+        //Do silent updates
+
+        //Initialize the interval -- multiplying by 1000 to convert from url times (seconds) to ms
+        this.interval.set({
+            from: params.get('from', this.config.defaults.from) * 1000,
+            to: params.get('to', this.config.defaults.to) * 1000
+        }, true);
+
+        var self = this;
+        this.queries.forEach(function (query, index) {
+            //Build a new query model from the URL
+            var data = {};
+
+            var search = params.get_at('search', index, undefined);
+            if (search !== undefined) {
+                data.search = search;
+            }
+
+            var author = params.get_at('author', index, undefined);
+            if (author !== undefined) {
+                data.author = author;
+            }
+
+            var rt = params.get_at('rt', index, undefined);
+            if (rt !== undefined) {
+                data.rt = rt;
+            }
+
+            var min_rt = params.get_at('min_rt', index, undefined);
+            if (min_rt !== undefined) {
+                data.min_rt = min_rt;
+            }
+
+            var sentiment = params.get_at('sentiment', index, undefined);
+            if (sentiment !== undefined) {
+                data.sentiment = sentiment;
+            }
+
+            query.set(data, true);
+        });
+
+        functions.release_changes();
     };
 
     return App;

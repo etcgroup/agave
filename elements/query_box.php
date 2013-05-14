@@ -6,21 +6,22 @@ function query_box($name)
     ?>
     <form class="query form-inline">
 <!--        <label>--><?php //echo $name ?><!--</label>-->
-        <button type="button" class="btn btn-info query-update"><i class="icon-search icon-white"></i></button>
+        <i class="icon-search icon-white"></i>
         <input class="query-search" type="search" placeholder="Search tweet text"/>
         <input class="query-author" type="text" placeholder="@author"/>
         <label class="checkbox" title="Check to view retweets">
-            <input class="query-rt" type="checkbox"> RT?
+            <input class="query-rt" type="checkbox"> Show RTs
         </label>
         <label class="" title="Filter tweets with less than this many retweets">
-            <input class="query-minrt" type="number" min="0" value="0"/> RTs
+            <input class="query-minrt" type="number" min="0" value="0"/> Times RTed
         </label>
         <select class="query-sentiment">
-            <option selected="selected"></option>
+            <option value="" selected="selected">all</option>
             <option value="1">pos</option>
             <option value="0">neut</option>
             <option value="-1">neg</option>
         </select>
+        <i class="icon-heart icon-white"></i>
     </form>
     <?php
     return ob_get_clean();

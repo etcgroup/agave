@@ -35,6 +35,11 @@ define(['underscore'], function(_) {
                 //Don't trigger the event if silent was set
                 if (!silent) {
                     this.trigger(eventName, this, fieldName);
+                } else if (queue !== null) {
+                    queue.push({
+                        obj: this,
+                        args: [eventName, this, fieldName]
+                    });
                 }
             }
 
@@ -79,11 +84,41 @@ define(['underscore'], function(_) {
 
             //Don't trigger if silent was et
             if (!silent) {
-                this.trigger('change', this, changedFields);
+                this.trigger(eventName, this, changedFields);
+            } else if (queue !== null) {
+                queue.push({
+                    obj: this,
+                    args: [eventName, this, changedFields]
+                });
             }
 
             return true;
         };
+    };
+
+    var queue = null;
+    /**
+     * Start a change queue.
+     * When any changes are made to models with 'silent' set to true,
+     * they will be added to the queue. Use the change release to trigger
+     * all the changes when ready.
+     *
+     * @returns {Function}
+     */
+    functions.queue_changes = function() {
+        if (queue !== null) {
+            return;
+        }
+
+        queue = [];
+    };
+
+    functions.release_changes = function() {
+        queue.forEach(function(event) {
+            event.obj.trigger.apply(event.obj, event.args);
+        });
+
+        queue = null;
     };
 
     return functions;

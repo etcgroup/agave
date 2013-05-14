@@ -95,12 +95,12 @@ define(['jquery', 'components/query_controls', 'model/query'],
 
                 spyOnEvent(query.model, 'change');
 
-                //Change something
-                searchInput.val("changing the search :)");
 
                 expect('change').not.toHaveBeenTriggeredOn(query.model);
 
-                updateButton.click();
+                //Change something
+                searchInput.val("changing the search :)");
+                searchInput.change();
 
                 expect('change').toHaveBeenTriggeredOn(query.model);
             });

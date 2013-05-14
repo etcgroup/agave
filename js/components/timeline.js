@@ -99,7 +99,7 @@ define(['jquery',
         this.loader = loader({
             into: this.into,
             options: {
-                color: '#eee'
+                color: '#aaa'
             }
         });
     };

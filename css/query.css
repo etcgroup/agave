@@ -7,6 +7,11 @@ form.query label {
     margin-bottom: 0;
 }
 
+form.query .icon-search {
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
 form.query .query-search {
     width: 120px;
 }

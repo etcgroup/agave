@@ -3,8 +3,9 @@ define(['jquery',
     'util/events',
     'util/poll',
     'util/loader',
+    'util/urls',
     'util/references',
-    'lib/bootstrap'], function($, _, events, Poll, loader, references, bootstrap) {
+    'lib/bootstrap'], function($, _, events, Poll, loader, urls, references, bootstrap) {
 
     //Check for messages every 10 seconds
     var POLL_INTERVAL = 10000;
@@ -59,6 +60,10 @@ define(['jquery',
 
         this.ui.commentList.on('click', '.ref', function() {
             self._referenceClicked($(this));
+        });
+
+        this.ui.commentList.on('click', '.view-state', function() {
+            self._viewStateClicked($(this));
         });
 
         this.user.on('change', $.proxy(this._userChanged, this));
@@ -124,7 +129,7 @@ define(['jquery',
     DiscussionView.prototype.toggleReferenceMode = function(value) {
         this._referenceMode = value;
         $('body').toggleClass('reference-mode', this._referenceMode);
-    }
+    };
 
     DiscussionView.prototype._onReferenceButtonClicked = function() {
         this.toggleReferenceMode(!this.ui.referenceButton.is('.active'));
@@ -136,10 +141,15 @@ define(['jquery',
         if (message) {
             this._disableCommentBox();
 
+            var view_state = urls.query_string();
+
+            this.loader.start();
+
             this.api.send_message({
                 user: this.user.name(),
                 message: this.ui.commentInput.val(),
-                discussion_id: this.discussion_id
+                discussion_id: this.discussion_id,
+                view_state: view_state
             });
         }
     };
@@ -218,6 +228,12 @@ define(['jquery',
             refs.filter('[data-id=' + item.id + ']')
                 .removeClass('highlight');
         });
+    };
+
+    DiscussionView.prototype._viewStateClicked = function(viewStateUI) {
+        var state = viewStateUI.data('view');
+
+        this.trigger('restore-state', state);
     };
 
     DiscussionView.prototype._referenceClicked = function(refUI) {

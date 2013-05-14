@@ -17,7 +17,6 @@
 
 .user-box .form input {
     font-size: 18px;
-    height: 25px;
     line-height: 25px;
     padding: 5px 8px;
 }
@@ -126,6 +125,16 @@
 }
 .discussion-view .comment .time {
     float: right;
+}
+
+.discussion-view .comment .view-state {
+    float: right;
+    margin-right: 10px;
+    cursor: pointer;
+    opacity: 0.5;
+}
+.discussion-view .comment .view-state:hover {
+    opacity: 1;
 }
 
 .discussion-view .comment .message {

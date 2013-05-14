@@ -38,7 +38,6 @@ define(['jquery', 'underscore', 'util/events', 'model/query'], function ($, _, e
         this.ui = {};
 
         this.ui.form = this.into; //an alias
-        this.ui.view_buttons = this.into.find('.view-buttons');
         this.ui.search_input = this.into.find('.query-search');
         this.ui.author_input = this.into.find('.query-author');
         this.ui.rt_checkbox = this.into.find('.query-rt');
@@ -53,8 +52,12 @@ define(['jquery', 'underscore', 'util/events', 'model/query'], function ($, _, e
      * @private
      */
     QueryControls.prototype._initEvents = function () {
-        this.ui.update_button.on('click', $.proxy(this._updateClicked, this));
-        this.ui.view_buttons.on('click', $.proxy(this._viewButtonClicked, this));
+        this.model.on('change', $.proxy(this._fillForm, this));
+
+//        this.ui.update_button.on('click', $.proxy(this._updateClicked, this));
+
+        this.ui.form.find('input,select').on('change', $.proxy(this._updateClicked, this));
+
         this.ui.form.on('submit', $.proxy(this._formSubmitted, this));
 
         var self = this;

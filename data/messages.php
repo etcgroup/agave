@@ -24,12 +24,13 @@ $perf = $request->timing();
  * Optionally, fields for a new message can be provided.
  */
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $params = $request->post(array('user', 'message'), array('discussion_id'));
+    $params = $request->post(array('user', 'message', 'view_state'), array('discussion_id'));
     $user = $params->user;
     $message = htmlspecialchars($params->message);
     $discussion_id = $params->discussion_id;
+    $view_state = $params->view_state;
 
-    $inserted_id = $db->insert_message($user, $message, $discussion_id);
+    $inserted_id = $db->insert_message($user, $message, $view_state, $discussion_id);
     if (!$inserted_id) {
         echo 'Failure.';
         return -1;

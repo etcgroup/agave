@@ -1,6 +1,14 @@
-define(['jquery', 'underscore', 'lib/Uri'], function ($, _, Uri) {
+define(['jquery', 'underscore', 'lib/Uri', 'util/events'], function ($, _, Uri, events) {
 
-    var urls = {};
+    var UrlsManager = function() {
+
+    };
+
+    //Only need the constructor above for this
+    events(UrlsManager);
+
+    //Singleton
+    var urls = new UrlsManager();
 
     /**
      * Map from query data field names to url parameter names.
@@ -204,7 +212,56 @@ define(['jquery', 'underscore', 'lib/Uri'], function ($, _, Uri) {
         var url = urls.make_url(parameters, queries);
 
         //Fancy HTML5 history management
-        history.pushState(url, '', url);
+        if (url !== document.location.href) {
+            history.pushState(url, '', url);
+        }
+    };
+
+    /**
+     * Get the current query string.
+     */
+    urls.query_string = function(url) {
+        url = url || document.location.href;
+
+        var parsed = new Uri(url);
+
+        return parsed.query();
+    };
+
+    /**
+     * Set the current query string.
+     *
+     * @param query
+     */
+    urls.set_query_string = function(query) {
+        var parsed = new Uri(document.location.href);
+        parsed.query(query);
+
+        //Fancy HTML5 history management
+        var url = parsed.toString();
+        if (url !== document.location.href) {
+            history.pushState(url, '', url);
+            this.trigger('change');
+        }
+    };
+
+
+
+    urls.watch_url_changes = function() {
+        if (!this._watching) {
+            this._watching = true;
+            var url = document.location.href;
+
+            var self = this;
+            $(window).on('popstate', function() {
+                var newUrl = document.location.href;
+                if (newUrl !== url) {
+                    url = newUrl;
+
+                    self.trigger('change');
+                }
+            });
+        }
     };
 
     return urls;

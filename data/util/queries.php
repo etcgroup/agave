@@ -328,9 +328,9 @@ class Queries
     private function _build_insert_message()
     {
         $this->prepare('insert_message',
-            "INSERT INTO messages (created, user, message, discussion_id)
-            VALUES (?, ?, ?, ?)",
-            'sssi'
+            "INSERT INTO messages (created, user, message, view_state, discussion_id)
+            VALUES (?, ?, ?, ?, ?)",
+            'ssssi'
         );
 
         $this->prepare('insert_discussion',
@@ -345,10 +345,11 @@ class Queries
      *
      * @param string $user
      * @param string $message
+     * @param string $view_state
      * @param int $discussion_id
      * @return mysqli_result
      */
-    public function insert_message($user, $message, $discussion_id)
+    public function insert_message($user, $message, $view_state, $discussion_id)
     {
         $now = new DateTime('now', $this->utc);
         $time = $now->format('Y-m-d H:i:s');
@@ -358,14 +359,14 @@ class Queries
             $discussion_id = $this->db->lastInsertId();
         }
 
-        $this->run('insert_message', $time, $user, $message, $discussion_id);
+        $this->run('insert_message', $time, $user, $message, $view_state, $discussion_id);
         return $this->db->lastInsertId();
     }
 
     private function _build_message()
     {
         $this->prepare('message',
-            "SELECT id, discussion_id, UNIX_TIMESTAMP(created) AS created, user, message
+            "SELECT messages.*, UNIX_TIMESTAMP(created) AS created
              FROM messages
              WHERE id = ?",
             'i'
@@ -421,7 +422,7 @@ class Queries
     private function _build_discussion_messages()
     {
         $this->prepare('discussion_messages',
-            "SELECT id, discussion_id, UNIX_TIMESTAMP(created) AS created, user, message
+            "SELECT messages.*, UNIX_TIMESTAMP(created) AS created
             FROM messages
             WHERE discussion_id = ?
             ORDER BY created DESC",
