@@ -547,7 +547,7 @@ class Queries
         $stop_datetime = $stop_datetime->format('Y-m-d H:i:s');
 
         $subquery = new Builder('users_subquery');
-        $subquery->select('tweets.user_id AS id, COUNT(tweets.user_id) AS count');
+        $subquery->select('tweets.user_id AS id, tweets.followers_count AS followers, COUNT(tweets.user_id) AS count');
         $subquery->from('tweets');
         $subquery->group_by('tweets.user_id');
         $subquery->order_by($sort, 'DESC');
