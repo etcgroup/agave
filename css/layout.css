@@ -169,6 +169,10 @@ body {
     top: 66px; /* the natural height of the nav tabs */
     bottom: 0;
 }
+.tab-content .tab-pane {
+    position: relative;
+    height: 100%;
+}
 
 /*
  * These are the collaborator panels.

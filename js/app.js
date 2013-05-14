@@ -10,7 +10,6 @@ define(function (require) {
     var User = require('model/user');
     var TimelineControls = require('components/timeline_controls');
     var QueryControls = require('components/query_controls');
-    var TweetTimeline = require('components/tweet_timeline');
     var TweetList = require('components/tweet_list');
     var KeywordList = require('components/keyword_list');
     var UserList = require('components/user_list');
@@ -101,6 +100,7 @@ define(function (require) {
 
         //The query collection
         this.queries = [];
+        this.queryControls = [];
 
         //One query model per query control
         var self = this;
@@ -129,6 +129,7 @@ define(function (require) {
                 into: ui,
                 api: self.api
             });
+            self.queryControls.push(view);
 
             //When the model changes, we need to know
             query.on('change', $.proxy(self.queryUpdated, self));
@@ -197,23 +198,6 @@ define(function (require) {
         });
 
         this.focusTimeline.render();
-//
-//            this.focusTimeline = new TweetTimeline();
-//
-//            var self = this;
-//
-//            this.focusTimeline.width(this.ui.focusTimeline.width())
-//                .height(this.ui.focusTimeline.height())
-//                .retweetHeight(70)
-//                .noiseHeight(70)
-//                .utcOffsetMillis(this.config.utc_offset_millis)
-//                .idealBinCount(200)
-//                .timeExtent([this.interval.from(), this.interval.to()])
-//                .onZoomChanged($.proxy(self.selectionChanged, self));
-//
-//            //Set the container and render
-//            this.focusTimeline.container(this.ui.focusTimeline.selector)
-//                .render();
     };
 
     /**
@@ -243,12 +227,14 @@ define(function (require) {
             var query = self.queries[index];
 
             group.tweetList = group.root.find('.tweet-list');
+            var spinner = group.root.find('.tweet-list-spinner');
 
             self.tweetLists.push(new TweetList({
                 api: self.api,
                 interval: self.interval,
                 query: query,
-                into: group.tweetList
+                into: group.tweetList,
+                spinner: spinner
             }));
         });
     };
@@ -263,12 +249,14 @@ define(function (require) {
             var query = self.queries[index];
             
             group.userList = group.root.find('.users-list');
-            
+            var spinner = group.root.find('.user-list-spinner');
+
             self.userLists.push(new UserList ( {
                 api: self.api,
                 interval: self.interval,
                 query: query,
-                into: group.userList
+                into: group.userList,
+                spinner: spinner
             }));
         });
     };
@@ -284,12 +272,14 @@ define(function (require) {
             var query = self.queries[index];
 
             group.keywordList = group.root.find('.keywords-list');
+            var spinner = group.root.find('.keywords-list-spinner');
 
             self.keywordLists.push(new KeywordList({
                 api: self.api,
                 interval: self.interval,
                 query: query,
-                into: group.keywordList
+                into: group.keywordList,
+                spinner: spinner
             }));
         });
 
@@ -400,10 +390,6 @@ define(function (require) {
             return;
         }
 
-        this.updateUrl();
-    };
-
-    App.prototype.queryViewChanged = function () {
         this.updateUrl();
     };
 

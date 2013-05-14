@@ -2,8 +2,9 @@ define(['jquery',
     'underscore',
     'util/events',
     'util/poll',
+    'util/loader',
     'util/references',
-    'lib/bootstrap'], function($, _, events, Poll, references, bootstrap) {
+    'lib/bootstrap'], function($, _, events, Poll, loader, references, bootstrap) {
 
     //Check for messages every 10 seconds
     var POLL_INTERVAL = 10000;
@@ -34,6 +35,11 @@ define(['jquery',
         this.ui.commentInput = this.ui.commentBox.find('textarea');
         this.ui.userDisplay = this.ui.commentBox.find('.user-display');
         this.ui.commentSubmit = this.ui.commentBox.find('.send-button');
+
+        this.loader = loader({
+            into: this.into,
+            delay: 500
+        });
     };
 
     DiscussionView.prototype._attachEvents = function() {
@@ -72,6 +78,7 @@ define(['jquery',
         //Clear the input box
         this.ui.commentInput.val('');
 
+        this.loader.start();
         this._requestData();
 
         this.poll.start();
@@ -220,6 +227,8 @@ define(['jquery',
     };
 
     DiscussionView.prototype._onData = function(e, result) {
+        this.loader.stop();
+
         this._enableCommentBox();
 
         var data = $($.trim(result.data)).filter(function() {

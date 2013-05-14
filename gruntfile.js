@@ -93,7 +93,8 @@ module.exports = function (grunt) {
                             'underscore': 'lib/underscore-amd',
                             'backbone': 'lib/backbone-amd',
                             'jquery': 'lib/jquery',
-                            'moment': 'lib/moment'
+                            'moment': 'lib/moment',
+                            'spin': 'lib/spin'
                         },
                         shim: {
                             'lib/d3': {

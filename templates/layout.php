@@ -28,37 +28,13 @@
                         <div class="details-left col">
                             <div class="padding-right-half">
                                 <?php echo query_box('Series 1') ?>
-                                <div class="tab-group">
-                                    <ul class="nav nav-tabs row">
-                                        <li class="active"><a data-target="#tweet-list-1" data-toggle="tab">Tweets</a></li>
-                                        <li><a data-target="#users-list-1" data-toggle="tab">Users</a></li>
-                                        <li><a data-target="#keywords-list-1" data-toggle="tab">Keywords</a></li>
-                                    </ul>
-
-                                    <div class="tab-content row scroll-y">
-                                        <div class="tab-pane active tweet-list" id="tweet-list-1"></div>
-                                        <div class="tab-pane users-list" id="users-list-1"></div>
-                                        <div class="tab-pane keywords-list" id="keywords-list-1"></div>
-                                    </div>
-                                </div>
+                                <?php echo details_tabs(1); ?>
                             </div>
                         </div>
                         <div class="details-right col">
                             <div class="padding-left-half">
                                 <?php echo query_box('Series 2') ?>
-                                <div class="tab-group">
-                                    <ul class="nav nav-tabs row">
-                                        <li class="active"><a data-target="#tweet-list-2" data-toggle="tab">Tweets</a></li>
-                                        <li><a data-target="#users-list-2" data-toggle="tab">Users</a></li>
-                                        <li><a data-target="#keywords-list-2" data-toggle="tab">Keywords</a></li>
-                                    </ul>
-
-                                    <div class="tab-content row scroll-y">
-                                        <div class="tab-pane active tweet-list" id="tweet-list-2"></div>
-                                        <div class="tab-pane users-list" id="users-list-2"></div>
-                                        <div class="tab-pane keywords-list" id="keywords-list-2"></div>
-                                    </div>
-                                </div>
+                                <?php echo details_tabs(2); ?>
                             </div>
                         </div>
                     </div>
@@ -106,7 +82,8 @@
                     'underscore': 'lib/underscore-amd',
                     'backbone': 'lib/backbone-amd',
                     'jquery' : 'lib/jquery',
-                    'moment': 'lib/moment'
+                    'moment': 'lib/moment',
+                    'spin': 'lib/spin'
                 },
                 shim: {
                     'lib/d3': {

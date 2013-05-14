@@ -1,9 +1,10 @@
 define(['jquery',
     'lib/d3',
     'util/events',
+    'util/loader',
     'util/transform',
     'util/rectangle',
-    'vis/histogram'], function ($, d3, events, Transform, Rectangle, Histogram) {
+    'vis/histogram'], function ($, d3, events, loader, Transform, Rectangle, Histogram) {
 
     var AXIS_OFFSET = 3;
 
@@ -94,6 +95,13 @@ define(['jquery',
         this.ui = {};
         this.ui.svg = d3.select(this.into.selector)
             .append('svg');
+
+        this.loader = loader({
+            into: this.into,
+            options: {
+                color: '#eee'
+            }
+        });
     };
 
     /**

@@ -1,4 +1,4 @@
-define(['jquery', 'util/events'], function ($, events) {
+define(['jquery', 'util/events', 'util/loader'], function ($, events, loader) {
 
     var DiscussionList = function (options) {
         this.api = options.api;
@@ -14,6 +14,11 @@ define(['jquery', 'util/events'], function ($, events) {
 
         this.ui.newDisussionButton = this.into.find('.new-button');
         this.ui.discussionList = this.into.find('.discussion-list');
+
+        this.loader = loader({
+            into: this.into,
+            delay: 500
+        });
     };
 
     DiscussionList.prototype._attachEvents = function () {
@@ -28,10 +33,14 @@ define(['jquery', 'util/events'], function ($, events) {
     };
 
     DiscussionList.prototype._requestData = function () {
+        this.loader.start();
+
         this.api.discussions();
     };
 
     DiscussionList.prototype._onData = function(e, result) {
+        this.loader.stop();
+
         this.ui.discussionList.html(result.data);
     };
 

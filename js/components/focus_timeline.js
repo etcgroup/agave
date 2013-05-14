@@ -82,11 +82,12 @@ define(['jquery',
          * @private
          */
         FocusTimeline.prototype._requestData = function (query) {
-
             var self = this;
 
             //Helper to request the data for a query
             function request(query) {
+
+                self.loader.start(query.id());
 
                 //TODO: make this actually the right parameters
                 var utcExtent = self.extentToUTC([self.from, self.to]);
@@ -488,6 +489,8 @@ define(['jquery',
 
             var params = result.params; //request info
 //            var data = result.data; //data
+
+            this.loader.stop(params.query_id);
 
             var countsOnly = result.data.reduce(function (prev, layer) {
                 return {

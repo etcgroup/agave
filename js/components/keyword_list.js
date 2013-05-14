@@ -1,11 +1,9 @@
 define([
     'jquery',
     'underscore',
-    'util/events',
-    'util/transform',
-    'util/rectangle',
-    'lib/bootstrap'],
-    function ($, _, events, Transform, Rectangle, Bootstrap) {
+    'util/loader',
+    'util/events'],
+    function ($, _, loader, events) {
 
         var KEYWORD_TEMPLATE = _.template("<li class='keyword' data-id='<%=id%>'>" +
             "<div class='keyword_term'><%=term%></div>" +
@@ -30,9 +28,9 @@ define([
          * @param options
          * @constructor
          */
-
         var KeywordList = function (options) {
             this.into = options.into || $('<div>');
+
             this.interval = options.interval;
             this.query = options.query;
             this.api = options.api;
@@ -59,15 +57,15 @@ define([
             this.api.on('unbrush', $.proxy(this._onUnBrush, this));
 
             var self = this;
-            this.ui.KeywordList.on('mouseenter', '.keyword', function() {
+            this.ui.keywordList.on('mouseenter', '.keyword', function() {
                 self._keywordMouseEntered($(this));
             });
 
-            this.ui.KeywordList.on('mouseleave', '.keyword', function() {
+            this.ui.keywordList.on('mouseleave', '.keyword', function() {
                 self._keywordMouseLeft($(this));
             });
 
-            this.ui.KeywordList.on('click', '.keyword', function() {
+            this.ui.keywordList.on('click', '.keyword', function() {
                 self._keywordClicked($(this));
             });
         };
@@ -100,7 +98,7 @@ define([
         };
 
         KeywordList.prototype._onBrush = function(e, brushed) {
-            var keywords = this.ui.KeywordList
+            var keywords = this.ui.keywordList
                 .find('.keyword');
 
             _.each(brushed, function(item) {
@@ -117,7 +115,7 @@ define([
         };
 
         KeywordList.prototype._onUnBrush = function(e, brushed) {
-            var keywords = this.ui.KeywordList
+            var keywords = this.ui.keywordList
                 .find('.keyword');
 
             _.each(brushed, function(item) {
@@ -137,6 +135,9 @@ define([
          * called anytime an update occurs
          */
         KeywordList.prototype._requestData = function () {
+
+            this.loader.start();
+
             this.api.keywords({
                 //need to know which query these keywords pertain to
                 window_size: 300,
@@ -157,10 +158,12 @@ define([
                 return;
             }
 
+            this.loader.stop();
+
             var keywords = result.data;
 
             //Remove all current keywords
-            this.ui.KeywordList.empty();
+            this.ui.keywordList.empty();
 
             var self = this;
 
@@ -173,7 +176,7 @@ define([
                 //Bind the keyword data to the keyword element
                 keywordUI.data('keyword', keyword);
 
-                self.ui.KeywordList.append(keywordUI);
+                self.ui.keywordList.append(keywordUI);
             });
         };
 
@@ -182,7 +185,12 @@ define([
          */
         KeywordList.prototype._initUI = function () {
             this.ui = {};
-            this.ui.KeywordList = $('<ul>').appendTo(this.into);
+            this.ui.body = this.into.find('.tab-pane-body');
+            this.ui.keywordList = $('<ul>').appendTo(this.ui.body);
+
+            this.loader = loader({
+                into: this.into
+            });
         };
 
         //Mix in events

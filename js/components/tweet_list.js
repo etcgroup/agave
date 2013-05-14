@@ -2,10 +2,8 @@ define([
     'jquery',
     'underscore',
     'util/events',
-    'util/transform',
-    'util/rectangle',
-    'lib/bootstrap'],
-    function ($, _, events, Transform, Rectangle, Bootstrap) {
+    'util/loader'],
+    function ($, _, events, loader) {
 
         var TWEET_TEMPLATE = _.template("<li class='tweet' data-id='<%=id%>'>" +
             "<div class='hdr'>@<%=screen_name%></div>" +
@@ -33,9 +31,9 @@ define([
          * @param options
          * @constructor
          */
-
         var TweetList = function (options) {
             this.into = options.into || $('<div>');
+
             this.interval = options.interval;
             this.query = options.query;
             this.api = options.api;
@@ -140,6 +138,9 @@ define([
          * called anytime an update occurs
          */
         TweetList.prototype._requestData = function () {
+
+            this.loader.start();
+
             this.api.tweets({
                 //need to know which query these tweets pertain to
                 query_id: this.query.id(),
@@ -164,6 +165,8 @@ define([
             if (result.params.query_id !== this.query.id()) {
                 return;
             }
+
+            this.loader.stop();
 
             var tweets = result.data;
 
@@ -190,7 +193,12 @@ define([
          */
         TweetList.prototype._initUI = function () {
             this.ui = {};
-            this.ui.tweetList = $('<ul>').appendTo(this.into);
+            this.ui.body = this.into.find('.tab-pane-body');
+            this.ui.tweetList = $('<ul>').appendTo(this.ui.body);
+
+            this.loader = loader({
+                into: this.into
+            });
         };
 
         //Mix in events

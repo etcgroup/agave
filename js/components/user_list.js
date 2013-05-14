@@ -1,9 +1,9 @@
 define([
     'jquery',
     'underscore',
-    'util/events',
-    'lib/bootstrap'],
-    function ($, _, events, Bootstrap) {
+    'util/loader',
+    'util/events'],
+    function ($, _, loader, events) {
 
         var USER_TEMPLATE = _.template("<li class='user' data-id='<%=id%>'>" +
             "<div class='name'>@<%=screen_name%></div>" +
@@ -28,6 +28,8 @@ define([
 
         var UserList = function (options) {
             this.into = options.into || $('<div>');
+            this.spinner = options.spinner || $('<i>').addClass('spinner-16').appendTo(this.into);
+
             this.interval = options.interval;
             this.query = options.query;
             this.api = options.api;
@@ -72,6 +74,9 @@ define([
          * called anytime an update occurs
          */
         UserList.prototype._requestData = function () {
+
+            this.loader.start();
+
             this.api.users({
                 //need to know which query these tweets pertain to
                 query_id: this.query.id(),
@@ -96,6 +101,8 @@ define([
             if (result.params.query_id !== this.query.id()) {
                 return;
             }
+
+            this.loader.stop();
 
             var users = result.data;
 
@@ -122,7 +129,12 @@ define([
          */
         UserList.prototype._initUI = function () {
             this.ui = {};
-            this.ui.userList = $('<ul>').appendTo(this.into);
+            this.ui.body = this.into.find('.tab-pane-body');
+            this.ui.userList = $('<ul>').appendTo(this.ui.body);
+
+            this.loader = loader({
+                into: this.into
+            });
         };
 
         UserList.prototype._userMouseEntered = function(userUI) {

@@ -2,3 +2,23 @@
     padding: 2px 12px;
     font-size: 12px;
 }
+
+.tab-group .nav-tabs > li .spinner-16 {
+    opacity: 0;
+
+    background-image: url("img/spinner_16_w.gif");
+
+    -webkit-transition: opacity 200ms ;
+    -moz-transition: opacity 200ms ;
+    -ms-transition: opacity 200ms ;
+    -o-transition: opacity 200ms ;
+    transition: opacity 200ms ;
+}
+
+.tab-group .nav-tabs > .active .spinner-16 {
+    background-image: url("img/spinner_16.gif");
+}
+
+.tab-group .nav-tabs > li .loading.spinner-16 {
+    opacity: 1;
+}
