@@ -1,6 +1,6 @@
 .tab-group .nav-tabs {
     margin: 0;
-    border-bottom-color: rgba(255, 255, 255, 0.3);
+    border: none;
 }
 
 .tab-group .nav-tabs > li > a {
@@ -17,6 +17,11 @@
     cursor: pointer;
 
     color: #888;
+
+    -webkit-transition: background 300ms, border 300ms;
+    -moz-transition: background 300ms, border 300ms;
+    transition: background 300ms, border 300ms;
+
 }
 
 .tab-group .nav > li > a:hover,
@@ -36,5 +41,4 @@
     color: #eee;
     cursor: default;
     background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.3) rgba(255, 255, 255, 0.3) rgba(0,0,0,0) rgba(255, 255, 255, 0.3);
 }
