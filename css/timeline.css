@@ -2,11 +2,21 @@
 .axis path,
 .axis line {
     fill: none;
-    stroke: #ddd;
+    stroke: #555;
     shape-rendering: crispEdges;
+    transition: stroke 300ms;
 }
 .axis text {
-    fill: #ddd;
+    fill: #888;
+    font-size: 11px;
+    transition: fill 300ms;
+}
+svg:hover .axis text {
+    fill: #aaa;
+}
+svg:hover .axis path,
+svg:hover .axis line {
+    stroke: #aaa;
 }
 
 .histogram .area {

@@ -1,26 +1,23 @@
-.tab-group .nav-tabs {
+.tab-group .nav-pills {
     margin: 0;
     border: none;
 }
 
-.tab-group .nav-tabs > li > a {
+.tab-group .nav-pills > li > a {
     padding: 2px 12px;
 
-    line-height: 16px;
+    font-size: 14px;
+    line-height: 18px;
 
-    border: 1px solid rgba(0, 0, 0, 0);
-
-    -webkit-border-radius: 4px 4px 0 0;
-    -moz-border-radius: 4px 4px 0 0;
-    border-radius: 4px 4px 0 0;
+    border: 1px solid rgba(255, 255, 255, 0.05);
 
     cursor: pointer;
 
     color: #888;
 
-    -webkit-transition: background 300ms, border 300ms;
-    -moz-transition: background 300ms, border 300ms;
-    transition: background 300ms, border 300ms;
+    -webkit-transition: all 300ms;
+    -moz-transition: all 300ms;
+    transition: all 300ms;
 
 }
 
@@ -30,15 +27,17 @@
     background: rgba(255, 255, 255, 0.05);
 }
 
-.tab-group .nav-tabs > li > a:hover,
-.tab-group .nav-tabs > li > a:focus {
-    border-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.2) transparent rgba(255, 255, 255, 0.2);
+.tab-group .nav-pills > li > a:hover,
+.tab-group .nav-pills > li > a:focus {
+    color: #eee;
+    border-color: rgba(255, 255, 255, 0.2);
 }
 
-.tab-group .nav-tabs > .active > a,
-.tab-group .nav-tabs > .active > a:hover,
-.tab-group .nav-tabs > .active > a:focus {
+.tab-group .nav-pills > .active > a,
+.tab-group .nav-pills > .active > a:hover,
+.tab-group .nav-pills > .active > a:focus {
     color: #eee;
     cursor: default;
     background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
 }

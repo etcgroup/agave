@@ -9,7 +9,7 @@ define([
             "<div class='username muted'>@<%=screen_name%></div>" +
             "<div class='body'>" +
             "<a class='twitter-link' title='View this on Twitter' target='tweet-link-tab' href='https://twitter.com/<%=screen_name%>/status/<%=id%>'>" +
-            "<span>view </span>" +
+            "<span>go to</span>" +
             "<i class='twitter-icon-light'></i></a>" +
             "<div class='tweet_text'><%=text%></div>" +
             "<div class='tweet_count'><%=retweet_count%></div>" +

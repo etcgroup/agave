@@ -60,7 +60,7 @@
                                         New</button>
                                     <div>Join an existing discussion</div>
                                 </div>
-                                <div class="discussion-list row scroll-y"></div>
+                                <ul class="discussion-list content-panel item-list row scroll-y"></ul>
                             </div>
                             <div class="discussion-view col">
                                 <div class="comment-box row">
@@ -83,7 +83,7 @@
                                         <i class="icon-white icon-comment"></i> Post
                                     </button>
                                 </div>
-                                <div class="comments row scroll-y"></div>
+                                <ul class="comments item-list content-panel row scroll-y"></ul>
                             </div>
                         </div>
                     </div>

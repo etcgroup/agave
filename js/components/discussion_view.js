@@ -123,7 +123,7 @@ define(['jquery',
     };
 
     DiscussionView.prototype._userChanged = function(e, user) {
-        this.ui.userDisplay.html('Hello, <b>' + user.name() + '</b>!');
+        this.ui.userDisplay.html('Hello, ' + user.name() + '!');
     };
 
     DiscussionView.prototype.toggleReferenceMode = function(value) {

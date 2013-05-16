@@ -6,7 +6,7 @@ function discussion_message($row)
 {
     ob_start();
     ?>
-    <div class="item comment" data-id="<?php echo $row['id'] ?>" data-discussion-id="<?php echo $row['discussion_id'] ?>">
+    <li class="item comment" data-id="<?php echo $row['id'] ?>" data-discussion-id="<?php echo $row['discussion_id'] ?>">
         <div class="time muted"><?php echo ago($row['created'], true) ?></div>
         <?php if ($row['view_state']) { ?>
             <div title="Restore this view"
@@ -17,7 +17,7 @@ function discussion_message($row)
         <?php } ?>
         <div class="user muted"><?php echo $row['user'] ?></div>
         <div class="message"><?php echo $row['message'] ?></div>
-    </div>
+    </li>
     <?php
     return ob_get_clean();
 }

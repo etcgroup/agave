@@ -1,9 +1,16 @@
+.content-panel {
+    background: rgba(255, 255, 255, 0.1);
+
+    -webkit-box-shadow: 0 0 4px rgba(0,0,0,0.4);
+    -moz-box-shadow: 0 0 4px rgba(0,0,0,0.4);
+    box-shadow: 0 0 4px rgba(0,0,0,0.4);
+}
+
 .item-list {
     margin: 0;
     padding: 0;
-
-    background: rgba(255, 255, 255, 0.1);
-
+}
+ul.item-list {
     list-style-type: none;
 }
 

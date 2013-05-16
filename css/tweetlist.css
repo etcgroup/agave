@@ -33,10 +33,12 @@
 
 .tweet-list .tweet .twitter-link {
     opacity: 0.2;
+    color: transparent;
 }
 
 .tweet-list .tweet:hover .twitter-link {
     opacity: 1;
+    color: #eee;
 }
 
 .tweet-list .tweet .twitter-icon-light {
