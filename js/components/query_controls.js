@@ -126,6 +126,12 @@ define(['jquery', 'underscore', 'util/events', 'model/query'], function ($, _, e
         //Get the author string
         data.author = $.trim(this.ui.author_input.val()) || null;
 
+        //Correct the author string
+        if (data.author && data.author[0] != '@') {
+            data.author = '@' + data.author;
+            this.ui.author_input.val(data.author);
+        }
+
         //Get whether or not to show retweets
         data.rt = this.ui.rt_checkbox.is(':checked');
 
