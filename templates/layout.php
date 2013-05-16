@@ -70,7 +70,6 @@
                                         Back
                                     </button>
                                     <span class="user-display"></span>
-                                    <br/>
                                     <textarea></textarea>
                                     <button type="button" data-toggle="button"
                                             class="reference-button btn"

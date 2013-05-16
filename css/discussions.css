@@ -98,6 +98,8 @@
     width: 100%;
     height: 56px;
     display: block;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
     box-sizing: border-box;
     resize: none;
     margin: 10px 0;
