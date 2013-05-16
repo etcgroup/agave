@@ -162,7 +162,7 @@ body {
  * These are the detail panel contents
  */
 .nav-tabs.row {
-    top: 40;
+    top: 40px;
     height: 26px; /* the natural height of the nav tabs */
 }
 .tab-content.row {
