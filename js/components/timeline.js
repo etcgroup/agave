@@ -112,8 +112,6 @@ define(['jquery',
 
         this._updateTarget();
 
-        this._renderBackground();
-
         this._renderTimeAxis();
         this._renderHistogram();
 
@@ -132,7 +130,6 @@ define(['jquery',
         this._updateTimeScaleRange();
 
         this._updateTarget();
-        this._updateBackground();
 
         this._updateTimeAxis();
         this._updateHistogram();
@@ -155,27 +152,6 @@ define(['jquery',
      */
     Timeline.prototype._updateTarget = function () {
         this.ui.svg.call(this.boxes.outer);
-    };
-
-    /**
-     * Render and size the background rectangle.
-     */
-    Timeline.prototype._renderBackground = function () {
-        //Add a background
-        this.ui.svg.append('rect')
-            .classed('main background', true);
-
-        this._updateBackground();
-    };
-
-
-    /**
-     * Update the size of the background rectangle, in case it has changed.
-     */
-    Timeline.prototype._updateBackground = function () {
-        //Size the background
-        this.ui.svg.select('rect.main.background')
-            .call(this.boxes.outer);
     };
 
     /**
