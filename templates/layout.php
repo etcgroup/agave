@@ -71,7 +71,7 @@
                                     </button>
                                     <span class="user-display"></span>
                                     <br/>
-                                    <textarea rows="3"></textarea>
+                                    <textarea></textarea>
                                     <button type="button" data-toggle="button"
                                             class="reference-button btn"
                                         title="Reference a tweet or annotation">

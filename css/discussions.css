@@ -96,6 +96,7 @@
 
 .discussion-view .comment-box textarea {
     width: 100%;
+    height: 56px;
     display: block;
     box-sizing: border-box;
     resize: none;
