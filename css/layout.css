@@ -97,6 +97,7 @@ body {
 .navbar.row {
     height: 41px;
     top: 0;
+    overflow: visible; /* so the box shadow can hang out */
 }
 
 .content.row {

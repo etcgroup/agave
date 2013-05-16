@@ -30,7 +30,8 @@ form.query .query-sentiment {
 
 /* Mode switch button styles */
 .mode-switch-button-group .active {
-    background-color: #ddd;
+    background-color: #2C4A55;
+    color: #efefef;
 }
 
 .annotations-checkbox {
@@ -40,16 +41,17 @@ form.query .query-sentiment {
 }
 
 .mode-switch-button-group .select {
-    padding-left: 10px;
+    padding-left: 7px;
 }
 .mode-switch-button-group .mode-switch-button {
-    padding-left: 10px;
+    padding-left: 7px;
+    min-width: 132px;
 }
 
 .mode-switch-button-group .display-icon {
     background-repeat: no-repeat;
     width: 26px;
-    height: 19px;
+    height: 17px;
     display: inline-block;
     line-height: 20px;
     vertical-align: top;
