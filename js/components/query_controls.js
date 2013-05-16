@@ -156,8 +156,12 @@ define(['jquery', 'underscore', 'util/events', 'model/query'], function ($, _, e
         //Set the search string
         this.ui.search_input.val(this.model.search());
 
-        //Set the author string
-        this.ui.author_input.val(this.model.author());
+        //Set the author string, adding an @ if needed
+        var author = this.model.author();
+        if (author && author[0] != '@') {
+            author = '@' + author;
+            this.ui.author_input.val(author);
+        }
 
         //Set the retweets checkbox
         this.ui.rt_checkbox.prop('checked', this.model.rt());
