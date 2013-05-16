@@ -12,9 +12,9 @@ function query_box($name)
         <label class="checkbox" title="Check to view retweets">
             <input class="query-rt" type="checkbox"> Show RTs
         </label>
-        <label class="" title="Filter tweets with less than this many retweets">
-            <input class="query-minrt" type="number" min="0" value="0"/> Times RTed
-        </label>
+<!--        <label class="" title="Filter tweets with less than this many retweets">-->
+<!--            <input class="query-minrt" type="number" min="0" value="0"/> Times RTed-->
+<!--        </label>-->
         <select class="query-sentiment">
             <option value="" selected="selected">all</option>
             <option value="1">pos</option>
