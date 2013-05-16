@@ -164,10 +164,10 @@ body {
  */
 .nav-tabs.row {
     top: 40px;
-    height: 26px; /* the natural height of the nav tabs */
+    height: 22px; /* the natural height of the nav tabs */
 }
 .tab-content.row {
-    top: 66px; /* the natural height of the nav tabs */
+    top: 62px; /* the natural height of the nav tabs */
     bottom: 0;
 }
 .tab-content .tab-pane {
@@ -217,38 +217,34 @@ body {
 }
 
 /*
- * These are the sign-in panels
- */
-.user-box .header.row {
-    top: 45px;
-    height: 40px;
-}
-
-.user-box .form {
-    top: 105px;
-    bottom: 0;
-}
-
-/*
  * These are the discussion list panels
  */
 .discussions .header.row {
-    top: 0;
     height: 60px;
+    top: 5px;
+    left: 5px;
+    right: 5px;
 }
 .discussions .discussion-list.row {
-    top: 60px;
-    bottom: 0;
+    top: 75px;
+    /* 5 px of margin for shadows */
+    bottom: 5px;
+    left: 5px;
+    right: 5px;
 }
 
 /*
  * These are the discussion view panels
  */
 .discussion-view .comment-box.row {
-    top: 0;
-    height: 130px;
+    top: 5px;
+    left: 5px;
+    right: 5px;
+    height: 132px;
 }
 .discussion-view .comments.row {
-    top: 130px;
-    bottom: 0;
+    top: 147px;
+    bottom: 5px;
+    left: 5px;
+    right: 5px;
 }

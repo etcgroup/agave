@@ -9,6 +9,7 @@ define(['jquery', 'underscore', 'lib/spin', 'lib/bootstrap'], function ($, _, Sp
 
     //Defaults for all configurations
     var defaults = {
+        color: null
     };
 
     var loader = function (options) {

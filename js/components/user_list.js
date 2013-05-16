@@ -5,7 +5,7 @@ define([
     'util/events'],
     function ($, _, loader, events) {
 
-        var USER_TEMPLATE = _.template("<li class='user' data-id='<%=id%>'>" +
+        var USER_TEMPLATE = _.template("<li class='item user' data-id='<%=id%>'>" +
             "<div class='name'>@<%=screen_name%></div>" +
             "<div class='count'><%=count%> <span class='muted'>tweets</span></div>" +
             "<div class='follower'><%=followers%> <span class='muted'>followers</span></div>" +
@@ -131,7 +131,9 @@ define([
         UserList.prototype._initUI = function () {
             this.ui = {};
             this.ui.body = this.into.find('.tab-pane-body');
-            this.ui.userList = $('<ul>').appendTo(this.ui.body);
+            this.ui.userList = $('<ul>')
+                .addClass('item-list')
+                .appendTo(this.ui.body);
 
             this.loader = loader({
                 into: this.into

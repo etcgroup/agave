@@ -5,10 +5,12 @@ define([
     'util/loader'],
     function ($, _, events, loader) {
 
-        var TWEET_TEMPLATE = _.template("<li class='tweet' data-id='<%=id%>'>" +
-            "<div class='hdr'>@<%=screen_name%></div>" +
+        var TWEET_TEMPLATE = _.template("<li class='item tweet' data-id='<%=id%>'>" +
+            "<div class='username muted'>@<%=screen_name%></div>" +
             "<div class='body'>" +
-            "<a class='twitter-link' target='tweet-link-tab' href='https://twitter.com/<%=screen_name%>/status/<%=id%>'><i class='icon-share'></i></a>" +
+            "<a class='twitter-link' title='View this on Twitter' target='tweet-link-tab' href='https://twitter.com/<%=screen_name%>/status/<%=id%>'>" +
+            "<span>view </span>" +
+            "<i class='twitter-icon-light'></i></a>" +
             "<div class='tweet_text'><%=text%></div>" +
             "<div class='tweet_count'><%=retweet_count%></div>" +
             "</div>" +
@@ -194,7 +196,9 @@ define([
         TweetList.prototype._initUI = function () {
             this.ui = {};
             this.ui.body = this.into.find('.tab-pane-body');
-            this.ui.tweetList = $('<ul>').appendTo(this.ui.body);
+            this.ui.tweetList = $('<ul>')
+                .addClass('item-list')
+                .appendTo(this.ui.body);
 
             this.loader = loader({
                 into: this.into

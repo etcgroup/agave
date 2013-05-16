@@ -1,30 +1,7 @@
-.tab-content.row {
-    background-color: #fff
-}
-
-.users-list ul {
-    list-style-type: none;
-    margin: 0;
-}
-
-.users-list .name, .users-list .count, .users-list .follower {
-    color: #000;
-}
-
-.users-list .user {
-    padding: 10px;
-
-    -webkit-transition: background 200ms ;
-    -moz-transition: background 200ms ;
-    -ms-transition: background 200ms ;
-    -o-transition: background 200ms ;
-    transition: background 200ms ;
-}
 
 .reference-mode .users-list .user {
     cursor: pointer;
 }
-
 
 .users-list .name {
     width: 40%;
@@ -43,12 +20,7 @@
     width: 35%;
 }
 
-.users-list li {
-    overflow: hidden;
-    border-bottom: 1px solid #ccc
-}
-
 .users-list .user.highlight,
 .users-list .user:hover {
-    background-color: #D9F6FA;
+    background-color: #555;
 }

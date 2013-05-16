@@ -1,40 +1,10 @@
-.tweet-list ul {
-	list-style-type: none;
-	margin: 0;
-	background: #fff;
-}
 
 .tweet-list .tweet {
-    border-bottom: 1px solid #ccc;
-	color: #333;
-	padding: 12px;
-
-    position: relative;
-
-    -webkit-transition: background 200ms ;
-    -moz-transition: background 200ms ;
-    -ms-transition: background 200ms ;
-    -o-transition: background 200ms ;
-    transition: background 200ms ;
+    line-height: 18px;
 }
 
-.reference-mode .tweet-list .tweet {
-    cursor: pointer;
-}
-
-.tweet-list .tweet .hdr {
-	color: #888;
-	font-size: 80%;
-}
-
-.tweet-list .tweet .twitter-link {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-}
-
-.tweet-list .tweet .body {
-	overflow: auto;
+.tweet-list .tweet .username {
+	font-size: 11px;
 }
 
 .tweet-list .tweet .tweet_text {
@@ -50,5 +20,30 @@
 
 .tweet-list .tweet.highlight,
 .tweet-list .tweet:hover {
-    background-color: #D9F6FA;
+    background-color: #555;
+}
+
+.tweet-list .tweet .twitter-link {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    height: 24px;
+    line-height: 24px;
+}
+
+.tweet-list .tweet .twitter-link {
+    opacity: 0.2;
+}
+
+.tweet-list .tweet:hover .twitter-link {
+    opacity: 1;
+}
+
+.tweet-list .tweet .twitter-icon-light {
+    background: url('img/twitter-bird-dark-bgs.png');
+    width: 24px;
+    height: 24px;
+    vertical-align: top;
+    display: inline-block;
+    background-size: cover;
 }

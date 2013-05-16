@@ -1,0 +1,23 @@
+.item-list {
+    margin: 0;
+    padding: 0;
+
+    background: rgba(255, 255, 255, 0.1);
+
+    list-style-type: none;
+}
+
+.item-list > .item {
+
+    overflow: hidden;
+
+    border-bottom: 1px solid #585858;
+    padding: 12px;
+    position: relative;
+
+    -webkit-transition: background 200ms ;
+    -moz-transition: background 200ms ;
+    -ms-transition: background 200ms ;
+    -o-transition: background 200ms ;
+    transition: background 200ms ;
+}

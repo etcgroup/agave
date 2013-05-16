@@ -43,10 +43,10 @@
                     <div class="collaborator padding-left show-left">
                         <div class="sliding-panel col">
                             <div class="user-box col">
-                                <div class="header row">
+                                <div class="header">
                                     <div class="title">Sign in to discuss!</div>
                                 </div>
-                                <div class="row form">
+                                <div class="form">
                                     <input type="text" placeholder="Choose a user name"/><br/>
                                     <button type="button" class="user-submit btn btn-large btn-primary">Sign in</button>
                                 </div>
@@ -54,26 +54,33 @@
                             <div class="discussions col">
                                 <div class="header row">
                                     <div class="title">Discussions</div>
-                                    <button type="button" class="btn btn-primary new-button">New Discussion</button>
-                                    <p>Join an existing discussion:</p>
+                                    <button type="button" class="btn btn-primary new-button"
+                                        title="Create a new discussion">
+                                        <i class="icon-white icon-plus-sign"></i>
+                                        New</button>
+                                    <div>Join an existing discussion</div>
                                 </div>
                                 <div class="discussion-list row scroll-y"></div>
                             </div>
                             <div class="discussion-view col">
                                 <div class="comment-box row">
-                                    <button type="button" class="btn back-button">
-                                        <i class="icon-arrow-left"></i> Back to discussion list
+                                    <button type="button" class="btn back-button"
+                                        title="Back to discussion list">
+                                        <i class="icon-white icon-arrow-left"></i>
+                                        Back
                                     </button>
                                     <span class="user-display"></span>
                                     <br/>
-                                    <textarea></textarea>
+                                    <textarea rows="3"></textarea>
                                     <button type="button" data-toggle="button"
-                                            class="btn-success reference-button btn">
-                                        <i class="icon-white icon-map-marker"></i> Ref. Tweet/User/Note
+                                            class="reference-button btn"
+                                        title="Reference a tweet or annotation">
+                                        <i class="icon-white icon-map-marker"></i> Reference
                                     </button>
                                     <button type="button"
-                                            class="send-button btn btn-primary">
-                                        <i class="icon-white icon-comment"></i> Post message
+                                            class="send-button btn btn-primary"
+                                        title="Post your comment">
+                                        <i class="icon-white icon-comment"></i> Post
                                     </button>
                                 </div>
                                 <div class="comments row scroll-y"></div>

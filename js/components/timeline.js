@@ -97,10 +97,7 @@ define(['jquery',
             .append('svg');
 
         this.loader = loader({
-            into: this.into,
-            options: {
-                color: '#aaa'
-            }
+            into: this.into
         });
     };
 

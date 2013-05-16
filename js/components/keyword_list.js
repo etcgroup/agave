@@ -5,7 +5,7 @@ define([
     'util/events'],
     function ($, _, loader, events) {
 
-        var KEYWORD_TEMPLATE = _.template("<li class='keyword' data-id='<%=id%>'>" +
+        var KEYWORD_TEMPLATE = _.template("<li class='item keyword' data-id='<%=id%>'>" +
             "<div class='keyword_term'><%=term%></div>" +
             "<div class='keyword_before'><%=before_count%></div>" +
             "<div class='keyword_delta'>&nbsp;&Delta;<%=count_delta%></div>" +
@@ -186,7 +186,9 @@ define([
         KeywordList.prototype._initUI = function () {
             this.ui = {};
             this.ui.body = this.into.find('.tab-pane-body');
-            this.ui.keywordList = $('<ul>').appendTo(this.ui.body);
+            this.ui.keywordList = $('<ul>')
+                .addClass('item-list')
+                .appendTo(this.ui.body);
 
             this.loader = loader({
                 into: this.into
