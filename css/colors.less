@@ -8,56 +8,57 @@
 @strokeWidthBase: 1.5px;
 
 .area {
-  stroke-width: 1px;
-  fill: steelblue;
+    stroke-width: 1px;
+    fill: steelblue;
 }
 
 .line {
-  stroke-width: @strokeWidthBase;
-  stroke: steelblue;
-  fill: none;
+    stroke-width: @strokeWidthBase;
+    stroke: steelblue;
+    fill: none;
 
-  .transition(~"stroke 200ms, stroke-width 200ms");
+    .transition(~"stroke 200ms, stroke-width 200ms");
 }
 
 .sentiment-colors(@baseFillColor, @baseStrokeColor) {
-  @mutedFillColor: darken(desaturate(@baseFillColor, 25%), 15%);
-  @mutedStrokeColor: darken(desaturate(@baseStrokeColor, 25%), 15%);
+    @mutedFillColor: darken(desaturate(@baseFillColor, 25%), 15%);
+    @mutedStrokeColor: darken(desaturate(@baseStrokeColor, 25%), 15%);
 
-  .area& {
-    fill: @baseFillColor;
+    .area& {
+        fill: @baseFillColor;
 
-    .muted & {
-      fill: @mutedFillColor;
+        .muted & {
+            fill: @mutedFillColor;
+        }
     }
-  }
 
-  .area&, .line& {
-    stroke: @baseStrokeColor;
+    /* no stroke for areas */
+    .line& {
+        stroke: @baseStrokeColor;
 
-    .muted & {
-      stroke: @mutedFillColor;
+        .muted & {
+            stroke: @mutedFillColor;
+        }
     }
-  }
 
-  .bold& {
-    stroke: lighten(@baseStrokeColor, 40%);
-    stroke-width: @strokeWidthBase + 1;
-  }
+    .bold& {
+        stroke: lighten(@baseStrokeColor, 40%);
+        stroke-width: @strokeWidthBase + 1;
+    }
 }
 
 .sentiment-combined {
-  .sentiment-colors(@sentimentCombined, @sentimentCombined);
+    .sentiment-colors(@sentimentCombined, @sentimentCombined);
 }
 
 .sentiment-positive {
-  .sentiment-colors(@sentimentPositive, @sentimentPositive);
+    .sentiment-colors(@sentimentPositive, @sentimentPositive);
 }
 
 .sentiment-neutral {
-  .sentiment-colors(@sentimentNeutral, lighten(@sentimentNeutral, 20%));
+    .sentiment-colors(@sentimentNeutral, lighten(@sentimentNeutral, 20%));
 }
 
 .sentiment-negative {
-  .sentiment-colors(@sentimentNegative, @sentimentNegative);
+    .sentiment-colors(@sentimentNegative, @sentimentNegative);
 }
