@@ -339,10 +339,8 @@ define(function (require) {
     App.prototype.windowResize = function () {
         var self = this;
         $(window).on('resize', function () {
-//                self.focusTimeline
-//                    .width(self.ui.focusTimeline.width())
-//                    .height(self.ui.focusTimeline.height())
-//                    .update();
+            self.focusTimeline.update();
+            self.overviewTimeline.update();
         });
     };
 

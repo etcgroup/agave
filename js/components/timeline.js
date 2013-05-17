@@ -35,15 +35,6 @@ define(['jquery',
         this.interval = options.interval;
         this.queries = options.queries;
 
-        //Get the dimensions from the target if set
-        if (options.into) {
-            this._height = options.height || options.into.height();
-            this._width = options.width || options.into.width();
-        } else {
-            this._height = options.height || 50;
-            this._width = options.width || 300;
-        }
-
         //Create a time scale for the timeline
         this._timeScale = d3.time.scale.utc();
 
@@ -126,7 +117,7 @@ define(['jquery',
      * Update the timeline. Only should be called after render.
      */
     Timeline.prototype.update = function (animate) {
-        this._buildBoxes();
+        this._updateBoxes();
         this._updateTimeScaleRange();
 
         this._updateTarget();
@@ -166,6 +157,16 @@ define(['jquery',
      */
     Timeline.prototype._buildBoxes = function () {
 
+        this.boxes = {
+            outer: new Rectangle(),
+            inner: new Rectangle()
+        };
+
+        this._updateBoxes();
+    };
+
+
+    Timeline.prototype._updateBoxes = function() {
         var margin = {
             left: 40,
             right: 20,
@@ -173,18 +174,17 @@ define(['jquery',
             bottom: 25
         };
 
-        this.boxes = {};
+        var height = this.into.height();
+        var width = this.into.width();
 
-        //The outer box, outside the margin.
-        this.boxes.outer = new Rectangle({
+        this.boxes.outer.set({
             top: 0,
             left: 0,
-            width: this._width,
-            height: this._height
+            width: width,
+            height: height
         });
 
-        //The inner box, inside the margin.
-        this.boxes.inner = new Rectangle({
+        this.boxes.inner.set({
             top: this.boxes.outer.top() + margin.top,
             left: this.boxes.outer.left() + margin.left,
             right: this.boxes.outer.width() - margin.right,

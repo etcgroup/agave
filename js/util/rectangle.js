@@ -18,42 +18,16 @@ define(['underscore'], function(_) {
      *      - width, right
      */
     var Rectangle = function(options) {
-        if (_.has(options, 'bottom')) {
-            if (_.has(options, 'top')) {
-                options.height = options.bottom - options.top;
-            } else if (_.has(options, 'height')) {
-                options.top = options.bottom - options.height;
-            } else {
-                throw 'Rectangle given bottom but no top or height';
-            }
-
-            delete options.bottom;
-        }
-        if (_.has(options, 'right')) {
-            if (_.has(options, 'left')) {
-                options.width = options.right - options.left;
-            } else if (_.has(options, 'width')) {
-                options.left = options.right - options.width;
-            } else {
-                throw 'Rectangle given right but no left or width';
-            }
-            delete options.right;
+        if (!options) {
+            options = {
+                top: 0,
+                left: 0,
+                width: 0,
+                height: 0
+            };
         }
 
-        if (!_.has(options, 'left')) {
-            throw 'Rectangle has no left side!';
-        }
-        if (!_.has(options, 'top')) {
-            throw 'Rectangle has no top!';
-        }
-        if (!_.has(options, 'width')) {
-            throw 'Rectangle has no width!';
-        }
-        if (!_.has(options, 'height')) {
-            throw 'Rectangle has no height!';
-        }
-
-        this.options = options;
+        this.set(options);
     };
 
     _.extend(Rectangle.prototype, {
@@ -129,6 +103,49 @@ define(['underscore'], function(_) {
             .attr('height', this.options.height)
             .attr('x', this.options.left)
             .attr('y', this.options.top);
+        },
+
+        /**
+         * Update the rectangle with new options.
+         * @param options
+         */
+        set: function(options) {
+            if (_.has(options, 'bottom')) {
+                if (_.has(options, 'top')) {
+                    options.height = options.bottom - options.top;
+                } else if (_.has(options, 'height')) {
+                    options.top = options.bottom - options.height;
+                } else {
+                    throw 'Rectangle given bottom but no top or height';
+                }
+
+                delete options.bottom;
+            }
+            if (_.has(options, 'right')) {
+                if (_.has(options, 'left')) {
+                    options.width = options.right - options.left;
+                } else if (_.has(options, 'width')) {
+                    options.left = options.right - options.width;
+                } else {
+                    throw 'Rectangle given right but no left or width';
+                }
+                delete options.right;
+            }
+
+            if (!_.has(options, 'left')) {
+                throw 'Rectangle has no left side!';
+            }
+            if (!_.has(options, 'top')) {
+                throw 'Rectangle has no top!';
+            }
+            if (!_.has(options, 'width')) {
+                throw 'Rectangle has no width!';
+            }
+            if (!_.has(options, 'height')) {
+                throw 'Rectangle has no height!';
+            }
+
+            this.options = options;
         }
     });
 
