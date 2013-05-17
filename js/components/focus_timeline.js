@@ -7,8 +7,9 @@ define(['jquery',
     'vis/histogram',
     'vis/stack_histogram',
     'util/tooltip',
+    'util/sentiment',
     'lib/d3'],
-    function ($, _, extend, Transform, Poll, Timeline, Histogram, StackHistogram, Tooltip, d3) {
+    function ($, _, extend, Transform, Poll, Timeline, Histogram, StackHistogram, Tooltip, sentiment, d3) {
 
         var ANNOTATION_POLL_INTERVAL = 10000;
         var AXIS_OFFSET = 3;
@@ -17,8 +18,8 @@ define(['jquery',
         );
 
         //Color defaults
-        var COLOR_DOMAIN = [-1, 0, 1, ''];
-        var COLOR_RANGE = ["sentiment-negative", "sentiment-neutral", "sentiment-positive", "sentiment-combined"];
+        var COLOR_DOMAIN = sentiment.numbers;
+        var COLOR_RANGE = sentiment.classes;
 
         var VALID_MODES = ['simple', 'stack', 'expand'];
 

@@ -10,9 +10,6 @@ define(['underscore', 'util/events', 'util/functions'], function (_, events, fun
 
     var VALID_VIEW_MODES = ['area', 'stacked', 'expand', 'hidden'];
 
-    var VALID_SENTIMENTS = ['', 'negative', 'neutral', 'positive'];
-
-
     /**
      * A model for data related to single query.
      *

@@ -2,17 +2,23 @@ define([
     'jquery',
     'underscore',
     'util/events',
-    'util/loader'],
-    function ($, _, events, loader) {
+    'util/loader',
+    'util/sentiment'],
+    function ($, _, events, loader, sentiment) {
 
         var TWEET_TEMPLATE = _.template("<li class='item tweet' data-id='<%=id%>'>" +
-            "<div class='username muted'>@<%=screen_name%></div>" +
+            "<div class='username muted'>" +
+            "<a class='user-link subtle-link' title='View <%=name%> on Twitter' target='tweet-link-tab' href='https://twitter.com/<%=screen_name%>'>" +
+            "@<%=screen_name%>" +
+            "</a></div>" +
+            "<div class='tweet_count muted' title='Number of retweets'><%=retweet_count%> retweets</div>" +
+            " <a class='twitter-link subtle-link' title='View this on Twitter' target='tweet-link-tab' href='https://twitter.com/<%=screen_name%>/status/<%=id%>'>" +
+            "<span>see on</span> " +
+            "<i class='twitter-icon-light'></i>" +
+            "</a> " +
             "<div class='body'>" +
-            "<a class='twitter-link' title='View this on Twitter' target='tweet-link-tab' href='https://twitter.com/<%=screen_name%>/status/<%=id%>'>" +
-            "<span>go to</span>" +
-            "<i class='twitter-icon-light'></i></a>" +
+            "<div class='indicator sentiment-<%=sentiment_str%>'></div>" +
             "<div class='tweet_text'><%=text%></div>" +
-            "<div class='tweet_count'><%=retweet_count%></div>" +
             "</div>" +
             "</li>");
 
@@ -180,6 +186,8 @@ define([
             //Add each tweet
             tweets.forEach(function (tweet) {
                 //Render the tweet using the template and append
+
+                tweet.sentiment_str = sentiment.from_number(Number(tweet.sentiment));
 
                 var tweetUI = $(TWEET_TEMPLATE(tweet));
 

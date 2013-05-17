@@ -4,18 +4,38 @@
 }
 
 .tweet-list .tweet .username {
-	font-size: 11px;
+    float: left;
+	font-size: 12px;
+    margin-right: 10px;
+}
+
+.tweet-list .subtle-link {
+    color: #81ACBD;
+}
+
+.tweet-list .tweet .body {
+    clear: both;
+    overflow: hidden;
+    position: relative;
+}
+
+.tweet-list .tweet .indicator {
+    position: absolute;
+    left: 2px;
+    width: 4px;
+    top: 3px;
+    bottom: 3px;
 }
 
 .tweet-list .tweet .tweet_text {
-	width: 80%;
-	float: left;
+    margin-left: 12px;
+    margin-top: 3px;
+    margin: 3px 12px;
 }
 
 .tweet-list .tweet .tweet_count {
-	width: 20%;
-	float: left;
-	text-align: right;
+	float: right;
+    margin-left: 10px;
 }
 
 .tweet-list .tweet.highlight,
@@ -24,28 +44,27 @@
 }
 
 .tweet-list .tweet .twitter-link {
-    position: absolute;
-    top: 6px;
-    right: 6px;
-    height: 24px;
-    line-height: 24px;
-}
-
-.tweet-list .tweet .twitter-link {
+    line-height: 18px;
     opacity: 0.2;
-    color: transparent;
+    float: right;
 }
 
-.tweet-list .tweet:hover .twitter-link {
+.tweet-list .tweet .twitter-link span {
+    opacity: 0;
+}
+
+.tweet-list .tweet:hover .twitter-link,
+.tweet-list .tweet:hover .twitter-link span{
     opacity: 1;
-    color: #eee;
 }
 
 .tweet-list .tweet .twitter-icon-light {
     background: url('img/twitter-bird-dark-bgs.png');
-    width: 24px;
-    height: 24px;
-    vertical-align: top;
+    background-position: center;
+    background-size: 24px 24px;
+
+    width: 18px;
+    height: 18px;
+    vertical-align: bottom;
     display: inline-block;
-    background-size: cover;
 }
