@@ -559,6 +559,7 @@ class Queries
         $stop_datetime = $binder->param('to', $stop_datetime);
         $min_rt = $binder->param('min_rt', $min_rt, PDO::PARAM_INT);
         $is_rt = $binder->param('rt', $is_rt, PDO::PARAM_BOOL);
+        $user_id = $binder->param('user_id', $user_id, PDO::PARAM_INT);
         $sentiment = $binder->param('sentiment', $sentiment);
         if ($text_search) {
             $text_search = "%$text_search%";
@@ -569,6 +570,7 @@ class Queries
         $subquery->where_retweet_count_over($min_rt);
         $subquery->where_text_like($text_search);
         $subquery->where_is_retweet_is($is_rt);
+        $subquery->where_user_is($user_id);
         $subquery->where_sentiment_is($sentiment);
 
         $builder = new Builder('users');

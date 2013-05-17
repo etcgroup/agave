@@ -127,9 +127,14 @@ define(['jquery', 'underscore', 'util/events', 'model/query'], function ($, _, e
         data.author = $.trim(this.ui.author_input.val()) || null;
 
         //Correct the author string
-        if (data.author && data.author[0] != '@') {
-            data.author = '@' + data.author;
-            this.ui.author_input.val(data.author);
+        if (data.author) {
+            if (data.author[0] != '@') {
+                data.author = '@' + data.author;
+                this.ui.author_input.val(data.author);
+            } else if (data.author == '@') {
+                data.author = '';
+                this.ui.author_input.val(data.author);
+            }
         }
 
         //Get whether or not to show retweets
@@ -160,8 +165,8 @@ define(['jquery', 'underscore', 'util/events', 'model/query'], function ($, _, e
         var author = this.model.author();
         if (author && author[0] != '@') {
             author = '@' + author;
-            this.ui.author_input.val(author);
         }
+        this.ui.author_input.val(author);
 
         //Set the retweets checkbox
         this.ui.rt_checkbox.prop('checked', this.model.rt());
