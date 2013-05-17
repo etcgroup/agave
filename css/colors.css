@@ -6,10 +6,6 @@
   stroke-width: 1.5px;
   stroke: steelblue;
   fill: none;
-  -webkit-transition: stroke 200ms, stroke-width 200ms;
-  -moz-transition: stroke 200ms, stroke-width 200ms;
-  -o-transition: stroke 200ms, stroke-width 200ms;
-  transition: stroke 200ms, stroke-width 200ms;
 }
 .sentiment-combined {
   /* no stroke for areas */

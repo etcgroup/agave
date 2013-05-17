@@ -1,14 +1,16 @@
 @import url(lib/bootstrap.css);
 @import url(navbar.css);
 @import url(layout.css);
+@import url(tabs.css);
 @import url(timeline.css);
+@import url(timeline_controls.css);
+@import url(annotation.css);
 @import url(colors.css);
 @import url(query.css);
 @import url(itemlists.css);
 @import url(discussions.css);
 @import url(tweetlist.css);
 @import url(keywordlist.css);
-@import url(tabs.css);
 @import url(userlist.css);
 
 .no-select {
@@ -22,4 +24,16 @@
 
 .spinner > div > div {
     background: #FFF;
+}
+
+.details-left > div,
+.details-right > div {
+    border: 2px solid transparent;
+    border-radius: 4px;
+}
+
+.details-left.highlight > div,
+.details-right.highlight > div {
+    border-color: rgba(102, 102, 102, 0.20);
+    box-shadow: inset 0 0 4px rgba(102, 102, 102, 0.20);
 }

@@ -25,13 +25,13 @@
                     </div>
 
                     <div class="details row">
-                        <div class="details-left col">
+                        <div class="details-left col" data-query-index='0'>
                             <div class="padding-right-half">
                                 <?php echo query_box('Series 1') ?>
                                 <?php echo details_tabs(1); ?>
                             </div>
                         </div>
-                        <div class="details-right col">
+                        <div class="details-right col" data-query-index='1'>
                             <div class="padding-left-half">
                                 <?php echo query_box('Series 2') ?>
                                 <?php echo details_tabs(2); ?>

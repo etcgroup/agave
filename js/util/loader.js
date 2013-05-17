@@ -44,7 +44,7 @@ define(['jquery', 'underscore', 'lib/spin', 'lib/bootstrap'], function ($, _, Sp
                 if ($.support.transition) {
                     $el.off($.support.transition.end);
                 }
-                
+
                 //start invisible and fade in/out
                 $el.addClass('fade');
 

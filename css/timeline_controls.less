@@ -1,0 +1,109 @@
+@import-once 'lib/mixins';
+
+
+.legend {
+    float: right;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    width: 33%;
+}
+.legend > li {
+    float: left;
+    padding: 8px 8px;
+    color: #ccc;
+
+    width: 25%;
+    .box-sizing(border-box);
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.legend .legend-swatch {
+    width: 13px;
+    height: 13px;
+    display: inline-block;
+    border: 1px solid rgba(170, 170, 170, 0.33);
+    vertical-align: top;
+}
+
+
+.annotations-checkbox {
+
+    display: inline-block;
+    vertical-align: middle;
+
+    margin: 0;
+    padding: 0 0 0 22px;
+
+    color: #eeca4b;
+
+    position: absolute;
+    z-index: 10000;
+    right: 4px;
+    top: 30px;
+
+    @checkboxColor: #222;
+    text-shadow: 1px 1px 6px fade(@checkboxColor, 50%);
+    background: fade(@checkboxColor, 50%);
+    .box-shadow(0 2px 4px fade(@checkboxColor, 50%));
+
+    .opacity(40);
+
+    &:hover {
+        .opacity(100);
+    }
+}
+
+
+/* Mode switch button styles */
+.mode-switch-buttons {
+    float:left;
+    width: 50%;
+
+    > li {
+        width: 20%;
+        overflow: hidden;
+        white-space: nowrap;
+
+        > a {
+            padding: 2px 10px 2px 4px;
+
+            .display-icon {
+                background-repeat: no-repeat;
+                width: 26px;
+                height: 17px;
+                display: inline-block;
+                line-height: 20px;
+                vertical-align: text-bottom;
+                margin-right: 3px;
+
+                .opacity(50);
+
+                &.display-simple {
+                    background-image: url("img/display_simple.png");
+                }
+                &.display-stack {
+                    background-image: url("img/display_stack.png");
+                }
+                &.display-expand {
+                    background-image: url("img/display_expand.png");
+                }
+            }
+
+            &:hover {
+                .display-icon {
+                    .opacity(100);
+                }
+            }
+        }
+
+        &.active > a {
+            .display-icon {
+                .opacity(100);
+            }
+        }
+    }
+}

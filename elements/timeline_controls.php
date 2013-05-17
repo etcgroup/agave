@@ -4,30 +4,32 @@ function timeline_controls()
 {
     ob_start();
     ?>
-    Display:
-    <div class="btn-group mode-switch-button-group">
-        <button type="button" class="btn dropdown-toggle mode-switch-button" data-toggle="dropdown">
-            <span class="dropdown-label"></span>
-            <span class="caret"></span>
-        </button>
-        <ul class="dropdown-menu" role="menu">
-            <li><a tabindex="-1" href="#" class="select" data-mode="simple" data-focus=""><i class="display-icon display-simple"></i> Overlay Both</a></li>
-            <li class="divider"></li>
-            <li><a tabindex="-1" href="#" class="select" data-mode="stack" data-focus="0"><i class="display-icon display-stack"></i> Sentiment Layers 1</a></li>
-            <li><a tabindex="-1" href="#" class="select" data-mode="stack" data-focus="1"><i class="display-icon display-stack blank"></i> Sentiment Layers 2</a></li>
-            <li class="divider"></li>
-            <li><a tabindex="-1" href="#" class="select" data-mode="expand" data-focus="0"><i class="display-icon display-expand"></i> Normalized Layers 1</a></li>
-            <li><a tabindex="-1" href="#" class="select" data-mode="expand" data-focus="1"><i class="display-icon display-expand blank"></i> Normalized Layers 2</a></li>
-        </ul>
-    </div>
+    <ul class="nav nav-pills mode-switch-buttons">
+        <li class="active" data-mode="simple" data-focus="">
+            <a href="#"><i class="display-icon display-simple"></i> Both</a>
+        </li>
+
+        <li data-mode="stack" data-focus="1">
+            <a href="#"><i class="display-icon display-stack"></i> Left Stack</a>
+        </li>
+        <li data-mode="stack" data-focus="2">
+            <a href="#"><i class="display-icon display-stack"></i> Right Stack</a>
+        </li>
+
+        <li data-mode="expand" data-focus="1">
+            <a href="#"><i class="display-icon display-expand"></i> Left Fill</a>
+        </li>
+        <li data-mode="expand" data-focus="2">
+            <a href="#"><i class="display-icon display-expand"></i> Right Fill</a>
+        </li>
+    </ul>
+
     <label class="checkbox annotations-checkbox">
         <input type="checkbox" class="annotations-toggle"/>
-        Annotations
+        Show/Hide Annotations
     </label>
+
     <ul class="legend">
-        <li>
-            Sentiment Key
-        </li>
         <li>
             <div class="legend-swatch sentiment-combined"></div>
             Combined

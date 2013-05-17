@@ -4,7 +4,7 @@ function query_box($name)
 {
     ob_start();
     ?>
-    <form class="query form-inline">
+    <form class="query form-inline row">
 <!--        <label>--><?php //echo $name ?><!--</label>-->
         <i class="icon-search icon-white"></i>
         <input class="query-search" type="search" placeholder="Search tweet text"/>

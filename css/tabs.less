@@ -1,0 +1,40 @@
+@import-once "lib/mixins";
+
+.nav-pills {
+    margin: 0;
+    border: none;
+
+    > li {
+
+        > a {
+            padding: 2px 12px;
+
+            line-height: 18px;
+
+            border: 1px solid rgba(255, 255, 255, 0.05);
+
+            cursor: pointer;
+
+            color: #888;
+
+            &:hover, &:focus {
+                text-decoration: none;
+                background: rgba(255, 255, 255, 0.05);
+                color: #eee;
+                border-color: rgba(255, 255, 255, 0.2);
+            }
+        }
+
+        &.active {
+
+            > a,
+            > a:hover,
+            > a:focus {
+                color: #eee;
+                cursor: default;
+                background: rgba(255, 255, 255, 0.1);
+                border-color: rgba(255, 255, 255, 0.2);
+            }
+        }
+    }
+}

@@ -1,0 +1,89 @@
+.legend {
+  float: right;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  width: 33%;
+}
+.legend > li {
+  float: left;
+  padding: 8px 8px;
+  color: #ccc;
+  width: 25%;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.legend .legend-swatch {
+  width: 13px;
+  height: 13px;
+  display: inline-block;
+  border: 1px solid rgba(170, 170, 170, 0.33);
+  vertical-align: top;
+}
+.annotations-checkbox {
+  display: inline-block;
+  vertical-align: middle;
+  margin: 0;
+  padding: 0 0 0 22px;
+  color: #eeca4b;
+  position: absolute;
+  z-index: 10000;
+  right: 4px;
+  top: 30px;
+  text-shadow: 1px 1px 6px rgba(34, 34, 34, 0.5);
+  background: rgba(34, 34, 34, 0.5);
+  -webkit-box-shadow: 0 2px 4px rgba(34, 34, 34, 0.5);
+  -moz-box-shadow: 0 2px 4px rgba(34, 34, 34, 0.5);
+  box-shadow: 0 2px 4px rgba(34, 34, 34, 0.5);
+  opacity: 0.4;
+  filter: alpha(opacity=40);
+}
+.annotations-checkbox:hover {
+  opacity: 1;
+  filter: alpha(opacity=100);
+}
+/* Mode switch button styles */
+.mode-switch-buttons {
+  float: left;
+  width: 50%;
+}
+.mode-switch-buttons > li {
+  width: 20%;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.mode-switch-buttons > li > a {
+  padding: 2px 10px 2px 4px;
+}
+.mode-switch-buttons > li > a .display-icon {
+  background-repeat: no-repeat;
+  width: 26px;
+  height: 17px;
+  display: inline-block;
+  line-height: 20px;
+  vertical-align: text-bottom;
+  margin-right: 3px;
+  opacity: 0.5;
+  filter: alpha(opacity=50);
+}
+.mode-switch-buttons > li > a .display-icon.display-simple {
+  background-image: url("img/display_simple.png");
+}
+.mode-switch-buttons > li > a .display-icon.display-stack {
+  background-image: url("img/display_stack.png");
+}
+.mode-switch-buttons > li > a .display-icon.display-expand {
+  background-image: url("img/display_expand.png");
+}
+.mode-switch-buttons > li > a:hover .display-icon {
+  opacity: 1;
+  filter: alpha(opacity=100);
+}
+.mode-switch-buttons > li.active > a .display-icon {
+  opacity: 1;
+  filter: alpha(opacity=100);
+}

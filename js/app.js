@@ -99,7 +99,9 @@ define(function (require) {
 
         this.timelineControls = new TimelineControls({
             model: this.display,
-            into: this.ui.timelineControls
+            into: this.ui.timelineControls,
+            api: this.api,
+            queries: this.queries
         });
     };
 
@@ -202,6 +204,22 @@ define(function (require) {
                 root: $(tabGroup)
             });
         });
+
+        //Add listeners for the mouse entering one of the two details panels
+        this.ui.detailsHalves = this.ui.detailsPanel.find('.details-left,.details-right');
+
+        this.ui.detailsHalves
+            .on('mouseenter', function(e) {
+                var queryId = $(this).data('query-index');
+                self.onQueryHovered(queryId, true);
+            })
+            .on('mouseleave', function(e) {
+                var queryId = $(this).data('query-index');
+                self.onQueryHovered(queryId, false);
+            });
+
+        this.api.on('brush', $.proxy(this.onBrush, this));
+        this.api.on('unbrush', $.proxy(this.onUnBrush, this));
     };
 
     /**
@@ -441,6 +459,42 @@ define(function (require) {
         });
 
         functions.release_changes();
+    };
+
+    App.prototype.onQueryHovered = function(index, hoverOn) {
+        var event = 'brush';
+        if (!hoverOn) {
+            event = 'unbrush';
+        }
+
+        this.api.trigger(event, [{
+            type: 'query',
+            id: this.queries[index].id()
+        }]);
+    };
+
+    App.prototype.onBrush = function(e, brushed) {
+        var self = this;
+        _.each(brushed, function (item) {
+            if (item.type != 'query') {
+                return;
+            }
+
+            var half = self.ui.detailsHalves[item.id];
+            $(half).addClass('highlight');
+        });
+    };
+
+    App.prototype.onUnBrush = function(e, brushed) {
+        var self = this;
+        _.each(brushed, function (item) {
+            if (item.type != 'query') {
+                return;
+            }
+
+            var half = self.ui.detailsHalves[item.id];
+            $(half).removeClass('highlight');
+        });
     };
 
     return App;

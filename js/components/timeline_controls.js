@@ -14,6 +14,10 @@ define(['jquery', 'underscore', 'util/events', 'model/display'], function ($, _,
      */
     var TimelineControls = function (options) {
 
+        this.api = options.api;
+
+        this.queries = options.queries;
+
         this.model = options.model || new Display();
         this.into = options.into || $('<div>');
 
@@ -34,10 +38,8 @@ define(['jquery', 'underscore', 'util/events', 'model/display'], function ($, _,
     TimelineControls.prototype._initUI = function () {
         this.ui = {};
 
-        this.ui.view_button_group = this.into.find('.mode-switch-button-group');
-        this.ui.view_button_label = this.ui.view_button_group.find('.dropdown-label');
-        this.ui.view_buttons = this.ui.view_button_group.find('.select');
-        this.ui.view_button_menu = this.ui.view_button_group.find('.dropdown-menu');
+        this.ui.view_button_group = this.into.find('.mode-switch-buttons');
+        this.ui.view_buttons = this.ui.view_button_group.find('li');
 
         this.ui.annotations_toggle = this.into.find('.annotations-toggle');
     };
@@ -52,9 +54,27 @@ define(['jquery', 'underscore', 'util/events', 'model/display'], function ($, _,
         this.ui.view_buttons.on('click', function(e) {
             e.preventDefault();
             self._viewButtonClicked($(this));
-            self.ui.view_button_menu.dropdown('toggle');
             return false;
         });
+        this.ui.view_buttons.on('mouseenter', function(e) {
+            var focus = $(this).data('focus');
+            if (focus) {
+                self.api.trigger('brush', [{
+                    type: 'query',
+                    id: self.queries[focus - 1].id()
+                }]);
+            }
+        });
+        this.ui.view_buttons.on('mouseleave', function(e) {
+            var focus = $(this).data('focus');
+            if (focus) {
+                self.api.trigger('unbrush', [{
+                    type: 'query',
+                    id: self.queries[focus - 1].id()
+                }]);
+            }
+        });
+
         this.ui.annotations_toggle.on('change', $.proxy(this._annotationToggled, this));
 
         this.model.on('change', $.proxy(this._fillForm, this));
@@ -70,6 +90,11 @@ define(['jquery', 'underscore', 'util/events', 'model/display'], function ($, _,
         //Get the mode of the active mode button
         var mode = clicked.data('mode');
         var focus = clicked.data('focus');
+
+        if (focus) {
+            //Convert back into proper focus values
+            focus = focus - 1;
+        }
 
         //Save on the model
         this.model.set({
@@ -88,8 +113,6 @@ define(['jquery', 'underscore', 'util/events', 'model/display'], function ($, _,
     TimelineControls.prototype._updateViewButton = function(clicked) {
         this.ui.view_buttons.removeClass('active');
         clicked.addClass('active');
-
-        this.ui.view_button_label.html(clicked.html());
     };
 
     /**
@@ -114,6 +137,11 @@ define(['jquery', 'underscore', 'util/events', 'model/display'], function ($, _,
 
         //If focus is null, make it an empty string
         focus = focus === null ? '' : focus;
+
+        //Adjust the focus by one - we don't use 0 in the html
+        if (focus !== '') {
+            focus = focus + 1;
+        }
 
         var selector = '[data-mode=' + this.model.mode() + '][data-focus=' + focus + ']';
 

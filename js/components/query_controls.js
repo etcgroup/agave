@@ -54,26 +54,9 @@ define(['jquery', 'underscore', 'util/events', 'model/query'], function ($, _, e
     QueryControls.prototype._initEvents = function () {
         this.model.on('change', $.proxy(this._fillForm, this));
 
-//        this.ui.update_button.on('click', $.proxy(this._updateClicked, this));
-
         this.ui.form.find('input,select').on('change', $.proxy(this._updateClicked, this));
 
         this.ui.form.on('submit', $.proxy(this._formSubmitted, this));
-
-        var self = this;
-        this.ui.form.on('mouseenter', function() {
-            self.api.trigger('brush', [{
-                type: 'query',
-                id: self.model.id()
-            }]);
-        });
-
-        this.ui.form.on('mouseleave', function() {
-            self.api.trigger('unbrush', [{
-                type: 'query',
-                id: self.model.id()
-            }]);
-        });
     };
 
     /**

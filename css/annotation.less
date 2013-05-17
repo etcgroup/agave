@@ -1,0 +1,40 @@
+@import-once 'lib/mixins';
+
+.annotation-controls rect {
+    stroke: orange;
+    stroke-width: 2px;
+    fill: none;
+
+    pointer-events: all;
+}
+
+.annotation-controls text {
+    fill: #FFF;
+    font-size: 11px;
+}
+
+.annotation-controls line {
+    stroke: yellow;
+    shape-rendering: crispEdges;
+}
+
+.annotations rect {
+    fill: yellow;
+    stroke: transparent;
+    stroke-width: 4px;
+    shape-rendering: crispEdges;
+    .opacity(50);
+    pointer-events: all;
+}
+
+.reference-mode .annotations rect {
+    cursor: pointer;
+    .opacity(90);
+}
+
+.annotations .highlight,
+.annotations rect:hover {
+    fill: orange;
+    stroke: orange;
+}
+

@@ -123,20 +123,20 @@ body {
  */
 .timeline-controls.row {
     top: 0;
-    height: 30px;
+    height: 32px;
     /*min-height: 70px;*/
     overflow: visible; /* show the overflow, for the dropdown menu */
 }
 .tweet-timeline-panel.row {
-    top: 30px;
+    top: 32px;
     height: 200px;
 }
 .tweet-overview-panel.row {
-    top: 230px;
+    top: 232px;
     height: 60px;
 }
 .details.row {
-    top: 290px;
+    top: 292px;
     bottom: 0;
 }
 
@@ -157,8 +157,12 @@ body {
 /*
  * These are the detail panel contents
  */
+.details .query.row {
+    top: 5px;
+    height: 26px;
+}
 .details .tab-group.row {
-    top: 36px;
+    top: 40px;
     bottom: 5px;
     left: 5px;
     right: 5px;
@@ -169,7 +173,7 @@ body {
     height: 28px; /* the natural height of the nav tabs */
 }
 .details .tab-content.row {
-    top: 33px; /* the natural height of the nav tabs */
+    top: 31px; /* the natural height of the nav tabs */
     bottom: 0;
 }
 .details .tab-content .tab-pane {
