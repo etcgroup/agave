@@ -7,7 +7,7 @@
     padding: 0;
     margin: 0;
 
-    width: 33%;
+    width: 43%;
 }
 .legend > li {
     float: left;
@@ -29,39 +29,45 @@
     vertical-align: top;
 }
 
-
-.annotations-checkbox {
-
-    display: inline-block;
-    vertical-align: middle;
-
-    margin: 0;
-    padding: 0 0 0 22px;
+.annotation-help {
+    position: absolute;
+    z-index: 10000;
+    right: 15px;
+    top: 28px;
 
     color: #eeca4b;
 
-    position: absolute;
-    z-index: 10000;
-    right: 4px;
-    top: 30px;
+    text-shadow: 1px 1px 6px fade(#222, 50%);
 
-    @checkboxColor: #222;
-    text-shadow: 1px 1px 6px fade(@checkboxColor, 50%);
-    background: fade(@checkboxColor, 50%);
-    .box-shadow(0 2px 4px fade(@checkboxColor, 50%));
+    .add-help {
+        margin-left: 15px;
+        .opacity(80);
+    }
 
-    .opacity(40);
+    .annotations-checkbox {
 
-    &:hover {
-        .opacity(100);
+        display: inline-block;
+        vertical-align: top;
+
+        margin: 0;
+        padding: 0 0 0 20px;
+
+        .annotations-toggle {
+            margin-top: 1px;
+        }
+
+        .opacity(40);
+
+        &:hover {
+            .opacity(100);
+        }
     }
 }
-
 
 /* Mode switch button styles */
 .mode-switch-buttons {
     float:left;
-    width: 50%;
+    width: 57%;
 
     > li {
         width: 20%;

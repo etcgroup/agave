@@ -3,7 +3,7 @@
   list-style: none;
   padding: 0;
   margin: 0;
-  width: 33%;
+  width: 43%;
 }
 .legend > li {
   float: left;
@@ -24,32 +24,38 @@
   border: 1px solid rgba(170, 170, 170, 0.33);
   vertical-align: top;
 }
-.annotations-checkbox {
-  display: inline-block;
-  vertical-align: middle;
-  margin: 0;
-  padding: 0 0 0 22px;
-  color: #eeca4b;
+.annotation-help {
   position: absolute;
   z-index: 10000;
-  right: 4px;
-  top: 30px;
+  right: 15px;
+  top: 28px;
+  color: #eeca4b;
   text-shadow: 1px 1px 6px rgba(34, 34, 34, 0.5);
-  background: rgba(34, 34, 34, 0.5);
-  -webkit-box-shadow: 0 2px 4px rgba(34, 34, 34, 0.5);
-  -moz-box-shadow: 0 2px 4px rgba(34, 34, 34, 0.5);
-  box-shadow: 0 2px 4px rgba(34, 34, 34, 0.5);
+}
+.annotation-help .add-help {
+  margin-left: 15px;
+  opacity: 0.8;
+  filter: alpha(opacity=80);
+}
+.annotation-help .annotations-checkbox {
+  display: inline-block;
+  vertical-align: top;
+  margin: 0;
+  padding: 0 0 0 20px;
   opacity: 0.4;
   filter: alpha(opacity=40);
 }
-.annotations-checkbox:hover {
+.annotation-help .annotations-checkbox .annotations-toggle {
+  margin-top: 1px;
+}
+.annotation-help .annotations-checkbox:hover {
   opacity: 1;
   filter: alpha(opacity=100);
 }
 /* Mode switch button styles */
 .mode-switch-buttons {
   float: left;
-  width: 50%;
+  width: 57%;
 }
 .mode-switch-buttons > li {
   width: 20%;
