@@ -31,6 +31,9 @@
   stroke: #ddf4e0;
   stroke-width: 2.5px;
 }
+.legend-swatch.sentiment-combined {
+  background-color: #44c151;
+}
 .sentiment-positive {
   /* no stroke for areas */
 
@@ -50,6 +53,9 @@
 .bold.sentiment-positive {
   stroke: #baf3fe;
   stroke-width: 2.5px;
+}
+.legend-swatch.sentiment-positive {
+  background-color: #05c5e7;
 }
 .sentiment-neutral {
   /* no stroke for areas */
@@ -71,6 +77,9 @@
   stroke: #dddddd;
   stroke-width: 2.5px;
 }
+.legend-swatch.sentiment-neutral {
+  background-color: #444444;
+}
 .sentiment-negative {
   /* no stroke for areas */
 
@@ -90,4 +99,7 @@
 .bold.sentiment-negative {
   stroke: #ffeff2;
   stroke-width: 2.5px;
+}
+.legend-swatch.sentiment-negative {
+  background-color: #f9294a;
 }

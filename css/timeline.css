@@ -85,3 +85,21 @@ text.silly-message {
   fill: orange;
   stroke: orange;
 }
+.legend {
+  float: right;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.legend > li {
+  float: left;
+  padding: 3px 6px;
+  color: #ccc;
+}
+.legend .legend-swatch {
+  width: 13px;
+  height: 13px;
+  display: inline-block;
+  border: 1px solid rgba(170, 170, 170, 0.33);
+  vertical-align: top;
+}
