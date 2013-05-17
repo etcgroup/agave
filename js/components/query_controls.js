@@ -41,7 +41,7 @@ define(['jquery', 'underscore', 'util/events', 'model/query'], function ($, _, e
         this.ui.search_input = this.into.find('.query-search');
         this.ui.author_input = this.into.find('.query-author');
         this.ui.rt_checkbox = this.into.find('.query-rt');
-        this.ui.min_rt_input = this.into.find('.query-minrt');
+//        this.ui.min_rt_input = this.into.find('.query-minrt');
         this.ui.sentiment_select = this.into.find('.query-sentiment');
         this.ui.update_button = this.into.find('.query-update');
     };
@@ -136,11 +136,11 @@ define(['jquery', 'underscore', 'util/events', 'model/query'], function ($, _, e
         data.rt = this.ui.rt_checkbox.is(':checked');
 
         //Get the minimum RT count (validate first)
-        data.min_rt = Number(this.ui.min_rt_input.val());
+//        data.min_rt = Number(this.ui.min_rt_input.val());
 
         //Get the selected sentiment filter, with validation
         data.sentiment = this.ui.sentiment_select.val();
-        data.sentiment = data.sentiment ? Number(data.sentiment) : null;
+//        data.sentiment = data.sentiment ? Number(data.sentiment) : null;
 
 
         return this.model.set(data);
@@ -167,7 +167,7 @@ define(['jquery', 'underscore', 'util/events', 'model/query'], function ($, _, e
         this.ui.rt_checkbox.prop('checked', this.model.rt());
 
         //Set the min retweets filter
-        this.ui.min_rt_input.val(this.model.min_rt());
+//        this.ui.min_rt_input.val(this.model.min_rt());
 
         this.ui.sentiment_select.val(this.model.sentiment());
     };

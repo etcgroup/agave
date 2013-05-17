@@ -175,7 +175,7 @@ define(['lib/d3', 'underscore',
 
                 this._updateScales();
 
-                this._updateTargetSize();
+                this._updateTarget();
             },
 
             /**
@@ -196,7 +196,7 @@ define(['lib/d3', 'underscore',
              * Given some stacked data, bind it to the paths
              * and redraw the areas.
              */
-            _updatePath: function() {
+            _updatePath: function(animate) {
                 //Only update if we have data ready
                 if (!this._stacked_data) {
                     return;
@@ -209,12 +209,21 @@ define(['lib/d3', 'underscore',
                 //Add any needed paths
                 bind.enter()
                 .append('path');
-                //.classed('area', true);
+
+                //Remove any unneeded paths
+                bind.exit()
+                    .remove('path');
 
                 //Update the path based on the data
-                bind.attr('d', this._buildArea)
-                .attr('class', this._colorValue);
+                if (animate) {
+                    bind.transition()
+                        .attr('d', this._buildArea);
+                } else {
+                    bind.attr('d', this._buildArea);
+                }
 
+                bind.attr('class', this._colorValue)
+                    .classed('area', true);
             },
 
             /**

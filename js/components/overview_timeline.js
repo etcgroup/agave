@@ -105,14 +105,19 @@ define(['jquery',
             //Call the parent render
             Timeline.prototype.render.call(this);
 
+            //Add a muted class to the histogram
+            this._histogram
+                .className('histogram muted')
+                .seriesClass('sentiment-combined');
+
             this._renderBrush();
         };
 
         /**
          * Update the brush on update.
          */
-        OverviewTimeline.prototype.update = function() {
-            Timeline.prototype.update.call(this);
+        OverviewTimeline.prototype.update = function(animate) {
+            Timeline.prototype.update.call(this, animate);
 
             //In addition, update the brush
             this._updateBrush();
@@ -122,7 +127,7 @@ define(['jquery',
          * Override the update histogram method slightly.
          * @private
          */
-        OverviewTimeline.prototype._updateHistogram = function() {
+        OverviewTimeline.prototype._updateHistogram = function(animate) {
 
             //Auto-scale the y axis
             var data = this._histogram.data();
@@ -131,7 +136,7 @@ define(['jquery',
             }
 
             //Call the default update method now
-            Timeline.prototype._updateHistogram.call(this);
+            Timeline.prototype._updateHistogram.call(this, animate);
         };
 
         /**

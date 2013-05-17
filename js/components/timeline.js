@@ -125,14 +125,14 @@ define(['jquery',
     /**
      * Update the timeline. Only should be called after render.
      */
-    Timeline.prototype.update = function () {
+    Timeline.prototype.update = function (animate) {
         this._buildBoxes();
         this._updateTimeScaleRange();
 
         this._updateTarget();
 
         this._updateTimeAxis();
-        this._updateHistogram();
+        this._updateHistogram(animate);
 
         this.ui.chartGroup
             .call(this.boxes.inner);
@@ -210,7 +210,7 @@ define(['jquery',
             .interpolate(this._interpolation)
             .render();
 
-        this._updateHistogram();
+        this._updateHistogram(false);
     };
 
     Timeline.prototype._renderTimeAxis = function () {
@@ -278,7 +278,7 @@ define(['jquery',
      */
     Timeline.prototype._onData = function (e, result) {
         //Update the timeline
-        this._updateHistogram();
+        this._updateHistogram(true);
         this._updateTimeAxis();
     };
 
@@ -286,8 +286,8 @@ define(['jquery',
      * Update the histogram.
      * @private
      */
-    Timeline.prototype._updateHistogram = function () {
-        this._histogram.update();
+    Timeline.prototype._updateHistogram = function (animate) {
+        this._histogram.update(animate);
     };
 
     /**

@@ -17,13 +17,13 @@ function details_tabs($index)
         </ul>
 
         <div class="tab-content row content-panel">
-            <div class="tab-pane active tweet-list" id="<?php echo $tweetListId ?>">
+            <div class="tab-pane fade in active tweet-list" id="<?php echo $tweetListId ?>">
                 <div class="tab-pane-body row col scroll-y"></div>
             </div>
-            <div class="tab-pane users-list" id="<?php echo $usersListId ?>">
+            <div class="tab-pane fade users-list" id="<?php echo $usersListId ?>">
                 <div class="tab-pane-body row col scroll-y"></div>
             </div>
-            <div class="tab-pane keywords-list" id="<?php echo $keywordsListId ?>">
+            <div class="tab-pane fade keywords-list" id="<?php echo $keywordsListId ?>">
                 <div class="tab-pane-body row col scroll-y"></div>
             </div>
         </div>

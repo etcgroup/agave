@@ -17,8 +17,8 @@ define(['jquery',
         );
 
         //Color defaults
-        var COLOR_DOMAIN = [-1, 0, 1];
-        var COLOR_RANGE = ["negative", "neutral", "positive"];
+        var COLOR_DOMAIN = [-1, 0, 1, ''];
+        var COLOR_RANGE = ["sentiment-negative", "sentiment-neutral", "sentiment-positive", "sentiment-combined"];
 
         var VALID_MODES = ['simple', 'stack', 'expand'];
 
@@ -36,6 +36,9 @@ define(['jquery',
 
             this.user = options.user;
             this.display = options.display;
+
+            //For storing query info about the currently loaded data
+            this._loadedQueries = {};
 
             //Call the parent constructor
             Timeline.call(this, options);
@@ -272,10 +275,10 @@ define(['jquery',
         /**
          * Update the focus timeline. Overrides the parent's update method.
          */
-        FocusTimeline.prototype.update = function () {
+        FocusTimeline.prototype.update = function (animate) {
             this._updateCountScale();
 
-            Timeline.prototype.update.call(this);
+            Timeline.prototype.update.call(this, animate);
 
             this._updateCountAxis();
             this._updateAnnotations();
@@ -375,7 +378,8 @@ define(['jquery',
                 //Use a Histogram to draw the timeline
                 var histogram = new Histogram();
                 histogram
-                    .className('focus histogram id-' + query.id())
+                    .line(true)
+                    .className('focus histogram fade id-' + query.id())
                     .container(self.ui.svg)
                     .box(self.boxes.inner)
                     .xData(self._timeAccessor)
@@ -389,7 +393,7 @@ define(['jquery',
                 //We also need a StackHistogram to draw the layered versions
                 var stackHistogram = new StackHistogram();
                 stackHistogram
-                    .className('focus stack-histogram id-' + query.id())
+                    .className('focus histogram fade stack-histogram id-' + query.id())
                     .container(self.ui.svg)
                     .box(self.boxes.inner)
                     .xData(self._timeAccessor)
@@ -401,8 +405,6 @@ define(['jquery',
 
                 self._stackHistograms.push(stackHistogram);
             });
-
-            this._updateHistogram();
         };
 
         /**
@@ -417,33 +419,49 @@ define(['jquery',
         /**
          * And replace the histogram update code.
          */
-        FocusTimeline.prototype._updateHistogram = function () {
+        FocusTimeline.prototype._updateHistogram = function (animate) {
             //Update each histogram
             var mode = this.display.mode();
-
-            this._histograms.forEach(function (histogram) {
-                if (mode !== 'simple') {
-                    histogram.hide();
-                } else {
-                    histogram.show();
-                    histogram.update();
-                }
-            });
-
             var toExpand = mode === 'expand';
             var queryShown = this.display.focus();
-            this._stackHistograms.forEach(function (stackHistogram, index) {
-                if (mode === 'simple' || (queryShown !== null && index !== queryShown)) {
+
+            var self = this;
+            this.queries.forEach(function (query, index) {
+                var histogram = self._histograms[index];
+                var stackHistogram = self._stackHistograms[index];
+
+                var sentiment = "";
+
+                //Get the query data that was most recently received from the server (not what is stored in the query object)
+                var loaded = self._loadedQueries[index];
+                if (loaded) {
+                    sentiment = loaded.sentiment;
+                }
+                var sentimentClass = self._sentimentScale(sentiment);
+
+                if (mode === 'simple') {
+                    //Show the histogram, not the stack
                     stackHistogram.hide();
+
+                    histogram.seriesClass(sentimentClass)
+                    histogram.show();
+                    histogram.update(animate);
+
+                    self.showSillyMessage(false);
+
+                } else if (queryShown !== null && index !== queryShown) {
+                    //We're not showing this query at all
+                    stackHistogram.hide();
+                    histogram.hide();
                 } else {
+                    //Show the stack, not the histogram
+                    histogram.hide();
+
                     stackHistogram.show();
+                    stackHistogram.expand(toExpand);
+                    stackHistogram.update(animate);
 
-                    if (toExpand !== stackHistogram.expand()) {
-                        //Don't change expand unless needed, because it can be expensive
-                        stackHistogram.expand(toExpand);
-                    }
-
-                    stackHistogram.update();
+                    self.showSillyMessage(sentiment !== "" && toExpand);
                 }
             });
         };
@@ -488,10 +506,15 @@ define(['jquery',
         FocusTimeline.prototype._onData = function (e, result) {
 
             var params = result.params; //request info
-//            var data = result.data; //data
 
+            //Stop the spinner
             this.loader.stop(params.query_id);
 
+            //Save the query data so we know what we have loaded
+            //The Query model can change more rapidly
+            this._loadedQueries[params.query_id] = params;
+
+            //Compute sum data (ha)
             var countsOnly = result.data.reduce(function (prev, layer) {
                 return {
                     values: layer.values.map(function (v, i) {
@@ -506,8 +529,17 @@ define(['jquery',
             //Bind the new data
             this._histograms[params.query_id].data(countsOnly);
 
+            //If some sentiment filter is in use besides all (''), then
+            //we'll remove the zero-valued series
+            var data = result.data
+            if (params.sentiment) {
+                data = data.filter(function(layer) {
+                    return layer.id == params.sentiment;
+                });
+            }
+
             //Bind the un-transformed data
-            this._stackHistograms[params.query_id].data(result.data);
+            this._stackHistograms[params.query_id].data(data);
 
             //Store the max value on the histogram for efficiency
             this._histograms[params.query_id]._maxCount = d3.max(countsOnly, function (d) {
@@ -866,6 +898,35 @@ define(['jquery',
             this.ui.annotationControls = null;
             this.ui.annotationIndicator = null;
             this.ui.annotationTarget = null;
+        };
+
+        FocusTimeline.prototype.showSillyMessage = function(toShow) {
+            var message = this.ui.chartGroup
+                .selectAll('text.silly-message');
+
+            if (toShow) {
+                var center = this.boxes.inner.center();
+                var messageWidth = 353;
+                message
+                    .data(["Well, this is rather silly, isn't it! Please try a different display mode or remove the filter on sentiment."])
+                    .enter()
+                    .append('text')
+                    .classed('silly-message', true)
+                    .attr('x', center.x)
+                    .attr('y', center.y)
+                    .text(String)
+                    .transition()
+                    .delay(800)
+                    .duration(500)
+                    .style('opacity', 1);
+
+            } else {
+                message
+                    .transition()
+                    .duration(500)
+                    .style('opacity', 0)
+                    .remove();
+            }
         };
 
         return FocusTimeline;

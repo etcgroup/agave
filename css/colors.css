@@ -1,0 +1,85 @@
+.area {
+  stroke-width: 1px;
+  fill: steelblue;
+}
+.line {
+  stroke-width: 1.5px;
+  stroke: steelblue;
+  fill: none;
+  -webkit-transition: stroke 200ms, stroke-width 200ms;
+  -moz-transition: stroke 200ms, stroke-width 200ms;
+  -o-transition: stroke 200ms, stroke-width 200ms;
+  transition: stroke 200ms, stroke-width 200ms;
+}
+.area.sentiment-combined {
+  fill: #44c151;
+}
+.muted .area.sentiment-combined {
+  fill: #45734a;
+}
+.area.sentiment-combined,
+.line.sentiment-combined {
+  stroke: #44c151;
+}
+.muted .area.sentiment-combined,
+.muted .line.sentiment-combined {
+  stroke: #45734a;
+}
+.bold.sentiment-combined {
+  stroke: #ddf4e0;
+  stroke-width: 2.5px;
+}
+.area.sentiment-positive {
+  fill: #05c5e7;
+}
+.muted .area.sentiment-positive {
+  fill: #177788;
+}
+.area.sentiment-positive,
+.line.sentiment-positive {
+  stroke: #05c5e7;
+}
+.muted .area.sentiment-positive,
+.muted .line.sentiment-positive {
+  stroke: #177788;
+}
+.bold.sentiment-positive {
+  stroke: #baf3fe;
+  stroke-width: 2.5px;
+}
+.area.sentiment-neutral {
+  fill: #444444;
+}
+.muted .area.sentiment-neutral {
+  fill: #1e1e1e;
+}
+.area.sentiment-neutral,
+.line.sentiment-neutral {
+  stroke: #777777;
+}
+.muted .area.sentiment-neutral,
+.muted .line.sentiment-neutral {
+  stroke: #1e1e1e;
+}
+.bold.sentiment-neutral {
+  stroke: #dddddd;
+  stroke-width: 2.5px;
+}
+.area.sentiment-negative {
+  fill: #f9294a;
+}
+.muted .area.sentiment-negative {
+  fill: #b52138;
+}
+.area.sentiment-negative,
+.line.sentiment-negative {
+  stroke: #f9294a;
+}
+.muted .area.sentiment-negative,
+.muted .line.sentiment-negative {
+  stroke: #b52138;
+}
+.bold.sentiment-negative {
+  stroke: #ffeff2;
+  stroke-width: 2.5px;
+}

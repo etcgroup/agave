@@ -8,6 +8,8 @@ define(['lib/d3', 'underscore',
         var Histogram = function() {
             var self = this;
 
+            this._showing = false;
+
             //Set up a default box for the histogram
             this._box = new Rectangle({
                 top: 0,
@@ -21,6 +23,9 @@ define(['lib/d3', 'underscore',
 
             //Optional classname to add to the histogram container
             this._className = "";
+
+            //Optional class name to add to the histogram data series
+            this._seriesClass = '';
 
             //Whether or not the histogram is vertically flipped
             this._flipped = false;
@@ -49,15 +54,36 @@ define(['lib/d3', 'underscore',
 
             //The svg area generator uses the scaling functions
             this._area = d3.svg.area()
-            .x(_scaledX)
-            .y1(_scaledY);
+                .x(_scaledX)
+                .y1(_scaledY);
+
+            this._useLine = false;
+            this._line = d3.svg.line()
+                .x(_scaledX)
+                .y(_scaledY);
         };
 
         _.extend(Histogram.prototype, {
 
             bold: function(bolded) {
-                this._target.select(".area")
+                this._target.select("path")
                     .classed('bold', bolded);
+            },
+
+            line: function(useLine) {
+                if (!arguments.length) {
+                    return this._useLine;
+                }
+                this._useLine = useLine;
+                return this;
+            },
+
+            seriesClass: function(className) {
+                if (!arguments.length) {
+                    return this._seriesClass;
+                }
+                this._seriesClass = className;
+                return this;
             },
 
             /**
@@ -85,13 +111,7 @@ define(['lib/d3', 'underscore',
             _renderTarget: function() {
 
                 //Add an svg document. It is ok if this is nested inside another svg.
-                this._svg = this._container.append('svg')
-                .classed('histogram', true);
-
-                //Set the classname if one has been provided. This is useful for css styling.
-                if (this._className) {
-                    this._svg.classed(this._className, true);
-                }
+                this._svg = this._container.append('svg');
 
                 //Create a group to be the rendering target.
                 this._target = this._svg.append('g');
@@ -101,14 +121,29 @@ define(['lib/d3', 'underscore',
              * Make the histogram invisible.
              */
             hide: function() {
-                this._svg.style('display', 'none');
+                var self = this;
+                this._showing = false;
+                this._svg.classed('in', false);
+                this._showHideTimeout = setTimeout(function() {
+                    self._svg.style('display', 'none');
+                }, 500);
             },
 
             /**
              * Make the histogram visible.
              */
             show: function() {
+                this._showing = true;
+
+                if (this._showHideTimeout) {
+                    clearTimeout(this._showHideTimeout);
+                    this._showHideTimeout = null;
+                }
+
                 this._svg.style('display', 'inline');
+                //Force reflow
+                this._svg[0][0].offsetWidth;
+                this._svg.classed('in', true);
             },
 
             /**
@@ -119,7 +154,7 @@ define(['lib/d3', 'underscore',
 
                 this._updateScales();
 
-                this._updateTargetSize();
+                this._updateTarget();
 
                 this._renderPath();
             },
@@ -127,38 +162,60 @@ define(['lib/d3', 'underscore',
             /**
              * Update the histogram.
              */
-            update: function() {
+            update: function(animate) {
+                if (animate === undefined) {
+                    animate = true;
+                }
+
                 this._updateScales();
-                this._updateTargetSize();
-                this._updatePath();
+                this._updateTarget();
+                this._updatePath(animate);
             },
 
             /**
              * Update the size of the target, if the box size has changed.
              */
-            _updateTargetSize: function() {
+            _updateTarget: function() {
                 this._svg.call(this._box);
+
+                this._svg.attr('class', this._className, true);
+                this._svg.classed('in', this._showing);
             },
 
             /**
              * Add the path element for rendering the area.
              */
             _renderPath: function() {
-                this._target.append("path")
-                .classed('area', true);
+                var path = this._target.append("path");
 
-                this._updatePath();
+                this._updatePath(false);
             },
 
             /**
              * Update the path using the area generator.
              */
-            _updatePath: function() {
+            _updatePath: function(animate) {
+                var path = this._target.select("path");
+                path.attr('class', this._seriesClass);
+
+                var generator = this._area;
+                var classToSet = 'area';
+                if (this._useLine) {
+                    generator = this._line;
+                    classToSet = 'line';
+                }
+
+                path.classed(classToSet, true);
+
                 //Only update if there is data
                 if (this.data()) {
                     //Adjust the path to fit the data
-                    this._target.select(".area")
-                    .attr("d", this._area);
+                    if (animate) {
+                        path.transition()
+                            .attr('d', generator);
+                    } else {
+                        path.attr('d', generator);
+                    }
                 }
             },
 
@@ -251,6 +308,7 @@ define(['lib/d3', 'underscore',
                 }
 
                 this._area.interpolate(value);
+                this._line.interpolate(value);
                 return this;
             },
 

@@ -1,0 +1,93 @@
+/*csslint known-properties: false*/
+@import-once 'lib/mixins';
+
+//
+// Set up the axes
+//
+.axis path,
+.axis line {
+    fill: none;
+    stroke: #555;
+    shape-rendering: crispEdges;
+    .transition(stroke 300ms);
+}
+.axis text {
+    fill: #888;
+    font-size: 11px;
+    .transition(fill 300ms);
+}
+svg:hover .axis text {
+    fill: #aaa;
+}
+svg:hover .axis path,
+svg:hover .axis line {
+    stroke: #aaa;
+}
+
+//
+//Set up the histogram cross-fading
+//
+svg.histogram {
+    .transition-duration(500ms);
+}
+
+svg.histogram.in {
+//    .opacity(0);
+    .transition-delay(500ms);
+}
+
+.brush .extent {
+    stroke: #fff;
+    fill-opacity: .125;
+    shape-rendering: crispEdges;
+}
+
+.tweet-highlight {
+    stroke: cyan;
+}
+
+text.silly-message {
+    fill: #FFF;
+    font-size: 14px;
+    text-anchor: middle;
+    .opacity(0);
+    text-shadow: 1px 1px 5px #000;
+}
+
+.annotation-controls rect {
+    stroke: orange;
+    stroke-width: 2px;
+    fill: none;
+
+    pointer-events: all;
+}
+
+.annotation-controls text {
+    fill: #FFF;
+    font-size: 11px;
+}
+
+.annotation-controls line {
+    stroke: yellow;
+    shape-rendering: crispEdges;
+}
+
+.annotations rect {
+    fill: yellow;
+    stroke: transparent;
+    stroke-width: 4px;
+    shape-rendering: crispEdges;
+    .opacity(50);
+    pointer-events: all;
+}
+
+.reference-mode .annotations rect {
+    cursor: pointer;
+    .opacity(90);
+}
+
+.annotations .highlight,
+.annotations rect:hover {
+    fill: orange;
+    stroke: orange;
+}

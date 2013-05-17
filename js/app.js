@@ -161,7 +161,7 @@ define(function (require) {
         var self = this;
         this.overviewTimeline.on('selection-change', function (e, extent) {
             self.focusTimeline.domain(extent);
-            self.focusTimeline.update();
+            self.focusTimeline.update(false);
         });
 
         this.overviewTimeline.render();

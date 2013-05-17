@@ -1,0 +1,63 @@
+@import-once "lib/mixins";
+
+@sentimentCombined: #44c151;
+@sentimentPositive: #05C5E7;
+@sentimentNeutral: #444;
+@sentimentNegative: #F9294A;
+
+@strokeWidthBase: 1.5px;
+
+.area {
+  stroke-width: 1px;
+  fill: steelblue;
+}
+
+.line {
+  stroke-width: @strokeWidthBase;
+  stroke: steelblue;
+  fill: none;
+
+  .transition(~"stroke 200ms, stroke-width 200ms");
+}
+
+.sentiment-colors(@baseFillColor, @baseStrokeColor) {
+  @mutedFillColor: darken(desaturate(@baseFillColor, 25%), 15%);
+  @mutedStrokeColor: darken(desaturate(@baseStrokeColor, 25%), 15%);
+
+  .area& {
+    fill: @baseFillColor;
+
+    .muted & {
+      fill: @mutedFillColor;
+    }
+  }
+
+  .area&, .line& {
+    stroke: @baseStrokeColor;
+
+    .muted & {
+      stroke: @mutedFillColor;
+    }
+  }
+
+  .bold& {
+    stroke: lighten(@baseStrokeColor, 40%);
+    stroke-width: @strokeWidthBase + 1;
+  }
+}
+
+.sentiment-combined {
+  .sentiment-colors(@sentimentCombined, @sentimentCombined);
+}
+
+.sentiment-positive {
+  .sentiment-colors(@sentimentPositive, @sentimentPositive);
+}
+
+.sentiment-neutral {
+  .sentiment-colors(@sentimentNeutral, lighten(@sentimentNeutral, 20%));
+}
+
+.sentiment-negative {
+  .sentiment-colors(@sentimentNegative, @sentimentNegative);
+}
