@@ -5389,7 +5389,7 @@ input[type="submit"].btn.btn-mini {
   padding: 1px;
   text-align: left;
   white-space: normal;
-  background-color: #333333;
+  background-color: #444444;
   border: 1px solid #ccc;
   border: 1px solid rgba(0, 0, 0, 0.2);
   -webkit-border-radius: 6px;
@@ -5425,8 +5425,8 @@ input[type="submit"].btn.btn-mini {
   font-size: 14px;
   font-weight: normal;
   line-height: 18px;
-  background-color: #2b2b2b;
-  border-bottom: 1px solid #383838;
+  background-color: #3c3c3c;
+  border-bottom: 1px solid #494949;
   -webkit-border-radius: 5px 5px 0 0;
      -moz-border-radius: 5px 5px 0 0;
           border-radius: 5px 5px 0 0;
@@ -5471,7 +5471,7 @@ input[type="submit"].btn.btn-mini {
 .popover.top .arrow:after {
   bottom: 1px;
   margin-left: -10px;
-  border-top-color: #333333;
+  border-top-color: #444444;
   border-bottom-width: 0;
 }
 
@@ -5487,7 +5487,7 @@ input[type="submit"].btn.btn-mini {
 .popover.right .arrow:after {
   bottom: -10px;
   left: 1px;
-  border-right-color: #333333;
+  border-right-color: #444444;
   border-left-width: 0;
 }
 
@@ -5503,7 +5503,7 @@ input[type="submit"].btn.btn-mini {
 .popover.bottom .arrow:after {
   top: 1px;
   margin-left: -10px;
-  border-bottom-color: #333333;
+  border-bottom-color: #444444;
   border-top-width: 0;
 }
 
@@ -5519,7 +5519,7 @@ input[type="submit"].btn.btn-mini {
 .popover.left .arrow:after {
   right: 1px;
   bottom: -10px;
-  border-left-color: #333333;
+  border-left-color: #444444;
   border-right-width: 0;
 }
 

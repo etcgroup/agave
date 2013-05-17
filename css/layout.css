@@ -10,7 +10,8 @@ body {
 }
 
 .row, .col {
-    overflow: hidden;
+    /*overflow: hidden;*/
+    overflow: visible;
     position: absolute;
 }
 
@@ -43,7 +44,8 @@ body {
 .padding-right-half,
 .padding-bottom-half,
 .padding-left-half {
-    overflow: hidden;
+    /*overflow: hidden;*/
+    overflow: visible;
     position: absolute;
     top: 0;
     bottom: 0;
@@ -184,6 +186,10 @@ body {
 /*
  * These are the collaborator panels.
  */
+
+.collaborator {
+    overflow: hidden;
+}
 
 .sliding-panel.col {
     left: 0;

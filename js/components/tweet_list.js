@@ -8,11 +8,11 @@ define([
 
         var TWEET_TEMPLATE = _.template("<li class='item tweet' data-id='<%=id%>'>" +
             "<div class='username muted'>" +
-            "<a class='user-link subtle-link' title='View <%=name%> on Twitter' target='tweet-link-tab' href='https://twitter.com/<%=screen_name%>'>" +
+            "<a class='user-link subtle-link tooltip-me' title='View <%=name%> on Twitter' target='tweet-link-tab' href='https://twitter.com/<%=screen_name%>'>" +
             "@<%=screen_name%>" +
             "</a></div>" +
-            "<div class='tweet_count muted' title='Number of retweets'><%=retweet_count%> retweets</div>" +
-            " <a class='twitter-link subtle-link' title='View this on Twitter' target='tweet-link-tab' href='https://twitter.com/<%=screen_name%>/status/<%=id%>'>" +
+            "<div class='tweet_count muted tooltip-me' title='Number of retweets'><%=retweet_count%> retweets</div>" +
+            " <a class='twitter-link subtle-link tooltip-me' title='View this on Twitter' target='tweet-link-tab' href='https://twitter.com/<%=screen_name%>/status/<%=id%>'>" +
             "<span>see on</span> " +
             "<i class='twitter-icon-light'></i>" +
             "</a> " +
@@ -196,6 +196,13 @@ define([
 
                 self.ui.tweetList.append(tweetUI);
             });
+
+            //Tooltips!
+            this.ui.tweetList.find('.tooltip-me').tooltip({
+                container: this.into,
+                animation: false
+            });
+
         };
 
         /**

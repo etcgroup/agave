@@ -16,8 +16,6 @@ ul.item-list {
 
 .item-list > .item {
 
-    overflow: hidden;
-
     border-bottom: 1px solid #585858;
     padding: 12px;
     position: relative;
