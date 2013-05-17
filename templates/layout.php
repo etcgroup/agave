@@ -21,6 +21,10 @@
                     </div>
                     <div class="tweet-overview-panel row">
                         <div class="tweet-overview padding-bottom">
+                            <?php echo help_icon(array(
+                                'title' => 'Overview Timeline',
+                                'content' => 'This timeline shows an overview of the entire data set. Click and drag on it to focus on an interval in the timeline above.'
+                            )); ?>
                         </div>
                     </div>
 

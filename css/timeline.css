@@ -1,15 +1,15 @@
 /*csslint known-properties: false*/
-.axis path,
-.axis line {
+svg .axis path,
+svg .axis line {
   fill: none;
-  stroke: #555;
+  stroke: #444;
   shape-rendering: crispEdges;
   -webkit-transition: stroke 300ms;
   -moz-transition: stroke 300ms;
   -o-transition: stroke 300ms;
   transition: stroke 300ms;
 }
-.axis text {
+svg .axis text {
   fill: #888;
   font-size: 11px;
   -webkit-transition: fill 300ms;
@@ -17,12 +17,27 @@
   -o-transition: fill 300ms;
   transition: fill 300ms;
 }
+svg:hover .axis path,
+svg:hover .axis line {
+  stroke: #666;
+}
 svg:hover .axis text {
   fill: #aaa;
 }
-svg:hover .axis path,
-svg:hover .axis line {
-  stroke: #aaa;
+.background {
+  fill: transparent;
+  pointer-events: all;
+}
+.area {
+  pointer-events: none;
+}
+.axis-title {
+  fill: #888;
+  text-anchor: end;
+  -webkit-transform: rotate(-90deg) translate(-5px, 14px);
+  -moz-transform: rotate(-90deg) translate(-5px, 14px);
+  -o-transform: rotate(-90deg) translate(-5px, 14px);
+  transform: rotate(-90deg) translate(-5px, 14px);
 }
 svg.histogram {
   -webkit-transition-duration: 500ms;

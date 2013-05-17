@@ -113,6 +113,12 @@
   -o-transform: translate3d(@x, @y, @z);
   transform: translate3d(@x, @y, @z);
 }
+.transform(@transformation) {
+    -webkit-transform: @transformation;
+    -moz-transform: @transformation;
+    -o-transform: @transformation;
+    transform: @transformation;
+}
 
 // Backface visibility
 // Prevent browsers from flickering when using CSS 3D transforms.

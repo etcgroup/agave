@@ -4,24 +4,48 @@
 //
 // Set up the axes
 //
-.axis path,
-.axis line {
-    fill: none;
-    stroke: #555;
-    shape-rendering: crispEdges;
-    .transition(stroke 300ms);
+svg {
+    .axis {
+        path, line {
+            fill: none;
+            stroke: #444;
+            shape-rendering: crispEdges;
+            .transition(stroke 300ms);
+        }
+
+        text {
+            fill: #888;
+            font-size: 11px;
+            .transition(fill 300ms);
+        }
+    }
+
+    &:hover {
+        .axis {
+            path, line {
+                stroke: #666;
+            }
+
+            text {
+                fill: #aaa;
+            }
+        }
+    }
 }
-.axis text {
+
+.background {
+    fill: transparent;
+    pointer-events: all;
+}
+
+.area {
+    pointer-events: none;
+}
+
+.axis-title {
     fill: #888;
-    font-size: 11px;
-    .transition(fill 300ms);
-}
-svg:hover .axis text {
-    fill: #aaa;
-}
-svg:hover .axis path,
-svg:hover .axis line {
-    stroke: #aaa;
+    text-anchor: end;
+    .transform(rotate(-90deg) translate(-5px, 14px));
 }
 
 //
@@ -32,7 +56,7 @@ svg.histogram {
 }
 
 svg.histogram.in {
-//    .opacity(0);
+    //    .opacity(0);
     .transition-delay(500ms);
 }
 

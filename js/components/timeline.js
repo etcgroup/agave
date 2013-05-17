@@ -110,7 +110,8 @@ define(['jquery',
 
         //A convenient container for anything that needs to be
         //in the same place as the inner box
-        this.ui.chartGroup = this.ui.svg.append('svg');
+        this.ui.chartGroup = this.ui.svg.append('svg')
+            .classed('chart-group', true);
 
         this._requestData();
     };
@@ -153,7 +154,7 @@ define(['jquery',
      */
     Timeline.prototype._renderBackground = function () {
         //Add a background
-        this.ui.svg.append('rect')
+        this.ui.background = this.ui.svg.append('rect')
             .classed('main background', true);
 
         this._updateBackground();
@@ -165,8 +166,8 @@ define(['jquery',
      */
     Timeline.prototype._updateBackground = function () {
         //Size the background
-        this.ui.svg.select('rect.main.background')
-            .call(this.boxes.outer);
+        this.ui.background
+            .call(this.boxes.inner);
     };
 
     /**
@@ -192,7 +193,7 @@ define(['jquery',
 
     Timeline.prototype._updateBoxes = function() {
         var margin = {
-            left: 40,
+            left: 50,
             right: 20,
             top: 10,
             bottom: 25

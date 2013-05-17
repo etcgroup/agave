@@ -60,6 +60,8 @@ define(function (require) {
 
         urls.watch_url_changes();
         urls.on('change', $.proxy(this.updateModelsFromUrl, this));
+
+        $('.help-icon').popover();
     };
 
     App.prototype.initModels = function() {

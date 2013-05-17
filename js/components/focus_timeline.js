@@ -147,6 +147,19 @@ define(['jquery',
             this.ui.annotations = this.ui.chartGroup.append('g')
                 .classed('annotations', true);
 
+            //If the user clicks on the svg, we'll begin annotation
+            var self = this;
+            this.ui.background.on('click', function () {
+
+                //Don't propagate or the listener for outside clicks will cancel annotation mode
+                d3.event.preventDefault();
+                d3.event.stopPropagation();
+
+                self.beginAnnotation();
+
+                return false;
+            });
+
         };
 
         /**
@@ -299,19 +312,6 @@ define(['jquery',
 
             //When the display mode changes, update
             this.display.on('change', $.proxy(this._onDisplayModeChanged, this));
-
-            //If the user clicks on the svg, we'll begin annotation
-            var self = this;
-            this.ui.svg.on('click', function () {
-
-                //Don't propagate or the listener for outside clicks will cancel annotation mode
-                d3.event.preventDefault();
-                d3.event.stopPropagation();
-
-                self.beginAnnotation();
-
-                return false;
-            });
         };
 
         /**
@@ -327,6 +327,12 @@ define(['jquery',
             this.ui.svg.append('g')
                 .classed('counts axis chart-label', true)
                 .style('opacity', 0);
+
+            //Add an axis label
+            this.ui.svg.append('text')
+                .classed('counts axis-title', true)
+                .text('tweets / sec.');
+//                .attr('transform', new Transform('rotate', -90));
 
             this._updateCountAxis();
         };
@@ -347,9 +353,8 @@ define(['jquery',
                 //Update the scale
                 this._countScale.domain([0, maxCount]);
             } else {
-                this._stackHistograms.forEach(function(hist) {
-                    hist._updateScales();
-                });
+                //Get the one that is in focus
+                this._stackHistograms[this.display.focus()]._updateScales();
             }
         };
 
