@@ -2,26 +2,56 @@
 
 function timeline_controls()
 {
+    function foo($options) {
+        $mode = $options['mode'];
+        $focus = $options['focus'];
+        $title = $options['title'];
+        $class = isset($options['class']) ? $options['class'] : '';
+        $label = $options['label'];
+
+        echo "<li class='tooltip-me {$class}' data-placement='bottom' data-mode='{$mode}' data-focus='{$focus}' title='{$title}'>";
+        echo "<a href='#'><i class='display-icon display-{$mode}'></i> {$label}</a>";
+        echo "</li>";
+    }
+
     ob_start();
     ?>
     <ul class="nav nav-pills mode-switch-buttons">
-        <li class="active" data-mode="simple" data-focus="">
-            <a href="#"><i class="display-icon display-simple"></i> Both</a>
-        </li>
+        <?php echo foo(array(
+            'class' => 'active',
+            'mode' => 'simple',
+            'focus' => '',
+            'label' => 'Both',
+            'title' => 'View both filters at the same time.'
+        )); ?>
 
-        <li data-mode="stack" data-focus="1">
-            <a href="#"><i class="display-icon display-stack"></i> Left Stack</a>
-        </li>
-        <li data-mode="stack" data-focus="2">
-            <a href="#"><i class="display-icon display-stack"></i> Right Stack</a>
-        </li>
+        <?php echo foo(array(
+            'mode' => 'stack',
+            'focus' => 0,
+            'label' => 'Left Stack',
+            'title' => 'View a stacked sentiment plot for the left filter set'
+        )); ?>
 
-        <li data-mode="expand" data-focus="1">
-            <a href="#"><i class="display-icon display-expand"></i> Left Fill</a>
-        </li>
-        <li data-mode="expand" data-focus="2">
-            <a href="#"><i class="display-icon display-expand"></i> Right Fill</a>
-        </li>
+        <?php echo foo(array(
+            'mode' => 'stack',
+            'focus' => 1,
+            'label' => 'Right Stack',
+            'title' => 'View a stacked sentiment plot for the right filter set'
+        )); ?>
+
+        <?php echo foo(array(
+            'mode' => 'expand',
+            'focus' => 0,
+            'label' => 'Left Fill',
+            'title' => 'View a normalized sentiment plot for the left filter set'
+        )); ?>
+
+        <?php echo foo(array(
+            'mode' => 'expand',
+            'focus' => 1,
+            'label' => 'Right Fill',
+            'title' => 'View a normalized sentiment plot for the right filter set'
+        )); ?>
     </ul>
 
     <label class="checkbox annotations-checkbox">

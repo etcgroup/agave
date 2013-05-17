@@ -194,7 +194,7 @@ define(['jquery',
     Timeline.prototype._updateBoxes = function() {
         var margin = {
             left: 50,
-            right: 20,
+            right: 15,
             top: 10,
             bottom: 25
         };

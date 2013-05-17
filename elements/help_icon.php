@@ -8,7 +8,7 @@ function help_icon($options)
     }
     ob_start();
     ?>
-    <div class="help-icon" data-trigger="hover" data-container="body" data-html="true" <?php echo implode(' ', $attrs)?> >
+    <div class="help-icon popover-me" data-animation="true" data-trigger="hover" data-html="true" <?php echo implode(' ', $attrs)?> >
         <i class="icon-white icon-question-sign"></i>
     </div>
     <?php

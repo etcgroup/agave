@@ -61,7 +61,18 @@ define(function (require) {
         urls.watch_url_changes();
         urls.on('change', $.proxy(this.updateModelsFromUrl, this));
 
-        $('.help-icon').popover();
+        //Set global tooltip defaults
+        var popupSettings = {
+            delay:{
+                show: 300
+            },
+            animation: false
+        };
+        _.extend($.fn.popover.defaults, popupSettings);
+        _.extend($.fn.tooltip.defaults, popupSettings);
+
+        $('.popover-me').popover();
+        $('.tooltip-me').tooltip();
     };
 
     App.prototype.initModels = function() {
