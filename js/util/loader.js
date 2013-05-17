@@ -41,8 +41,10 @@ define(['jquery', 'underscore', 'lib/spin', 'lib/bootstrap'], function ($, _, Sp
                 el = spinner.el;
                 $el = $(el);
 
-                $el.off($.support.transition.end);
-
+                if ($.support.transition) {
+                    $el.off($.support.transition.end);
+                }
+                
                 //start invisible and fade in/out
                 $el.addClass('fade');
 
