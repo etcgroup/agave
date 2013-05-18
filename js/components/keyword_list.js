@@ -5,11 +5,10 @@ define([
     'util/events'],
     function ($, _, loader, events) {
 
-        var KEYWORD_TEMPLATE = _.template("<li class='item keyword' data-id='<%=id%>'>" +
+        var KEYWORD_TEMPLATE = _.template("<li class='item keyword clearfix' data-id='<%=id%>'>" +
             "<div class='keyword_term'><%=term%></div>" +
-            "<div class='keyword_before'><%=before_count%></div>" +
-            "<div class='keyword_delta'>&nbsp;&Delta;<%=count_delta%></div>" +
-            "<div class='keyword_pct_delta'>(<%=count_percent_delta%> %)</div>" +
+            "<div class='keyword_before muted'>from <%=before_count%> use</div>" +
+            "<div class='keyword_delta'><i class='icon-white icon-arrow-up'></i> <%=count_delta%> </div>" +
             "</li>");
 
         //The max number of keywords to load.

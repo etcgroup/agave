@@ -3,21 +3,17 @@
     cursor: pointer;
 }
 
-.keywords-list .keyword_term, .keywords-list .keyword_before, .keywords-list .keyword_delta {
-	width: 20%;
-	float: left;
-	text-align: center;
+.keywords-list .keyword_before {
+    float: right;
+}
+
+.keywords-list .keyword_delta {
+	float: right;
+    margin-right: 6px;
 }
 
 .keywords-list .keyword_term {
-	width: 35%;
-	text-align: left;
-}
-
-.keywords-list .keyword .keyword_pct_delta {
-	width: 20%;
-	float: right;
-	text-align: right;	
+    float: left;
 }
 
 .keywords-list .keyword.highlight,
