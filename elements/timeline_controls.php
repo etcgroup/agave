@@ -4,7 +4,7 @@ function timeline_controls()
 {
     function foo($options) {
         $mode = $options['mode'];
-        $focus = $options['focus'];
+        $focus = $options['focus'] === '' ? $options['focus'] : $options['focus'] + 1;
         $title = $options['title'];
         $class = isset($options['class']) ? $options['class'] : '';
         $label = $options['label'];
@@ -54,10 +54,12 @@ function timeline_controls()
         )); ?>
     </ul>
 
-    <label class="checkbox annotations-checkbox">
-        <input type="checkbox" class="annotations-toggle"/>
-        Show/Hide Annotations
-    </label>
+    <div class="annotation-help">
+        <label class="checkbox annotations-checkbox">
+            <input type="checkbox" class="annotations-toggle"/>
+            Show/Hide Annotations
+        </label>
+    </div>
 
     <ul class="legend">
         <li>
