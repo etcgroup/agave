@@ -1,4 +1,12 @@
 /*csslint known-properties: false*/
+svg {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+  cursor: default;
+}
 svg .axis path,
 svg .axis line {
   fill: none;
@@ -24,12 +32,30 @@ svg:hover .axis line {
 svg:hover .axis text {
   fill: #aaa;
 }
-.background {
+svg .histogram {
+  -webkit-transition-duration: 500ms;
+  -moz-transition-duration: 500ms;
+  -o-transition-duration: 500ms;
+  transition-duration: 500ms;
+}
+svg .histogram .in {
+  -webkit-transition-delay: 500ms;
+  -moz-transition-delay: 500ms;
+  -o-transition-delay: 500ms;
+  transition-delay: 500ms;
+}
+svg .background {
   fill: transparent;
   pointer-events: all;
 }
-.area {
+svg .area {
   pointer-events: none;
+}
+svg .highlight.tweet {
+  stroke: cyan;
+}
+svg .highlight.keyword {
+  stroke: #e800ff;
 }
 .axis-title {
   fill: #AAA;
@@ -39,28 +65,10 @@ svg:hover .axis text {
   -o-transform: rotate(-90deg) translate(-10px, 14px);
   transform: rotate(-90deg) translate(-10px, 14px);
 }
-svg.histogram {
-  -webkit-transition-duration: 500ms;
-  -moz-transition-duration: 500ms;
-  -o-transition-duration: 500ms;
-  transition-duration: 500ms;
-}
-svg.histogram.in {
-  -webkit-transition-delay: 500ms;
-  -moz-transition-delay: 500ms;
-  -o-transition-delay: 500ms;
-  transition-delay: 500ms;
-}
 .brush .extent {
   stroke: #fff;
   fill-opacity: .125;
   shape-rendering: crispEdges;
-}
-.highlight.tweet {
-  stroke: cyan;
-}
-.highlight.keyword {
-  stroke: #e800ff;
 }
 text.silly-message {
   fill: #FFF;

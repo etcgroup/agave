@@ -179,7 +179,7 @@ define(['jquery',
             //Add any new annotations
             bind.enter().append('rect')
                 .classed('annotation', true)
-                .attr('y', 0)
+                .attr('y', 1)
                 .attr('width', 2)
                 .on('mousemove', function (d) {
                     self._onAnnotationHover(d3.event, d, true);
@@ -235,6 +235,7 @@ define(['jquery',
          */
         FocusTimeline.prototype._updateAnnotations = function () {
             var boxHeight = this.boxes.annotations.height();
+            var boxWidth = this.boxes.annotations.width();
 
             var self = this;
 
@@ -243,8 +244,8 @@ define(['jquery',
             //Resize the svg and background
             annotations.call(this.boxes.annotations);
             this.ui.annotationsBackground
-                .attr('width', this.boxes.annotations.width())
-                .attr('height', this.boxes.annotations.height());
+                .attr('width', boxWidth)
+                .attr('height', boxHeight);
 
             if (this.display.annotations()) {
                 annotations
@@ -265,7 +266,7 @@ define(['jquery',
                     return d.id in self._brushedAnnotations;
                 })
                 .attr('x', this._annotationXPosition)
-                .attr('height', boxHeight);
+                .attr('height', boxHeight - 2);
         };
 
         /**

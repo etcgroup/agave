@@ -31,33 +31,48 @@ svg {
             }
         }
     }
+
+
+    //
+    //Set up the histogram cross-fading
+    //
+    .histogram {
+        .transition-duration(500ms);
+
+        .in {
+            //    .opacity(0);
+            .transition-delay(500ms);
+        }
+    }
+
+    .background {
+        fill: transparent;
+        pointer-events: all;
+    }
+
+    .area {
+        pointer-events: none;
+    }
+
+    .highlight {
+        &.tweet {
+            stroke: cyan;
+        }
+
+        &.keyword {
+            stroke: #e800ff;
+        }
+    }
+
+    .user-select(none);
+    cursor: default;
 }
 
-.background {
-    fill: transparent;
-    pointer-events: all;
-}
-
-.area {
-    pointer-events: none;
-}
 
 .axis-title {
     fill: #AAA;
     text-anchor: end;
     .transform(rotate(-90deg) translate(-10px, 14px));
-}
-
-//
-//Set up the histogram cross-fading
-//
-svg.histogram {
-    .transition-duration(500ms);
-}
-
-svg.histogram.in {
-    //    .opacity(0);
-    .transition-delay(500ms);
 }
 
 .brush .extent {
@@ -66,15 +81,6 @@ svg.histogram.in {
     shape-rendering: crispEdges;
 }
 
-.highlight {
-    &.tweet {
-        stroke: cyan;
-    }
-
-    &.keyword {
-        stroke: #e800ff;
-    }
-}
 
 text.silly-message {
     fill: #FFF;

@@ -1,8 +1,18 @@
+.annotations {
+  cursor: pointer;
+}
 .annotations .annotation-target {
   stroke: orange;
   stroke-width: 2px;
   shape-rendering: crispEdges;
   display: none;
+}
+.annotations .background {
+  fill: rgba(255, 255, 255, 0.03);
+  -webkit-transition: fill 300ms linear;
+  -moz-transition: fill 300ms linear;
+  -o-transition: fill 300ms linear;
+  transition: fill 300ms linear;
 }
 .annotations:hover .annotation-target {
   display: inline;
@@ -10,6 +20,9 @@
 .annotations:hover .annotation {
   opacity: 0.75;
   filter: alpha(opacity=75);
+}
+.annotations:hover .background {
+  fill: rgba(255, 255, 255, 0.08);
 }
 .annotations .annotation {
   fill: yellow;

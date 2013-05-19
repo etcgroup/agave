@@ -79,7 +79,8 @@
 .annotation-help {
   position: absolute;
   right: 18px;
-  top: 32px;
+  top: 31px;
+  font-size: 11px;
   color: #d2b340;
   text-shadow: 1px 1px 6px rgba(34, 34, 34, 0.5);
 }

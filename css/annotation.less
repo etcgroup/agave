@@ -2,11 +2,18 @@
 
 .annotations {
 
+    cursor: pointer;
+
     .annotation-target {
         stroke: orange;
         stroke-width: 2px;
         shape-rendering: crispEdges;
         display: none;
+    }
+
+    .background {
+        fill: rgba(255, 255, 255, 0.03);
+        .transition(fill 300ms linear);
     }
 
     &:hover {
@@ -16,6 +23,10 @@
 
         .annotation {
             .opacity(75);
+        }
+
+        .background {
+            fill: rgba(255, 255, 255, 0.08);
         }
     }
 
