@@ -21,11 +21,11 @@ define(['jquery', 'underscore'], function($, _) {
     Tooltip.prototype.show = function(offset, contents) {
         this.el.html(contents);
 
+        this.el.show();
         this.el.offset({
             top: offset.top + POSITION_OFFSET.top,
             left: offset.left + POSITION_OFFSET.left
         });
-        this.el.show();
 
         //force reflow
         this.el[0].offsetWidth;
