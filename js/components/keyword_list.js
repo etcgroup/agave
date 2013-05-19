@@ -1,11 +1,11 @@
 define([
     'jquery',
     'underscore',
-    'util/loader',
-    'util/events'],
-    function ($, _, loader, events) {
+    'util/extend',
+    'components/item_list'],
+    function ($, _, extend, ItemList) {
 
-        var KEYWORD_TEMPLATE = _.template("<li class='item keyword clearfix' data-id='<%=id%>'>" +
+        var KEYWORD_TEMPLATE = _.template("<li class='keyword clearfix' data-id='<%=id%>'>" +
             "<div class='keyword_term'><%=term%></div>" +
             "<div class='keyword_before muted'>from <%=before_count%> uses</div>" +
             "<div class='keyword_delta'><i class='icon-white icon-arrow-up'></i> <%=count_delta%> </div>" +
@@ -28,107 +28,45 @@ define([
          * @constructor
          */
         var KeywordList = function (options) {
-            this.into = options.into || $('<div>');
+            ItemList.call(this, options, 'keyword');
 
-            this.interval = options.interval;
-            this.query = options.query;
-            this.api = options.api;
-
-            this._initUI();
-            this._attachEvents();
+            this._initData('keywords');
             this._requestData();
         };
 
+
+        extend(KeywordList, ItemList);
+
+
+        KeywordList.prototype.createList = function() {
+            var body = this.into.find('.tab-pane-body');
+            return $('<ul>').appendTo(body);
+        };
 
         /**
          * Attach to model events.
          */
         KeywordList.prototype._attachEvents = function () {
+            ItemList.prototype._attachEvents.call(this);
+
             //When either the interval or query changes, request data directly
             this.interval.on('change', $.proxy(this._requestData, this));
             this.query.on('change', $.proxy(this._requestData, this));
 
-            //Listen for new keywords on the API
-            this.api.on('keywords', $.proxy(this._onData, this));
-
-            this.api.on('brush', $.proxy(this._onBrush, this));
-
-            this.api.on('unbrush', $.proxy(this._onUnBrush, this));
-
             var self = this;
-            this.ui.keywordList.on('mouseenter', '.keyword', function() {
-                self._keywordMouseEntered($(this));
-            });
-
-            this.ui.keywordList.on('mouseleave', '.keyword', function() {
-                self._keywordMouseLeft($(this));
-            });
-
-            this.ui.keywordList.on('click', '.keyword', function() {
+            this.ui.list.on('click', '.keyword', function () {
                 self._keywordClicked($(this));
             });
+
+            this._initBrushing();
         };
 
-        KeywordList.prototype._keywordMouseEntered = function(keywordUI) {
-            var keyword = keywordUI.data('keyword');
-console.log(keyword);
-            this.api.trigger('brush', [{
-                id: keyword.id,
-                type: 'keyword',
-                data: keyword
-            }]);
-        };
-
-        KeywordList.prototype._keywordMouseLeft = function(keywordUI) {
-            var keyword = keywordUI.data('keyword');
-
-            this.api.trigger('unbrush', [{
-                id: keyword.id,
-                type: 'keyword',
-                data: keyword
-            }]);
-        };
-
-        KeywordList.prototype._keywordClicked = function(keywordUI) {
-            var keyword = keywordUI.data('keyword');
+        KeywordList.prototype._keywordClicked = function (keywordUI) {
+            var keyword = keywordUI.data('item');
 
             this.api.trigger('reference-selected', {
                 type: 'keyword',
                 data: keyword
-            });
-        };
-
-        KeywordList.prototype._onBrush = function(e, brushed) {
-            var keywords = this.ui.keywordList
-                .find('.keyword');
-
-            _.each(brushed, function(item) {
-                if (item.type !==  'keyword') {
-                    return;
-                }
-
-                var keywordUI = keywords.filter('[data-id=' + item.id + ']');
-
-                if (keywordUI.length) {
-                    keywordUI.addClass('highlight');
-                }
-            });
-        };
-
-        KeywordList.prototype._onUnBrush = function(e, brushed) {
-            var keywords = this.ui.keywordList
-                .find('.keyword');
-
-            _.each(brushed, function(item) {
-                if (item.type !==  'keyword') {
-                    return;
-                }
-
-                var keywordUI = keywords.filter('[data-id=' + item.id + ']');
-
-                if (keywordUI.length) {
-                    keywordUI.removeClass('highlight');
-                }
             });
         };
 
@@ -137,9 +75,7 @@ console.log(keyword);
          */
         KeywordList.prototype._requestData = function () {
 
-            this.loader.start();
-
-            this.api.keywords({
+            ItemList.prototype._requestData.call(this, {
                 //need to know which query these keywords pertain to
                 window_size: 300,
                 query_id: this.query.id(),
@@ -159,45 +95,13 @@ console.log(keyword);
                 return;
             }
 
-            this.loader.stop();
-
-            var keywords = result.data;
-
-            //Remove all current keywords
-            this.ui.keywordList.empty();
-
-            var self = this;
-
-            //Add each keyword
-            keywords.forEach(function (keyword) {
-                //Render the keyword using the template and append
-
-                var keywordUI = $(KEYWORD_TEMPLATE(keyword));
-
-                //Bind the keyword data to the keyword element
-                keywordUI.data('keyword', keyword);
-
-                self.ui.keywordList.append(keywordUI);
-            });
+            ItemList.prototype._onData.call(this, result.data);
         };
 
-        /**
-         * Initialize the keyword list.
-         */
-        KeywordList.prototype._initUI = function () {
-            this.ui = {};
-            this.ui.body = this.into.find('.tab-pane-body');
-            this.ui.keywordList = $('<ul>')
-                .addClass('item-list')
-                .appendTo(this.ui.body);
-
-            this.loader = loader({
-                into: this.into
-            });
+        KeywordList.prototype.renderItem = function(itemData) {
+            return $(KEYWORD_TEMPLATE(itemData));
         };
 
-        //Mix in events
-        events(KeywordList);
 
         return KeywordList;
 

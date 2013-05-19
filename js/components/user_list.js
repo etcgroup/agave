@@ -1,11 +1,11 @@
 define([
     'jquery',
     'underscore',
-    'util/loader',
-    'util/events'],
-    function ($, _, loader, events) {
+    'util/extend',
+    'components/item_list'],
+    function ($, _, extend, ItemList) {
 
-        var USER_TEMPLATE = _.template("<li class='item user clearfix' data-id='<%=id%>'>" +
+        var USER_TEMPLATE = _.template("<li class='user clearfix' data-id='<%=id%>'>" +
             "<div class='name'>@<%=screen_name%></div>" +
             "<div class='count'><%=count%> <span class='muted'>tweets</span></div>" +
             "<div class='follower'><%=followers%> <span class='muted'>followers</span></div>" +
@@ -28,44 +28,28 @@ define([
          */
 
         var UserList = function (options) {
-            this.into = options.into || $('<div>');
-            this.spinner = options.spinner || $('<i>').addClass('spinner-16').appendTo(this.into);
+            ItemList.call(this, options, 'user');
 
-            this.interval = options.interval;
-            this.query = options.query;
-            this.api = options.api;
-
-            this._initUI();
-            this._attachEvents();
+            this._initData('users');
             this._requestData();
         };
 
+        extend(UserList, ItemList);
 
         /**
          * Attach to model events.
          */
         UserList.prototype._attachEvents = function () {
+            ItemList.prototype._attachEvents.call(this);
+
             //When either the interval or query changes, request data directly
             this.interval.on('change', $.proxy(this._requestData, this));
             this.query.on('change', $.proxy(this._requestData, this));
 
-            //Listen for new tweets on the API
-            this.api.on('users', $.proxy(this._onData, this));
-
-            this.api.on('brush', $.proxy(this._onBrush, this));
-
-            this.api.on('unbrush', $.proxy(this._onUnBrush, this));
+            this._initBrushing();
 
             var self = this;
-            this.ui.userList.on('mouseenter', '.user', function() {
-                self._userMouseEntered($(this));
-            });
-
-            this.ui.userList.on('mouseleave', '.user', function() {
-                self._userMouseLeft($(this));
-            });
-
-            this.ui.userList.on('click', '.user', function() {
+            this.ui.list.on('click', '.user', function() {
                 self._userClicked($(this));
             });
         };
@@ -76,8 +60,7 @@ define([
          */
         UserList.prototype._requestData = function () {
 
-            this.loader.start();
-            this.api.users({
+            ItemList.prototype._requestData.call(this, {
                 //need to know which query these tweets pertain to
                 query_id: this.query.id(),
                 from: this.interval.from(),
@@ -103,59 +86,19 @@ define([
                 return;
             }
 
-            this.loader.stop();
+            ItemList.prototype._onData.call(this, result.data);
+        };
 
-            var users = result.data;
-
-            //Remove all current tweets
-            this.ui.userList.empty();
-
-            var self = this;
-            
-            //Add each tweet
-            users.forEach(function (user) {
-                //Render the tweet using the template and append
-
-                var userUI = $(USER_TEMPLATE(user));
-
-                //Bind the tweet data to the tweet element
-                userUI.data('user', user);
-
-                self.ui.userList.append(userUI);
-            });
+        UserList.prototype.renderItem = function(itemData) {
+            return $(USER_TEMPLATE(itemData));
         };
 
         /**
          * Initialize the tweet list.
          */
-        UserList.prototype._initUI = function () {
-            this.ui = {};
-            this.ui.body = this.into.find('.tab-pane-body');
-            this.ui.userList = $('<ul>')
-                .addClass('item-list')
-                .appendTo(this.ui.body);
-
-            this.loader = loader({
-                into: this.into
-            });
-        };
-
-        UserList.prototype._userMouseEntered = function(userUI) {
-            var user = userUI.data('user');
-
-            this.api.trigger('brush', [{
-                id: user.id,
-                type: 'user'
-            }]);
-        };
-
-        UserList.prototype._userMouseLeft = function(userUI) {
-            var user = userUI.data('user');
-
-            this.api.trigger('unbrush', [{
-                id: user.id,
-                type: 'user'
-            }]);
+        UserList.prototype.createList = function () {
+            var body = this.into.find('.tab-pane-body');
+            return $('<ul>').appendTo(body);
         };
 
         UserList.prototype._userClicked = function(userUI) {
@@ -166,43 +109,6 @@ define([
                 data: user
             });
         };
-
-        UserList.prototype._onBrush = function(e, brushed) {
-            var users = this.ui.userList
-                .find('.user');
-
-            _.each(brushed, function(item) {
-                if (item.type !==  'user') {
-                    return;
-                }
-
-                var userUI = users.filter('[data-id=' + item.id + ']');
-
-                if (userUI.length) {
-                    userUI.addClass('highlight');
-                }
-            });
-        };
-
-        UserList.prototype._onUnBrush = function(e, brushed) {
-            var users = this.ui.userList
-                .find('.user');
-
-            _.each(brushed, function(item) {
-                if (item.type !==  'user') {
-                    return;
-                }
-
-                var userUI = users.filter('[data-id=' + item.id + ']');
-
-                if (userUI.length) {
-                    userUI.removeClass('highlight');
-                }
-            });
-        };
-        
-        //Mix in events
-        events(UserList);
 
         return UserList;
 

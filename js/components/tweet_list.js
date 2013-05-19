@@ -1,12 +1,12 @@
 define([
     'jquery',
     'underscore',
-    'util/events',
-    'util/loader',
+    'components/item_list',
+    'util/extend',
     'util/sentiment'],
-    function ($, _, events, loader, sentiment) {
+    function ($, _, ItemList, extend, sentiment) {
 
-        var TWEET_TEMPLATE = _.template("<li class='item tweet' data-id='<%=id%>'>" +
+        var TWEET_TEMPLATE = _.template("<li class='tweet' data-id='<%=id%>'>" +
             "<div class='username muted'>" +
             "<a class='user-link subtle-link tooltip-me' title='View <%=name%> on Twitter' target='tweet-link-tab' href='https://twitter.com/<%=screen_name%>'>" +
             "@<%=screen_name%>" +
@@ -40,56 +40,32 @@ define([
          * @constructor
          */
         var TweetList = function (options) {
-            this.into = options.into || $('<div>');
-
-            this.interval = options.interval;
-            this.query = options.query;
-            this.api = options.api;
-
-            this._initUI();
-            this._attachEvents();
+            ItemList.call(this, options, 'tweet');
+            this._initData('tweets');
             this._requestData();
         };
+
+        extend(TweetList, ItemList);
 
 
         /**
          * Attach to model events.
          */
         TweetList.prototype._attachEvents = function () {
+            ItemList.prototype._attachEvents.call(this);
+
             //When either the interval or query changes, request data directly
             this.interval.on('change', $.proxy(this._requestData, this));
             this.query.on('change', $.proxy(this._requestData, this));
 
-            //Listen for new tweets on the API
-            this.api.on('tweets', $.proxy(this._onData, this));
-
-            this.api.on('brush', $.proxy(this._onBrush, this));
-
-            this.api.on('unbrush', $.proxy(this._onUnBrush, this));
+            this._initBrushing();
 
             var self = this;
-            this.ui.tweetList.on('mouseenter', '.tweet', function() {
-                self._tweetMouseHover($(this), true);
-            });
-
-            this.ui.tweetList.on('mouseleave', '.tweet', function() {
-                self._tweetMouseHover($(this), false);
-            });
-
-            this.ui.tweetList.on('click', '.tweet', function() {
+            this.ui.list.on('click', '.tweet', function() {
                 self._tweetClicked($(this));
             });
         };
 
-        TweetList.prototype._tweetMouseHover = function(tweetUI, hovering) {
-            var tweet = tweetUI.data('tweet');
-
-            this.api.trigger(hovering ? 'brush' : 'unbrush', [{
-                id: tweet.id,
-                type: 'tweet',
-                data: tweet
-            }]);
-        };
 
         TweetList.prototype._tweetClicked = function(tweetUI) {
             var tweet = tweetUI.data('tweet');
@@ -100,48 +76,12 @@ define([
             });
         };
 
-        TweetList.prototype._onBrush = function(e, brushed) {
-            var tweets = this.ui.tweetList
-                .find('.tweet');
-
-            _.each(brushed, function(item) {
-                if (item.type !==  'tweet') {
-                    return;
-                }
-
-                var tweetUI = tweets.filter('[data-id=' + item.id + ']');
-
-                if (tweetUI.length) {
-                    tweetUI.addClass('highlight');
-                }
-            });
-        };
-
-        TweetList.prototype._onUnBrush = function(e, brushed) {
-            var tweets = this.ui.tweetList
-                .find('.tweet');
-
-            _.each(brushed, function(item) {
-                if (item.type !==  'tweet') {
-                    return;
-                }
-
-                var tweetUI = tweets.filter('[data-id=' + item.id + ']');
-
-                if (tweetUI.length) {
-                    tweetUI.removeClass('highlight');
-                }
-            });
-        };
-
         /**
          * called anytime an update occurs
          */
         TweetList.prototype._requestData = function () {
 
-            this.loader.start();
-
-            this.api.tweets({
+            ItemList.prototype._requestData.call(this, {
                 //need to know which query these tweets pertain to
                 query_id: this.query.id(),
                 from: this.interval.from(),
@@ -166,54 +106,28 @@ define([
                 return;
             }
 
-            this.loader.stop();
-
-            var tweets = result.data;
-
-            //Remove all current tweets
-            this.ui.tweetList.empty();
-
-            var self = this;
-
-            //Add each tweet
-            tweets.forEach(function (tweet) {
-                //Render the tweet using the template and append
-
-                tweet.sentiment_str = sentiment.from_number(Number(tweet.sentiment));
-
-                var tweetUI = $(TWEET_TEMPLATE(tweet));
-
-                //Bind the tweet data to the tweet element
-                tweetUI.data('tweet', tweet);
-
-                self.ui.tweetList.append(tweetUI);
-            });
+            ItemList.prototype._onData.call(this, result.data);
 
             //Tooltips!
-            this.ui.tweetList.find('.tooltip-me').tooltip({
+            this.ui.list.find('.tooltip-me').tooltip({
                 container: this.into,
                 animation: false
             });
 
         };
 
+        TweetList.prototype.renderItem = function(itemData) {
+            itemData.sentiment_str = sentiment.from_number(Number(itemData.sentiment));
+            return $(TWEET_TEMPLATE(itemData));
+        };
+
         /**
          * Initialize the tweet list.
          */
-        TweetList.prototype._initUI = function () {
-            this.ui = {};
-            this.ui.body = this.into.find('.tab-pane-body');
-            this.ui.tweetList = $('<ul>')
-                .addClass('item-list')
-                .appendTo(this.ui.body);
-
-            this.loader = loader({
-                into: this.into
-            });
+        TweetList.prototype.createList = function () {
+            var body = this.into.find('.tab-pane-body');
+            return $('<ul>').appendTo(body);
         };
-
-        //Mix in events
-        events(TweetList);
 
         return TweetList;
 
