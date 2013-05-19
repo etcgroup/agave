@@ -200,7 +200,8 @@ define(['jquery',
 
         this.api.trigger('brush', [{
             type: type,
-            id: id
+            id: id,
+            data: this.tweets[id]
         }]);
     };
 
@@ -210,7 +211,8 @@ define(['jquery',
 
         this.api.trigger('unbrush', [{
             type: type,
-            id: id
+            id: id,
+            data: this.tweets[id]
         }]);
     };
 
@@ -250,7 +252,8 @@ define(['jquery',
                 reference.label = text;
                 break;
             case 'tweet':
-                reference.text = text;
+                //reference.text = text;
+                reference = this.tweets[id];
                 break;
         }
 
@@ -275,6 +278,13 @@ define(['jquery',
         if (data.length === this.ui.commentList.find('.comment').length) {
             return;
         }
+
+        // add our map of the data
+        this.tweets = [];
+        var self = this;
+        result.data.tweets.forEach(function(d,i){
+            self.tweets[d.id] = d;
+        });
 
         //Format all the messages (looking for entities)
         data.each(function(index, element) {
