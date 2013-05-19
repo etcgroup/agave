@@ -167,7 +167,7 @@ define(['jquery',
         var type = result.type;
 
         //Generate a reference code
-        var referenceCode = references.build(type, result.data);
+        var referenceCode = references.build(type, result.data.rendered);
 
         //Append to the comment input
         var currentMsg = $.trim(this.ui.commentInput.val());
@@ -266,7 +266,7 @@ define(['jquery',
 
         this._enableCommentBox();
 
-        var data = $($.trim(result.data)).filter(function() {
+        var data = $($.trim(result.data.rendered)).filter(function() {
             //Remove 'text' nodes
             return this.nodeType !== 3;
         });
