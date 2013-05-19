@@ -167,6 +167,7 @@ define(function (require) {
             api: this.api,
             queries: this.queries,
             interval: this.interval,
+            display: this.display,
             from: this.config.overview_from * 1000,
             to: this.config.overview_to * 1000,
             binSize: this.config.overview_bin_size * 1000,
