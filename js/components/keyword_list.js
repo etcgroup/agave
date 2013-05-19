@@ -7,7 +7,7 @@ define([
 
         var KEYWORD_TEMPLATE = _.template("<li class='item keyword clearfix' data-id='<%=id%>'>" +
             "<div class='keyword_term'><%=term%></div>" +
-            "<div class='keyword_before muted'>from <%=before_count%> use</div>" +
+            "<div class='keyword_before muted'>from <%=before_count%> uses</div>" +
             "<div class='keyword_delta'><i class='icon-white icon-arrow-up'></i> <%=count_delta%> </div>" +
             "</li>");
 
@@ -71,10 +71,11 @@ define([
 
         KeywordList.prototype._keywordMouseEntered = function(keywordUI) {
             var keyword = keywordUI.data('keyword');
-
+console.log(keyword);
             this.api.trigger('brush', [{
                 id: keyword.id,
-                type: 'keyword'
+                type: 'keyword',
+                data: keyword
             }]);
         };
 
@@ -83,7 +84,8 @@ define([
 
             this.api.trigger('unbrush', [{
                 id: keyword.id,
-                type: 'keyword'
+                type: 'keyword',
+                data: keyword
             }]);
         };
 

@@ -56,8 +56,11 @@ svg.histogram.in {
   fill-opacity: .125;
   shape-rendering: crispEdges;
 }
-.tweet-highlight {
+.highlight.tweet {
   stroke: cyan;
+}
+.highlight.keyword {
+  stroke: #e800ff;
 }
 text.silly-message {
   fill: #FFF;

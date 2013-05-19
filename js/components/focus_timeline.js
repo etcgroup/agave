@@ -47,9 +47,6 @@ define(['jquery',
 
             this._brushedAnnotations = {};
 
-            //A lookup object for tweets by id
-            this._tweetCacheLookup = {};
-
             //Store offset time internally
             var staticExtent = this.extentFromUTC([options.from, options.to]);
             this.from = staticExtent[0];
@@ -350,9 +347,6 @@ define(['jquery',
             //Subscribe to a data stream from the API.
             this.api.on('counts', $.proxy(this._onData, this));
 
-            //Subscribe to another data stream
-            this.api.on('tweets', $.proxy(this._onTweets, this));
-
             //When the display mode changes, update
             this.display.on('change', $.proxy(this._onDisplayModeChanged, this));
         };
@@ -516,36 +510,6 @@ define(['jquery',
         };
 
         /**
-         * When new tweets arrive, store them in the tweet cache.
-         * @param e
-         * @param result
-         * @returns {Function}
-         * @private
-         */
-        FocusTimeline.prototype._onTweets = function (e, result) {
-            var toKeep = 100;
-            var self = this;
-
-            //add these items to the tweet cache, which will dedupe for us
-            _.each(result.data, function (tweet) {
-                self._tweetCacheLookup[tweet.id] = tweet;
-            });
-
-            //Now limit to 100 items
-            var list = _.keys(self._tweetCacheLookup);
-            var toRemove = Math.max(0, list.length - toKeep);
-            list.splice(0, toRemove);
-
-            //Now rebuild the cache
-            var newCache = {};
-            _.each(list, function (id) {
-                newCache[id] = self._tweetCacheLookup[id];
-            });
-
-            this._tweetCacheLookup = newCache;
-        };
-
-        /**
          * When new data arrives, bind to the proper histogram and update.
          *
          * @param e Event
@@ -619,35 +583,24 @@ define(['jquery',
             var self = this;
 
             //A list of highlighted points in time
-            this._tweetHighlights = [];
+            this._highlights = [];
+
+            //A lookup object for highlights by id
+            this._highlightLookup = {};
 
             //A function for positioning highlights
-            this._tweetXPosition = function (d) {
-                return self._timeScale(d.created_at + self._utcOffset);
+            this._highlightXPosition = function (d) {
+                return self._timeScale(d.time + self._utcOffset);
+            };
+
+            this._highlightClass = function(d) {
+                return d.type;
             };
 
             //A group element for containing the highlight points
             this.api.on('brush', $.proxy(this._onBrush, this));
 
             this.api.on('unbrush', $.proxy(this._onUnBrush, this));
-        };
-
-
-        /**
-         * Checks in the brushed tweet list to see if the tweet with the given
-         * id is already there. Returns its index or null.
-         *
-         * @param id
-         * @returns {*}
-         * @private
-         */
-        FocusTimeline.prototype._findIndexOfBrushedTweet = function (id) {
-            for (var i = 0; i < this._tweetHighlights.length; i++) {
-                if (+this._tweetHighlights[i].id === +id) {
-                    return i;
-                }
-            }
-            return null;
         };
 
         /**
@@ -661,21 +614,26 @@ define(['jquery',
             var self = this;
             _.each(brushed, function (item) {
 
+                var time;
+
                 switch (item.type) {
                     case 'tweet':
-                        //Do we know about this tweet?
-                        if (!(item.id in self._tweetCacheLookup)) {
-                            return;
+                        time = item.data.created_at;
+                    case 'keyword':
+                        //grab the mid-point if time not already set (by tweet case)
+                        time = time || item.data.mid_point;
+
+                        if (!self._highlightLookup[item.data.id]) {
+                            //We are not showing it yet
+                            self._highlights.push({
+                                time: time,
+                                type: item.type
+                            });
+
+                            self._highlightLookup[item.data.id] = true;
                         }
 
-                        //Is it already highlighted?
-                        if (self._findIndexOfBrushedTweet(item.id) !== null) {
-                            return;
-                        }
-
-                        var tweet = self._tweetCacheLookup[item.id];
-                        self._tweetHighlights.push(tweet);
-                        self._updateTweetHighlights();
+                        self._updateHighlights();
                         break;
                     case 'annotation':
                         //Add mark that the item is being brushed
@@ -706,10 +664,12 @@ define(['jquery',
 
                 switch (item.type) {
                     case 'tweet':
-                        var index = self._findIndexOfBrushedTweet(item.id);
-                        if (index !== null) {
-                            self._tweetHighlights.splice(index, 1);
-                            self._updateTweetHighlights();
+                    case 'keyword':
+                        if (self._highlightLookup[item.data.id]) {
+                            //We are showing it
+                            delete self._highlightLookup[item.data.id];
+                            self._highlights = _.values(self._highlightLookup);
+                            self._updateHighlights();
                         }
                         break;
                     case 'annotation':
@@ -729,35 +689,32 @@ define(['jquery',
         };
 
         /**
-         * Updates the display of brushed/highlighted tweets.
+         * Updates the display of brushed/highlighted times.
          *
          * @private
          */
-        FocusTimeline.prototype._updateTweetHighlights = function () {
+        FocusTimeline.prototype._updateHighlights = function () {
 
             var boxHeight = this.boxes.inner.height();
 
             //Set the highlight positions
-            var bind = this.ui.chartGroup.selectAll('line.tweet-highlight')
-                .data(this._tweetHighlights);
+            var bind = this.ui.chartGroup.selectAll('line.highlight')
+                .data(this._highlights);
 
             //Create new lines and position them, but make them have no height
             bind.enter().append('line')
-                .classed('tweet-highlight', true)
-                .attr('x1', this._tweetXPosition)
-                .attr('x2', this._tweetXPosition)
-                .attr('y1', boxHeight)
-                .attr('y2', boxHeight);
+                .classed('highlight', true);
 
             //Transition un-needed lines out and remove
             bind.exit()
-                .attr('y1', boxHeight)
-                .attr('y2', boxHeight)
                 .remove();
 
             //Position the lines where they ought to be
-            bind.attr('x1', this._tweetXPosition)
-                .attr('x2', this._tweetXPosition)
+            //Apply a class based on the data type
+            bind.attr('class', this._highlightClass)
+                .classed('highlight', true) //add the highlight class back in
+                .attr('x1', this._highlightXPosition)
+                .attr('x2', this._highlightXPosition)
                 .attr('y1', 0)
                 .attr('y2', boxHeight);
         };

@@ -69,11 +69,11 @@ define([
 
             var self = this;
             this.ui.tweetList.on('mouseenter', '.tweet', function() {
-                self._tweetMouseEntered($(this));
+                self._tweetMouseHover($(this), true);
             });
 
             this.ui.tweetList.on('mouseleave', '.tweet', function() {
-                self._tweetMouseLeft($(this));
+                self._tweetMouseHover($(this), false);
             });
 
             this.ui.tweetList.on('click', '.tweet', function() {
@@ -81,21 +81,13 @@ define([
             });
         };
 
-        TweetList.prototype._tweetMouseEntered = function(tweetUI) {
+        TweetList.prototype._tweetMouseHover = function(tweetUI, hovering) {
             var tweet = tweetUI.data('tweet');
 
-            this.api.trigger('brush', [{
+            this.api.trigger(hovering ? 'brush' : 'unbrush', [{
                 id: tweet.id,
-                type: 'tweet'
-            }]);
-        };
-
-        TweetList.prototype._tweetMouseLeft = function(tweetUI) {
-            var tweet = tweetUI.data('tweet');
-
-            this.api.trigger('unbrush', [{
-                id: tweet.id,
-                type: 'tweet'
+                type: 'tweet',
+                data: tweet
             }]);
         };
 
