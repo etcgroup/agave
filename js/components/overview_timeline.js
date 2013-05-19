@@ -25,6 +25,8 @@ define(['jquery',
             var staticExtent = this.extentFromUTC([options.from, options.to]);
             this.from = staticExtent[0];
             this.to = staticExtent[1];
+            this.from_utc = options.from;
+            this.to_utc = options.to;
 
             //Set up the x axis domain, which stays constant, in offset time
             this._timeScale.domain(staticExtent);
@@ -51,19 +53,17 @@ define(['jquery',
 
             var utc = [interval.from(), interval.to()];
             var local = this.extentFromUTC(utc);
-            console.log("test");
-            console.log(local);
-            //Move the brush
-            if (local[0] === this.from && local[1] === this.to){
+
+            if (local[0] === this.from &&
+                local[1] === this.to) {
+                //Clear the rectangle
                 this._brush.clear();
-            } else if (local[0] === local[1]) { 
-                var gameTime = [this.from, this.to];
-                utc = this.extentToUTC(gameTime);
-                this._brush.clear();
+                utc = [this.from_utc, this.to_utc];
+                local = [this.from, this.to];
             } else {
+                //Move the rectangle
                 this._brush.extent(local);
             }
-
             //Let other people know we moved
             this.trigger('selection-change', utc);
 
@@ -93,7 +93,7 @@ define(['jquery',
          * @param result
          * @private
          */
-        OverviewTimeline.prototype._onData = function(e, result) {
+        OverviewTimeline.prototype._onData = function (e, result) {
             var data = result.data; //data
 
             //Bind the data to the histogram first
@@ -121,7 +121,7 @@ define(['jquery',
         /**
          * Update the brush on update.
          */
-        OverviewTimeline.prototype.update = function(animate) {
+        OverviewTimeline.prototype.update = function (animate) {
             Timeline.prototype.update.call(this, animate);
 
             //In addition, update the brush
@@ -132,7 +132,7 @@ define(['jquery',
          * Override the update histogram method slightly.
          * @private
          */
-        OverviewTimeline.prototype._updateHistogram = function(animate) {
+        OverviewTimeline.prototype._updateHistogram = function (animate) {
 
             //Auto-scale the y axis
             var data = this._histogram.data();
@@ -148,7 +148,7 @@ define(['jquery',
          * Build the brush elements
          * @private
          */
-        OverviewTimeline.prototype._renderBrush = function() {
+        OverviewTimeline.prototype._renderBrush = function () {
             //Set up the brush
             this._brush = d3.svg.brush()
                 .x(this._timeScale)
@@ -176,7 +176,7 @@ define(['jquery',
          * Make sure the brush is the right size
          * @private
          */
-        OverviewTimeline.prototype._updateBrush = function() {
+        OverviewTimeline.prototype._updateBrush = function () {
             //Update the height of the brush
             this.ui.svg.selectAll('g.x.brush')
                 .attr('transform', new Transform('translate', this.boxes.inner.left(), this.boxes.inner.top()))
@@ -202,9 +202,15 @@ define(['jquery',
             }
         };
 
-        OverviewTimeline.prototype._onBrushEnd = function() {
+        OverviewTimeline.prototype._onBrushEnd = function () {
             //convert to utc
-            var extent = this.extentToUTC(this._brush.extent());
+            var extent = this._brush.extent();
+
+            if (this._brush.empty()) {
+                extent = [this.from, this.to];
+            }
+
+            var extent = this.extentToUTC(extent);
 
             //When the timeline zoom/pan changes, we need to update the query object
             this.interval.set({
