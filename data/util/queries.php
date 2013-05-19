@@ -700,14 +700,30 @@ class Queries
      */
     public function get_burst_keywords($window_size, $start_datetime, $stop_datetime, $limit = 10)
     {
+        //Compute an extended interval, by the window size
+        $half_window_size = $window_size / 2;
+        $window_interval = new DateInterval("PT{$half_window_size}S");
+        $start_datetime->sub($window_interval);
+        $stop_datetime->add($window_interval);
+
         $start_datetime = $start_datetime->format('Y-m-d H:i:s');
         $stop_datetime = $stop_datetime->format('Y-m-d H:i:s');
 
-        $limit = (int)$limit;
-        $result = $this->run('burst_keywords',
-            $window_size, $start_datetime, $stop_datetime, $start_datetime, $stop_datetime, $limit);
+        $builder = new Builder('burst_keywords');
+        $builder->select('*, UNIX_TIMESTAMP(mid_point) AS mid_point');
+        $builder->from('burst_keywords');
+        $builder->order_by('count_percent_delta', 'DESC');
 
-        return $result;
+        //Declare the parameters
+        $binder = new Binder();
+        $start_datetime = $binder->param('from', $start_datetime);
+        $stop_datetime = $binder->param('from', $stop_datetime);
+
+        //Set the conditions
+        $builder->where('mid_point', '>=', $start_datetime);
+        $builder->where('mid_point', '<', $stop_datetime);
+
+        return $this->run2($builder, $binder);
     }
 }
 
