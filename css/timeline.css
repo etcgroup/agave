@@ -57,13 +57,35 @@ svg .highlight.tweet {
 svg .highlight.keyword {
   stroke: #e800ff;
 }
+.tweet-overview .time-selector {
+  position: absolute;
+  left: 5px;
+  top: 0px;
+  z-index: 20000;
+  width: 50px;
+  opacity: 0.8;
+  filter: alpha(opacity=80);
+}
+.tweet-overview .time-selector:hover {
+  opacity: 1;
+  filter: alpha(opacity=100);
+}
+.tweet-overview .time-selector .selector-label {
+  color: #aaa;
+  font-size: 11px;
+}
+.tweet-overview .time-selector .help-icon {
+  position: absolute;
+  left: 30px;
+  top: 0px;
+}
 .axis-title {
   fill: #AAA;
   text-anchor: end;
-  -webkit-transform: rotate(-90deg) translate(-10px, 14px);
-  -moz-transform: rotate(-90deg) translate(-10px, 14px);
-  -o-transform: rotate(-90deg) translate(-10px, 14px);
-  transform: rotate(-90deg) translate(-10px, 14px);
+  -webkit-transform: rotate(-90deg) translate(-10px, 20px);
+  -moz-transform: rotate(-90deg) translate(-10px, 20px);
+  -o-transform: rotate(-90deg) translate(-10px, 20px);
+  transform: rotate(-90deg) translate(-10px, 20px);
 }
 .brush .extent {
   stroke: #fff;
