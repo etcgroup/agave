@@ -4,7 +4,7 @@ define(['underscore', 'util/events', 'util/functions'], function (_, events, fun
         search: null,
         author: null,
         rt: false,
-        min_rt: 0,
+        //min_rt: 0,
         sentiment: null
     };
 
@@ -86,7 +86,7 @@ define(['underscore', 'util/events', 'util/functions'], function (_, events, fun
      *
      * @type {Function}
      */
-    Query.prototype.min_rt = functions.evented_mutator('data', 'min_rt');
+    //Query.prototype.min_rt = functions.evented_mutator('data', 'min_rt');
 
     /**
      * Get or set the 'sentiment' value.

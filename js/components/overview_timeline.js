@@ -3,8 +3,14 @@ define(['jquery',
     'util/extend',
     'util/transform',
     'components/timeline',
+    'util/sentiment',
     'lib/d3'],
-    function ($, _, extend, Transform, Timeline, d3) {
+    function ($, _, extend, Transform, Timeline, sentiment, d3) {
+
+        //Color defaults
+        var COLOR_DOMAIN = sentiment.numbers;
+        var COLOR_RANGE = sentiment.classes;
+
 
         /**
          * A class for rendering and maintaining an overview timeline,
@@ -18,6 +24,12 @@ define(['jquery',
          * @constructor
          */
         var OverviewTimeline = function (options) {
+            //For storing the data from two series
+            this._series = {};
+            this._loadedQueries = {};
+
+            this.display = options.display;
+
             //Call the parent constructor
             Timeline.call(this, options);
 
@@ -31,13 +43,34 @@ define(['jquery',
             //Set up the x axis domain, which stays constant, in offset time
             this._timeScale.domain(staticExtent);
 
+            //Create a color scale
+            this._sentimentScale = d3.scale.ordinal()
+                .domain(COLOR_DOMAIN)
+                .range(COLOR_RANGE);
+
             //Subscribe to a data stream from the API.
-            this.api.on('overview_counts', $.proxy(this._onData, this));
+            this.api.on('counts', $.proxy(this._onData, this));
 
         };
 
         //The overview extends the basic timeline
         extend(OverviewTimeline, Timeline);
+
+        OverviewTimeline.prototype.attachEvents = function() {
+            Timeline.prototype.attachEvents.call(this);
+
+            this.display.on('change', $.proxy(this._onDisplayModeChanged, this));
+        };
+
+        /**
+         * Called when the display mode changes.
+         *
+         * @private
+         */
+        OverviewTimeline.prototype._onDisplayModeChanged = function() {
+            this._updateDataBinding();
+            this.update();
+        };
 
         /**
          * Called when the interval model changes.
@@ -71,22 +104,6 @@ define(['jquery',
         };
 
         /**
-         * Submit a request for new data.
-         * @private
-         */
-        OverviewTimeline.prototype._requestData = function () {
-
-            var utcExtent = this.extentToUTC([this.from, this.to]);
-
-            //Remember to subtract the UTC offset before sending out times
-            this.api.overview_counts({
-                from: utcExtent[0],
-                to: utcExtent[1],
-                interval: this._binSize
-            });
-        };
-
-        /**
          * Update the graph when data arrives.
          *
          * @param e Event
@@ -94,13 +111,80 @@ define(['jquery',
          * @private
          */
         OverviewTimeline.prototype._onData = function (e, result) {
+
             var data = result.data; //data
 
-            //Bind the data to the histogram first
-            this._histogram.data(data);
+            var countsOnly = result.data.reduce(function (prev, layer) {
+                return {
+                    values: layer.values.map(function (v, i) {
+                        return {
+                            count: prev.values[i].count + v.count,
+                            time: prev.values[i].time
+                        };
+                    })
+                };
+            }).values;
+
+            this._loadedQueries[result.params.query_id] = result.params;
+            this._series[result.params.query_id] = countsOnly;
+            this._lastUpdated = result.params.query_id;
+
+            this._updateDataBinding();
 
             //Call through to parent method
             Timeline.prototype._onData.call(this, data);
+        };
+
+        /**
+         * Given the state of the view and the most recently updated data series,
+         * show the appropriate data.
+         *
+         * By default, show the data with the largest sum -- approximately the taller series.
+         * However, when a particular series is showing, only show data from that series.
+         *
+         * @private
+         */
+        OverviewTimeline.prototype._updateDataBinding = function() {
+            var selectedQuery = 0;
+
+            if (this.display.mode() === 'simple') {
+                //Find the bigger series
+                var max = -1;
+                var maxId = -1;
+                for (var queryId in this._series) {
+                    var sum = d3.sum(this._series[queryId], function(d) {
+                        return d.count;
+                    });
+                    if (sum > max) {
+                        max = sum;
+                        maxId = queryId;
+                    }
+                }
+
+                if (maxId >= 0) {
+                    selectedQuery = maxId;
+                }
+
+            } else if (this.display.focus() in this._loadedQueries) {
+                selectedQuery = this.display.focus();
+            } else {
+                selectedQuery = this._lastUpdated;
+            }
+
+            if (!(selectedQuery in this._loadedQueries)) {
+                return;
+            }
+
+            var sentiment = "";
+
+            //Get the query data that was most recently received from the server (not what is stored in the query object)
+            var loaded = this._loadedQueries[selectedQuery];
+            if (loaded) {
+                sentiment = loaded.sentiment;
+            }
+            var sentimentClass = this._sentimentScale(sentiment);
+            this._histogram.seriesClass(sentimentClass);
+            this._histogram.data(this._series[selectedQuery]);
         };
 
         /**
@@ -210,7 +294,7 @@ define(['jquery',
                 extent = [this.from, this.to];
             }
 
-            var extent = this.extentToUTC(extent);
+            extent = this.extentToUTC(extent);
 
             //When the timeline zoom/pan changes, we need to update the query object
             this.interval.set({

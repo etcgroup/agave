@@ -10,7 +10,7 @@ define(['model/query'],
                 expect(query.author()).toEqual(null);
                 expect(query.rt()).toEqual(false);
                 expect(query.sentiment()).toEqual(null);
-                expect(query.min_rt()).toEqual(0);
+//                expect(query.min_rt()).toEqual(0);
 
             });
 

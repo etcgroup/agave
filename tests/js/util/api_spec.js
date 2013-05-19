@@ -105,7 +105,8 @@ define(['util/api', 'jquery'], function(API, $) {
             expect($.ajax).toHaveBeenCalledWith({
                 url: 'http://example.com',
                 data: {},
-                type: 'get'
+                type: 'get',
+                dataType: 'json'
             });
         });
 

@@ -111,10 +111,10 @@ define(['jquery', 'underscore', 'util/events', 'model/query'], function ($, _, e
 
         //Correct the author string
         if (data.author) {
-            if (data.author[0] != '@') {
+            if (data.author[0] !== '@') {
                 data.author = '@' + data.author;
                 this.ui.author_input.val(data.author);
-            } else if (data.author == '@') {
+            } else if (data.author === '@') {
                 data.author = '';
                 this.ui.author_input.val(data.author);
             }
@@ -128,8 +128,9 @@ define(['jquery', 'underscore', 'util/events', 'model/query'], function ($, _, e
 
         //Get the selected sentiment filter, with validation
         data.sentiment = this.ui.sentiment_select.val();
-//        data.sentiment = data.sentiment ? Number(data.sentiment) : null;
-
+        if (data.sentiment !== '') {
+            data.sentiment = Number(data.sentiment);
+        }
 
         return this.model.set(data);
     };
@@ -146,7 +147,7 @@ define(['jquery', 'underscore', 'util/events', 'model/query'], function ($, _, e
 
         //Set the author string, adding an @ if needed
         var author = this.model.author();
-        if (author && author[0] != '@') {
+        if (author && author[0] !== '@') {
             author = '@' + author;
         }
         this.ui.author_input.val(author);

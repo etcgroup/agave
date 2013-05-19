@@ -167,9 +167,9 @@ define(function (require) {
             api: this.api,
             queries: this.queries,
             interval: this.interval,
+            display: this.display,
             from: this.config.overview_from * 1000,
             to: this.config.overview_to * 1000,
-            binSize: this.config.overview_bin_size * 1000,
             utcOffset: this.config.utc_offset_millis
         });
 
@@ -197,7 +197,7 @@ define(function (require) {
             display: this.display,
             from: this.config.overview_from * 1000,
             to: this.config.overview_to * 1000,
-            binSize: 30,
+            binSize: this.config.bin_size * 1000,
             utcOffset: this.config.utc_offset_millis
         });
 
@@ -489,7 +489,7 @@ define(function (require) {
     App.prototype.onBrush = function(e, brushed) {
         var self = this;
         _.each(brushed, function (item) {
-            if (item.type != 'query') {
+            if (item.type !== 'query') {
                 return;
             }
 
@@ -501,7 +501,7 @@ define(function (require) {
     App.prototype.onUnBrush = function(e, brushed) {
         var self = this;
         _.each(brushed, function (item) {
-            if (item.type != 'query') {
+            if (item.type !== 'query') {
                 return;
             }
 

@@ -67,7 +67,7 @@ define([
                 to: this.interval.to(),
                 search: this.query.search(),
                 rt: this.query.rt(),
-                min_rt: this.query.min_rt(),
+//                min_rt: this.query.min_rt(),
                 author: this.query.author(),
                 sentiment: this.query.sentiment(),
                 limit: USER_LIMIT,
