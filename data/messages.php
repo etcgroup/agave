@@ -62,6 +62,7 @@ if ($discussion_id) {
 
                 $tweet_result = $db->get_tweet($m[1]);
                 foreach($tweet_result as $row) {
+                    $row['created_at'] = $row['created_at'] * 1000;
                     $tweets[] = $row;
                 }
             }

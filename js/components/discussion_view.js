@@ -283,6 +283,7 @@ define(['jquery',
         this.tweets = [];
         var self = this;
         result.data.tweets.forEach(function(d,i){
+            //d.created_at = Date.parse(d.created_at);
             self.tweets[d.id] = d;
         });
 

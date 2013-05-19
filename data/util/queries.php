@@ -480,11 +480,13 @@ class Queries
     {
         $builder = new Builder('tweet');
 
-        $builder->select("* from tweets");
+        $builder->select('tweets.*, UNIX_TIMESTAMP(tweets.created_at) AS created_at, users.screen_name, users.name');
+        $builder->from('tweets');
+        $builder->join('users', 'users.id = tweets.user_id');
         $binder = new Binder();
         $id = $binder->param('id', $id);
 
-        $builder->where("id", "=", $id);
+        $builder->where("tweets.id", "=", $id);
         return $this->run2($builder, $binder);
     }
 
