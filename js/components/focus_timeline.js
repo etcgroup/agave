@@ -99,7 +99,7 @@ define(['jquery',
                     query_id: query.id(),
                     from: utcExtent[0],
                     to: utcExtent[1],
-                    interval: self._binSize * 1000,
+                    interval: self._binSize,
                     search: query.search(),
                     rt: query.rt(),
 //                    min_rt: query.min_rt(),
@@ -635,7 +635,7 @@ define(['jquery',
                                 type: item.type
                             });
 
-                            self._highlightLookup[item.data.id] = true;
+                            self._highlightLookup[item.data.id] = item.data;
                         }
 
                         self._updateHighlights();
