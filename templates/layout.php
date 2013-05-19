@@ -58,7 +58,7 @@
                             <div class="discussions col">
                                 <div class="header row">
                                     <div class="title">Discussions</div>
-                                    <button type="button" class="btn btn-primary new-button"
+                                    <button type="button" class="btn btn-primary new-button tooltip-me" data-placement="left"
                                         title="Create a new discussion">
                                         <i class="icon-white icon-plus-sign"></i>
                                         New</button>
@@ -68,7 +68,7 @@
                             </div>
                             <div class="discussion-view col">
                                 <div class="comment-box row">
-                                    <button type="button" class="btn back-button"
+                                    <button type="button" class="btn back-button tooltip-me" data-placement="right"
                                         title="Back to discussion list">
                                         <i class="icon-white icon-arrow-left"></i>
                                         Back
@@ -76,12 +76,12 @@
                                     <span class="user-display"></span>
                                     <textarea></textarea>
                                     <button type="button" data-toggle="button"
-                                            class="reference-button btn"
+                                            class="reference-button btn tooltip-me" data-placement="right"
                                         title="Reference a tweet or annotation">
                                         <i class="icon-white icon-map-marker"></i> Reference
                                     </button>
                                     <button type="button"
-                                            class="send-button btn btn-primary"
+                                            class="send-button btn btn-primary tooltip-me" data-placement="left"
                                         title="Post your comment">
                                         <i class="icon-white icon-comment"></i> Post
                                     </button>
