@@ -51,9 +51,14 @@ define(['jquery',
 
             var utc = [interval.from(), interval.to()];
             var local = this.extentFromUTC(utc);
-
+            console.log("test");
+            console.log(local);
             //Move the brush
-            if (local[0] === this.from && local[1] === this.to) {
+            if (local[0] === this.from && local[1] === this.to){
+                this._brush.clear();
+            } else if (local[0] === local[1]) { 
+                var gameTime = [this.from, this.to];
+                utc = this.extentToUTC(gameTime);
                 this._brush.clear();
             } else {
                 this._brush.extent(local);
