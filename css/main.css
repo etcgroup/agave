@@ -44,6 +44,17 @@
 
 .tweet-overview .help-icon {
     position: absolute;
-    left: 20px;
-    top: 13px;
+    left: 30px;
+    top: 0px;
+}
+.selector-label {
+    position: absolute;
+    left: 0px;
+    width: 50px;
+    color: #aaa;
+    font-size: 11px;
+}
+
+.time-selector {
+    width: 50px;
 }

@@ -21,10 +21,12 @@
                     </div>
                     <div class="tweet-overview-panel row">
                         <div class="tweet-overview padding-bottom">
-                            <?php echo help_icon(array(
-                                'title' => 'Overview Timeline',
-                                'content' => 'This timeline shows an overview of the entire data set. Click and drag on it to focus on an interval in the timeline above.'
-                            )); ?>
+                            <div class="time-selector popover-me" data-animation="true" data-trigger="hover" title="Time Selector"
+                                 data-content="This timeline shows an overview of the entire data set. Click and drag on it to focus
+                                 on an interval in the timeline above.">
+                                <label class="selector-label">Time Selector</label>
+                                <?php echo help_icon(array()); ?>
+                            </div>
                         </div>
                     </div>
 
