@@ -290,6 +290,12 @@ define(['jquery',
                 this.discussion_id = comments.data('discussion-id');
             }
         }
+        
+         this.ui.commentList.find('.tooltip-me').tooltip({
+                container: this.into,
+                animation: false
+            });
+        
     };
 
     DiscussionView.prototype._requestData = function() {

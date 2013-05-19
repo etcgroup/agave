@@ -62,19 +62,19 @@ function timeline_controls()
     </div>
 
     <ul class="legend">
-        <li>
-            <div class="legend-swatch sentiment-combined"></div>
+        <li class="tooltip-me" title="Combined">
+            <div class="legend-swatch sentiment-combined" ></div>
             Combined
         </li>
-        <li>
+        <li class="tooltip-me" title="Positive">
             <div class="legend-swatch sentiment-positive"></div>
             Positive
         </li>
-        <li>
+        <li class="tooltip-me" title="Neutral">
             <div class="legend-swatch sentiment-neutral"></div>
             Neutral
         </li>
-        <li>
+        <li class="tooltip-me" title="Negative">
             <div class="legend-swatch sentiment-negative"></div>
             Negative
         </li>
