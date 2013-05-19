@@ -167,7 +167,7 @@ define(['jquery',
         var type = result.type;
 
         //Generate a reference code
-        var referenceCode = references.build(type, result.data.rendered);
+        var referenceCode = references.build(type, result.data);
 
         //Append to the comment input
         var currentMsg = $.trim(this.ui.commentInput.val());
