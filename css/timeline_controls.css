@@ -1,22 +1,11 @@
-@media all and (max-width: 1100px) {
-  .legend {
-    width: 43%;
-  }
-  .legend > li {
-    width: 25%;
-  }
-  .mode-switch-buttons {
-    width: 57%;
-  }
-  .mode-switch-buttons > li {
-    width: 20%;
-  }
-}
 .legend {
   float: right;
   list-style: none;
-  padding: 0;
   margin: 0;
+  padding: 0 10px 0 0;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
 }
 .legend > li {
   float: right;
@@ -36,43 +25,14 @@
   border: 1px solid rgba(170, 170, 170, 0.33);
   vertical-align: top;
 }
-.annotation-help {
-  position: absolute;
-  right: 18px;
-  top: 32px;
-  color: #d2b340;
-  text-shadow: 1px 1px 6px rgba(34, 34, 34, 0.5);
-}
-.annotation-help .add-help {
-  margin-left: 15px;
-  opacity: 0.8;
-  filter: alpha(opacity=80);
-}
-.annotation-help .annotations-checkbox {
-  display: inline-block;
-  vertical-align: top;
-  margin: 0;
-  padding: 0 0 0 20px;
-  opacity: 0.4;
-  filter: alpha(opacity=40);
-}
-.annotation-help .annotations-checkbox .annotations-toggle {
-  margin-top: 1px;
-}
-.annotation-help .annotations-checkbox:hover {
-  opacity: 1;
-  filter: alpha(opacity=100);
-}
 /* Mode switch button styles */
 .mode-switch-buttons {
   float: left;
 }
-.mode-switch-buttons > li {
-  overflow: hidden;
-  white-space: nowrap;
-}
 .mode-switch-buttons > li > a {
   padding: 2px 10px 2px 4px;
+  overflow: hidden;
+  white-space: nowrap;
 }
 .mode-switch-buttons > li > a .display-icon {
   background-repeat: no-repeat;
@@ -99,6 +59,47 @@
   filter: alpha(opacity=100);
 }
 .mode-switch-buttons > li.active > a .display-icon {
+  opacity: 1;
+  filter: alpha(opacity=100);
+}
+@media all and (max-width: 1108px) {
+  .legend {
+    width: 43%;
+  }
+  .legend > li {
+    width: 25%;
+  }
+  .mode-switch-buttons {
+    width: 57%;
+  }
+  .mode-switch-buttons > li {
+    width: 20%;
+  }
+}
+.annotation-help {
+  position: absolute;
+  right: 18px;
+  top: 32px;
+  color: #d2b340;
+  text-shadow: 1px 1px 6px rgba(34, 34, 34, 0.5);
+}
+.annotation-help .add-help {
+  margin-left: 15px;
+  opacity: 0.8;
+  filter: alpha(opacity=80);
+}
+.annotation-help .annotations-checkbox {
+  display: inline-block;
+  vertical-align: top;
+  margin: 0;
+  padding: 0 0 0 20px;
+  opacity: 0.4;
+  filter: alpha(opacity=40);
+}
+.annotation-help .annotations-checkbox .annotations-toggle {
+  margin-top: 1px;
+}
+.annotation-help .annotations-checkbox:hover {
   opacity: 1;
   filter: alpha(opacity=100);
 }

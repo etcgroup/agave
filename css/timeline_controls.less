@@ -1,91 +1,44 @@
 @import-once 'lib/mixins';
 
-@media all and (max-width: 1100px) {
-    .legend {
-        width: 43%;
-    }
-    .legend > li {
-        width: 25%;
-    }
-    .mode-switch-buttons {
-        width: 57%;
-        > li {
-            width: 20%;
-        }
-    }
-}
-
-
-
 .legend {
     float: right;
     list-style: none;
-    padding: 0;
     margin: 0;
+    padding: 0 10px 0 0;
 
-}
-.legend > li {
-    float: right;
-    padding: 8px 8px;
-    color: #ccc;
     .box-sizing(border-box);
 
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-.legend .legend-swatch {
-    width: 13px;
-    height: 13px;
-    display: inline-block;
-    border: 1px solid rgba(170, 170, 170, 0.33);
-    vertical-align: top;
-}
+    > li {
+        float: right;
+        padding: 8px 8px;
+        color: #ccc;
+        .box-sizing(border-box);
 
-.annotation-help {
-    position: absolute;
-    right: 18px;
-    top: 32px;
-
-    color: #d2b340;
-
-    text-shadow: 1px 1px 6px fade(#222, 50%);
-
-    .add-help {
-        margin-left: 15px;
-        .opacity(80);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
-
-    .annotations-checkbox {
-
+    .legend-swatch {
+        width: 13px;
+        height: 13px;
         display: inline-block;
+        border: 1px solid rgba(170, 170, 170, 0.33);
         vertical-align: top;
-
-        margin: 0;
-        padding: 0 0 0 20px;
-
-        .annotations-toggle {
-            margin-top: 1px;
-        }
-
-        .opacity(40);
-
-        &:hover {
-            .opacity(100);
-        }
     }
 }
+
 
 /* Mode switch button styles */
 .mode-switch-buttons {
     float:left;
 
     > li {
-        overflow: hidden;
-        white-space: nowrap;
 
         > a {
             padding: 2px 10px 2px 4px;
+
+            overflow: hidden;
+            white-space: nowrap;
 
             .display-icon {
                 background-repeat: no-repeat;
@@ -120,6 +73,57 @@
             .display-icon {
                 .opacity(100);
             }
+        }
+    }
+}
+
+@media all and (max-width: 1108px) {
+    .legend {
+        width: 43%;
+
+        > li {
+            width: 25%;
+        }
+    }
+
+    .mode-switch-buttons {
+        width: 57%;
+        > li {
+            width: 20%;
+        }
+    }
+}
+
+.annotation-help {
+    position: absolute;
+    right: 18px;
+    top: 32px;
+
+    color: #d2b340;
+
+    text-shadow: 1px 1px 6px fade(#222, 50%);
+
+    .add-help {
+        margin-left: 15px;
+        .opacity(80);
+    }
+
+    .annotations-checkbox {
+
+        display: inline-block;
+        vertical-align: top;
+
+        margin: 0;
+        padding: 0 0 0 20px;
+
+        .annotations-toggle {
+            margin-top: 1px;
+        }
+
+        .opacity(40);
+
+        &:hover {
+            .opacity(100);
         }
     }
 }

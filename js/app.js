@@ -370,8 +370,8 @@ define(function (require) {
     App.prototype.windowResize = function () {
         var self = this;
         $(window).on('resize', function () {
-            self.focusTimeline.update();
-            self.overviewTimeline.update();
+            self.focusTimeline.update(false);
+            self.overviewTimeline.update(false);
         });
     };
 
