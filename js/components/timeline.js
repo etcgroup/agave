@@ -82,7 +82,7 @@ define(['jquery',
     /**
      * Sets up the UI container and svg element.
      */
-    Timeline.prototype.initUI = function() {
+    Timeline.prototype.initUI = function () {
         this.ui = {};
         this.ui.svg = d3.select(this.into.selector)
             .append('svg');
@@ -99,6 +99,7 @@ define(['jquery',
     Timeline.prototype.render = function () {
 
         this._buildBoxes();
+        this._updateBoxes();
         this._updateTimeScaleRange();
 
         this._updateTarget();
@@ -137,7 +138,7 @@ define(['jquery',
      * Request some data for this histogram
      * @private
      */
-    Timeline.prototype._requestData = function() {
+    Timeline.prototype._requestData = function () {
         //Meant to be overridden
     };
 
@@ -186,18 +187,24 @@ define(['jquery',
             outer: new Rectangle(),
             inner: new Rectangle()
         };
-
-        this._updateBoxes();
     };
 
-
-    Timeline.prototype._updateBoxes = function() {
-        var margin = {
+    /**
+     * Get the margins for the inner (chart) group.
+     * @returns {{left: number, right: number, top: number, bottom: number}}
+     * @private
+     */
+    Timeline.prototype._getMargins = function () {
+        return {
             left: 50,
             right: 15,
-            top: 10,
+            top: 0,
             bottom: 25
         };
+    };
+
+    Timeline.prototype._updateBoxes = function () {
+        var margin = this._getMargins();
 
         var height = this.into.height();
         var width = this.into.width();
@@ -240,7 +247,7 @@ define(['jquery',
 
     Timeline.prototype._renderTimeAxis = function () {
         //Add an x axis
-        this.ui.svg.append('g')
+        this.ui.xAxis = this.ui.svg.append('g')
             .classed('x axis chart-label', true);
 
         this._updateTimeAxis();
@@ -252,7 +259,7 @@ define(['jquery',
      * @param extent
      * @returns {Array}
      */
-    Timeline.prototype.extentToUTC = function(extent) {
+    Timeline.prototype.extentToUTC = function (extent) {
         return [
             extent[0] - this._utcOffset,
             extent[1] - this._utcOffset
@@ -265,7 +272,7 @@ define(['jquery',
      * @param extent
      * @returns {Array}
      */
-    Timeline.prototype.extentFromUTC = function(extent) {
+    Timeline.prototype.extentFromUTC = function (extent) {
         return [
             extent[0] + this._utcOffset,
             extent[1] + this._utcOffset
@@ -321,7 +328,7 @@ define(['jquery',
      */
     Timeline.prototype._updateTimeAxis = function () {
         //Update the time axis
-        this.ui.svg.select('g.x.axis.chart-label')
+        this.ui.xAxis
             .attr('transform', new Transform('translate',
                 this.boxes.inner.left(), this.boxes.inner.bottom() + AXIS_OFFSET))
             .call(this._timeAxis);

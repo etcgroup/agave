@@ -1,40 +1,47 @@
 @import-once 'lib/mixins';
 
-.annotation-controls rect {
-    stroke: orange;
-    stroke-width: 2px;
-    fill: none;
+.annotations {
 
-    pointer-events: all;
+    .annotation-target {
+        stroke: orange;
+        stroke-width: 2px;
+        shape-rendering: crispEdges;
+        display: none;
+    }
+
+    &:hover {
+        .annotation-target {
+            display: inline
+        }
+
+        .annotation {
+            .opacity(75);
+        }
+    }
+
+
+    .annotation {
+        fill: yellow;
+        stroke: transparent;
+        stroke-width: 4px;
+        shape-rendering: crispEdges;
+        .opacity(50);
+        pointer-events: all;
+
+        .transition(~'stroke 300ms,opacity 300ms');
+
+        &.highlight, &:hover {
+            stroke: yellow;
+            .opacity(100);
+        }
+    }
+
+    .reference-mode & {
+        .annotation {
+            cursor: pointer;
+            .opacity(100);
+        }
+    }
 }
 
-.annotation-controls text {
-    fill: #FFF;
-    font-size: 11px;
-}
-
-.annotation-controls line {
-    stroke: yellow;
-    shape-rendering: crispEdges;
-}
-
-.annotations rect {
-    fill: yellow;
-    stroke: transparent;
-    stroke-width: 4px;
-    shape-rendering: crispEdges;
-    .opacity(50);
-    pointer-events: all;
-}
-
-.reference-mode .annotations rect {
-    cursor: pointer;
-    .opacity(90);
-}
-
-.annotations .highlight,
-.annotations rect:hover {
-    fill: orange;
-    stroke: orange;
-}
 

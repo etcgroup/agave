@@ -25,11 +25,21 @@ define(['jquery', 'underscore'], function($, _) {
             top: offset.top + POSITION_OFFSET.top,
             left: offset.left + POSITION_OFFSET.left
         });
+        this.el.show();
+
+        //force reflow
+        this.el[0].offsetWidth;
         this.el.addClass('in');
     };
 
     Tooltip.prototype.hide = function() {
-        this.el.removeClass('in');
+        var el = this.el.removeClass('in');
+
+        if ($.support.transition) {
+            this.el.one($.support.transition.end, function() {
+                el.hide();
+            });
+        }
     };
 
     return Tooltip;

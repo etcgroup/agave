@@ -32,12 +32,12 @@ svg:hover .axis text {
   pointer-events: none;
 }
 .axis-title {
-  fill: #888;
+  fill: #AAA;
   text-anchor: end;
-  -webkit-transform: rotate(-90deg) translate(-5px, 14px);
-  -moz-transform: rotate(-90deg) translate(-5px, 14px);
-  -o-transform: rotate(-90deg) translate(-5px, 14px);
-  transform: rotate(-90deg) translate(-5px, 14px);
+  -webkit-transform: rotate(-90deg) translate(-10px, 14px);
+  -moz-transform: rotate(-90deg) translate(-10px, 14px);
+  -o-transform: rotate(-90deg) translate(-10px, 14px);
+  transform: rotate(-90deg) translate(-10px, 14px);
 }
 svg.histogram {
   -webkit-transition-duration: 500ms;

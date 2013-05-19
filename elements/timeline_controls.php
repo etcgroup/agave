@@ -55,10 +55,7 @@ function timeline_controls()
     </ul>
 
     <div class="annotation-help">
-        <label class="checkbox annotations-checkbox">
-            <input type="checkbox" class="annotations-toggle"/>
-            Show/Hide Annotations
-        </label>
+        <span class="add-help">click to label</span>
     </div>
 
     <ul class="legend">

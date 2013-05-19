@@ -8,8 +8,9 @@ define(['jquery',
     'vis/stack_histogram',
     'util/tooltip',
     'util/sentiment',
+    'util/rectangle',
     'lib/d3'],
-    function ($, _, extend, Transform, Poll, Timeline, Histogram, StackHistogram, Tooltip, sentiment, d3) {
+    function ($, _, extend, Transform, Poll, Timeline, Histogram, StackHistogram, Tooltip, sentiment, Rectangle, d3) {
 
         var ANNOTATION_POLL_INTERVAL = 10000;
         var AXIS_OFFSET = 3;
@@ -144,22 +145,23 @@ define(['jquery',
             };
 
             //A group for containing static annotations
-            this.ui.annotations = this.ui.chartGroup.append('g')
+            this.ui.annotations = this.ui.svg.append('svg')
                 .classed('annotations', true);
 
-            //If the user clicks on the svg, we'll begin annotation
-            var self = this;
-            this.ui.background.on('click', function () {
+            this.ui.annotationsBackground = this.ui.annotations.append('rect')
+                .classed('background', true);
 
-                //Don't propagate or the listener for outside clicks will cancel annotation mode
-                d3.event.preventDefault();
-                d3.event.stopPropagation();
+            //Add a line for showing where the annotation will fall
+            this.ui.annotationTarget = this.ui.annotations
+                .append('line')
+                .classed('annotation-target', true);
 
-                self.beginAnnotation();
+            //When the mouse moves, we need to update the annotation target
+            this.ui.annotations.on('mousemove', $.proxy(this._updateAnnotationTarget, this));
 
-                return false;
-            });
-
+            //At this point, clicking on the timeline creates a new annotation
+            this.ui.annotations.selectAll('.background,.annotation-target')
+                .on('click', $.proxy(this._createAnnotation, this));
         };
 
         /**
@@ -170,15 +172,16 @@ define(['jquery',
 
             this.annotations = result.data;
 
-            var boxHeight = this.boxes.inner.height();
+            var boxHeight = this.boxes.annotations.height();
 
             //Bind the new annotations data
-            var bind = this.ui.annotations.selectAll('rect')
+            var bind = this.ui.annotations.selectAll('rect.annotation')
                 .data(this.annotations);
 
             var self = this;
             //Add any new annotations
             bind.enter().append('rect')
+                .classed('annotation', true)
                 .attr('y', 0)
                 .attr('width', 2)
                 .on('mousemove', function (d) {
@@ -234,11 +237,18 @@ define(['jquery',
          * @private
          */
         FocusTimeline.prototype._updateAnnotations = function () {
-            var boxHeight = this.boxes.inner.height();
+            var boxHeight = this.boxes.annotations.height();
 
             var self = this;
 
             var annotations = this.ui.annotations;
+
+            //Resize the svg and background
+            annotations.call(this.boxes.annotations);
+            this.ui.annotationsBackground
+                .attr('width', this.boxes.annotations.width())
+                .attr('height', this.boxes.annotations.height());
+
             if (this.display.annotations()) {
                 annotations
                     .style('display', 'inline')
@@ -253,7 +263,7 @@ define(['jquery',
                     });
             }
 
-            annotations.selectAll('rect')
+            annotations.selectAll('rect.annotation')
                 .classed('highlight', function (d) {
                     return d.id in self._brushedAnnotations;
                 })
@@ -269,6 +279,39 @@ define(['jquery',
         FocusTimeline.prototype.domain = function (domain) {
             //don't forget to translate from utc to translated time
             this._timeScale.domain(this.extentFromUTC(domain));
+        };
+
+        /**
+         * Get the margins for the inner (chart) group.
+         *
+         * We're overriding the parent to make room for the annotation bar.
+         *
+         * @returns {{left: number, right: number, top: number, bottom: number}}
+         * @private
+         */
+        FocusTimeline.prototype._getMargins = function () {
+            return {
+                left: 50,
+                right: 15,
+                top: 15,
+                bottom: 25
+            };
+        };
+
+        FocusTimeline.prototype._buildBoxes = function() {
+            Timeline.prototype._buildBoxes.call(this);
+            this.boxes.annotations = new Rectangle();
+        };
+//
+        FocusTimeline.prototype._updateBoxes = function() {
+            Timeline.prototype._updateBoxes.call(this);
+
+            this.boxes.annotations.set({
+                top: this.boxes.outer.top(),
+                left: this.boxes.inner.left(),
+                width: this.boxes.inner.width(),
+                bottom: this.boxes.inner.top() - 2
+            });
         };
 
         /**
@@ -737,68 +780,6 @@ define(['jquery',
 
 
         /**
-         * Call this to put the timeline in annotation mode.
-         */
-        FocusTimeline.prototype.beginAnnotation = function () {
-            if (this._annotationMode) {
-                //Already annotating
-                return;
-            }
-
-            if (!this.user.signed_in()) {
-                alert("You must sign in to annotate");
-                return;
-            }
-
-            this._annotationMode = true;
-            console.log('entering annotation mode');
-
-            //Hide when escape is pressed
-            var self = this;
-            $(document)
-                .on('keyup.focus-timeline.annotation', function (e) {
-                    if (e.which === 27) {
-                        self.endAnnotation();
-                    }
-                })
-                .on('click.focus-timeline.annotation', function (e) {
-                    self.endAnnotation();
-                });
-
-            //Add a new group for containing the annotation controls
-            this.ui.annotationControls = this.ui.chartGroup.append('g')
-                .style('opacity', 0)
-                .classed('annotation-controls', true);
-
-            //Add a label - we put this behind the box
-            this.ui.annotationControls
-                .append('text')
-                .attr('x', 3)
-                .attr('y', 13)
-                .text('Click to label a time');
-
-            //Add a box to show that annotation mode is active
-            this.ui.annotationIndicator = this.ui.annotationControls.append('rect')
-                .attr('width', this.boxes.inner.width())
-                .attr('height', this.boxes.inner.height());
-
-            //Add a line for showing where the annotation will fall
-            this.ui.annotationTarget = this.ui.annotationControls.append('line');
-
-            //And fade it in
-            this.ui.annotationControls
-                .transition()
-                .style('opacity', 1);
-
-            //When the mouse moves, we need to update the annotation target
-            this.ui.annotationIndicator.on('mousemove', $.proxy(this._updateAnnotationTarget, this));
-
-            //At this point, clicking on the timeline creates a new annotation
-            this.ui.annotationIndicator.on('click', $.proxy(this._createAnnotation, this));
-            this.ui.annotationTarget.on('click', $.proxy(this._createAnnotation, this));
-        };
-
-        /**
          * Called when an existing annotation is clicked.
          * @private
          */
@@ -815,8 +796,9 @@ define(['jquery',
          * @private
          */
         FocusTimeline.prototype._createAnnotation = function () {
-            if (!this._annotationMode) {
-                //Not annotating
+
+            if (!this.user.signed_in()) {
+                alert("You must sign in to annotate");
                 return;
             }
 
@@ -832,27 +814,21 @@ define(['jquery',
 
             console.log('creating annotation at time ' + time);
 
-            if (!this.user.signed_in()) {
-                alert('You must sign in to annotate.');
-            } else {
-                var label = prompt("Label this time");
 
-                if (label) {
+            var label = prompt("Label this time");
 
-                    //Send the annotation up to the server
-                    var annotation = {
-                        time: time,
-                        label: label,
-                        user: this.user.name()
-                    };
-                    this.api.annotate(annotation);
+            if (label) {
 
-                    this.trigger('new-annotation', annotation);
-                }
+                //Send the annotation up to the server
+                var annotation = {
+                    time: time,
+                    label: label,
+                    user: this.user.name()
+                };
+                this.api.annotate(annotation);
+
+                this.trigger('new-annotation', annotation);
             }
-
-            //And we're done annotating
-            this.endAnnotation();
 
             return false;
         };
@@ -863,11 +839,6 @@ define(['jquery',
          * @private
          */
         FocusTimeline.prototype._updateAnnotationTarget = function () {
-            if (!this._annotationMode) {
-                //Not annotating
-                return;
-            }
-
             //Get the coordinate of the mouse
             var x = d3.event.offsetX - this.boxes.inner.left();
 
@@ -876,34 +847,7 @@ define(['jquery',
                 .attr('x1', x)
                 .attr('x2', x)
                 .attr('y1', 0)
-                .attr('y2', this.boxes.inner.height());
-        };
-
-        /**
-         * Call this to take the timeline out of annotation mode.
-         */
-        FocusTimeline.prototype.endAnnotation = function () {
-            if (!this._annotationMode) {
-                //Not annotating
-                return;
-            }
-
-            console.log('leaving annotation mode');
-            this._annotationMode = false;
-
-            //Turn off the key and click listeners
-            $(document).off('keyup.focus-timeline.annotation')
-                .off('click.focus-timeline.annotation');
-
-            //Fade out and remove
-            this.ui.annotationControls
-                .transition()
-                .style('opacity', 0)
-                .remove();
-
-            this.ui.annotationControls = null;
-            this.ui.annotationIndicator = null;
-            this.ui.annotationTarget = null;
+                .attr('y2', this.boxes.annotations.height());
         };
 
         FocusTimeline.prototype.showSillyMessage = function(toShow) {

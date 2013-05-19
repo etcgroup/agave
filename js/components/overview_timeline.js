@@ -177,8 +177,7 @@ define(['jquery',
                 .attr('transform', new Transform('translate', this.boxes.inner.left(), this.boxes.inner.top()))
                 .call(this._brush)
                 .selectAll('rect')
-                .attr("height", this.boxes.inner.height() + 7)
-                .attr("y", -6);
+                .attr("height", this.boxes.inner.height());
         };
 
         /**

@@ -26,10 +26,9 @@
 }
 .annotation-help {
   position: absolute;
-  z-index: 10000;
-  right: 15px;
-  top: 28px;
-  color: #eeca4b;
+  right: 18px;
+  top: 32px;
+  color: #d2b340;
   text-shadow: 1px 1px 6px rgba(34, 34, 34, 0.5);
 }
 .annotation-help .add-help {
