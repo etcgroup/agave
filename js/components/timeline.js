@@ -196,7 +196,7 @@ define(['jquery',
      */
     Timeline.prototype._getMargins = function () {
         return {
-            left: 50,
+            left: 60,
             right: 15,
             top: 0,
             bottom: 25

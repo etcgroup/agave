@@ -68,11 +68,39 @@ svg {
     cursor: default;
 }
 
+.tweet-overview {
+
+    .time-selector {
+        position: absolute;
+        left: 5px;
+        top: 0px;
+
+        z-index: 20000;
+        width: 50px;
+
+        .opacity(80);
+
+        &:hover {
+            .opacity(100);
+        }
+
+        .selector-label {
+            color: #aaa;
+            font-size: 11px;
+        }
+
+        .help-icon {
+            position: absolute;
+            left: 30px;
+            top: 0px;
+        }
+    }
+}
 
 .axis-title {
     fill: #AAA;
     text-anchor: end;
-    .transform(rotate(-90deg) translate(-10px, 14px));
+    .transform(rotate(-90deg) translate(-10px, 20px));
 }
 
 .brush .extent {

@@ -288,12 +288,9 @@ define(['jquery',
          * @private
          */
         FocusTimeline.prototype._getMargins = function () {
-            return {
-                left: 50,
-                right: 15,
-                top: 15,
-                bottom: 25
-            };
+            var margins = Timeline.prototype._getMargins.call(this);
+            margins.top += 15; //make room for annotation bar
+            return margins;
         };
 
         FocusTimeline.prototype._buildBoxes = function() {
