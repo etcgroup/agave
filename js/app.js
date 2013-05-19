@@ -489,7 +489,7 @@ define(function (require) {
     App.prototype.onBrush = function(e, brushed) {
         var self = this;
         _.each(brushed, function (item) {
-            if (item.type != 'query') {
+            if (item.type !== 'query') {
                 return;
             }
 
@@ -501,7 +501,7 @@ define(function (require) {
     App.prototype.onUnBrush = function(e, brushed) {
         var self = this;
         _.each(brushed, function (item) {
-            if (item.type != 'query') {
+            if (item.type !== 'query') {
                 return;
             }
 

@@ -297,7 +297,7 @@ define(['jquery',
             Timeline.prototype._buildBoxes.call(this);
             this.boxes.annotations = new Rectangle();
         };
-//
+
         FocusTimeline.prototype._updateBoxes = function() {
             Timeline.prototype._updateBoxes.call(this);
 
@@ -484,7 +484,7 @@ define(['jquery',
                     //Show the histogram, not the stack
                     stackHistogram.hide();
 
-                    histogram.seriesClass(sentimentClass)
+                    histogram.seriesClass(sentimentClass);
                     histogram.show();
                     histogram.update(animate);
 
@@ -542,10 +542,10 @@ define(['jquery',
 
             //If some sentiment filter is in use besides all (''), then
             //we'll remove the zero-valued series
-            var data = result.data
+            var data = result.data;
             if (params.sentiment) {
                 data = data.filter(function(layer) {
-                    return layer.id == params.sentiment;
+                    return +layer.id === +params.sentiment;
                 });
             }
 
@@ -614,9 +614,12 @@ define(['jquery',
 
                 var time;
 
+                if (item.type === 'tweet') {
+                    time = item.data.created_at;
+                }
+
                 switch (item.type) {
                     case 'tweet':
-                        time = item.data.created_at;
                     case 'keyword':
                         //grab the mid-point if time not already set (by tweet case)
                         time = time || item.data.mid_point;

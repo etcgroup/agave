@@ -210,7 +210,7 @@ define(['jquery',
                 extent = [this.from, this.to];
             }
 
-            var extent = this.extentToUTC(extent);
+            extent = this.extentToUTC(extent);
 
             //When the timeline zoom/pan changes, we need to update the query object
             this.interval.set({

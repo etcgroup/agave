@@ -7,9 +7,7 @@ define(['jquery', 'components/query_controls', 'model/query'],
                 searchInput,
                 authorInput,
                 rtCheckbox,
-                minRTInput,
-                sentimentSelector,
-                updateButton;
+                sentimentSelector;
 
             var refreshUI = function() {
                 ui = $('form.query');
@@ -17,9 +15,7 @@ define(['jquery', 'components/query_controls', 'model/query'],
                 searchInput = ui.find('.query-search');
                 authorInput = ui.find('.query-author');
                 rtCheckbox = ui.find('.query-rt');
-                minRTInput = ui.find('.query-minrt');
                 sentimentSelector = ui.find('.query-sentiment');
-                updateButton = ui.find('.query-update');
             };
 
             beforeEach(function () {
@@ -33,9 +29,7 @@ define(['jquery', 'components/query_controls', 'model/query'],
                 expect(searchInput).toHaveLength(1);
                 expect(authorInput).toHaveLength(1);
                 expect(rtCheckbox).toHaveLength(1);
-                expect(minRTInput).toHaveLength(1);
                 expect(sentimentSelector).toHaveLength(1);
-                expect(updateButton).toHaveLength(1);
             });
 
             it('applies data settings to query UI', function() {
@@ -44,7 +38,6 @@ define(['jquery', 'components/query_controls', 'model/query'],
                     search: 'a search string',
                     author: '@ICanTweet',
                     rt: true,
-                    min_rt: 2,
                     sentiment: 0
                 };
 
@@ -58,7 +51,6 @@ define(['jquery', 'components/query_controls', 'model/query'],
                 expect(searchInput).toHaveValue(data.search.toString());
                 expect(authorInput).toHaveValue(data.author.toString());
                 expect(rtCheckbox).toBeChecked();
-                expect(minRTInput).toHaveValue(data.min_rt.toString());
                 expect(sentimentSelector).toHaveValue(data.sentiment.toString());
             });
 
@@ -67,7 +59,6 @@ define(['jquery', 'components/query_controls', 'model/query'],
                     search: 'a search string',
                     author: '@ICanTweet',
                     rt: true,
-                    min_rt: 2,
                     sentiment: 0
                 };
 
@@ -78,7 +69,6 @@ define(['jquery', 'components/query_controls', 'model/query'],
                 searchInput.val(data.search);
                 authorInput.val(data.author);
                 rtCheckbox.prop('checked', true);
-                minRTInput.val(data.min_rt);
                 sentimentSelector.val(data.sentiment);
 
                 //Now gather all the data
