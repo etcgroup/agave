@@ -32,7 +32,7 @@ define(['jquery',
             this._timeScale.domain(staticExtent);
 
             //Subscribe to a data stream from the API.
-            this.api.on('overview_counts', $.proxy(this._onData, this));
+            this.api.on('counts', $.proxy(this._onData, this));
 
         };
 
@@ -79,10 +79,12 @@ define(['jquery',
             var utcExtent = this.extentToUTC([this.from, this.to]);
 
             //Remember to subtract the UTC offset before sending out times
-            this.api.overview_counts({
+            this.api.counts({
+                query_id: 'overview',
                 from: utcExtent[0],
                 to: utcExtent[1],
-                interval: this._binSize
+                interval: this._binSize,
+                split_sentiment: false
             });
         };
 
@@ -94,6 +96,10 @@ define(['jquery',
          * @private
          */
         OverviewTimeline.prototype._onData = function (e, result) {
+            if (result.params.query_id !== 'overview') {
+                return;
+            }
+
             var data = result.data; //data
 
             //Bind the data to the histogram first

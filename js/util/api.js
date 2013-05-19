@@ -5,7 +5,6 @@ define(['jquery', 'underscore', 'util/events'], function ($, _, events) {
      */
     var URLS = {
         'counts': 'data/counts.php',
-        'overview_counts': 'data/overview_counts.php',
         'discussions': 'data/discussions.php',
         'messages': 'data/messages.php',
         'tweets': 'data/tweets.php',
@@ -166,21 +165,6 @@ define(['jquery', 'underscore', 'util/events'], function ($, _, events) {
             },
             //Have to make sure requests for different queries don't get crossed
             request_name: 'counts-' + queryId
-        });
-    };
-
-    /**
-     * Request tweet counts. Subscribe to the overview_counts event
-     * to receive the data when it arrives.
-     *
-     * @param parameters
-     */
-    API.prototype.overview_counts = function (parameters) {
-        this.request('get', 'overview_counts', {
-            params: parameters,
-            post_process: function (results) {
-                return results.payload;
-            }
         });
     };
 

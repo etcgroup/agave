@@ -102,7 +102,7 @@ define(['jquery',
                     interval: self._binSize * 1000,
                     search: query.search(),
                     rt: query.rt(),
-                    min_rt: query.min_rt(),
+//                    min_rt: query.min_rt(),
                     author: query.author(),
                     sentiment: query.sentiment()
                 });
@@ -517,6 +517,10 @@ define(['jquery',
         FocusTimeline.prototype._onData = function (e, result) {
 
             var params = result.params; //request info
+
+            if (!(params.query_id in this.queries)) {
+                return;
+            }
 
             //Stop the spinner
             this.loader.stop(params.query_id);
