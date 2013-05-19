@@ -42,6 +42,11 @@ define(['jquery', 'util/events', 'util/loader'], function ($, events, loader) {
         this.loader.stop();
 
         this.ui.discussionList.html(result.data);
+        
+       this.ui.discussionList.find('.tooltip-me').tooltip({
+                container: this.into,
+                animation: false
+            }); 
     };
 
     DiscussionList.prototype._newDiscussion = function() {

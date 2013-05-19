@@ -1,15 +1,27 @@
+@media all and (max-width: 1100px) {
+  .legend {
+    width: 43%;
+  }
+  .legend > li {
+    width: 25%;
+  }
+  .mode-switch-buttons {
+    width: 57%;
+  }
+  .mode-switch-buttons > li {
+    width: 20%;
+  }
+}
 .legend {
   float: right;
   list-style: none;
   padding: 0;
   margin: 0;
-  width: 43%;
 }
 .legend > li {
-  float: left;
+  float: right;
   padding: 8px 8px;
   color: #ccc;
-  width: 25%;
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
@@ -54,10 +66,8 @@
 /* Mode switch button styles */
 .mode-switch-buttons {
   float: left;
-  width: 57%;
 }
 .mode-switch-buttons > li {
-  width: 20%;
   overflow: hidden;
   white-space: nowrap;
 }

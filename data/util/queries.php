@@ -471,6 +471,25 @@ class Queries
     }
 
     /**
+     * Gets a specific tweet
+     *
+     *
+     * @returns the tweet
+     */
+    public function get_tweet($id)
+    {
+        $builder = new Builder('tweet');
+
+        $builder->select("* from tweets");
+        $binder = new Binder();
+        $id = $binder->param('id', $id);
+
+        $builder->where("id", "=", $id);
+        return $this->run2($builder, $binder);
+    }
+
+
+    /**
      * Gets tweets in the specified interval.
      *
      * @param DateTime $start_datetime
