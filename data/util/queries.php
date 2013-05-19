@@ -663,32 +663,6 @@ class Queries
         return $this->run2($builder, $binder);
     }
 
-
-    /**
-     * Grabs the keyword terms
-     *
-     *
-     *
-     *
-     *
-     *
-     */
-    private function _build_burst_keywords()
-    {
-        $this->prepare('burst_keywords',
-            "SELECT * FROM burst_keywords 
-            WHERE window_size=?
-            AND ((UNIX_TIMESTAMP(mid_point)+ window_size/2 >= UNIX_TIMESTAMP(?) AND UNIX_TIMESTAMP(mid_point) + window_size/2 <= UNIX_TIMESTAMP(?))
-            OR (UNIX_TIMESTAMP(mid_point)- window_size/2 >= UNIX_TIMESTAMP(?) AND UNIX_TIMESTAMP(mid_point) - window_size/2 <= UNIX_TIMESTAMP(?)))
-            ORDER BY COUNT_PERCENT_DELTA DESC 
-            LIMIT ?
-            ",
-            'issssi'
-        );
-
-
-    }
-
     /**
      * Grabs the top burst keywords
      *
@@ -713,6 +687,7 @@ class Queries
         $builder->select('*, UNIX_TIMESTAMP(mid_point) AS mid_point');
         $builder->from('burst_keywords');
         $builder->order_by('count_percent_delta', 'DESC');
+        $builder->limit($limit);
 
         //Declare the parameters
         $binder = new Binder();
