@@ -231,9 +231,25 @@ define(['lib/d3', 'underscore',
                     this._stacked_data = this._stack(this._raw_data);
                 }
 
+                var data = this._stacked_data;
+                if (Histogram.USE_VISIBLE_SECTION) {
+                    //Select the part of the data we are showing
+                    var firstGroupValues = data[0].values;
+                    var visibleRange = this._visibleRange(firstGroupValues);
+                    if (visibleRange) {
+                        var self = this;
+                        data = data.map(function(grp) {
+                            return {
+                                id: grp.id,
+                                values: grp.values.slice(visibleRange[0], visibleRange[1])
+                            };
+                        });
+                    }
+                }
+
                 //Bind the new data
                 var bind = this._target.selectAll('path')
-                .data(this._stacked_data);
+                .data(data);
 
                 //Add any needed paths
                 bind.enter()

@@ -1,11 +1,11 @@
 define(['lib/d3', 'underscore',
     'util/rectangle'],
-    function(d3, _, Rectangle) {
+    function (d3, _, Rectangle) {
 
         /**
          * Basic histogram visualization, created via an area chart.
          */
-        var Histogram = function() {
+        var Histogram = function () {
             var self = this;
 
             this._showing = false;
@@ -31,11 +31,11 @@ define(['lib/d3', 'underscore',
             this._flipped = false;
 
             //Function that retrieves the x dimension from the data
-            this._xAccessor = function(d) {
+            this._xAccessor = function (d) {
                 return d.time;
             };
             //Function that retrieves the y dimension from the data
-            this._yAccessor = function(d) {
+            this._yAccessor = function (d) {
                 return d.count;
             };
 
@@ -45,10 +45,10 @@ define(['lib/d3', 'underscore',
 
             //Immutable functions for scaling the x and y data, not meant to be changed.
             //Only the scales and the accessors should be changeable.
-            var _scaledX = function(d) {
+            var _scaledX = function (d) {
                 return self._xScale(self._xAccessor(d));
             };
-            var _scaledY = function(d) {
+            var _scaledY = function (d) {
                 return self._yScale(self._yAccessor(d));
             };
 
@@ -63,14 +63,16 @@ define(['lib/d3', 'underscore',
                 .y(_scaledY);
         };
 
+        Histogram.USE_VISIBLE_SECTION = false;
+
         _.extend(Histogram.prototype, {
 
-            bold: function(bolded) {
+            bold: function (bolded) {
                 this._target.select("path")
                     .classed('bold', bolded);
             },
 
-            line: function(useLine) {
+            line: function (useLine) {
                 if (!arguments.length) {
                     return this._useLine;
                 }
@@ -78,7 +80,7 @@ define(['lib/d3', 'underscore',
                 return this;
             },
 
-            seriesClass: function(className) {
+            seriesClass: function (className) {
                 if (!arguments.length) {
                     return this._seriesClass;
                 }
@@ -89,7 +91,7 @@ define(['lib/d3', 'underscore',
             /**
              * Update the scales based on the data
              */
-            _updateScales: function() {
+            _updateScales: function () {
                 //Redo the x range in case the box has changed
                 this._xScale.range([0, this._box.width()]);
 
@@ -108,7 +110,7 @@ define(['lib/d3', 'underscore',
             /**
              * Render the histogram background elements.
              */
-            _renderTarget: function() {
+            _renderTarget: function () {
 
                 //Add an svg document. It is ok if this is nested inside another svg.
                 this._svg = this._container.append('svg');
@@ -120,11 +122,11 @@ define(['lib/d3', 'underscore',
             /**
              * Make the histogram invisible.
              */
-            hide: function() {
+            hide: function () {
                 var self = this;
                 this._showing = false;
                 this._svg.classed('in', false);
-                this._showHideTimeout = setTimeout(function() {
+                this._showHideTimeout = setTimeout(function () {
                     self._svg.style('display', 'none');
                 }, 500);
             },
@@ -132,7 +134,7 @@ define(['lib/d3', 'underscore',
             /**
              * Make the histogram visible.
              */
-            show: function() {
+            show: function () {
                 this._showing = true;
 
                 if (this._showHideTimeout) {
@@ -146,14 +148,14 @@ define(['lib/d3', 'underscore',
                 this._svg.classed('in', true);
             },
 
-            isShowing: function() {
+            isShowing: function () {
                 return this._showing;
             },
 
             /**
              * Render the histogram.
              */
-            render: function() {
+            render: function () {
                 this._renderTarget();
 
                 this._updateScales();
@@ -166,7 +168,7 @@ define(['lib/d3', 'underscore',
             /**
              * Update the histogram.
              */
-            update: function(animate) {
+            update: function (animate) {
                 if (animate === undefined) {
                     animate = true;
                 }
@@ -179,7 +181,7 @@ define(['lib/d3', 'underscore',
             /**
              * Update the size of the target, if the box size has changed.
              */
-            _updateTarget: function() {
+            _updateTarget: function () {
                 this._svg.call(this._box);
 
                 this._svg.attr('class', this._className, true);
@@ -189,7 +191,7 @@ define(['lib/d3', 'underscore',
             /**
              * Add the path element for rendering the area.
              */
-            _renderPath: function() {
+            _renderPath: function () {
                 var path = this._target.append("path");
 
                 this._updatePath(false);
@@ -198,7 +200,20 @@ define(['lib/d3', 'underscore',
             /**
              * Update the path using the area generator.
              */
-            _updatePath: function(animate) {
+            _updatePath: function (animate) {
+                var data = this.data();
+                if (data) {
+                    if (Histogram.USE_VISIBLE_SECTION) {
+                        //Select the part of the data we are showing
+                        var visibleRange = this._visibleRange(data);
+                        if (visibleRange) {
+                            data = data.slice(visibleRange[0], visibleRange[1]);
+                        }
+                    }
+                    //Bind the data to the target
+                    this._target.datum(data);
+                }
+
                 var path = this._target.select("path");
                 path.attr('class', this._seriesClass);
 
@@ -212,7 +227,7 @@ define(['lib/d3', 'underscore',
                 path.classed(classToSet, true);
 
                 //Only update if there is data
-                if (this.data()) {
+                if (this._target.datum()) {
                     //Adjust the path to fit the data
                     if (animate) {
                         path.transition()
@@ -224,9 +239,48 @@ define(['lib/d3', 'underscore',
             },
 
             /**
+             * Returns an array [from, to] referring to the segment of the input
+             * array that is inside the visible part of the histogram.
+             * @param data
+             * @private
+             */
+            _visibleRange: function (data) {
+                var from = 0, to = data.length, time;
+                var visible = this._xScale.domain();
+                var shrunk = false;
+
+                //Find the start time
+                for (var i = 0; i < data.length; i++) {
+                    time = this._xAccessor(data[i]);
+                    if (time < visible[0]) {
+                        from = i;
+                        shrunk = true;
+                    } else {
+                        //save the last time that was before the range
+                        break;
+                    }
+                }
+
+                for (var i = data.length - 1; i >= 0; i--) {
+                    time = this._xAccessor(data[i]);
+                    if (time > visible[1]) {
+                        to = i;
+                        shrunk = true;
+                    } else {
+                        //Save the last time that was after the range
+                        break;
+                    }
+                }
+
+                if (shrunk) {
+                    return [from, to];
+                }
+            },
+
+            /**
              * Auto size the x scale domain to the data.
              */
-            xScaleDomainAuto: function(data) {
+            xScaleDomainAuto: function (data) {
                 this._xScale.domain(d3.extent(data, this._xAccessor));
                 return this;
             },
@@ -234,7 +288,7 @@ define(['lib/d3', 'underscore',
             /**
              * Auto size the y scale domain to the data.
              */
-            yScaleDomainAuto: function(data, autoBaseline) {
+            yScaleDomainAuto: function (data, autoBaseline) {
                 if (!autoBaseline) {
                     this._yScale.domain([0, d3.max(data, this._yAccessor)]);
                 } else {
@@ -253,7 +307,7 @@ define(['lib/d3', 'underscore',
              *
              * An svg element will be added to the container.
              */
-            container: function(selection) {
+            container: function (selection) {
                 if (!arguments.length) {
                     return this._container;
                 }
@@ -264,26 +318,26 @@ define(['lib/d3', 'underscore',
             /**
              * Get or set the data for the histogram
              */
-            data: function(data) {
+            data: function (data) {
                 if (!arguments.length) {
-                    return this._target.datum();
+                    return this._data;
                 }
 
-                this._target.datum(data);
+                this._data = data;
                 return this;
             },
 
             /**
              * Get the histogram's render target.
              */
-            target: function() {
+            target: function () {
                 return this._target;
             },
 
             /**
              * Get or set the classname that will be added to the histogram's svg element.
              */
-            className: function(value) {
+            className: function (value) {
                 if (!arguments.length) {
                     return this._className;
                 }
@@ -295,7 +349,7 @@ define(['lib/d3', 'underscore',
             /**
              * Get or set whether or not the histogram is flipped vertically.
              */
-            flipped: function(flipped) {
+            flipped: function (flipped) {
                 if (!arguments.length) {
                     return this._flipped;
                 }
@@ -306,7 +360,7 @@ define(['lib/d3', 'underscore',
             /**
              * Get or set the interpolation mode for the histogram area.
              */
-            interpolate: function(value) {
+            interpolate: function (value) {
                 if (!arguments.length) {
                     return this._area.interpolate();
                 }
@@ -319,7 +373,7 @@ define(['lib/d3', 'underscore',
             /**
              * Get or set the histogram box.
              */
-            box: function(value) {
+            box: function (value) {
                 if (!arguments.length) {
                     return this._box;
                 }
@@ -330,7 +384,7 @@ define(['lib/d3', 'underscore',
             /**
              * Get or set the x accessor function.
              */
-            xData: function(fun) {
+            xData: function (fun) {
                 if (!arguments.length) {
                     return this._xAccessor;
                 }
@@ -341,7 +395,7 @@ define(['lib/d3', 'underscore',
             /**
              * Get or set the y accessor function.
              */
-            yData: function(fun) {
+            yData: function (fun) {
                 if (!arguments.length) {
                     return this._yAccessor;
                 }
@@ -352,7 +406,7 @@ define(['lib/d3', 'underscore',
             /**
              * Get or set the x scale.
              */
-            xScale: function(scale) {
+            xScale: function (scale) {
                 if (!arguments.length) {
                     return this._xScale;
                 }
@@ -363,7 +417,7 @@ define(['lib/d3', 'underscore',
             /**
              * Get or set the y scale.
              */
-            yScale: function(scale) {
+            yScale: function (scale) {
                 if (!arguments.length) {
                     return this._yScale;
                 }
