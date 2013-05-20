@@ -2,7 +2,9 @@ define(['underscore', 'util/events', 'util/functions'], function(_, events, func
 
     var DATA_DEFAULTS = {
         from: 0,
-        to: 1
+        to: 1,
+        min: 0,
+        max: 1
     };
 
     /**
@@ -48,6 +50,82 @@ define(['underscore', 'util/events', 'util/functions'], function(_, events, func
      * @param silent don't trigger an event
      */
     Interval.prototype.to = functions.evented_mutator('data', 'to');
+
+    /**
+     * Centers the current window around a specific time frame with adjusting the window size
+     *
+     * @param search
+     * @param silent don't trigger an event
+     */
+    Interval.prototype.centerAround = function(time) {
+        var intervalWidth = this.to() - this.from();
+
+        this.set({
+            from: time - (intervalWidth * 0.5),
+            to: time + (intervalWidth * 0.5)
+        });
+    }
+
+
+    /**
+     * Gets/sets the minimum value
+     *
+     * @param val value to assign to min
+     */
+     Interval.prototype.min = function(val) {
+        if(!arguments.length) {
+            return this.min;
+        } else {
+            this.min = val;
+        }
+     }
+
+    /**
+     * Gets/sets the maximum value
+     *
+     * @param val value to assign to max
+     */
+     Interval.prototype.max = function(val) {
+        if(!arguments.length) {
+            return this.max;
+        } else {
+            this.max = val;
+        }
+     }
+
+    /**
+     * Sets the range
+     *
+     */
+     Interval.prototype.setRange = function(min,max) {
+        this.min = min;
+        this.max = max;
+     }
+
+
+     /**
+      * Gets the extent
+      *
+      */
+     Interval.prototype.getExtent = function() {
+        return [
+            this.from,
+            this.to
+        ];
+     }
+
+
+     /**
+      * Gets the range (min/max) extent
+      *
+      */
+     Interval.prototype.getRangeExtent = function() {
+        return [
+            this.min,
+            this.max
+        ];
+     }
+
 
     //Mix in events
     events(Interval);

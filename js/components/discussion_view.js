@@ -260,13 +260,8 @@ define(['jquery',
                 break;
         }
 
-        //var curInterval = this.interval.get();
-        var intervalWidth = this.interval.to() - this.interval.from();
-
-        this.interval.set({
-            from: time - (intervalWidth * 0.5),
-            to: time + (intervalWidth * 0.5)
-        });
+        // center the interval around the time of the tweet or annotation
+        this.interval.centerAround( time );
 
         //Send it out through the normal channels, in case anyone else is watching
         this.api.trigger('reference-selected', {

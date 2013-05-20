@@ -47,11 +47,6 @@ define(['jquery',
 
             this._brushedAnnotations = {};
 
-            //Store offset time internally
-            var staticExtent = this.extentFromUTC([options.from, options.to]);
-            this.from = staticExtent[0];
-            this.to = staticExtent[1];
-
             //Create a vertical scale
             this._countScale = d3.scale.linear();
 

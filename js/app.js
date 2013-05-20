@@ -82,7 +82,10 @@ define(function (require) {
         this.display = new Display();
         this.display.on('change', $.proxy(this.displayChanged, this));
 
-        this.interval = new Interval();
+        this.interval = new Interval({
+            min: this.config.overview_from * 1000,
+            max: this.config.overview_to * 1000
+        });
         this.interval.on('change', $.proxy(this.intervalChanged, this));
 
         //The query collection
