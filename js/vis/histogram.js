@@ -63,7 +63,7 @@ define(['lib/d3', 'underscore',
                 .y(_scaledY);
         };
 
-        Histogram.USE_VISIBLE_SECTION = false;
+        Histogram.USE_VISIBLE_SECTION = true;
 
         _.extend(Histogram.prototype, {
 
