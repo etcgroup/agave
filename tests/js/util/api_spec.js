@@ -67,17 +67,18 @@ define(['util/api', 'jquery'], function(API, $) {
             //Just prevent ajax calls
             spyOn($, 'ajax').andReturn(myResponse);
 
-            spyOnEvent(api, 'counts');
+            var handler = jasmine.createSpy();
+            api.on('counts', handler);
 
             api.request('get', 'counts');
 
-            expect('counts').not.toHaveBeenTriggeredOn(api);
+            expect(handler).not.toHaveBeenCalled();
 
             myResponse.resolve({
                 payload: 'asdf'
             });
 
-            expect('counts').toHaveBeenTriggeredOn(api);
+            expect(handler).toHaveBeenCalled();
         });
 
         it('can make new kinds of requests', function() {
@@ -86,7 +87,8 @@ define(['util/api', 'jquery'], function(API, $) {
             //Just prevent ajax calls
             spyOn($, 'ajax').andReturn(myResponse);
 
-            spyOnEvent(api, 'newrequest');
+            var handler = jasmine.createSpy();
+            api.on('newrequest', handler);
 
             var requester = function() {};
 
@@ -100,7 +102,7 @@ define(['util/api', 'jquery'], function(API, $) {
                 payload: 'asdf'
             });
 
-            expect('newrequest').toHaveBeenTriggeredOn(api);
+            expect(handler).toHaveBeenCalled();
 
             expect($.ajax).toHaveBeenCalledWith({
                 url: 'http://example.com',

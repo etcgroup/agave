@@ -52,11 +52,11 @@ define(['jquery', 'util/events'],
 
                 foo.trigger('asdf');
 
-                expect(event).toEqual(jasmine.any($.Event));
+                expect(event).toBeTruthy();
                 expect(args).toEqual([]);
 
                 foo.trigger('asdf', 'a', 'b', 'c');
-                expect(event).toEqual(jasmine.any($.Event));
+                expect(event).toBeTruthy();
                 expect(args).toEqual(['a', 'b', 'c']);
             });
 
@@ -70,7 +70,7 @@ define(['jquery', 'util/events'],
                     callCount++;
                 };
 
-
+                $.proxy();
                 foo.on('asdf', callback);
                 foo.trigger('asdf');
                 expect(callCount).toEqual(1);
