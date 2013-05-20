@@ -48,11 +48,6 @@ define(['jquery',
 
             this._brushedAnnotations = {};
 
-            //Store offset time internally
-            var staticExtent = this.extentFromUTC([options.from, options.to]);
-            this.from = staticExtent[0];
-            this.to = staticExtent[1];
-
             //Create a vertical scale
             this._countScale = d3.scale.linear();
 
@@ -93,7 +88,7 @@ define(['jquery',
                 self.loader.start(query.id());
 
                 //TODO: make this actually the right parameters
-                var utcExtent = self.extentToUTC([self.from, self.to]);
+                var utcExtent = self.interval.getRangeExtent();
 
                 //The interval doesn't need to be translated because it is already in UTC
                 self.api.counts({

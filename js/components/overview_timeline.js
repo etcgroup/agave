@@ -35,11 +35,7 @@ define(['jquery',
             Timeline.call(this, options);
 
             //Store offset time internally
-            var staticExtent = this.extentFromUTC([options.from, options.to]);
-            this.from = staticExtent[0];
-            this.to = staticExtent[1];
-            this.from_utc = options.from;
-            this.to_utc = options.to;
+            var staticExtent = this.extentFromUTC(this.interval.getRangeExtent());
 
             //Set up the x axis domain, which stays constant, in offset time
             this._timeScale.domain(staticExtent);
@@ -85,19 +81,17 @@ define(['jquery',
             //Call the parent method
             Timeline.prototype._onIntervalChanged.call(this, interval, field);
 
-            var utc = [interval.from(), interval.to()];
+            var utc = this.interval.getExtent();
             var local = this.extentFromUTC(utc);
 
-            if (local[0] === this.from &&
-                local[1] === this.to) {
-                //Clear the rectangle
+            var rangeExtent = this.interval.getRangeExtent();
+            if(utc[0] === rangeExtent[0] &&
+                utc[1] === rangeExtent[1]) {
                 this._brush.clear();
-                utc = [this.from_utc, this.to_utc];
-                local = [this.from, this.to];
             } else {
-                //Move the rectangle
                 this._brush.extent(local);
             }
+
             //Let other people know we moved
             this.trigger('selection-change', utc);
 
@@ -250,8 +244,8 @@ define(['jquery',
                 .on("brushend", $.proxy(this._onBrushEnd, this));
 
             //Check if there is a selection
-            var selectionInterval = this.extentFromUTC([this.interval.from(), this.interval.to()]);
-            var staticDomain = [this.from, this.to];
+            var selectionInterval = this.extentFromUTC(this.interval.getExtent());
+            var staticDomain = this.extentFromUTC(this.interval.getRangeExtent());
             if (!_.isEqual(staticDomain, selectionInterval)) {
                 this._brush.extent(selectionInterval);
             }
@@ -291,8 +285,7 @@ define(['jquery',
                 this.trigger('selection-change', this.extentToUTC(this._brush.extent()));
             } else {
                 //Notify the outside about our selection (in utc time)
-                var utcSelection = this.extentToUTC([this.from, this.to]);
-                this.trigger('selection-change', utcSelection);
+                this.trigger('selection-change', this.interval.getRangeExtent());
             }
         };
 
@@ -301,7 +294,7 @@ define(['jquery',
             var extent = this._brush.extent();
 
             if (this._brush.empty()) {
-                extent = [this.from, this.to];
+                extent = this.interval.getRangeExtent();
             }
 
             extent = this.extentToUTC(extent);

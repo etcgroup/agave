@@ -19,6 +19,7 @@ ul.item-list {
     border-bottom: 1px solid #585858;
     padding: 12px;
     position: relative;
+    overflow-wrap: break-word;
 
     -webkit-transition: background 200ms ;
     -moz-transition: background 200ms ;

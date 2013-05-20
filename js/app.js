@@ -82,8 +82,12 @@ define(function (require) {
         this.display = new Display();
         this.display.on('change', $.proxy(this.displayChanged, this));
 
-        this.interval = new Interval();
+        this.interval = new Interval({
+            min: this.config.overview_from * 1000,
+            max: this.config.overview_to * 1000
+        });
         this.interval.on('change', $.proxy(this.intervalChanged, this));
+
 
         //The query collection
         this.queries = [];
@@ -101,6 +105,7 @@ define(function (require) {
             //When the model changes, we need to know
             query.on('change', $.proxy(self.queryUpdated, self));
         });
+       
     };
 
     /**
@@ -168,8 +173,6 @@ define(function (require) {
             queries: this.queries,
             interval: this.interval,
             display: this.display,
-            from: this.config.overview_from * 1000,
-            to: this.config.overview_to * 1000,
             binSize: this.config.bin_size * 1000,
             desiredBins: 400,
             utcOffset: this.config.utc_offset_millis
@@ -197,8 +200,6 @@ define(function (require) {
             queries: this.queries,
             interval: this.interval,
             display: this.display,
-            from: this.config.overview_from * 1000,
-            to: this.config.overview_to * 1000,
             binSize: this.config.bin_size * 1000,
             desiredBins: 200,
             utcOffset: this.config.utc_offset_millis
