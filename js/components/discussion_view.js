@@ -159,7 +159,10 @@ define(['jquery',
         if (!this.isShowing() || !this._referenceMode) {
             // TODO: this isn't the best place for this, but its the only listener for
             // reference-selected and its the only one that knows about insert mode
-            this.interval.centerAround(result.data.created_at);
+            // also ignore annotations for the moment
+            if(result.type == "tweet") {
+                this.interval.centerAround(result.data.created_at);
+            }
             return;
         }
 
