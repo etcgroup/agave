@@ -58,11 +58,26 @@ define(['underscore', 'util/events', 'util/functions'], function(_, events, func
      * @param silent don't trigger an event
      */
     Interval.prototype.centerAround = function(time) {
+        var maxWidth = this.max() - this.min();
         var intervalWidth = this.to() - this.from();
 
+        // force the range to be at most the max range possible
+        intervalWidth = (intervalWidth > maxWidth) ? maxWidth : intervalWidth;
+
+        var from = time - (intervalWidth * 0.5);
+        var to = time + (intervalWidth * 0.5);
+
+        if( from < this.data.min ) {
+            from = this.data.min;
+            to = from + intervalWidth;
+        } else if( to > this.data.max ) {
+            to = this.data.max;
+            from = to - intervalWidth;
+        }
+
         this.set({
-            from: time - (intervalWidth * 0.5),
-            to: time + (intervalWidth * 0.5)
+            from: from,
+            to: to
         });
     }
 
