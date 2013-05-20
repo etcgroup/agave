@@ -245,7 +245,6 @@ define(['jquery',
 
             //Check if there is a selection
             var selectionInterval = this.extentFromUTC(this.interval.getExtent());
-            //var staticDomain = [this.from, this.to];
             var staticDomain = this.extentFromUTC(this.interval.getRangeExtent());
             if (!_.isEqual(staticDomain, selectionInterval)) {
                 this._brush.extent(selectionInterval);

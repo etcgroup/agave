@@ -87,9 +87,9 @@ define(['underscore', 'util/events', 'util/functions'], function(_, events, func
      */
      Interval.prototype.max = function(val) {
         if(!arguments.length) {
-            return this.max;
+            return this.data.max;
         } else {
-            this.max = val;
+            this.data.max = val;
         }
      }
 
@@ -98,8 +98,8 @@ define(['underscore', 'util/events', 'util/functions'], function(_, events, func
      *
      */
      Interval.prototype.setRange = function(min,max) {
-        this.min = min;
-        this.max = max;
+        this.data.min = min;
+        this.data.max = max;
      }
 
 
@@ -109,8 +109,8 @@ define(['underscore', 'util/events', 'util/functions'], function(_, events, func
       */
      Interval.prototype.getExtent = function() {
         return [
-            this.from,
-            this.to
+            this.data.from,
+            this.data.to
         ];
      }
 
@@ -121,8 +121,8 @@ define(['underscore', 'util/events', 'util/functions'], function(_, events, func
       */
      Interval.prototype.getRangeExtent = function() {
         return [
-            this.min,
-            this.max
+            this.data.min,
+            this.data.max
         ];
      }
 
