@@ -14,6 +14,7 @@ define(['jquery',
         this.into = options.into || $('<div>');
         this.api = options.api;
         this.user = options.user;
+        this.interval = options.interval;
 
         this.discussion_id = null;
 
@@ -242,6 +243,7 @@ define(['jquery',
         var type = getReferenceType(refUI);
         var id = refUI.data('id');
         var text = refUI.html();
+        var time = 0;
 
         var reference = {
             id: id
@@ -254,14 +256,24 @@ define(['jquery',
             case 'tweet':
                 //reference.text = text;
                 reference = this.tweets[id];
+                time = reference.created_at;
                 break;
         }
+
+        //var curInterval = this.interval.get();
+        var intervalWidth = this.interval.to() - this.interval.from();
+
+        this.interval.set({
+            from: time - (intervalWidth * 0.5),
+            to: time + (intervalWidth * 0.5)
+        });
 
         //Send it out through the normal channels, in case anyone else is watching
         this.api.trigger('reference-selected', {
             type: type,
             data: reference
         });
+
     };
 
     DiscussionView.prototype._onData = function(e, result) {
