@@ -128,9 +128,7 @@ define(['lib/d3', 'underscore',
                     }
 
                     //Re-stack the data (force a restack)
-                    if (this._raw_data) {
-                        this._stacked_data = null;
-                    }
+                    this._stacked_data = null;
                 }
                 return this;
             },
@@ -142,9 +140,16 @@ define(['lib/d3', 'underscore',
                 //Redo the x scale range
                 this._xScale.range([0, this._box.width()]);
 
-                var stacked = this._stacked_data;
+
                 //Redo the y scale domain
-                if (stacked) {
+                if (this._raw_data) {
+
+                    if (!this._stacked_data) {
+                        this._stacked_data = this._stack(this._raw_data);
+                    }
+
+                    var stacked = this._stacked_data;
+
                     var lastGroupValues = this._groupValuesAccessor(stacked[stacked.length - 1]);
                     var firstGroupValues = this._groupValuesAccessor(stacked[0]);
                     var min = d3.min(firstGroupValues, function(d) {
