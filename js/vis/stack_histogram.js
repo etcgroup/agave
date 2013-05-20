@@ -127,9 +127,9 @@ define(['lib/d3', 'underscore',
                         this._area.defined(function () {return true;});
                     }
 
-                    //Re-stack the data
+                    //Re-stack the data (force a restack)
                     if (this._raw_data) {
-                        this._stacked_data = this._stack(this._raw_data);
+                        this._stacked_data = null;
                     }
                 }
                 return this;
@@ -202,7 +202,7 @@ define(['lib/d3', 'underscore',
                 }
 
                 //Stack the data
-                this._stacked_data = this._stack(data);
+                this._stacked_data = null;
                 this._raw_data = data;
                 return this;
             },
@@ -213,8 +213,12 @@ define(['lib/d3', 'underscore',
              */
             _updatePath: function(animate) {
                 //Only update if we have data ready
-                if (!this._stacked_data) {
+                if (!this._raw_data) {
                     return;
+                }
+
+                if (!this._stacked_data) {
+                    this._stacked_data = this._stack(data);
                 }
 
                 //Bind the new data
