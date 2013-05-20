@@ -588,14 +588,14 @@ define(['jquery',
                     } else if (index in cache.layers) {
 
                         var downsampled = cache.layers[index];
-                        if (self._downsamplingFactor !== 1) {
+//                        if (self._downsamplingFactor !== 1) {
                             downsampled = cache.layers[index].map(function (layer) {
                                 return {
                                     id: layer.id,
                                     values: sampling.downsample(layer.values, self._downsamplingFactor)
                                 };
                             });
-                        }
+//                        }
 
                         stackHistogram.data(downsampled);
                         stackHistogram.expand(toExpand);

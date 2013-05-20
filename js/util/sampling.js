@@ -20,26 +20,28 @@ define([], function() {
         var inputLen = dataSeries.length;
         var outputLen = Math.ceil(inputLen / samplingFactor);
 
+        var wingSize = samplingFactor; // the number of bins on either side of the center of the window
         //Initialize the output array
         for (var outputIdx = 0; outputIdx < outputLen; outputIdx++) {
+
+            //Initialize the window
             var reversedIdx = outputIdx * samplingFactor;
-            result.push({
+            var bin = {
                 count: 0,
                 time: dataSeries[reversedIdx].time
-            });
-        }
+            };
+            result.push(bin);
 
-        var lostSamples = samplingFactor;
-        var contributingSamples = 2 * samplingFactor;
-        for (var inputIdx = 0; inputIdx < inputLen - lostSamples; inputIdx++) {
-            //what output bins do I contribute to?
+            //Determine the window
+            var from = Math.max(0, reversedIdx - wingSize),
+                to = Math.min(inputLen - 1, reversedIdx + wingSize);
 
-            var mappedIdx = inputIdx / samplingFactor;
-
-            var inputData = dataSeries[inputIdx].count / contributingSamples;
-
-            result[Math.floor(mappedIdx)].count += inputData;
-            result[Math.ceil(mappedIdx)].count += inputData;
+            //Add all the values in the window
+            for (var inputIdx = from; inputIdx < to; inputIdx++) {
+                bin.count += dataSeries[inputIdx].count;
+            }
+            //Divide by the number of counts that were added
+            bin.count /= (to - from);
         }
 
         return result;
