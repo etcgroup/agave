@@ -68,7 +68,7 @@ define([
 
 
         TweetList.prototype._tweetClicked = function(tweetUI) {
-            var tweet = tweetUI.data('tweet');
+            var tweet = tweetUI.data('item');
 
             this.api.trigger('reference-selected', {
                 type: 'tweet',

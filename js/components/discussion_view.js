@@ -157,6 +157,9 @@ define(['jquery',
 
     DiscussionView.prototype._onReferenceInserted = function(e, result) {
         if (!this.isShowing() || !this._referenceMode) {
+            // TODO: this isn't the best place for this, but its the only listener for
+            // reference-selected and its the only one that knows about insert mode
+            this.interval.centerAround(result.data.created_at);
             return;
         }
 
@@ -259,9 +262,6 @@ define(['jquery',
                 time = reference.created_at;
                 break;
         }
-
-        // center the interval around the time of the tweet or annotation
-        this.interval.centerAround( time );
 
         //Send it out through the normal channels, in case anyone else is watching
         this.api.trigger('reference-selected', {
