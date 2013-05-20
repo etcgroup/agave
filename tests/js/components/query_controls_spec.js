@@ -83,16 +83,16 @@ define(['jquery', 'components/query_controls', 'model/query'],
                     into: ui
                 });
 
-                spyOnEvent(query.model, 'change');
+                var handler = jasmine.createSpy();
+                query.model.on('change', handler);
 
-
-                expect('change').not.toHaveBeenTriggeredOn(query.model);
+                expect(handler).not.toHaveBeenCalled();
 
                 //Change something
                 searchInput.val("changing the search :)");
                 searchInput.change();
 
-                expect('change').toHaveBeenTriggeredOn(query.model);
+                expect(handler).toHaveBeenCalled();
             });
 
             it('prevents form submit by enter and fires change', function() {
@@ -100,7 +100,9 @@ define(['jquery', 'components/query_controls', 'model/query'],
                     into: ui
                 });
 
-                spyOnEvent(query.model, 'change');
+                var changeHandler = jasmine.createSpy();
+                query.model.on('change', changeHandler);
+
                 spyOnEvent(ui, 'submit');
 
                 //Change something
@@ -109,7 +111,7 @@ define(['jquery', 'components/query_controls', 'model/query'],
                 ui.submit();
 
                 expect('submit').toHaveBeenPreventedOn(ui);
-                expect('change').toHaveBeenTriggeredOn(query.model);
+                expect(changeHandler).toHaveBeenCalled();
             });
         });
     });
