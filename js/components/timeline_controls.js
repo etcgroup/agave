@@ -39,7 +39,7 @@ define(['jquery', 'underscore', 'util/events', 'model/display'], function ($, _,
         this.ui = {};
 
         this.ui.view_button_group = this.into.find('.mode-switch-buttons');
-        this.ui.view_buttons = this.ui.view_button_group.find('li');
+        this.ui.view_buttons = this.ui.view_button_group.find('a');
 
         this.ui.annotations_toggle = this.into.find('.annotations-toggle');
     };

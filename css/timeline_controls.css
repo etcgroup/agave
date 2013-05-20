@@ -59,7 +59,7 @@
   opacity: 1;
   filter: alpha(opacity=100);
 }
-.mode-switch-buttons > li.active > a .display-icon {
+.mode-switch-buttons > li.active .display-icon {
   opacity: 1;
   filter: alpha(opacity=100);
 }

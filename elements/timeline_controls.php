@@ -9,8 +9,9 @@ function timeline_controls()
         $class = isset($options['class']) ? $options['class'] : '';
         $label = $options['label'];
 
-        echo "<li class='tooltip-me {$class}' data-placement='top' data-mode='{$mode}' data-focus='{$focus}' title='{$title}'>";
-        echo "<a href='#'><i class='display-icon display-{$mode}'></i> {$label}</a>";
+        echo "<li>";
+        echo "<a class='tooltip-me {$class}' data-placement='top' data-mode='{$mode}' data-focus='{$focus}' data-animation='true' title='{$title}' href='#'>";
+        echo "<i class='display-icon display-{$mode}'></i> {$label}</a>";
         echo "</li>";
     }
 
