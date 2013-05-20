@@ -1,16 +1,33 @@
 .navbar .navbar-inner {
-    /* Simulating .navbar-fixed-top */
-    border-width: 0 0 1px;
+  /* Simulating .navbar-fixed-top */
 
-    padding-right: 0;
-    padding-left: 0;
-    -webkit-border-radius: 0;
-    -moz-border-radius: 0;
-    border-radius: 0;
+  border-width: 0 0 1px;
+  padding-right: 0;
+  padding-left: 0;
+  -webkit-border-radius: 0;
+  -moz-border-radius: 0;
+  border-radius: 0;
 }
-
 .navbar .nav > li > .title {
-    font-size: 16px;
-    font-weight: bold;
-    margin-right: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  margin-right: 10px;
+}
+.navbar .brand {
+  padding-left: 48px;
+  background: url(img/logo.png);
+  background-position: 12px center;
+  background-repeat: no-repeat;
+  background-size: 32px 32px;
+  color: #eee;
+  opacity: 0.7;
+  filter: alpha(opacity=70);
+  -webkit-transition: opacity 200ms linear;
+  -moz-transition: opacity 200ms linear;
+  -o-transition: opacity 200ms linear;
+  transition: opacity 200ms linear;
+}
+.navbar .brand:hover {
+  opacity: 1;
+  filter: alpha(opacity=100);
 }

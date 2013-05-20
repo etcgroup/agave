@@ -36,11 +36,12 @@
 }
 .mode-switch-buttons > li > a .display-icon {
   background-repeat: no-repeat;
+  background-size: contain;
   width: 26px;
   height: 17px;
   display: inline-block;
   line-height: 20px;
-  vertical-align: text-bottom;
+  vertical-align: middle;
   margin-right: 3px;
   opacity: 0.5;
   filter: alpha(opacity=50);

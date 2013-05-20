@@ -5,6 +5,9 @@
         <title>Twitter Vis!</title>
         <meta name="description" content="A neat twitter visualization">
         <meta name="viewport" content="width=device-width">
+        <link rel="icon"
+              type="image/png"
+              href="css/img/logo.png">
         <link rel="stylesheet" href="css/main.css">
     </head>
     <body>
