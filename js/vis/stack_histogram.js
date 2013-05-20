@@ -87,6 +87,14 @@ define(['lib/d3', 'underscore',
             .y1(_scaledY0)
             .y0(_scaledY);
 
+            this._defined = function(d, i) {
+                if (self._totals[i] == 0) {
+                    return false;
+                } else {
+                    return true;
+                }
+                };
+                
             this._colorValue = function(grp) {
                 return self._colorScale(self._groupIdAccessor(grp));
             };
@@ -112,9 +120,11 @@ define(['lib/d3', 'underscore',
                     this._expand = toExpand;
 
                     if (toExpand) {
-                        this._stack.offset(expand);
+                        this._stack.offset("expand");
+                        this._area.defined(this._defined);
                     } else {
                         this._stack.offset('zero');
+                        this._area.defined(function () {return true;});
                     }
 
                     //Re-stack the data
@@ -182,6 +192,11 @@ define(['lib/d3', 'underscore',
              * Get or set the data for the stacked histogram
              */
             data: function(data) {
+                
+                this._totals = [];
+                for (i = 0; i < data[0].values.length; i++) {
+                    this._totals.push(data[0].values[i].count + data[1].values[i].count + data[2].values[i].count);
+                }
                 if (!arguments.length) {
                     return this._raw_data;
                 }
@@ -215,12 +230,12 @@ define(['lib/d3', 'underscore',
                     .remove('path');
 
                 //Update the path based on the data
-                if (animate) {
-                    bind.transition()
-                        .attr('d', this._buildArea);
-                } else {
+                //if (animate) {
+                //    bind.transition()
+                //        .attr('d', this._buildArea);
+                //} else {
                     bind.attr('d', this._buildArea);
-                }
+                //}
 
                 bind.attr('class', this._colorValue)
                     .classed('area', true);
