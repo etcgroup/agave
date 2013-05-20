@@ -14,6 +14,7 @@ define(['jquery',
         this.into = options.into || $('<div>');
         this.api = options.api;
         this.user = options.user;
+        this.interval = options.interval;
 
         this.discussion_id = null;
 
@@ -200,7 +201,8 @@ define(['jquery',
 
         this.api.trigger('brush', [{
             type: type,
-            id: id
+            id: id,
+            data: this.tweets[id]
         }]);
     };
 
@@ -210,7 +212,8 @@ define(['jquery',
 
         this.api.trigger('unbrush', [{
             type: type,
-            id: id
+            id: id,
+            data: this.tweets[id]
         }]);
     };
 
@@ -240,6 +243,7 @@ define(['jquery',
         var type = getReferenceType(refUI);
         var id = refUI.data('id');
         var text = refUI.html();
+        var time = 0;
 
         var reference = {
             id: id
@@ -250,15 +254,26 @@ define(['jquery',
                 reference.label = text;
                 break;
             case 'tweet':
-                reference.text = text;
+                //reference.text = text;
+                reference = this.tweets[id];
+                time = reference.created_at;
                 break;
         }
+
+        //var curInterval = this.interval.get();
+        var intervalWidth = this.interval.to() - this.interval.from();
+
+        this.interval.set({
+            from: time - (intervalWidth * 0.5),
+            to: time + (intervalWidth * 0.5)
+        });
 
         //Send it out through the normal channels, in case anyone else is watching
         this.api.trigger('reference-selected', {
             type: type,
             data: reference
         });
+
     };
 
     DiscussionView.prototype._onData = function(e, result) {
@@ -275,6 +290,14 @@ define(['jquery',
         if (data.length === this.ui.commentList.find('.comment').length) {
             return;
         }
+
+        // add our map of the data
+        this.tweets = [];
+        var self = this;
+        result.data.tweets.forEach(function(d,i){
+            //d.created_at = Date.parse(d.created_at);
+            self.tweets[d.id] = d;
+        });
 
         //Format all the messages (looking for entities)
         data.each(function(index, element) {

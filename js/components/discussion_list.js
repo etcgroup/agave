@@ -3,6 +3,7 @@ define(['jquery', 'util/events', 'util/loader'], function ($, events, loader) {
     var DiscussionList = function (options) {
         this.api = options.api;
         this.into = options.into || $('<div>');
+        this.interval = options.interval;
 
         this._initUI();
 

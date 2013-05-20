@@ -47,7 +47,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 $rendered = array();
 
-$tweet_ids = array();
 $tweets = array();
 if ($discussion_id) {
     $result = $db->get_discussion_messages($discussion_id);
@@ -56,12 +55,11 @@ if ($discussion_id) {
 
     foreach ($result as $row) {
         $rendered[] = discussion_message($row);
-        if(preg_match_all("/T(\d{10,20})\[/", $row['message'], $matches, PREG_SET_ORDER) > 1) {
+        if(preg_match_all("/T(\d{10,20})\[/", $row['message'], $matches, PREG_SET_ORDER) > 0) {
             foreach($matches as $m) {
-                $tweet_ids[] = $m[1];
-
                 $tweet_result = $db->get_tweet($m[1]);
                 foreach($tweet_result as $row) {
+                    $row['created_at'] = $row['created_at'] * 1000;
                     $tweets[] = $row;
                 }
             }

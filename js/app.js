@@ -357,7 +357,8 @@ define(function (require) {
         this.discussionView = new DiscussionView({
             into: this.ui.discussionView,
             api: this.api,
-            user: this.user
+            user: this.user,
+            interval: this.interval
         });
 
         var self = this;
