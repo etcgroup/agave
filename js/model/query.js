@@ -1,11 +1,11 @@
 define(['underscore', 'util/events', 'util/functions'], function (_, events, functions) {
 
     var DEFAULT_DATA = {
-        search: null,
-        author: null,
+        search: '',
+        author: '',
         rt: false,
         //min_rt: 0,
-        sentiment: null
+        sentiment: ''
     };
 
     var VALID_VIEW_MODES = ['area', 'stacked', 'expand', 'hidden'];
