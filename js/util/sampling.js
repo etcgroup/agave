@@ -18,22 +18,28 @@ define([], function() {
         var result = [];
 
         var inputLen = dataSeries.length;
-        var outputLen = Math.floor(inputLen / samplingFactor);
+        var outputLen = Math.ceil(inputLen / samplingFactor);
 
-//        var inputsPerOutput = 2 * samplingFactor - 1;
-
-        //the offset from the left edge of the window to the center
-        var windowCenterOffset = Math.floor(samplingFactor / 2);
-
+        //Initialize the output array
         for (var outputIdx = 0; outputIdx < outputLen; outputIdx++) {
+            var reversedIdx = outputIdx * samplingFactor;
+            result.push({
+                count: 0,
+                time: dataSeries[reversedIdx].time
+            });
+        }
 
-            var centerIdx = samplingFactor * outputIdx + windowCenterOffset;
+        var lostSamples = samplingFactor;
+        var contributingSamples = 2 * samplingFactor;
+        for (var inputIdx = 0; inputIdx < inputLen - lostSamples; inputIdx++) {
+            //what output bins do I contribute to?
 
-            var bin = {
-                count: dataSeries[centerIdx].count,
-                time: dataSeries[centerIdx].time
-            };
-            result.push(bin);
+            var mappedIdx = inputIdx / samplingFactor;
+
+            var inputData = dataSeries[inputIdx].count / contributingSamples;
+
+            result[Math.floor(mappedIdx)].count += inputData;
+            result[Math.ceil(mappedIdx)].count += inputData;
         }
 
         return result;

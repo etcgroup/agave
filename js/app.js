@@ -202,6 +202,7 @@ define(function (require) {
             display: this.display,
             binSize: this.config.bin_size * 1000,
             desiredBins: 200,
+            interpolation: 'basis',
             utcOffset: this.config.utc_offset_millis
         });
 
