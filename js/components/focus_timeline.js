@@ -334,6 +334,7 @@ define(['jquery',
 
             this._updateCountAxis();
             this._updateAnnotations();
+            this._updateHighlights();
         };
 
         /**
