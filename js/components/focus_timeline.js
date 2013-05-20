@@ -530,7 +530,7 @@ define(['jquery',
             this.cache.counts[params.query_id] = countsOnly;
             this.cache.layers[params.query_id] = data;
             this.cache.max[params.query_id] = maxCount;
-            this.cache.query[params.query_id] = params
+            this.cache.query[params.query_id] = params;
 
             this._updateDataBinding();
 

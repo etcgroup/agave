@@ -245,12 +245,12 @@ define(['lib/d3', 'underscore',
              * @private
              */
             _visibleRange: function (data) {
-                var from = 0, to = data.length, time;
+                var from = 0, to = data.length, time, i;
                 var visible = this._xScale.domain();
                 var shrunk = false;
 
                 //Find the start time
-                for (var i = 0; i < data.length; i++) {
+                for (i = 0; i < data.length; i++) {
                     time = this._xAccessor(data[i]);
                     if (time < visible[0]) {
                         from = i;
@@ -261,7 +261,7 @@ define(['lib/d3', 'underscore',
                     }
                 }
 
-                for (var i = data.length - 1; i >= 0; i--) {
+                for (i = data.length - 1; i >= 0; i--) {
                     time = this._xAccessor(data[i]);
                     if (time > visible[1]) {
                         to = i;

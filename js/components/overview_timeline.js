@@ -152,10 +152,13 @@ define(['jquery',
                 //Find the bigger series
                 var max = -1;
                 var maxId = -1;
+
+                var getCounts = function(d) {
+                    return d.count;
+                };
+
                 for (var queryId in this._series) {
-                    var sum = d3.sum(this._series[queryId], function(d) {
-                        return d.count;
-                    });
+                    var sum = d3.sum(this._series[queryId], getCounts);
                     if (sum > max) {
                         max = sum;
                         maxId = queryId;
