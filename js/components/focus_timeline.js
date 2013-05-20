@@ -88,7 +88,7 @@ define(['jquery',
                 self.loader.start(query.id());
 
                 //TODO: make this actually the right parameters
-                var utcExtent = self.extentToUTC([self.from, self.to]);
+                var utcExtent = self.interval.getRangeExtent();
 
                 //The interval doesn't need to be translated because it is already in UTC
                 self.api.counts({

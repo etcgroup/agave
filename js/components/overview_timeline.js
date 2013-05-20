@@ -35,7 +35,7 @@ define(['jquery',
             Timeline.call(this, options);
 
             //Store offset time internally
-            var staticExtent = this.extentFromUTC([options.from, options.to]);
+            var staticExtent = this.extentFromUTC(this.interval.getRangeExtent());
 
             //Set up the x axis domain, which stays constant, in offset time
             this._timeScale.domain(staticExtent);

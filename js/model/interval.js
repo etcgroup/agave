@@ -74,9 +74,9 @@ define(['underscore', 'util/events', 'util/functions'], function(_, events, func
      */
      Interval.prototype.min = function(val) {
         if(!arguments.length) {
-            return this.min;
+            return this.data.min;
         } else {
-            this.min = val;
+            this.data.min = val;
         }
      }
 

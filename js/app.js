@@ -87,10 +87,7 @@ define(function (require) {
             max: this.config.overview_to * 1000
         });
         this.interval.on('change', $.proxy(this.intervalChanged, this));
-        this.interval.set({
-            from: this.config.overview_from * 1000,
-            to: this.config.overview_to * 1000
-        });
+
 
         //The query collection
         this.queries = [];
@@ -108,6 +105,7 @@ define(function (require) {
             //When the model changes, we need to know
             query.on('change', $.proxy(self.queryUpdated, self));
         });
+       
     };
 
     /**
