@@ -46,6 +46,8 @@ define(['jquery',
     };
 
     DiscussionView.prototype._attachEvents = function() {
+        this.api.on('annotations', $.proxy(this._onAnnotationData, this));
+
         this.ui.backButton.on('click', $.proxy(this._onBackClicked, this));
         this.ui.commentSubmit.on('click', $.proxy(this._onSendClicked, this));
         this.ui.referenceButton.on('click', $.proxy(this._onReferenceButtonClicked, this));
@@ -162,6 +164,8 @@ define(['jquery',
             // also ignore annotations for the moment
             if(result.type == "tweet") {
                 this.interval.centerAround(result.data.created_at);
+            } else if(result.type == "annotation") {
+                this.interval.centerAround(result.data.time);
             }
             return;
         }
@@ -258,6 +262,8 @@ define(['jquery',
         switch (type) {
             case 'annotation':
                 reference.label = text;
+                reference = this.annotations[id];
+                time = reference.created;
                 break;
             case 'tweet':
                 //reference.text = text;
@@ -269,7 +275,8 @@ define(['jquery',
         //Send it out through the normal channels, in case anyone else is watching
         this.api.trigger('reference-selected', {
             type: type,
-            data: reference
+            data: reference,
+            time: time
         });
 
     };
@@ -324,6 +331,23 @@ define(['jquery',
             discussion_id: this.discussion_id
         });
     };
+
+        /**
+         * Called when new annotation data arrives.
+         * @private
+         */
+        DiscussionView.prototype._onAnnotationData = function (e, result) {
+            this.annotations = [];
+
+            var self = this;
+            result.data.forEach(function(d,i){
+                self.annotations[+d.id] = d;
+            });
+
+            //this._updateAnnotations();
+        };
+
+
 
     events(DiscussionView);
 
