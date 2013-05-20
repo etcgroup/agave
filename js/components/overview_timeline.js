@@ -4,8 +4,9 @@ define(['jquery',
     'util/transform',
     'components/timeline',
     'util/sentiment',
+    'util/sampling',
     'lib/d3'],
-    function ($, _, extend, Transform, Timeline, sentiment, d3) {
+    function ($, _, extend, Transform, Timeline, sentiment, sampling, d3) {
 
         //Color defaults
         var COLOR_DOMAIN = sentiment.numbers;
@@ -145,10 +146,13 @@ define(['jquery',
                 //Find the bigger series
                 var max = -1;
                 var maxId = -1;
+
+                var getCounts = function(d) {
+                    return d.count;
+                };
+
                 for (var queryId in this._series) {
-                    var sum = d3.sum(this._series[queryId], function(d) {
-                        return d.count;
-                    });
+                    var sum = d3.sum(this._series[queryId], getCounts);
                     if (sum > max) {
                         max = sum;
                         maxId = queryId;
@@ -178,7 +182,13 @@ define(['jquery',
             }
             var sentimentClass = this._sentimentScale(sentiment);
             this._histogram.seriesClass(sentimentClass);
-            this._histogram.data(this._series[selectedQuery]);
+
+            var downsampled = this._series[selectedQuery];
+            if (this._downsamplingFactor !== 1) {
+                downsampled = sampling.downsample(downsampled, this._downsamplingFactor);
+            }
+
+            this._histogram.data(downsampled);
         };
 
         /**

@@ -16,9 +16,9 @@ define(['util/api', 'jquery'], function(API, $) {
 
             var params = {foo: 'bar'};
 
-            api.overview_counts(params);
+            api.discussions(params);
 
-            expect(api.request).toHaveBeenCalledWith('get', 'overview_counts', {
+            expect(api.request).toHaveBeenCalledWith('get', 'discussions', {
                 params: params,
                 post_process: jasmine.any(Function)
             });

@@ -9,8 +9,9 @@ define(['jquery',
     'util/tooltip',
     'util/sentiment',
     'util/rectangle',
+    'util/sampling',
     'lib/d3'],
-    function ($, _, extend, Transform, Poll, Timeline, Histogram, StackHistogram, Tooltip, sentiment, Rectangle, d3) {
+    function ($, _, extend, Transform, Poll, Timeline, Histogram, StackHistogram, Tooltip, sentiment, Rectangle, sampling, d3) {
 
         var ANNOTATION_POLL_INTERVAL = 10000;
         var AXIS_OFFSET = 3;
@@ -40,7 +41,7 @@ define(['jquery',
             this.display = options.display;
 
             //For storing query info about the currently loaded data
-            this._loadedQueries = {};
+            this.cache = {counts: {}, layers: {}, max: {}, query: {}};
 
             //Call the parent constructor
             Timeline.call(this, options);
@@ -251,7 +252,7 @@ define(['jquery',
                 annotations
                     .transition()
                     .style('opacity', 0)
-                    .each('end', function() {
+                    .each('end', function () {
                         annotations.style('display', 'none');
                     });
             }
@@ -272,6 +273,11 @@ define(['jquery',
         FocusTimeline.prototype.domain = function (domain) {
             //don't forget to translate from utc to translated time
             this._timeScale.domain(this.extentFromUTC(domain));
+
+            if (this._updateDownsamplingFactor() ) {
+                this._updateDataBinding();
+                this._updateHistogram(true);
+            }
         };
 
         /**
@@ -288,12 +294,12 @@ define(['jquery',
             return margins;
         };
 
-        FocusTimeline.prototype._buildBoxes = function() {
+        FocusTimeline.prototype._buildBoxes = function () {
             Timeline.prototype._buildBoxes.call(this);
             this.boxes.annotations = new Rectangle();
         };
 
-        FocusTimeline.prototype._updateBoxes = function() {
+        FocusTimeline.prototype._updateBoxes = function () {
             Timeline.prototype._updateBoxes.call(this);
 
             this.boxes.annotations.set({
@@ -323,7 +329,7 @@ define(['jquery',
          * Update the focus timeline. Overrides the parent's update method.
          */
         FocusTimeline.prototype.update = function (animate) {
-            this._updateCountScale();
+//            this._updateCountScale();
 
             Timeline.prototype.update.call(this, animate);
 
@@ -373,13 +379,11 @@ define(['jquery',
          *
          * @private
          */
-        FocusTimeline.prototype._updateCountScale = function() {
+        FocusTimeline.prototype._updateCountScale = function () {
             //The stack histograms manage the scale themselves, but the regular histograms do not
             if (this.display.mode() === 'simple') {
                 //Get the maximum count over all histograms
-                var maxCount = d3.max(this._histograms, function (hist) {
-                    return hist._maxCount || 0;
-                });
+                var maxCount = d3.max(_.values(this.cache.max));
 
                 //Update the scale
                 this._countScale.domain([0, maxCount]);
@@ -449,7 +453,8 @@ define(['jquery',
          *
          * @private
          */
-        FocusTimeline.prototype._onDisplayModeChanged = function() {
+        FocusTimeline.prototype._onDisplayModeChanged = function () {
+            this._updateDataBinding();
             this.update();
         };
 
@@ -457,48 +462,17 @@ define(['jquery',
          * And replace the histogram update code.
          */
         FocusTimeline.prototype._updateHistogram = function (animate) {
-            //Update each histogram
-            var mode = this.display.mode();
-            var toExpand = mode === 'expand';
-            var queryShown = this.display.focus();
-
             var self = this;
             this.queries.forEach(function (query, index) {
                 var histogram = self._histograms[index];
                 var stackHistogram = self._stackHistograms[index];
 
-                var sentiment = "";
-
-                //Get the query data that was most recently received from the server (not what is stored in the query object)
-                var loaded = self._loadedQueries[index];
-                if (loaded) {
-                    sentiment = loaded.sentiment;
-                }
-                var sentimentClass = self._sentimentScale(sentiment);
-
-                if (mode === 'simple') {
-                    //Show the histogram, not the stack
-                    stackHistogram.hide();
-
-                    histogram.seriesClass(sentimentClass);
-                    histogram.show();
+                if (histogram.isShowing()) {
                     histogram.update(animate);
+                }
 
-                    self.showSillyMessage(false);
-
-                } else if (queryShown !== null && index !== queryShown) {
-                    //We're not showing this query at all
-                    stackHistogram.hide();
-                    histogram.hide();
-                } else {
-                    //Show the stack, not the histogram
-                    histogram.hide();
-
-                    stackHistogram.show();
-                    stackHistogram.expand(toExpand);
+                if (stackHistogram.isShowing()) {
                     stackHistogram.update(animate);
-
-                    self.showSillyMessage(sentiment !== "" && toExpand);
                 }
             });
         };
@@ -521,10 +495,6 @@ define(['jquery',
             //Stop the spinner
             this.loader.stop(params.query_id);
 
-            //Save the query data so we know what we have loaded
-            //The Query model can change more rapidly
-            this._loadedQueries[params.query_id] = params;
-
             //Compute sum data (ha)
             var countsOnly = result.data.reduce(function (prev, layer) {
                 return {
@@ -537,38 +507,112 @@ define(['jquery',
                 };
             }).values;
 
-            //Bind the new data
-            this._histograms[params.query_id].data(countsOnly);
-
             //If some sentiment filter is in use besides all (''), then
             //we'll remove the zero-valued series
             var data = result.data;
             if (params.sentiment) {
-                data = data.filter(function(layer) {
+                data = data.filter(function (layer) {
                     return +layer.id === +params.sentiment;
                 });
             }
 
-            //Bind the un-transformed data
-            this._stackHistograms[params.query_id].data(data);
-
-            //Store the max value on the histogram for efficiency
-            this._histograms[params.query_id]._maxCount = d3.max(countsOnly, function (d) {
+            //Get the max value now, for efficiency
+            var maxCount = d3.max(countsOnly, function (d) {
                 return d.count;
             });
+
+            //Store things in the cache
+            this.cache.counts[params.query_id] = countsOnly;
+            this.cache.layers[params.query_id] = data;
+            this.cache.max[params.query_id] = maxCount;
+            this.cache.query[params.query_id] = params;
+
+            this._updateDataBinding();
 
             //Fade in the counts axis
             this.ui.svg.select('g.counts.axis.chart-label')
                 .transition()
                 .style('opacity', 1);
 
+            //Call the parent method
+            Timeline.prototype._onData.call(this, result);
+        };
+
+        FocusTimeline.prototype._updateDataBinding = function () {
+
+            //Which series are we showing?
+            var mode = this.display.mode();
+            var toExpand = mode === 'expand';
+            var queryShown = this.display.focus();
+            var cache = this.cache;
+            var self = this;
+
+            //Find out what kind of sentiment we're dealing with here.
+            function sentimentFor(queryIndex) {
+                var loaded = cache.query[queryIndex];
+                return loaded ? loaded.sentiment : '';
+            }
+
+            if (mode === 'simple') {
+                //We're showing both histograms
+                this.queries.forEach(function (query, index) {
+                    //Hide the stack histogram
+                    self._stackHistograms[index].hide();
+
+                    if (index in cache.counts) {
+                        var histogram = self._histograms[index];
+
+                        var sentiment = sentimentFor(index);
+                        histogram.seriesClass(self._sentimentScale(sentiment));
+
+                        var downsampled = cache.counts[index];
+                        if (self._downsamplingFactor !== 1) {
+                            downsampled = sampling.downsample(downsampled, self._downsamplingFactor);
+                        }
+
+                        histogram.data(downsampled);
+
+                        histogram.show();
+                    }
+                });
+            } else {
+                //We're showing one of the stacks
+                this.queries.forEach(function (query, index) {
+                    //Hide the histogram
+                    self._histograms[index].hide();
+
+                    var stackHistogram = self._stackHistograms[index];
+                    if (queryShown !== null && index !== queryShown) {
+                        //not this one
+                        stackHistogram.hide();
+                    } else if (index in cache.layers) {
+
+                        var downsampled = cache.layers[index];
+                        if (self._downsamplingFactor !== 1) {
+                            downsampled = cache.layers[index].map(function (layer) {
+                                return {
+                                    id: layer.id,
+                                    values: sampling.downsample(layer.values, self._downsamplingFactor)
+                                };
+                            });
+                        }
+
+                        stackHistogram.data(downsampled);
+                        stackHistogram.expand(toExpand);
+
+                        stackHistogram.show();
+
+                        var sentiment = sentimentFor(index);
+                        self.showSillyMessage(sentiment !== "" && toExpand);
+                    } else {
+                        console.log('no data loaded yet for this chart');
+                    }
+                });
+            }
 
             //Update the counts axis
             this._updateCountScale();
             this._updateCountAxis();
-
-            //Call the parent method
-            Timeline.prototype._onData.call(this, result);
         };
 
         /**
@@ -591,7 +635,7 @@ define(['jquery',
                 return self._timeScale(d.time + self._utcOffset);
             };
 
-            this._highlightClass = function(d) {
+            this._highlightClass = function (d) {
                 return d.type;
             };
 
@@ -738,6 +782,18 @@ define(['jquery',
 
 
         /**
+         * Check if the interval is small enough that we want to get new data.
+         *
+         * @param e
+         * @param interval
+         * @param field
+         * @private
+         */
+        FocusTimeline.prototype._onIntervalChanged = function (e, interval, field) {
+
+        };
+
+        /**
          * Called when an existing annotation is clicked.
          * @private
          */
@@ -808,7 +864,7 @@ define(['jquery',
                 .attr('y2', this.boxes.annotations.height());
         };
 
-        FocusTimeline.prototype.showSillyMessage = function(toShow) {
+        FocusTimeline.prototype.showSillyMessage = function (toShow) {
             var message = this.ui.chartGroup
                 .selectAll('text.silly-message');
 
