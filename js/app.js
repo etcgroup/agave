@@ -170,6 +170,8 @@ define(function (require) {
             display: this.display,
             from: this.config.overview_from * 1000,
             to: this.config.overview_to * 1000,
+            binSize: this.config.bin_size * 1000,
+            desiredBins: 400,
             utcOffset: this.config.utc_offset_millis
         });
 
@@ -198,6 +200,7 @@ define(function (require) {
             from: this.config.overview_from * 1000,
             to: this.config.overview_to * 1000,
             binSize: this.config.bin_size * 1000,
+            desiredBins: 200,
             utcOffset: this.config.utc_offset_millis
         });
 

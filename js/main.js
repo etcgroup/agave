@@ -19,7 +19,7 @@ define(['app'], function(App) {
         overview_from: 1359932400,
         overview_to: 1359952200,
         //The overview bin size in seconds
-        bin_size: 30,
+        bin_size: 5,
 
         //The UTC offset for Eastern Time (during the Super Bowl)
         utc_offset_millis: -5 * 60 * 60 * 1000

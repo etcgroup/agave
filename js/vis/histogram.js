@@ -146,6 +146,10 @@ define(['lib/d3', 'underscore',
                 this._svg.classed('in', true);
             },
 
+            isShowing: function() {
+                return this._showing;
+            },
+
             /**
              * Render the histogram.
              */

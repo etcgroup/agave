@@ -8,6 +8,8 @@ define(['jquery',
 
     var AXIS_OFFSET = 3;
 
+    var DEFAULT_DESIRED_BINS = 150;
+
     /**
      * A class for rendering and maintaining a basic timeline.
      *
@@ -35,6 +37,8 @@ define(['jquery',
         this.interval = options.interval;
         this.queries = options.queries;
 
+        this._downsamplingFactor = 1;
+
         //Create a time scale for the timeline
         this._timeScale = d3.time.scale.utc();
 
@@ -49,7 +53,9 @@ define(['jquery',
         //Some tweet data constants. Ideal bin count
         //is used when switching zoom levels to determine a binning
         //granularity based on viewable time range.
-        this._binSize = options.binSize || 60;
+        this._binSize = options.binSize || 60 * 1000; //in ms
+
+        this._desiredBinsShowing = options.desiredBins || DEFAULT_DESIRED_BINS;
 
         //The utc offset to render times at.
         this._utcOffset = options.utcOffset || 0;
@@ -108,6 +114,8 @@ define(['jquery',
 
         this._renderTimeAxis();
         this._renderHistogram();
+
+        this._updateDownsamplingFactor();
 
         //A convenient container for anything that needs to be
         //in the same place as the inner box
@@ -301,6 +309,25 @@ define(['jquery',
     Timeline.prototype._onIntervalChanged = function (e, interval, field) {
 
     };
+
+    /**
+     * Calculate an updated downsampling factor. Returns true if it changed.
+     * @private
+     */
+    Timeline.prototype._updateDownsamplingFactor = function () {
+        var showing = this._timeScale.domain();
+        var duration = showing[1] - showing[0];
+
+        var binsShowing = duration / this._binSize;
+        var newDownsamplingFactor = Math.floor(binsShowing / this._desiredBinsShowing);
+        newDownsamplingFactor = Math.max(1, newDownsamplingFactor);
+
+        if (this._downsamplingFactor !== newDownsamplingFactor) {
+            this._downsamplingFactor = newDownsamplingFactor;
+            return true;
+        }
+    };
+
 
     /**
      * Called when new data is available.
