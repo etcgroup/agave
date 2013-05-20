@@ -194,8 +194,13 @@ define(['lib/d3', 'underscore',
             data: function(data) {
                 
                 this._totals = [];
+                var num = data.length;
                 for (i = 0; i < data[0].values.length; i++) {
-                    this._totals.push(data[0].values[i].count + data[1].values[i].count + data[2].values[i].count);
+                    var sum = 0;
+                    for (j = 0; j < num; j++) {
+                        sum += data[j].values[i].count;
+                    }
+                    this._totals.push(sum);
                 }
                 if (!arguments.length) {
                     return this._raw_data;
