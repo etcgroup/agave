@@ -223,7 +223,7 @@ define(['lib/d3', 'underscore',
                 }
 
                 if (!this._stacked_data) {
-                    this._stacked_data = this._stack(data);
+                    this._stacked_data = this._stack(this._raw_data);
                 }
 
                 //Bind the new data
