@@ -253,7 +253,7 @@ define(['lib/d3', 'underscore',
                 for (i = 0; i < data.length; i++) {
                     time = this._xAccessor(data[i]);
                     if (time < visible[0]) {
-                        from = i;
+                        from = i - 1;
                         shrunk = true;
                     } else {
                         //save the last time that was before the range
@@ -264,7 +264,7 @@ define(['lib/d3', 'underscore',
                 for (i = data.length - 1; i >= 0; i--) {
                     time = this._xAccessor(data[i]);
                     if (time > visible[1]) {
-                        to = i;
+                        to = i + 2;
                         shrunk = true;
                     } else {
                         //Save the last time that was after the range
@@ -273,7 +273,7 @@ define(['lib/d3', 'underscore',
                 }
 
                 if (shrunk) {
-                    return [from, to];
+                    return [Math.max(from, 0), Math.min(to, data.length - 1)];
                 }
             },
 
