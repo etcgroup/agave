@@ -83,6 +83,12 @@ class Builder
         $this->where("$table.created_at", '>=', $fromParam);
     }
 
+    public function where_grouped_created_at_between($fromParam, $toParam, $table = 'tweets')
+    {
+        $this->where("$table.created_at_5s", '<', $toParam);
+        $this->where("$table.created_at_5s", '>=', $fromParam);
+    }
+
     public function where_retweet_count_over($minRTParam, $table = 'tweets')
     {
         $this->where("$table.retweet_count", '>=', $minRTParam);
@@ -93,11 +99,13 @@ class Builder
         $this->where("$table.is_retweet", '=', $isRTParam);
     }
 
-    public function where_sentiment_is($sentimentParam, $table = 'tweets') {
+    public function where_sentiment_is($sentimentParam, $table = 'tweets')
+    {
         $this->where("$table.sentiment", '=', $sentimentParam);
     }
 
-    public function where_user_is($userIdParam, $table = 'tweets') {
+    public function where_user_is($userIdParam, $table = 'tweets')
+    {
         $this->where("$table.user_id", '=', $userIdParam);
     }
 

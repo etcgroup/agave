@@ -405,7 +405,8 @@ class Queries
      * @param $screen_name
      * @return mixed
      */
-    public function get_user_by_name($screen_name) {
+    public function get_user_by_name($screen_name)
+    {
         // Chop off a leading @
         if (strlen($screen_name) > 0 && $screen_name[0] == '@') {
             $screen_name = substr($screen_name, 1);
@@ -510,9 +511,6 @@ class Queries
                                $text_search = NULL, $sentiment = NULL, $user_id = NULL,
                                $sort = NULL, $limit = NULL)
     {
-        $start_datetime = $start_datetime->format('Y-m-d H:i:s');
-        $stop_datetime = $stop_datetime->format('Y-m-d H:i:s');
-
         $builder = new Builder('tweets');
 
         $builder->select('tweets.*, UNIX_TIMESTAMP(tweets.created_at) AS created_at, users.screen_name, users.name');
@@ -524,8 +522,7 @@ class Queries
 
         //Declare the parameters
         $binder = new Binder();
-        $start_datetime = $binder->param('from', $start_datetime);
-        $stop_datetime = $binder->param('to', $stop_datetime);
+        list($start_datetime, $stop_datetime) = $binder->grouped_created_at_params($start_datetime, $stop_datetime);
         $min_rt = $binder->param('min_rt', $min_rt, PDO::PARAM_INT);
         $is_rt = $binder->param('rt', $is_rt, PDO::PARAM_BOOL);
         $sentiment = $binder->param('sentiment', $sentiment);
@@ -536,7 +533,7 @@ class Queries
         }
         $text_search = $binder->param('search', $text_search);
 
-        $builder->where_created_at_between($start_datetime, $stop_datetime);
+        $builder->where_grouped_created_at_between($start_datetime, $stop_datetime);
         $builder->where_retweet_count_over($min_rt);
         $builder->where_text_like($text_search);
         $builder->where_is_retweet_is($is_rt);
@@ -564,9 +561,6 @@ class Queries
                                    $text_search = NULL, $sentiment = NULL, $user_id = NULL,
                                    $sort = NULL, $limit = NULL)
     {
-        $start_datetime = $start_datetime->format('Y-m-d H:i:s');
-        $stop_datetime = $stop_datetime->format('Y-m-d H:i:s');
-
         $subquery = new Builder('users_subquery');
         $subquery->select('tweets.user_id AS id, tweets.followers_count AS followers, COUNT(tweets.user_id) AS count');
         $subquery->from('tweets');
@@ -576,8 +570,7 @@ class Queries
 
         //Declare the parameters
         $binder = new Binder();
-        $start_datetime = $binder->param('from', $start_datetime);
-        $stop_datetime = $binder->param('to', $stop_datetime);
+        list($start_datetime, $stop_datetime) = $binder->grouped_created_at_params($start_datetime, $stop_datetime);
         $min_rt = $binder->param('min_rt', $min_rt, PDO::PARAM_INT);
         $is_rt = $binder->param('rt', $is_rt, PDO::PARAM_BOOL);
         $user_id = $binder->param('user_id', $user_id, PDO::PARAM_INT);
@@ -587,7 +580,7 @@ class Queries
         }
         $text_search = $binder->param('search', $text_search);
 
-        $subquery->where_created_at_between($start_datetime, $stop_datetime);
+        $subquery->where_grouped_created_at_between($start_datetime, $stop_datetime);
         $subquery->where_retweet_count_over($min_rt);
         $subquery->where_text_like($text_search);
         $subquery->where_is_retweet_is($is_rt);
@@ -618,20 +611,17 @@ class Queries
      * @return array
      */
     public function get_grouped_counts($start_datetime, $stop_datetime, $group_seconds, $split_sentiment = TRUE,
-                               $is_rt = NULL, $min_rt = NULL,
-                               $text_search = NULL, $sentiment = NULL, $user_id = NULL)
+                                       $is_rt = NULL, $min_rt = NULL,
+                                       $text_search = NULL, $sentiment = NULL, $user_id = NULL)
     {
-        $start_datetime = $start_datetime->format('Y-m-d H:i:s');
-        $stop_datetime = $stop_datetime->format('Y-m-d H:i:s');
 
         //Declare some parameters we need now
         $binder = new Binder();
-        $start_datetime = $binder->param('from', $start_datetime);
+        list($start_datetime, $stop_datetime) = $binder->grouped_created_at_params($start_datetime, $stop_datetime, $group_seconds);
         $group_seconds = $binder->param('interval', $group_seconds, PDO::PARAM_INT);
 
         $builder = new Builder('grouped_counts');
-
-        $builder->select("UNIX_TIMESTAMP($start_datetime) + $group_seconds * FLOOR((UNIX_TIMESTAMP(created_at)-UNIX_TIMESTAMP($start_datetime)) / $group_seconds) AS binned_time");
+        $builder->select("$group_seconds * created_at_5s AS binned_time");
         $builder->select('COUNT(*) AS count');
         if ($split_sentiment) {
             $builder->select('SUM(IF(sentiment=1,1,0)) AS positive');
@@ -641,11 +631,10 @@ class Queries
 
         $builder->from('tweets');
 
-        $builder->group_by('binned_time');
-        $builder->order_by('binned_time');
+        $builder->group_by('created_at_5s');
+        $builder->order_by('created_at_5s');
 
         //Declare the rest of the parameters
-        $stop_datetime = $binder->param('to', $stop_datetime);
         $min_rt = $binder->param('min_rt', $min_rt, PDO::PARAM_INT);
         $is_rt = $binder->param('rt', $is_rt, PDO::PARAM_BOOL);
         $sentiment = $binder->param('sentiment', $sentiment);
@@ -655,7 +644,7 @@ class Queries
         }
         $text_search = $binder->param('search', $text_search);
 
-        $builder->where_created_at_between($start_datetime, $stop_datetime);
+        $builder->where_grouped_created_at_between($start_datetime, $stop_datetime);
         $builder->where_retweet_count_over($min_rt);
         $builder->where_text_like($text_search);
         $builder->where_is_retweet_is($is_rt);
