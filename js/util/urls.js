@@ -225,7 +225,7 @@ define(['jquery', 'underscore', 'lib/Uri', 'util/events'], function ($, _, Uri, 
 
         var parsed = new Uri(url);
 
-        return parsed.query();
+        return decodeURIComponent(parsed.query());
     };
 
     /**
@@ -238,7 +238,7 @@ define(['jquery', 'underscore', 'lib/Uri', 'util/events'], function ($, _, Uri, 
         parsed.query(query);
 
         //Fancy HTML5 history management
-        var url = parsed.toString();
+        var url = decodeURIComponent(parsed.query());
         if (url !== document.location.href) {
             history.pushState(url, '', url);
             this.trigger('change');

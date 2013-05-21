@@ -81,6 +81,23 @@ define(['util/urls'],
                 expect(history.pushState).toHaveBeenCalled();
             });
 
+            it('can give the query string for a url', function() {
+
+                var expected = '?asdf=1&b=34&c=%40hello';
+                var actual = urls.query_string('http://www.google.com/' + expected);
+
+                expect(actual).toEqual(actual);
+            });
+
+            it('can set the query string', function() {
+                spyOn(history, 'pushState');
+
+                var expected = '?asdf=1&b=34&c=%40hello';
+
+                urls.set_query_string(expected);
+
+                expect(history.pushState).toHaveBeenCalledWith(expected, '', expected);
+            });
         });
 
     });
