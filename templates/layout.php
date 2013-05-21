@@ -7,8 +7,11 @@
         <meta name="viewport" content="width=device-width">
         <link rel="icon"
               type="image/png"
-              href="css/img/logo.png">
-        <link rel="stylesheet" href="css/main.css">
+              href="<?php echo asset('css/img/logo.png')?>">
+
+        <link rel="stylesheet" href="<?php echo asset('css/main.css') ?>">
+
+
     </head>
     <body>
         <?php echo nav_bar(); ?>
@@ -101,28 +104,31 @@
             </div>
         </div>
 
-        <script>
-            window.require = {
-                baseUrl: 'js',
-                paths: {
-                    'underscore': 'lib/underscore-amd',
-                    'backbone': 'lib/backbone-amd',
-                    'jquery' : 'lib/jquery',
-                    'moment': 'lib/moment',
-                    'spin': 'lib/spin'
-                },
-                shim: {
-                    'lib/d3': {
-                        exports: 'd3'
-                    },
-                    'lib/bootstrap': ['jquery'],
-                    'lib/Uri': {
-                        exports: 'Uri'
-                    }
-                }
-            };
-        </script>
+        <?php if ($config['environment'] == 'development') { ?>
+            <!-- Loading development resources -->
+            <script src="<?php echo asset('js/lib/require.js')?>"></script>
+            <script src="<?php echo asset('js/require-config.js')?>"></script>
+            <script type="text/javascript">
+                //Have to make sure that we override the common config's base url with the real one
+                require.config({
+                    'baseUrl': "js"
+                });
+            </script>
+        <?php } else { ?>
+            <!-- Loading production resources -->
+            <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+            <script src="<?php echo asset('js/main.js')?>"></script>
+            <script type="text/javascript">
+                //A shim since jQuery didn't know about define when it initialized
+                define('jquery', function() {
+                    return jQuery;
+                });
+            </script>
+        <?php } ?>
 
-        <script src="js/lib/require.js" data-main="main"></script>
+        <script type="text/javascript">
+            //Start the app
+            require(["main"]);
+        </script>
     </body>
 </html>

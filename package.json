@@ -15,6 +15,10 @@
     "grunt-contrib-csslint": "~0.1.2",
     "grunt-contrib-jshint": "~0.4.3",
     "grunt-contrib-watch": "~0.3.1",
-    "grunt-phplint": "0.0.5"
+    "grunt-phplint": "0.0.5",
+    "grunt-contrib-requirejs": "~0.4.1",
+    "underscore": "~1.4.4",
+    "grunt-contrib-clean": "~0.4.1",
+    "grunt-contrib-copy": "~0.4.1"
   }
 }

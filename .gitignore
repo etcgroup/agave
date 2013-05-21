@@ -1,9 +1,11 @@
 /nbproject/
 /.idea/
+/dist/
 
 *.zip
-data/db.ini
+/data/db.ini
+/app.ini
 
-node_modules
+/node_modules
 /_SpecRunner.html
 .grunt
