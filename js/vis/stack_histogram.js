@@ -209,7 +209,7 @@ define(['lib/d3', 'underscore',
 
             _calculateTotals: function() {
                 var data = this._raw_data;
-                this._totals = [];
+                this._raw_totals = [];
                 var num = data.length;
                 var i, j;
                 for (i = 0; i < data[0].values.length; i++) {
@@ -217,7 +217,7 @@ define(['lib/d3', 'underscore',
                     for (j = 0; j < num; j++) {
                         sum += data[j].values[i].count;
                     }
-                    this._totals.push(sum);
+                    this._raw_totals.push(sum);
                 }
             },
 
@@ -237,6 +237,7 @@ define(['lib/d3', 'underscore',
                 }
 
                 var data = this._stacked_data;
+                this._totals = this._raw_totals;
                 if (Histogram.USE_VISIBLE_SECTION) {
                     //Select the part of the data we are showing
                     var firstGroupValues = data[0].values;
@@ -249,6 +250,7 @@ define(['lib/d3', 'underscore',
                                 values: grp.values.slice(visibleRange[0], visibleRange[1])
                             };
                         });
+                        this._totals = this._raw_totals.slice(visibleRange[0], visibleRange[1]);
                     }
                 }
 
