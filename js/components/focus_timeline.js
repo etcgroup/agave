@@ -205,20 +205,6 @@ define(['jquery',
                 .attr('width', boxWidth)
                 .attr('height', boxHeight);
 
-            if (this.display.annotations()) {
-                annotations
-                    .style('display', 'inline')
-                    .transition()
-                    .style('opacity', 1);
-            } else {
-                annotations
-                    .transition()
-                    .style('opacity', 0)
-                    .each('end', function () {
-                        annotations.style('display', 'none');
-                    });
-            }
-
             annotations.selectAll('rect.annotation')
                 .classed('highlight', function (d) {
                     return d.id in self._brushedAnnotations;
