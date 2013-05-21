@@ -111,8 +111,9 @@ define(['jquery', 'underscore', 'util/events', 'model/display'], function ($, _,
      * @private
      */
     TimelineControls.prototype._updateViewButton = function(clicked) {
-        this.ui.view_buttons.removeClass('active');
-        clicked.addClass('active');
+        //parent() selects the list element
+        this.ui.view_buttons.parent().removeClass('active');
+        clicked.parent().addClass('active');
     };
 
     /**
