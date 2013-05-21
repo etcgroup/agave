@@ -81,15 +81,15 @@
                                         Back
                                     </button>
                                     <textarea></textarea>
-                                    <button type="button" data-toggle="button"
-                                            class="reference-button btn tooltip-me" data-placement="right"
-                                        title="Reference a tweet or annotation">
-                                        <i class="icon-white icon-map-marker"></i> Reference
-                                    </button>
                                     <button type="button"
                                             class="send-button btn btn-primary tooltip-me" data-placement="bottom"
                                         title="Post your comment">
                                         <i class="icon-white icon-comment"></i> Post
+                                    </button>
+                                    <button type="button" data-toggle="button"
+                                            class="reference-button btn tooltip-me" data-placement="right"
+                                            title="Reference a tweet or annotation">
+                                        <i class="icon-white icon-map-marker"></i> Reference
                                     </button>
                                 </div>
                                 <ul class="comments item-list content-panel row scroll-y"></ul>

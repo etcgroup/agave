@@ -142,7 +142,12 @@ define(['jquery',
     DiscussionView.prototype._onSendClicked = function () {
         var message = $.trim(this.ui.commentInput.val());
 
-        if (message) {
+        if (!message) {
+            this.ui.commentInput.focus();
+        }
+        else {
+            //Hide the tooltip before we disable the button or it won't go away - no hover events when disabled.
+            this.ui.commentSubmit.tooltip('hide');
             this._disableCommentBox();
 
             var view_state = urls.query_string();

@@ -31,7 +31,7 @@ define(['jquery'], function($) {
     SignIn.prototype._onUserSubmitted = function() {
         var user = $.trim(this.ui.userInput.val());
         if (!user) {
-            alert("Come on... type a user name :)");
+            this.ui.userInput.focus();
             return;
         }
 
