@@ -28,9 +28,19 @@
 }
 
 
+.display-mode-help {
+    position: absolute;
+    left: 4px;
+    top: 4px;
+
+    padding: 3px 3px 0 3px;
+}
+
 /* Mode switch button styles */
 .mode-switch-buttons {
     float:left;
+    padding-left: 28px;
+    .box-sizing(border-box);
 
     > li {
 
@@ -80,17 +90,29 @@
     }
 }
 
-@media all and (max-width: 1108px) {
+@media all and (max-width: 1060px) {
     .legend {
-        width: 43%;
+        width: 45%;
 
         > li {
             width: 25%;
+            padding-right: 2px;
+            padding-left: 2px;
+
+            /* this is the first li visually, because they are floated left */
+            &:last-child {
+                padding-left: 4px;
+            }
+
+            &:first-child {
+                padding-right: 0px;
+            }
         }
     }
 
     .mode-switch-buttons {
-        width: 57%;
+        width: 55%;
+
         > li {
             width: 20%;
         }

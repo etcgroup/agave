@@ -29,7 +29,7 @@
                                  data-content="This timeline shows an overview of the entire data set. <u>Click and drag</u> on it to focus
                                  on an interval in the timeline above.">
                                 <label class="selector-label">Time Selector</label>
-                                <?php echo help_icon(array()); ?>
+                                <i class="icon-white icon-question-sign"></i>
                             </div>
                         </div>
                     </div>

@@ -25,9 +25,19 @@
   border: 1px solid rgba(170, 170, 170, 0.33);
   vertical-align: top;
 }
+.display-mode-help {
+  position: absolute;
+  left: 4px;
+  top: 4px;
+  padding: 3px 3px 0 3px;
+}
 /* Mode switch button styles */
 .mode-switch-buttons {
   float: left;
+  padding-left: 28px;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
 }
 .mode-switch-buttons > li > a {
   padding: 2px 10px 2px 4px;
@@ -63,15 +73,25 @@
   opacity: 1;
   filter: alpha(opacity=100);
 }
-@media all and (max-width: 1108px) {
+@media all and (max-width: 1060px) {
   .legend {
-    width: 43%;
+    width: 45%;
   }
   .legend > li {
     width: 25%;
+    padding-right: 2px;
+    padding-left: 2px;
+    /* this is the first li visually, because they are floated left */
+  
+  }
+  .legend > li:last-child {
+    padding-left: 4px;
+  }
+  .legend > li:first-child {
+    padding-right: 0px;
   }
   .mode-switch-buttons {
-    width: 57%;
+    width: 55%;
   }
   .mode-switch-buttons > li {
     width: 20%;
