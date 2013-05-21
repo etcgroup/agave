@@ -15,6 +15,7 @@ define(['jquery',
         this.api = options.api;
         this.user = options.user;
         this.interval = options.interval;
+        this.display = options.display;
 
         this.discussion_id = null;
 
@@ -333,10 +334,14 @@ define(['jquery',
             animation: false,
             placement: 'right',
             title: function() {
-                if ($(this).is('.type-T')) {
-                    return 'Go to this Tweet';
-                } else {
-                    return 'Go to this label';
+                if (self.display.reference_mode()) {
+                    return 'Add to comment';
+                }
+                switch(getReferenceType($(this))) {
+                    case 'tweet':
+                        return 'Go to this Tweet';
+                    case 'annotation':
+                        return 'Go to this label';
                 }
             }
         });

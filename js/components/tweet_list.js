@@ -6,7 +6,7 @@ define([
     'util/sentiment'],
     function ($, _, ItemList, extend, sentiment) {
 
-        var TWEET_TEMPLATE = _.template("<li class='tweet' data-id='<%=id%>' title='Center the view over this Tweet'>" +
+        var TWEET_TEMPLATE = _.template("<li class='tweet' data-id='<%=id%>'" +
             "<div class='username muted'>" +
             "<a class='user-link subtle-link tooltip-me' title='View <%=name%> on Twitter' target='tweet-link-tab' href='https://twitter.com/<%=screen_name%>'>" +
             "@<%=screen_name%>" +
@@ -64,6 +64,11 @@ define([
             this.ui.list.on('click', '.tweet', function() {
                 self._tweetClicked($(this));
             });
+
+            this.ui.list.on('click', '.user-link,.twitter-link', function(e) {
+                $(this).tooltip('hide');
+                e.stopPropagation();
+            });
         };
 
 
@@ -113,7 +118,6 @@ define([
                 container: this.into,
                 animation: false
             });
-
         };
 
         TweetList.prototype.renderItem = function(itemData) {
