@@ -212,7 +212,7 @@ define(['jquery', 'underscore', 'lib/Uri', 'util/events'], function ($, _, Uri, 
         var url = urls.make_url(parameters, queries);
 
         //Fancy HTML5 history management
-        if (url !== document.location.href) {
+        if (url !== document.location.search) {
             history.pushState(url, '', url);
         }
     };
