@@ -9,7 +9,7 @@ function discussion_message($row)
     <li class="item comment" data-id="<?php echo $row['id'] ?>" data-discussion-id="<?php echo $row['discussion_id'] ?>">
         <div class="time muted"><?php echo ago($row['created'], true) ?></div>
         <?php if ($row['view_state']) { ?>
-            <div class="view-state tooltip-me" data-placement="top"
+            <div class="view-state tooltip-me" data-placement="bottom"
                 title="Restore this view"
                  data-view="<?php echo $row['view_state'] ?>">
                 <i class="icon-white icon-fullscreen"></i>

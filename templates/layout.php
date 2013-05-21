@@ -64,7 +64,7 @@
                             <div class="discussions col">
                                 <div class="header row">
                                     <div class="title">Discussions</div>
-                                    <button type="button" class="btn btn-primary new-button tooltip-me" data-placement="left"
+                                    <button type="button" class="btn btn-primary new-button tooltip-me" data-placement="bottom"
                                         title="Create a new discussion">
                                         <i class="icon-white icon-plus-sign"></i>
                                         New</button>
@@ -87,7 +87,7 @@
                                         <i class="icon-white icon-map-marker"></i> Reference
                                     </button>
                                     <button type="button"
-                                            class="send-button btn btn-primary tooltip-me" data-placement="left"
+                                            class="send-button btn btn-primary tooltip-me" data-placement="bottom"
                                         title="Post your comment">
                                         <i class="icon-white icon-comment"></i> Post
                                     </button>
