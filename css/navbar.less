@@ -1,8 +1,13 @@
 @import-once "lib/mixins";
 
 .navbar {
+
+    line-height: 40px;
+    font-family: "Trebuchet MS", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    vertical-align: bottom;
+
     .navbar-inner {
-        /* Simulating .navbar-fixed-top */
+        /* Simulating .navbar-fixed-top but without all the fixed-ness */
         border-width: 0 0 1px;
 
         padding-right: 0;
@@ -11,25 +16,58 @@
         .border-radius(0);
     }
 
-    .nav > li > .title {
-        font-size: 16px;
-        font-weight: bold;
-        margin-right: 10px;
+    .nav-main-info {
+        float: left;
+
+        .colon, .brand, .title {
+            float: left;
+            line-height: 40px;
+        }
+
+        .colon, .brand {
+            font-size: 24px;
+
+            color: #eee;
+        }
+
+        .brand {
+            padding: 0 0 0 58px;
+
+            background: url(img/logo.png);
+            background-position: 12px center;
+            background-repeat: no-repeat;
+            background-size: 32px 32px;
+
+        }
+
+        .colon {
+            padding: 0 10px;
+        }
+
+        .title {
+            padding: 0;
+            font-size: 18px;
+            margin-right: 10px;
+        }
     }
 
-    .brand {
-        padding-left: 48px;
-        background: url(img/logo.png);
-        background-position: 12px center;
-        background-repeat: no-repeat;
-        background-size: 32px 32px;
-        color: #eee;
+    .details {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 0 70px;
+        float: left;
 
-        .opacity(70);
-        .transition(opacity 200ms linear);
+        > li {
+            line-height: 40px;
+            float: left;
 
-        &:hover {
-            .opacity(100);
+            &.divider-vertical {
+                height: 20px;
+                margin: 10px;
+
+                border-right: 1px solid #5f5f5f;
+                border-left: 1px solid #313131
+            }
         }
     }
 }

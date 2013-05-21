@@ -1,5 +1,10 @@
+.navbar {
+  line-height: 40px;
+  font-family: "Trebuchet MS", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  vertical-align: bottom;
+}
 .navbar .navbar-inner {
-  /* Simulating .navbar-fixed-top */
+  /* Simulating .navbar-fixed-top but without all the fixed-ness */
 
   border-width: 0 0 1px;
   padding-right: 0;
@@ -8,26 +13,48 @@
   -moz-border-radius: 0;
   border-radius: 0;
 }
-.navbar .nav > li > .title {
-  font-size: 16px;
-  font-weight: bold;
-  margin-right: 10px;
+.navbar .nav-main-info {
+  float: left;
 }
-.navbar .brand {
-  padding-left: 48px;
+.navbar .nav-main-info .colon,
+.navbar .nav-main-info .brand,
+.navbar .nav-main-info .title {
+  float: left;
+  line-height: 40px;
+}
+.navbar .nav-main-info .colon,
+.navbar .nav-main-info .brand {
+  font-size: 24px;
+  color: #eee;
+}
+.navbar .nav-main-info .brand {
+  padding: 0 0 0 58px;
   background: url(img/logo.png);
   background-position: 12px center;
   background-repeat: no-repeat;
   background-size: 32px 32px;
-  color: #eee;
-  opacity: 0.7;
-  filter: alpha(opacity=70);
-  -webkit-transition: opacity 200ms linear;
-  -moz-transition: opacity 200ms linear;
-  -o-transition: opacity 200ms linear;
-  transition: opacity 200ms linear;
 }
-.navbar .brand:hover {
-  opacity: 1;
-  filter: alpha(opacity=100);
+.navbar .nav-main-info .colon {
+  padding: 0 10px;
+}
+.navbar .nav-main-info .title {
+  padding: 0;
+  font-size: 18px;
+  margin-right: 10px;
+}
+.navbar .details {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 0 70px;
+  float: left;
+}
+.navbar .details > li {
+  line-height: 40px;
+  float: left;
+}
+.navbar .details > li.divider-vertical {
+  height: 20px;
+  margin: 10px;
+  border-right: 1px solid #5f5f5f;
+  border-left: 1px solid #313131;
 }

@@ -7,14 +7,17 @@ function nav_bar()
     <div class="navbar row">
         <div class="navbar-inner">
             <div class="container-fluid">
-                <a class="brand" href="#">TwitterVis</a>
-                <ul class="nav">
-                    <li>
-                        <span class="title navbar-text">Super Bowl 47</span>
-                    </li>
-                    <li>
-                        <span class="navbar-text">2/3/2013 6:30pm - 2/3/2013 10:00pm EST; 7.5 million tweets, 3.9 million authors</span>
-                    </li>
+                <div class="nav-main-info">
+                    <a class="brand" href="#">TwitterVis</a>
+                    <span class="colon">:</span>
+                    <span class="title muted">Super Bowl 47</span>
+                </div>
+                <ul class="details">
+                    <li>2/3/2013 6:30pm - 2/3/2013 10:00pm EST</li>
+                    <li class="divider-vertical"></li>
+                    <li>7.9 million tweets</li>
+                    <li class="divider-vertical"></li>
+                    <li>3.8 million authors</li>
                 </ul>
             </div>
         </div>
