@@ -122,11 +122,7 @@ define(['jquery',
 
         this._updateDownsamplingFactor();
 
-        //A convenient container for anything that needs to be
-        //in the same place as the inner box
-        this.ui.chartGroup = this.ui.svg.append('svg')
-            .classed('chart-group', true);
-
+        this._renderChartGroup();
         this._requestData();
     };
 
@@ -146,6 +142,19 @@ define(['jquery',
         this._updateAnnotations();
         this._updateHighlights();
 
+        this._updateChartGroup();
+    };
+
+    Timeline.prototype._renderChartGroup = function() {
+        //A convenient container for anything that needs to be
+        //in the same place as the inner box
+        this.ui.chartGroup = this.ui.svg.append('svg')
+            .classed('chart-group', true);
+
+        this._updateChartGroup();
+    };
+
+    Timeline.prototype._updateChartGroup = function() {
         this.ui.chartGroup
             .call(this.boxes.inner);
     };
@@ -384,6 +393,9 @@ define(['jquery',
         //A lookup object for highlights by id
         this._highlightLookup = {};
 
+        //A lookup for annotations that are currently brushed
+        this._brushedAnnotations = {};
+
         this._highlightClass = function (d) {
             return d.type;
         };
@@ -398,7 +410,7 @@ define(['jquery',
         });
 
         //Set up some default handlers
-        self._brushHandlers = {
+        this._brushHandlers = {
             'tweet': this._brushTweetOrKeyword,
             'keyword': this._brushTweetOrKeyword,
             'annotation': this._brushAnnotation

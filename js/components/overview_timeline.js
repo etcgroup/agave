@@ -198,6 +198,9 @@ define(['jquery',
             //Call the parent render
             Timeline.prototype.render.call(this);
 
+            this._initHighlights();
+            this._initAnnotations();
+
             //Add a muted class to the histogram
             this._histogram
                 .className('histogram muted')

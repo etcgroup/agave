@@ -46,8 +46,6 @@ define(['jquery',
             //Call the parent constructor
             Timeline.call(this, options);
 
-            this._brushedAnnotations = {};
-
             //Create a vertical scale
             this._countScale = d3.scale.linear();
 
@@ -207,7 +205,7 @@ define(['jquery',
          *
          * @private
          */
-        Timeline.prototype._updateAnnotations = function () {
+        FocusTimeline.prototype._updateAnnotations = function () {
             var boxHeight = this.boxes.annotations.height();
             var boxWidth = this.boxes.annotations.width();
 
