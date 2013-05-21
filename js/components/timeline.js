@@ -69,6 +69,11 @@ define(['jquery',
             return d.time + self._utcOffset;
         };
 
+        //A function for positioning highlights and annotations (THEY MUST HAVE a 'time' property)
+        this._highlightXPosition = function (d) {
+            return self._timeScale(self._timeAccessor(d));
+        };
+
         this.initUI();
         this.attachEvents();
     };
@@ -137,6 +142,9 @@ define(['jquery',
 
         this._updateTimeAxis();
         this._updateHistogram(animate);
+
+        this._updateAnnotations();
+        this._updateHighlights();
 
         this.ui.chartGroup
             .call(this.boxes.inner);
@@ -359,6 +367,177 @@ define(['jquery',
             .attr('transform', new Transform('translate',
                 this.boxes.inner.left(), this.boxes.inner.bottom() + AXIS_OFFSET))
             .call(this._timeAxis);
+    };
+
+    /**
+     * Set up the display of linked tweets or other stuff.
+     *
+     * @private
+     */
+    Timeline.prototype._initHighlights = function () {
+
+        var self = this;
+
+        //A list of highlighted points in time
+        this._highlights = [];
+
+        //A lookup object for highlights by id
+        this._highlightLookup = {};
+
+        this._highlightClass = function (d) {
+            return d.type;
+        };
+
+        //A group element for containing the highlight points
+        this.api.on('brush', function(e, brushed) {
+            self._onBrush(brushed, true);
+        });
+
+        this.api.on('unbrush', function(e, brushed) {
+            self._onBrush(brushed, false);
+        });
+
+        //Set up some default handlers
+        self._brushHandlers = {
+            'tweet': this._brushTweetOrKeyword,
+            'keyword': this._brushTweetOrKeyword,
+            'annotation': this._brushAnnotation
+        };
+    };
+
+    Timeline.prototype._brushAnnotation = function(item, brushOn) {
+        if (brushOn) {
+            //Add mark that the item is being brushed
+            this._brushedAnnotations[item.id] = true;
+        } else {
+            //Mark that the item is not being brushed
+            delete this._brushedAnnotations[item.id];
+        }
+        this._updateAnnotations();
+    };
+
+    Timeline.prototype._brushTweetOrKeyword = function (item, brushOn) {
+
+        //TODO: looks like we might have problems if data of different item.types has the same id
+        if (brushOn && !this._highlightLookup[item.data.id]) {
+            //We are not showing it yet and we should be
+            var time;
+
+            if (item.type === 'tweet') {
+                time = item.data.created_at;
+            } else if (item.type === 'keyword') {
+                time = item.data.mid_point
+            } else {
+                throw 'huh? bad item item.type ' + item.type;
+            }
+
+            var packaged = {
+                time: time,
+                type: item.type
+            };
+
+            this._highlights.push(packaged);
+            this._highlightLookup[item.data.id] = packaged;
+            
+            this._updateHighlights();
+
+        } else if (!brushOn && this._highlightLookup[item.data.id]) {
+            //We are showing it and we should not be
+            delete this._highlightLookup[item.data.id];
+            this._highlights = _.values(this._highlightLookup);
+            this._updateHighlights();
+        }
+    };
+
+    /**
+     * Called when some elements are brushed or unbrushed
+     *
+     * @param e
+     * @param brushed
+     * @private
+     */
+    Timeline.prototype._onBrush = function (brushed, brushOn) {
+        var self = this;
+        _.each(brushed, function (item) {
+            if (item.type in self._brushHandlers) {
+                self._brushHandlers[item.type].call(self, item, brushOn);
+            } else {
+                //unknown brush type! (not a big deal)
+            }
+        });
+    };
+
+    Timeline.prototype.addBrushHandler = function(brushType, handler) {
+        this._brushHandlers[brushType] = handler;
+    };
+
+    /**
+     * Updates the display of brushed/highlighted times.
+     *
+     * @private
+     */
+    Timeline.prototype._updateHighlights = function () {
+
+        var boxHeight = this.boxes.inner.height();
+
+        //Set the highlight positions
+        var bind = this.ui.chartGroup.selectAll('line.highlight')
+            .data(this._highlights);
+
+        //Create new lines and position them, but make them have no height
+        bind.enter().append('line')
+            .classed('highlight', true);
+
+        //Transition un-needed lines out and remove
+        bind.exit()
+            .remove();
+
+        //Position the lines where they ought to be
+        //Apply a class based on the data type
+        bind.attr('class', this._highlightClass)
+            .classed('highlight', true) //add the highlight class back in
+            .attr('x1', this._highlightXPosition)
+            .attr('x2', this._highlightXPosition)
+            .attr('y1', 0)
+            .attr('y2', boxHeight);
+    };
+    
+    /**
+     * Set up for the display of already created annotations.
+     *
+     * @private
+     */
+    Timeline.prototype._initAnnotations = function () {
+
+        this.api.on('annotations', $.proxy(this._onAnnotationData, this));
+
+    };
+
+    /**
+     * Called when new annotation data arrives.
+     * @private
+     */
+    Timeline.prototype._onAnnotationData = function (e, result) {
+        this.annotations = result.data;
+
+        this._renderAnnotations();
+
+        this._updateAnnotations();
+    };
+
+    /**
+     * Render the data in this.annotations.
+     */
+    Timeline.prototype._renderAnnotations = function() {
+        //do nothing
+    };
+
+    /**
+     * Update the rendered annotations
+     * @private
+     */
+    Timeline.prototype._updateAnnotations = function() {
+        //do nothing
     };
 
     //Mix in events

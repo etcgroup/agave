@@ -121,21 +121,8 @@ define(['jquery',
             this.api.annotations();
         };
 
-
-        /**
-         * Set up for the display of already created annotations.
-         *
-         * @private
-         */
-        FocusTimeline.prototype._initAnnotations = function () {
-
-            this.api.on('annotations', $.proxy(this._onAnnotationData, this));
-
-            var self = this;
-            //A function for generating the x position of an annotation
-            this._annotationXPosition = function (d) {
-                return self._timeScale(d.time + self._utcOffset);
-            };
+        FocusTimeline.prototype._initAnnotations = function() {
+            Timeline.prototype._initAnnotations.call(this);
 
             //A group for containing static annotations
             this.ui.annotations = this.ui.svg.append('svg')
@@ -157,14 +144,7 @@ define(['jquery',
                 .on('click', $.proxy(this._createAnnotation, this));
         };
 
-        /**
-         * Called when new annotation data arrives.
-         * @private
-         */
-        FocusTimeline.prototype._onAnnotationData = function (e, result) {
-
-            this.annotations = result.data;
-
+        FocusTimeline.prototype._renderAnnotations = function() {
             var boxHeight = this.boxes.annotations.height();
 
             //Bind the new annotations data
@@ -196,8 +176,6 @@ define(['jquery',
             //Remove un-needed lines
             bind.exit()
                 .remove();
-
-            this._updateAnnotations();
         };
 
         /**
@@ -208,7 +186,7 @@ define(['jquery',
          * @param mouseHovering whether or not the mouse is now hovering
          * @private
          */
-        FocusTimeline.prototype._onAnnotationHover = function (event, data, mouseHovering) {
+        Timeline.prototype._onAnnotationHover = function (event, data, mouseHovering) {
             if (mouseHovering) {
                 //Show a tooltip near the mouse
                 var label = ANNOTATION_TOOLTIP_TEMPLATE(data);
@@ -229,7 +207,7 @@ define(['jquery',
          *
          * @private
          */
-        FocusTimeline.prototype._updateAnnotations = function () {
+        Timeline.prototype._updateAnnotations = function () {
             var boxHeight = this.boxes.annotations.height();
             var boxWidth = this.boxes.annotations.width();
 
@@ -261,7 +239,7 @@ define(['jquery',
                 .classed('highlight', function (d) {
                     return d.id in self._brushedAnnotations;
                 })
-                .attr('x', this._annotationXPosition)
+                .attr('x', this._highlightXPosition)
                 .attr('height', boxHeight - 2);
         };
 
@@ -318,11 +296,22 @@ define(['jquery',
             Timeline.prototype.render.call(this);
 
             this._initHighlights();
+
+            //Add a handler for brushing queries
+            this.addBrushHandler('query', this._brushQuery);
+
             this._initAnnotations();
             this._renderCountAxis();
 
             //Request the annotation data now, I guess
             this._requestAnnotations();
+        };
+
+        FocusTimeline.prototype._brushQuery = function(item, brushOn) {
+            //Someone brushed an entire query!
+            if (this.display.mode() === 'simple') {
+                this._histograms[item.id].bold(brushOn);
+            }
         };
 
         /**
@@ -334,8 +323,6 @@ define(['jquery',
             Timeline.prototype.update.call(this, animate);
 
             this._updateCountAxis();
-            this._updateAnnotations();
-            this._updateHighlights();
         };
 
         /**
@@ -615,154 +602,6 @@ define(['jquery',
             this._updateCountAxis();
         };
 
-        /**
-         * Set up the display of linked tweets.
-         *
-         * @private
-         */
-        FocusTimeline.prototype._initHighlights = function () {
-
-            var self = this;
-
-            //A list of highlighted points in time
-            this._highlights = [];
-
-            //A lookup object for highlights by id
-            this._highlightLookup = {};
-
-            //A function for positioning highlights
-            this._highlightXPosition = function (d) {
-                return self._timeScale(d.time + self._utcOffset);
-            };
-
-            this._highlightClass = function (d) {
-                return d.type;
-            };
-
-            //A group element for containing the highlight points
-            this.api.on('brush', $.proxy(this._onBrush, this));
-
-            this.api.on('unbrush', $.proxy(this._onUnBrush, this));
-        };
-
-        /**
-         * Called when some elements are brushed.
-         *
-         * @param e
-         * @param brushed
-         * @private
-         */
-        FocusTimeline.prototype._onBrush = function (e, brushed) {
-            var self = this;
-            _.each(brushed, function (item) {
-
-                var time;
-
-                if (item.type === 'tweet') {
-                    time = item.data.created_at;
-                }
-
-                switch (item.type) {
-                    case 'tweet':
-                    case 'keyword':
-                        //grab the mid-point if time not already set (by tweet case)
-                        time = time || item.data.mid_point;
-
-                        if (!self._highlightLookup[item.data.id]) {
-                            //We are not showing it yet
-                            self._highlights.push({
-                                time: time,
-                                type: item.type
-                            });
-
-                            self._highlightLookup[item.data.id] = item.data;
-                        }
-
-                        self._updateHighlights();
-                        break;
-                    case 'annotation':
-                        //Add mark that the item is being brushed
-                        self._brushedAnnotations[item.id] = true;
-                        self._updateAnnotations();
-                        break;
-                    case 'query':
-                        //Someone brushed an entire query!
-                        if (self.display.mode() === 'simple') {
-                            self._histograms[item.id].bold(true);
-                        }
-                        break;
-                }
-
-            });
-        };
-
-        /**
-         * Called when some elements are un-brushed.
-         *
-         * @param e
-         * @param brushed
-         * @private
-         */
-        FocusTimeline.prototype._onUnBrush = function (e, brushed) {
-            var self = this;
-            _.each(brushed, function (item) {
-
-                switch (item.type) {
-                    case 'tweet':
-                    case 'keyword':
-                        if (self._highlightLookup[item.data.id]) {
-                            //We are showing it
-                            delete self._highlightLookup[item.data.id];
-                            self._highlights = _.values(self._highlightLookup);
-                            self._updateHighlights();
-                        }
-                        break;
-                    case 'annotation':
-                        //Mark that the item is not being brushed
-                        delete self._brushedAnnotations[item.id];
-                        self._updateAnnotations();
-                        break;
-                    case 'query':
-                        //Someone brushed an entire query!
-                        if (self.display.mode() === 'simple') {
-                            self._histograms[item.id].bold(false);
-                        }
-                        break;
-                }
-
-            });
-        };
-
-        /**
-         * Updates the display of brushed/highlighted times.
-         *
-         * @private
-         */
-        FocusTimeline.prototype._updateHighlights = function () {
-
-            var boxHeight = this.boxes.inner.height();
-
-            //Set the highlight positions
-            var bind = this.ui.chartGroup.selectAll('line.highlight')
-                .data(this._highlights);
-
-            //Create new lines and position them, but make them have no height
-            bind.enter().append('line')
-                .classed('highlight', true);
-
-            //Transition un-needed lines out and remove
-            bind.exit()
-                .remove();
-
-            //Position the lines where they ought to be
-            //Apply a class based on the data type
-            bind.attr('class', this._highlightClass)
-                .classed('highlight', true) //add the highlight class back in
-                .attr('x1', this._highlightXPosition)
-                .attr('x2', this._highlightXPosition)
-                .attr('y1', 0)
-                .attr('y2', boxHeight);
-        };
 
         /**
          * When the query changes, request some new data.
