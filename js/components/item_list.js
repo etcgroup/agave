@@ -28,6 +28,7 @@ define([
             this.api = options.api;
 
             this.itemsById = {};
+            this._brushCache = {};
 
             this._initUI();
             this._attachEvents();
@@ -149,9 +150,12 @@ define([
          * Clears the item list.
          */
         ItemList.prototype.clearList = function () {
-            //Remove all current keywords
+            //Remove all current items (clear brush first)
+            this.api.trigger('unbrush', _.values(this._brushCache));
+
             this.ui.list.empty();
             this._itemsById = {};
+            this._brushCache = {};
         };
 
         /**
@@ -167,13 +171,22 @@ define([
         ItemList.prototype._mouseHovered = function (ui, hovered) {
             var itemData = ui.data('item');
 
-            this.api.trigger(hovered ? 'brush' : 'unbrush', [
-                {
+            var brushData = this._brushCache[itemData.id];
+            if (!brushData) {
+                brushData = {
                     id: itemData.id,
                     type: this.item_type,
                     data: itemData
-                }
-            ]);
+                };
+            }
+
+            if (!hovered) {
+                delete this._brushCache[itemData.id];
+            } else {
+                this._brushCache[itemData.id] = brushData;
+            }
+
+            this.api.trigger(hovered ? 'brush' : 'unbrush', [brushData]);
         };
 
         ItemList.prototype._onBrush = function (brushedItems, brushOn) {
