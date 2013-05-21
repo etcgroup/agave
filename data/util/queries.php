@@ -304,6 +304,22 @@ class Queries
         return $this->db->lastInsertId();
     }
 
+    private function _build_update_annotation()
+    {
+        $this->prepare('update_annotation',
+            "UPDATE annotations SET label = ?
+            WHERE id = ?",
+            'si'
+        );
+    }
+
+    public function update_annotation($id, $label)
+    {
+        if ($this->run('update_annotation', $label, $id)) {
+            return $id;
+        }
+    }
+
     private function _build_annotations()
     {
         $this->prepare('annotations',

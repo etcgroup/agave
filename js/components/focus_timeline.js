@@ -156,6 +156,10 @@ define(['jquery',
             //Remove un-needed lines
             bind.exit()
                 .remove();
+
+            bind.classed('new', function(d) {
+                return d.new;
+            });
         };
 
         /**
@@ -614,10 +618,14 @@ define(['jquery',
          * @private
          */
         FocusTimeline.prototype._selectAnnotation = function (data) {
-            this.api.trigger('reference-selected', {
-                type: 'annotation',
-                data: data
-            });
+            if (this.display.reference_mode()) {
+                this.api.trigger('reference-selected', {
+                    type: 'annotation',
+                    data: data
+                });
+            } else {
+                this._createAnnotation(data);
+            }
         };
 
         /**
@@ -625,7 +633,7 @@ define(['jquery',
          *
          * @private
          */
-        FocusTimeline.prototype._createAnnotation = function () {
+        FocusTimeline.prototype._createAnnotation = function (annotation) {
 
             if (!this.user.signed_in()) {
                 alert("You must sign in to annotate");
@@ -636,29 +644,43 @@ define(['jquery',
             d3.event.preventDefault();
             d3.event.stopPropagation();
 
-            //Get the coordinate that was clicked
-            var x = d3.event.offsetX - this.boxes.inner.left();
+            var label;
+            if (annotation) {
+                //Edit existing annotation
+                label = prompt("Edit " + annotation.user + "'s label:", annotation.label);
 
-            //Convert to a time, in real UTC
-            var time = this._timeScale.invert(x) - this._utcOffset;
+                if (!label || label === annotation.label) {
+                    //Cancel
+                    return;
+                }
 
-            console.log('creating annotation at time ' + time);
+            } else {
+                //Get the coordinate that was clicked
+                var x = d3.event.offsetX - this.boxes.inner.left();
 
+                //Convert to a time, in real UTC
+                var time = this._timeScale.invert(x) - this._utcOffset;
 
-            var label = prompt("Label this time");
-
-            if (label) {
-
-                //Send the annotation up to the server
-                var annotation = {
+                annotation = {
                     time: time,
-                    label: label,
                     user: this.user.name()
                 };
-                this.api.annotate(annotation);
 
-                this.trigger('new-annotation', annotation);
+                console.log('creating annotation at time ' + time);
+
+                var label = prompt("Label this time:");
+
+                if (!label) {
+                    //Cancel
+                    return;
+                }
             }
+
+            annotation.label = label;
+
+            //Send the annotation up to the server
+            this.api.annotate(annotation);
+            this.trigger('new-annotation', annotation);
 
             return false;
         };

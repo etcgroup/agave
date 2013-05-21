@@ -25,17 +25,22 @@ $inserted_id = FALSE;
  * Optionally, fields for a new message can be provided.
  */
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $params = $request->post(array('user', 'time', 'label'));
+    $params = $request->post(array('user', 'time', 'label'), array('id'));
 
     $user = $params->user;
     $label = htmlspecialchars($params->label);
     $time = floor($params->time / 1000); //converting from ms to s
     $time = new DateTime("@$time"); // converting to a DateTime
 
-    $inserted_id = $db->insert_annotation($user, $label, $time);
-    if (!$inserted_id) {
-        echo 'Failure.';
-        return -1;
+    if ($params->id === NULL) {
+        $inserted_id = $db->insert_annotation($user, $label, $time);
+        if (!$inserted_id) {
+            echo 'Failure.';
+            return -1;
+        }
+    } else {
+        //The label is the only thing that can change
+        $inserted_id = $db->update_annotation($params->id, $label);
     }
 }
 

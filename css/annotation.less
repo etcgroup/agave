@@ -39,11 +39,16 @@
         .opacity(50);
         pointer-events: all;
 
-        .transition(~'stroke 300ms,opacity 300ms');
+        .transition(~'stroke 300ms,opacity 300ms,fill 300ms');
 
         &.highlight, &:hover {
             stroke: yellow;
             .opacity(100);
+        }
+
+        &.new {
+            fill: #4AFF42;
+            .opacity(80);
         }
 
         .reference-mode & {

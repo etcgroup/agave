@@ -32,16 +32,21 @@
   opacity: 0.5;
   filter: alpha(opacity=50);
   pointer-events: all;
-  -webkit-transition: stroke 300ms,opacity 300ms;
-  -moz-transition: stroke 300ms,opacity 300ms;
-  -o-transition: stroke 300ms,opacity 300ms;
-  transition: stroke 300ms,opacity 300ms;
+  -webkit-transition: stroke 300ms,opacity 300ms,fill 300ms;
+  -moz-transition: stroke 300ms,opacity 300ms,fill 300ms;
+  -o-transition: stroke 300ms,opacity 300ms,fill 300ms;
+  transition: stroke 300ms,opacity 300ms,fill 300ms;
 }
 .tweet-timeline .annotations .annotation.highlight,
 .tweet-timeline .annotations .annotation:hover {
   stroke: yellow;
   opacity: 1;
   filter: alpha(opacity=100);
+}
+.tweet-timeline .annotations .annotation.new {
+  fill: #4AFF42;
+  opacity: 0.8;
+  filter: alpha(opacity=80);
 }
 .reference-mode .tweet-timeline .annotations .annotation {
   cursor: pointer;
