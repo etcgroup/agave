@@ -43,6 +43,11 @@
   opacity: 1;
   filter: alpha(opacity=100);
 }
+.reference-mode .tweet-timeline .annotations .annotation {
+  cursor: pointer;
+  opacity: 1;
+  filter: alpha(opacity=100);
+}
 .tweet-overview .annotations .annotation {
   stroke: yellow;
   opacity: 0.5;
@@ -67,9 +72,4 @@
   -ms-transform: scale(1, 10);
   -o-transform: scale(1, 10);
   transform: scale(1, 10);
-}
-.reference-mode .annotations .annotation {
-  cursor: pointer;
-  opacity: 1;
-  filter: alpha(opacity=100);
 }

@@ -45,6 +45,11 @@
             stroke: yellow;
             .opacity(100);
         }
+
+        .reference-mode & {
+            cursor: pointer;
+            .opacity(100);
+        }
     }
 
     .tweet-overview & .annotation {
@@ -58,13 +63,6 @@
         &.highlight {
             .opacity(100);
             .scale(~'1, 10');
-        }
-    }
-
-    .reference-mode & {
-        .annotation {
-            cursor: pointer;
-            .opacity(100);
         }
     }
 }
