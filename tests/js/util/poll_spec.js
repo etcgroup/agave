@@ -36,11 +36,26 @@ define(['util/poll'], function (Poll) {
             expect(callback).not.toHaveBeenCalled();
         });
 
+        it ('executes the callback immediately when started', function() {
+            var poll = new Poll({
+                callback: callback,
+                interval: 50
+            });
+
+            expect(poll.isPolling()).toBe(false);
+            poll.start();
+            expect(poll.isPolling()).toBe(true);
+
+            expect(callback).toHaveBeenCalled();
+
+        });
+
         it('calls the callback once started', function() {
 
             var poll = new Poll({
                 callback: callback,
-                interval: 50
+                interval: 50,
+                immediate: false
             });
 
             expect(poll.isPolling()).toBe(false);
@@ -60,7 +75,8 @@ define(['util/poll'], function (Poll) {
 
             var poll = new Poll({
                 callback: callback,
-                interval: 50
+                interval: 50,
+                immediate: false
             });
 
             poll.start();
@@ -77,7 +93,8 @@ define(['util/poll'], function (Poll) {
         it('stops polling when stopped', function() {
             var poll = new Poll({
                 callback: callback,
-                interval: 50
+                interval: 50,
+                immediate: false
             });
 
             poll.start();
@@ -100,7 +117,8 @@ define(['util/poll'], function (Poll) {
         it('can be restarted', function() {
             var poll = new Poll({
                 callback: callback,
-                interval: 50
+                interval: 50,
+                immediate: false
             });
 
             poll.start();
@@ -125,7 +143,8 @@ define(['util/poll'], function (Poll) {
         it('does not double up if started twice', function() {
             var poll = new Poll({
                 callback: callback,
-                interval: 50
+                interval: 50,
+                immediate: false
             });
 
             poll.start();
@@ -139,7 +158,8 @@ define(['util/poll'], function (Poll) {
         it('silently ignores duplicate stops', function() {
             var poll = new Poll({
                 callback: callback,
-                interval: 50
+                interval: 50,
+                immediate: false
             });
 
             poll.start();
