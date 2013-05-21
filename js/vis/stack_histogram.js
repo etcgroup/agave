@@ -65,7 +65,7 @@ define(['lib/d3', 'underscore',
                 .values(stackValuesAccessor)
                 .y(stackYAccessor)
                 .x(stackXAccessor)
-                .offset(expand);
+                .offset('expand');
 
             //I can't remember what this does...
             self._bumpValue = -1;
@@ -81,15 +81,16 @@ define(['lib/d3', 'underscore',
                 return Math.round(self._yScale(d.y0));
             };
 
+            this._defined = function (d, i) {
+                return (self._totals[i] !== 0);
+            };
+
             //This overwrites the super class's area generator
             this._area = d3.svg.area()
                 .x(_scaledX)
                 .y1(_scaledY0)
-                .y0(_scaledY);
-
-            this._defined = function (d, i) {
-                return (self._totals[i] !== 0);
-            };
+                .y0(_scaledY)
+                .defined(this._defined);
 
             this._colorValue = function (grp) {
                 return self._colorScale(self._groupIdAccessor(grp));
