@@ -54,7 +54,10 @@ define([
             });
         };
 
-   
+        UserList.prototype.renderExplanation = function() {
+            this.ui.explanation.html('Top 50 most <i>prolific</i> Tweets');
+        };
+
         /**
          * called anytime an update occurs
          */

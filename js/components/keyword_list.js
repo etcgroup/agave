@@ -70,6 +70,10 @@ define([
             });
         };
 
+        KeywordList.prototype.renderExplanation = function() {
+            this.ui.explanation.html('Top 50 <i>bursting keywords</i>');
+        };
+
         /**
          * called anytime an update occurs
          */

@@ -43,13 +43,21 @@ define([
             this.ui.list = this.createList()
                 .addClass('item-list');
 
+            this.ui.explanation = this.into.find('.tab-pane-explanation');
+
             this.loader = loader({
                 into: this.into
             });
+
+            this.renderExplanation();
         };
 
         ItemList.prototype.createList = function () {
             return $('<ul>').appendTo(this.into);
+        };
+
+        ItemList.prototype.renderExplanation = function() {
+            this.ui.explanation.text('I am a hippo!');
         };
 
         /**

@@ -27,3 +27,17 @@ ul.item-list {
     -o-transition: background 200ms ;
     transition: background 200ms ;
 }
+
+.tab-pane-explanation {
+    position: absolute;
+    top: -24px;
+    right: 2px;
+    left: 220px; /* enough space for the menu */
+
+    font-size: 11px;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: right;
+}
