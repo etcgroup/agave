@@ -80,6 +80,7 @@
                                         <i class="icon-white icon-arrow-left"></i>
                                         Back
                                     </button>
+                                    <div class="discussion-title"></div>
                                     <textarea></textarea>
                                     <button type="button"
                                             class="send-button btn btn-primary tooltip-me" data-placement="bottom"

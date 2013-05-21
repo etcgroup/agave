@@ -33,6 +33,7 @@ define(['jquery',
 
         this.ui.backButton = this.into.find('.back-button');
         this.ui.commentList = this.into.find('.comments');
+        this.ui.discussionTitle = this.into.find('.discussion-title');
 
         this.ui.commentBox = this.into.find('.comment-box');
         this.ui.commentInput = this.ui.commentBox.find('textarea');
@@ -314,11 +315,22 @@ define(['jquery',
             self.tweets[d.id] = d;
         });
 
+
         //Format all the messages (looking for entities)
+        var firstMessage = null,
+            firstUser = null;
         data.each(function (index, element) {
             var msgElement = $(this).find('.message');
-            msgElement.html(references.replace(msgElement.html()));
+            firstMessage = msgElement.html();
+            msgElement.html(references.replace(firstMessage));
+
+            firstUser = $(this).find('.user').text();
         });
+
+        //If we have no messages yet, load the earliest message as the title
+        if (this.ui.commentList.find('.comment').length === 0 && firstMessage) {
+            this._setDiscussionTitle(firstMessage, firstUser);
+        }
 
         this.ui.commentList.html(data);
 
@@ -350,6 +362,14 @@ define(['jquery',
                 }
             }
         });
+    };
+
+    DiscussionView.prototype._setDiscussionTitle = function(title, user) {
+        this.ui.discussionTitle.html(title)
+            .tooltip({
+                placement: 'bottom',
+                title: 'Started by ' + user
+            });
     };
 
     DiscussionView.prototype._requestData = function () {
