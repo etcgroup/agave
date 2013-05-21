@@ -58,3 +58,9 @@
   border-right: 1px solid #5f5f5f;
   border-left: 1px solid #313131;
 }
+.navbar .user-display {
+  float: right;
+}
+.navbar .user-display .sign-out-button {
+  margin: 0 0 0 10px;
+}

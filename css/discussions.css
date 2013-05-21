@@ -7,6 +7,13 @@
     margin-bottom: 10px;
 }
 
+.collaborator .user-display {
+    font-size: 18px;
+    line-height: 30px;
+    vertical-align: middle;
+    float: right;
+}
+
 .user-box {
     text-align: center;
 }
@@ -15,16 +22,33 @@
     margin: 10px 0;
 }
 
+.user-box .header .title {
+    font-size: 50px;
+    line-height: 54px;
+    text-rendering: optimizeLegibility;
+    max-width: 300px;
+    margin: 40px auto;
+    font-weight: bold;
+}
+
+.user-box .header .message {
+    font-size: 22px;
+    line-height: 24px;
+    color: #ddd;
+    margin: 10px 0 25px;
+}
+
 .user-box .form input {
-    font-size: 18px;
-    line-height: 25px;
-    height: 25px;
-    padding: 5px 8px;
+    font-size: 20px;
+    line-height: 30px;
+    height: 30px;
+    padding: 8px 14px;
+    text-align: center;
 }
 
 .user-box .form .user-submit {
-    font-size:17px;
-    padding: 8px 13px;
+    font-size:20px;
+    padding: 12px 18px;
 }
 
 .discussions .instructions {
@@ -103,13 +127,6 @@
     box-sizing: border-box;
     resize: none;
     margin: 10px 0;
-}
-
-.discussion-view .comment-box .user-display {
-    font-size: 18px;
-    line-height: 30px;
-    vertical-align: middle;
-    margin-left: 15px;
 }
 
 .discussion-view .comment-box .reference-button {

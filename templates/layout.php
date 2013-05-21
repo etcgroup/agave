@@ -50,14 +50,15 @@
                     </div>
                 </div>
                 <div class="collaborator-wrapper col">
-                    <div class="collaborator padding-left show-left">
+                    <div class="collaborator padding-left show-left hide">
                         <div class="sliding-panel col">
                             <div class="user-box col">
                                 <div class="header">
-                                    <div class="title">Sign in to discuss!</div>
+                                    <div class="title">Welcome!</div>
+                                    <div class="message">Sign in to discuss this data set</div>
                                 </div>
                                 <div class="form">
-                                    <input type="text" placeholder="Choose a user name"/><br/>
+                                    <input type="text" placeholder="Enter your user name"/><br/>
                                     <button type="button" class="user-submit btn btn-large btn-primary">Sign in</button>
                                 </div>
                             </div>
@@ -79,7 +80,6 @@
                                         <i class="icon-white icon-arrow-left"></i>
                                         Back
                                     </button>
-                                    <span class="user-display"></span>
                                     <textarea></textarea>
                                     <button type="button" data-toggle="button"
                                             class="reference-button btn tooltip-me" data-placement="right"

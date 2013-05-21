@@ -35,20 +35,18 @@ define(['jquery'], function($) {
             return;
         }
 
-        //Save the user data
-        this.user.set({
-            name: user,
-            signed_in: true
+        //Save the user data and sign in
+        this.user.sign_me_in({
+            name: user
         });
-        this.user.trigger('signed-in');
     };
 
     SignIn.prototype.hide = function() {
-
+        this.ui.userInput.val('');
     };
 
     SignIn.prototype.show = function() {
-
+        this.ui.userInput.focus();
     };
 
     return SignIn;

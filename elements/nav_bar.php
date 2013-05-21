@@ -19,6 +19,12 @@ function nav_bar()
                     <li class="divider-vertical"></li>
                     <li>3.8 million authors</li>
                 </ul>
+                <div class="user-display hide fade">
+                    <span class="welcome-message">
+                        Welcome, <span class="user-name"></span>!
+                    </span>
+                    <a href="#" class="btn sign-out-button">Sign out</a>
+                </div>
             </div>
         </div>
     </div>

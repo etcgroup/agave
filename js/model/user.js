@@ -1,8 +1,7 @@
 define(['underscore', 'util/events', 'util/functions'], function(_, events, functions) {
 
     var DATA_DEFAULTS = {
-        name: null,
-        signed_in: false
+        name: null
     };
 
     /**
@@ -18,6 +17,8 @@ define(['underscore', 'util/events', 'util/functions'], function(_, events, func
 
         //Initialize the data with the defaults
         this.data = _.defaults(data, DATA_DEFAULTS);
+
+        this._signed_in = false;
     };
 
     /**
@@ -46,7 +47,27 @@ define(['underscore', 'util/events', 'util/functions'], function(_, events, func
      *
      * @type {Function}
      */
-    User.prototype.signed_in = functions.evented_mutator('data', 'signed_in');
+    User.prototype.signed_in = function() {
+        return this._signed_in;
+    };
+
+    User.prototype.sign_me_in = function(userData) {
+        this.set(userData);
+
+        this._signed_in = true;
+
+        this.trigger('signed-in');
+    };
+
+    User.prototype.sign_me_out = function() {
+        this.set({
+            name: null
+        });
+
+        this._signed_in = false;
+
+        this.trigger('signed-out');
+    };
 
     events(User);
 

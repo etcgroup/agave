@@ -9,6 +9,7 @@ define(function (require) {
     var Interval = require('model/interval');
     var Query = require('model/query');
     var User = require('model/user');
+    var cookie = require('util/cookie');
     var TimelineControls = require('components/timeline_controls');
     var QueryControls = require('components/query_controls');
     var TweetList = require('components/tweet_list');
@@ -18,9 +19,12 @@ define(function (require) {
     var FocusTimeline = require('components/focus_timeline');
     var DiscussionList = require('components/discussion_list');
     var DiscussionView = require('components/discussion_view');
+    var UserInfoView = require('components/user_info');
     var SignIn = require('components/sign_in');
     var API = require('util/api');
     var Poll = require('util/poll');
+
+    var USER_COOKIE_NAME = 'user_data'
 
     /**
      * This class orchestrates the overall setup of the application.
@@ -39,6 +43,7 @@ define(function (require) {
 
         this.initUI();
         this.initModels();
+        this.initUserInfo();
 
         this.updateModelsFromUrl();
 
@@ -56,6 +61,7 @@ define(function (require) {
         this.initSignInView();
         this.initDiscussionList();
         this.initDiscussionView();
+        this.initDiscussionsState();
 
         this.windowResize();
         this.annotationPoll();
@@ -110,6 +116,31 @@ define(function (require) {
 
     };
 
+    App.prototype.initUserInfo = function() {
+        var self = this;
+
+        //Listen for sign ins to save
+        this.user.on('signed-in', function() {
+            cookie.set(USER_COOKIE_NAME, JSON.stringify(self.user.data));
+        });
+
+        //And sign outs
+        this.user.on('signed-out', function() {
+            cookie.remove(USER_COOKIE_NAME);
+        });
+
+        var data = cookie.get(USER_COOKIE_NAME);
+        if (data) {
+            data = JSON.parse(data);
+            this.user.sign_me_in(data);
+        }
+
+        this.userDisplay = new UserInfoView({
+            into: this.ui.user_display,
+            user: this.user
+        });
+    };
+
     /**
      * Set up the display model and timeline controls.
      */
@@ -161,6 +192,7 @@ define(function (require) {
         this.ui.explorer = content.find('.explorer');
         this.ui.collaborator = content.find('.collaborator');
 
+        this.ui.user_display = $('.navbar .user-display');
     };
 
     /**
@@ -314,7 +346,7 @@ define(function (require) {
 
     App.prototype.setDiscussionState = function (cssClass) {
         this.ui.collaborator
-            .removeClass('show-left show-mid show-right')
+            .removeClass('show-left show-mid show-right hide')
             .addClass(cssClass);
     };
 
@@ -325,17 +357,6 @@ define(function (require) {
             into: this.ui.signIn,
             user: this.user
         });
-
-        var self = this;
-
-        //When a user is available...
-        this.user.on('signed-in', function () {
-            //Hide the sign-in box, show the discussions
-            self.discussionList.show();
-            self.signIn.hide();
-            self.setDiscussionState('show-mid');
-        });
-
     };
 
     App.prototype.initDiscussionList = function () {
@@ -374,6 +395,44 @@ define(function (require) {
         });
 
         this.discussionView.on('restore-state', $.proxy(this.restoreViewState, this));
+    };
+
+    App.prototype.initDiscussionsState = function() {
+        var self = this;
+        function showDiscussionList(showMe) {
+            if (showMe) {
+                //Hide the sign-in box, show the discussions
+                self.discussionList.show();
+                self.discussionView.hide();
+                self.signIn.hide();
+                self.setDiscussionState('show-mid');
+            } else {
+                //Show the sign-in box, hide the discussion list and view
+                self.discussionList.hide();
+                self.discussionView.hide();
+                self.setDiscussionState('show-left');
+
+                //Doing this after so that it will be focused
+                self.signIn.show();
+            }
+        }
+
+        //if a user is available...
+        if (this.user.signed_in()) {
+            showDiscussionList(true);
+        } else {
+            showDiscussionList(false);
+        }
+
+        //When a user is available...
+        this.user.on('signed-in', function () {
+            showDiscussionList(true);
+        });
+
+        //When a user signs out
+        this.user.on('signed-out', function() {
+            showDiscussionList(false);
+        });
     };
 
     App.prototype.windowResize = function () {
