@@ -431,14 +431,16 @@ define(['jquery',
                 throw 'huh? bad item item.type ' + item.type;
             }
 
+            //We need a uniform time property for these, and not much else
             var packaged = {
+                id: item.id,
                 time: time,
                 type: item.type
             };
 
             this._highlights.push(packaged);
             this._highlightLookup[item.data.id] = packaged;
-            
+
             this._updateHighlights();
 
         } else if (!brushOn && this._highlightLookup[item.data.id]) {
