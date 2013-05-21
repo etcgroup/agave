@@ -6,7 +6,7 @@ define([
     'util/sentiment'],
     function ($, _, ItemList, extend, sentiment) {
 
-        var TWEET_TEMPLATE = _.template("<li class='tweet' data-id='<%=id%>'>" +
+        var TWEET_TEMPLATE = _.template("<li class='tweet' data-id='<%=id%>' title='Center the view over this Tweet'>" +
             "<div class='username muted'>" +
             "<a class='user-link subtle-link tooltip-me' title='View <%=name%> on Twitter' target='tweet-link-tab' href='https://twitter.com/<%=screen_name%>'>" +
             "@<%=screen_name%>" +

@@ -328,6 +328,18 @@ define(['jquery',
             animation: false
         });
 
+        this.ui.commentList.find('.ref').tooltip({
+            container: this.into,
+            animation: false,
+            placement: 'right',
+            title: function() {
+                if ($(this).is('.type-T')) {
+                    return 'Go to this Tweet';
+                } else {
+                    return 'Go to this label';
+                }
+            }
+        });
     };
 
     DiscussionView.prototype._requestData = function () {

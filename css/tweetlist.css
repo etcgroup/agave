@@ -1,6 +1,7 @@
 
 .tweet-list .tweet {
     line-height: 18px;
+    cursor: pointer;
 }
 
 .tweet-list .tweet .username {
