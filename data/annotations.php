@@ -27,7 +27,7 @@ $inserted_id = FALSE;
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $params = $request->post(array('user', 'time', 'label'), array('id'));
 
-    $user = $params->user;
+    $user = htmlspecialchars($params->user);
     $label = htmlspecialchars($params->label);
     $time = floor($params->time / 1000); //converting from ms to s
     $time = new DateTime("@$time"); // converting to a DateTime

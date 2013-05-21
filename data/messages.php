@@ -25,7 +25,7 @@ $perf = $request->timing();
  */
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $params = $request->post(array('user', 'message', 'view_state'), array('discussion_id'));
-    $user = $params->user;
+    $user = htmlspecialchars($params->user);
     $message = htmlspecialchars($params->message);
     $discussion_id = $params->discussion_id;
     $view_state = $params->view_state;
