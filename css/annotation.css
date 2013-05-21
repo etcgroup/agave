@@ -24,7 +24,7 @@
 .annotations:hover .background {
   fill: rgba(255, 255, 255, 0.08);
 }
-.annotations .annotation {
+.tweet-timeline .annotations .annotation {
   fill: yellow;
   stroke: transparent;
   stroke-width: 4px;
@@ -37,11 +37,36 @@
   -o-transition: stroke 300ms,opacity 300ms;
   transition: stroke 300ms,opacity 300ms;
 }
-.annotations .annotation.highlight,
-.annotations .annotation:hover {
+.tweet-timeline .annotations .annotation.highlight,
+.tweet-timeline .annotations .annotation:hover {
   stroke: yellow;
   opacity: 1;
   filter: alpha(opacity=100);
+}
+.tweet-overview .annotations .annotation {
+  stroke: yellow;
+  opacity: 0.5;
+  filter: alpha(opacity=50);
+  stroke-width: 2px;
+  shape-rendering: crispEdges;
+  -webkit-transition: opacity 300ms;
+  -moz-transition: opacity 300ms;
+  -o-transition: opacity 300ms;
+  transition: opacity 300ms;
+  -webkit-transform: scale(1, 1);
+  -moz-transform: scale(1, 1);
+  -ms-transform: scale(1, 1);
+  -o-transform: scale(1, 1);
+  transform: scale(1, 1);
+}
+.tweet-overview .annotations .annotation.highlight {
+  opacity: 1;
+  filter: alpha(opacity=100);
+  -webkit-transform: scale(1, 10);
+  -moz-transform: scale(1, 10);
+  -ms-transform: scale(1, 10);
+  -o-transform: scale(1, 10);
+  transform: scale(1, 10);
 }
 .reference-mode .annotations .annotation {
   cursor: pointer;

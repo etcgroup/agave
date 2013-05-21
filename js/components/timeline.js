@@ -533,9 +533,7 @@ define(['jquery',
      * @private
      */
     Timeline.prototype._onAnnotationData = function (e, result) {
-        this.annotations = result.data;
-
-        this._renderAnnotations();
+        this._renderAnnotations(result.data);
 
         this._updateAnnotations();
     };

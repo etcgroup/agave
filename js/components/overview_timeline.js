@@ -5,12 +5,14 @@ define(['jquery',
     'components/timeline',
     'util/sentiment',
     'util/sampling',
+    'util/rectangle',
     'lib/d3'],
-    function ($, _, extend, Transform, Timeline, sentiment, sampling, d3) {
+    function ($, _, extend, Transform, Timeline, sentiment, sampling, Rectangle, d3) {
 
         //Color defaults
         var COLOR_DOMAIN = sentiment.numbers;
         var COLOR_RANGE = sentiment.classes;
+        var ANNOTATIONS_PERCENT_HEIGHT = 0.1;
 
 
         /**
@@ -220,6 +222,47 @@ define(['jquery',
         };
 
         /**
+         * Set up all the rectangles used to calculate sub-component sizes and positions.
+         */
+        OverviewTimeline.prototype._buildBoxes = function () {
+            Timeline.prototype._buildBoxes.call(this);
+
+            this.boxes.annotations = new Rectangle();
+            this.boxes.chart = new Rectangle();
+        };
+
+        OverviewTimeline.prototype._updateBoxes = function () {
+            Timeline.prototype._updateBoxes.call(this);
+
+            //This one is relative to the inner box
+            this.boxes.annotations.set({
+                top: 0,
+                left: 0,
+                right: this.boxes.inner.width(),
+                bottom: this.boxes.inner.height() * ANNOTATIONS_PERCENT_HEIGHT
+            });
+
+            //This one is relative to the outer box
+            this.boxes.chart.set({
+                top: this.boxes.annotations.bottom(),
+                left: this.boxes.inner.left(),
+                width: this.boxes.inner.width(),
+                bottom: this.boxes.inner.height()
+            });
+        };
+
+        /**
+         * Render the timeline.
+         */
+        OverviewTimeline.prototype._renderHistogram = function () {
+            Timeline.prototype._renderHistogram.call(this);
+
+            this._histogram.box(this.boxes.chart);
+
+            this._updateHistogram(false);
+        };
+
+        /**
          * Override the update histogram method slightly.
          * @private
          */
@@ -307,6 +350,70 @@ define(['jquery',
                 from: extent[0],
                 to: extent[1]
             });
+        };
+
+        OverviewTimeline.prototype._initAnnotations = function() {
+            Timeline.prototype._initAnnotations.call(this);
+
+            //A group for containing static annotations
+            this.ui.annotations = this.ui.chartGroup.append('g')
+                .classed('annotations', true);
+        };
+
+        OverviewTimeline.prototype._renderAnnotations = function(annotations) {
+            var boxHeight = this.boxes.annotations.height();
+
+            //Bind the new annotations data
+            var bind = this.ui.annotations.selectAll('line.annotation')
+                .data(annotations);
+
+            var self = this;
+
+            //Add any new annotations
+            bind.enter().append('line')
+                .classed('annotation', true);
+
+            //Remove un-needed lines
+            bind.exit()
+                .remove();
+        };
+
+        /**
+         * Update the annotations being displayed. This needs to be called
+         * when the annotation data have changed, or when the graph is being updated
+         * overall.
+         *
+         * @private
+         */
+        OverviewTimeline.prototype._updateAnnotations = function () {
+            var boxHeight = this.boxes.annotations.height();
+            var boxWidth = this.boxes.annotations.width();
+
+            var self = this;
+
+            var annotations = this.ui.annotations;
+            if (this.display.annotations()) {
+                annotations
+                    .style('display', 'inline')
+                    .transition()
+                    .style('opacity', 1);
+            } else {
+                annotations
+                    .transition()
+                    .style('opacity', 0)
+                    .each('end', function () {
+                        annotations.style('display', 'none');
+                    });
+            }
+
+            annotations.selectAll('line.annotation')
+                .classed('highlight', function (d) {
+                    return d.id in self._brushedAnnotations;
+                })
+                .attr('x1', this._highlightXPosition)
+                .attr('x2', this._highlightXPosition)
+                .attr('y1', 0)
+                .attr('y2', boxHeight);
         };
 
         return OverviewTimeline;

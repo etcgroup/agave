@@ -124,12 +124,12 @@ define(['jquery',
                 .on('click', $.proxy(this._createAnnotation, this));
         };
 
-        FocusTimeline.prototype._renderAnnotations = function() {
+        FocusTimeline.prototype._renderAnnotations = function(annotations) {
             var boxHeight = this.boxes.annotations.height();
 
             //Bind the new annotations data
             var bind = this.ui.annotations.selectAll('rect.annotation')
-                .data(this.annotations);
+                .data(annotations);
 
             var self = this;
             //Add any new annotations

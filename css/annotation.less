@@ -31,7 +31,7 @@
     }
 
 
-    .annotation {
+    .tweet-timeline & .annotation {
         fill: yellow;
         stroke: transparent;
         stroke-width: 4px;
@@ -44,6 +44,20 @@
         &.highlight, &:hover {
             stroke: yellow;
             .opacity(100);
+        }
+    }
+
+    .tweet-overview & .annotation {
+        stroke: yellow;
+        .opacity(50);
+        stroke-width: 2px;
+        shape-rendering: crispEdges;
+        .transition(~'opacity 300ms');
+        .scale(~'1, 1');
+
+        &.highlight {
+            .opacity(100);
+            .scale(~'1, 10');
         }
     }
 

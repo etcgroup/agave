@@ -55,12 +55,22 @@ svg {
     }
 
     .highlight {
+        shape-rendering: crispEdges;
+
         &.tweet {
             stroke: cyan;
+
+            .tweet-overview & {
+                stroke-width: 2px;
+            }
         }
 
         &.keyword {
-            stroke: #e800ff;
+            stroke: #ffa0f3;
+
+            .tweet-overview & {
+                stroke-width: 2px;
+            }
         }
     }
 

@@ -51,11 +51,20 @@ svg .background {
 svg .area {
   pointer-events: none;
 }
+svg .highlight {
+  shape-rendering: crispEdges;
+}
 svg .highlight.tweet {
   stroke: cyan;
 }
+.tweet-overview svg .highlight.tweet {
+  stroke-width: 2px;
+}
 svg .highlight.keyword {
-  stroke: #e800ff;
+  stroke: #ffa0f3;
+}
+.tweet-overview svg .highlight.keyword {
+  stroke-width: 2px;
 }
 .tweet-overview .time-selector {
   position: absolute;
