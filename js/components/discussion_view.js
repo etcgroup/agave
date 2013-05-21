@@ -5,17 +5,16 @@ define(['jquery',
     'util/loader',
     'util/urls',
     'util/references',
-    'lib/bootstrap'], function($, _, events, Poll, loader, urls, references, bootstrap) {
+    'lib/bootstrap'], function ($, _, events, Poll, loader, urls, references, bootstrap) {
 
     //Check for messages every 10 seconds
     var POLL_INTERVAL = 10000;
 
-    var DiscussionView = function(options) {
+    var DiscussionView = function (options) {
         this.into = options.into || $('<div>');
         this.api = options.api;
         this.user = options.user;
         this.interval = options.interval;
-        this.display = options.display;
 
         this.discussion_id = null;
 
@@ -28,7 +27,7 @@ define(['jquery',
         });
     };
 
-    DiscussionView.prototype._initUI = function() {
+    DiscussionView.prototype._initUI = function () {
         this.ui = {};
 
         this.ui.backButton = this.into.find('.back-button');
@@ -46,7 +45,7 @@ define(['jquery',
         });
     };
 
-    DiscussionView.prototype._attachEvents = function() {
+    DiscussionView.prototype._attachEvents = function () {
         this.api.on('annotations', $.proxy(this._onAnnotationData, this));
 
         this.ui.backButton.on('click', $.proxy(this._onBackClicked, this));
@@ -54,19 +53,19 @@ define(['jquery',
         this.ui.referenceButton.on('click', $.proxy(this._onReferenceButtonClicked, this));
 
         var self = this;
-        this.ui.commentList.on('mouseenter', '.ref', function() {
+        this.ui.commentList.on('mouseenter', '.ref', function () {
             self._referenceMouseEntered($(this));
         });
 
-        this.ui.commentList.on('mouseleave', '.ref', function() {
+        this.ui.commentList.on('mouseleave', '.ref', function () {
             self._referenceMouseLeft($(this));
         });
 
-        this.ui.commentList.on('click', '.ref', function() {
+        this.ui.commentList.on('click', '.ref', function () {
             self._referenceClicked($(this));
         });
 
-        this.ui.commentList.on('click', '.view-state', function() {
+        this.ui.commentList.on('click', '.view-state', function () {
             self._viewStateClicked($(this));
         });
 
@@ -80,7 +79,7 @@ define(['jquery',
         this.api.on('unbrush', $.proxy(this._onUnBrush, this));
     };
 
-    DiscussionView.prototype.show = function(discussion_id) {
+    DiscussionView.prototype.show = function (discussion_id) {
         this.discussion_id = discussion_id;
 
         //Clear the current list contents
@@ -97,27 +96,27 @@ define(['jquery',
         this.ui.commentInput.focus();
     };
 
-    DiscussionView.prototype.isShowing = function() {
+    DiscussionView.prototype.isShowing = function () {
         //We are showing if we are polling
         return this.poll.isPolling();
     };
 
-    DiscussionView.prototype.hide = function() {
+    DiscussionView.prototype.hide = function () {
         this.discussion_id = null;
 
         this.poll.stop();
     };
 
-    DiscussionView.prototype._onBackClicked = function() {
+    DiscussionView.prototype._onBackClicked = function () {
         this.trigger('back');
     };
 
-    DiscussionView.prototype._disableCommentBox = function() {
+    DiscussionView.prototype._disableCommentBox = function () {
         this.ui.commentInput.prop('disabled', true);
         this.ui.commentSubmit.prop('disabled', true);
     };
 
-    DiscussionView.prototype._enableCommentBox = function() {
+    DiscussionView.prototype._enableCommentBox = function () {
         if (this.ui.commentInput.prop('disabled')) {
             this.ui.commentInput.prop('disabled', false);
             this.ui.commentSubmit.prop('disabled', false);
@@ -126,20 +125,20 @@ define(['jquery',
         }
     };
 
-    DiscussionView.prototype._userChanged = function(e, user) {
+    DiscussionView.prototype._userChanged = function (e, user) {
         this.ui.userDisplay.html('Hello, ' + user.name() + '!');
     };
 
-    DiscussionView.prototype.toggleReferenceMode = function(value) {
+    DiscussionView.prototype.toggleReferenceMode = function (value) {
         $('body').toggleClass('reference-mode', value);
         this.display.reference_mode(value);
     };
 
-    DiscussionView.prototype._onReferenceButtonClicked = function() {
+    DiscussionView.prototype._onReferenceButtonClicked = function () {
         this.toggleReferenceMode(!this.ui.referenceButton.is('.active'));
     };
 
-    DiscussionView.prototype._onSendClicked = function() {
+    DiscussionView.prototype._onSendClicked = function () {
         var message = $.trim(this.ui.commentInput.val());
 
         if (message) {
@@ -158,14 +157,14 @@ define(['jquery',
         }
     };
 
-    DiscussionView.prototype._onReferenceInserted = function(e, result) {
+    DiscussionView.prototype._onReferenceInserted = function (e, result) {
         if (!this.isShowing() || !this.display.reference_mode()) {
             // TODO: this isn't the best place for this, but its the only listener for
             // reference-selected and its the only one that knows about insert mode
             // also ignore annotations for the moment
-            if(result.type == "tweet") {
+            if (result.type == "tweet") {
                 this.interval.centerAround(result.data.created_at);
-            } else if(result.type == "annotation") {
+            } else if (result.type == "annotation") {
                 this.interval.centerAround(result.data.time);
             }
             return;
@@ -206,31 +205,35 @@ define(['jquery',
         return type;
     }
 
-    DiscussionView.prototype._referenceMouseEntered = function(refUI) {
+    DiscussionView.prototype._referenceMouseEntered = function (refUI) {
         var type = getReferenceType(refUI);
         var id = refUI.data('id');
 
-        this.api.trigger('brush', [{
-            type: type,
-            id: id,
-            data: this.tweets[id]
-        }]);
+        this.api.trigger('brush', [
+            {
+                type: type,
+                id: id,
+                data: this.tweets[id]
+            }
+        ]);
     };
 
-    DiscussionView.prototype._referenceMouseLeft = function(refUI) {
+    DiscussionView.prototype._referenceMouseLeft = function (refUI) {
         var type = getReferenceType(refUI);
         var id = refUI.data('id');
 
-        this.api.trigger('unbrush', [{
-            type: type,
-            id: id,
-            data: this.tweets[id]
-        }]);
+        this.api.trigger('unbrush', [
+            {
+                type: type,
+                id: id,
+                data: this.tweets[id]
+            }
+        ]);
     };
 
     DiscussionView.prototype._onBrush = function (e, brush) {
         var refs = this.ui.commentList.find('.ref');
-        _.each(brush, function(item) {
+        _.each(brush, function (item) {
             refs.filter('[data-id=' + item.id + ']')
                 .addClass('highlight');
         });
@@ -238,19 +241,19 @@ define(['jquery',
 
     DiscussionView.prototype._onUnBrush = function (e, brush) {
         var refs = this.ui.commentList.find('.ref');
-        _.each(brush, function(item) {
+        _.each(brush, function (item) {
             refs.filter('[data-id=' + item.id + ']')
                 .removeClass('highlight');
         });
     };
 
-    DiscussionView.prototype._viewStateClicked = function(viewStateUI) {
+    DiscussionView.prototype._viewStateClicked = function (viewStateUI) {
         var state = viewStateUI.data('view');
 
         this.trigger('restore-state', state);
     };
 
-    DiscussionView.prototype._referenceClicked = function(refUI) {
+    DiscussionView.prototype._referenceClicked = function (refUI) {
         var type = getReferenceType(refUI);
         var id = refUI.data('id');
         var text = refUI.html();
@@ -282,12 +285,12 @@ define(['jquery',
 
     };
 
-    DiscussionView.prototype._onData = function(e, result) {
+    DiscussionView.prototype._onData = function (e, result) {
         this.loader.stop();
 
         this._enableCommentBox();
 
-        var data = $($.trim(result.data.rendered)).filter(function() {
+        var data = $($.trim(result.data.rendered)).filter(function () {
             //Remove 'text' nodes
             return this.nodeType !== 3;
         });
@@ -300,13 +303,13 @@ define(['jquery',
         // add our map of the data
         this.tweets = [];
         var self = this;
-        result.data.tweets.forEach(function(d,i){
+        result.data.tweets.forEach(function (d, i) {
             //d.created_at = Date.parse(d.created_at);
             self.tweets[d.id] = d;
         });
 
         //Format all the messages (looking for entities)
-        data.each(function(index, element) {
+        data.each(function (index, element) {
             var msgElement = $(this).find('.message');
             msgElement.html(references.replace(msgElement.html()));
         });
@@ -319,35 +322,34 @@ define(['jquery',
                 this.discussion_id = comments.data('discussion-id');
             }
         }
-        
-         this.ui.commentList.find('.tooltip-me').tooltip({
-                container: this.into,
-                animation: false
-            });
-        
+
+        this.ui.commentList.find('.tooltip-me').tooltip({
+            container: this.into,
+            animation: false
+        });
+
     };
 
-    DiscussionView.prototype._requestData = function() {
+    DiscussionView.prototype._requestData = function () {
         this.api.messages({
             discussion_id: this.discussion_id
         });
     };
 
-        /**
-         * Called when new annotation data arrives.
-         * @private
-         */
-        DiscussionView.prototype._onAnnotationData = function (e, result) {
-            this.annotations = [];
+    /**
+     * Called when new annotation data arrives.
+     * @private
+     */
+    DiscussionView.prototype._onAnnotationData = function (e, result) {
+        this.annotations = [];
 
-            var self = this;
-            result.data.forEach(function(d,i){
-                self.annotations[+d.id] = d;
-            });
+        var self = this;
+        result.data.forEach(function (d, i) {
+            self.annotations[+d.id] = d;
+        });
 
-            //this._updateAnnotations();
-        };
-
+        //this._updateAnnotations();
+    };
 
 
     events(DiscussionView);
