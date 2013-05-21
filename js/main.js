@@ -22,7 +22,10 @@ define(['app'], function(App) {
         bin_size: 5,
 
         //The UTC offset for Eastern Time (during the Super Bowl)
-        utc_offset_millis: -5 * 60 * 60 * 1000
+        utc_offset_millis: -5 * 60 * 60 * 1000,
+
+        //Time between annotation polls in millis
+        annotation_poll_interval: 10000
     };
 
     //Start the app

@@ -1,10 +1,11 @@
 define(['jquery',
+    'underscore',
     'lib/d3',
     'util/events',
     'util/loader',
     'util/transform',
     'util/rectangle',
-    'vis/histogram'], function ($, d3, events, loader, Transform, Rectangle, Histogram) {
+    'vis/histogram'], function ($, _, d3, events, loader, Transform, Rectangle, Histogram) {
 
     var AXIS_OFFSET = 3;
 

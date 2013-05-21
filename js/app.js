@@ -20,6 +20,7 @@ define(function (require) {
     var DiscussionView = require('components/discussion_view');
     var SignIn = require('components/sign_in');
     var API = require('util/api');
+    var Poll = require('util/poll');
 
     /**
      * This class orchestrates the overall setup of the application.
@@ -57,13 +58,14 @@ define(function (require) {
         this.initDiscussionView();
 
         this.windowResize();
+        this.annotationPoll();
 
         urls.watch_url_changes();
         urls.on('change', $.proxy(this.updateModelsFromUrl, this));
 
         //Set global tooltip defaults
         var popupSettings = {
-            delay:{
+            delay: {
                 show: 300
             },
             animation: false
@@ -75,7 +77,7 @@ define(function (require) {
         $('.tooltip-me').tooltip();
     };
 
-    App.prototype.initModels = function() {
+    App.prototype.initModels = function () {
         //Initialize the user model
         this.user = new User();
 
@@ -105,13 +107,13 @@ define(function (require) {
             //When the model changes, we need to know
             query.on('change', $.proxy(self.queryUpdated, self));
         });
-       
+
     };
 
     /**
      * Set up the display model and timeline controls.
      */
-    App.prototype.initTimelineControls = function() {
+    App.prototype.initTimelineControls = function () {
 
         this.ui.timelineControls = this.ui.explorer.find('.timeline-controls');
 
@@ -227,11 +229,11 @@ define(function (require) {
         this.ui.detailsHalves = this.ui.detailsPanel.find('.details-left,.details-right');
 
         this.ui.detailsHalves
-            .on('mouseenter', function(e) {
+            .on('mouseenter', function (e) {
                 var queryId = $(this).data('query-index');
                 self.onQueryHovered(queryId, true);
             })
-            .on('mouseleave', function(e) {
+            .on('mouseleave', function (e) {
                 var queryId = $(this).data('query-index');
                 self.onQueryHovered(queryId, false);
             });
@@ -248,7 +250,7 @@ define(function (require) {
         this.tweetLists = [];
 
         var self = this;
-        this.ui.detailsTabGroups.forEach(function(group, index) {
+        this.ui.detailsTabGroups.forEach(function (group, index) {
             var query = self.queries[index];
 
             group.tweetList = group.root.find('.tweet-list');
@@ -263,20 +265,20 @@ define(function (require) {
             }));
         });
     };
-    
+
     // Setting up the users list component
     App.prototype.initUserList = function () {
-        
+
         this.userLists = [];
-        
+
         var self = this;
-        this.ui.detailsTabGroups.forEach(function(group, index) {
+        this.ui.detailsTabGroups.forEach(function (group, index) {
             var query = self.queries[index];
-            
+
             group.userList = group.root.find('.users-list');
             var spinner = group.root.find('.user-list-spinner');
 
-            self.userLists.push(new UserList ( {
+            self.userLists.push(new UserList({
                 api: self.api,
                 interval: self.interval,
                 query: query,
@@ -289,11 +291,11 @@ define(function (require) {
     /**
      * Set up the other list
      */
-    App.prototype.initKeywordList = function() {
+    App.prototype.initKeywordList = function () {
         this.keywordLists = [];
 
         var self = this;
-        this.ui.detailsTabGroups.forEach(function(group, index) {
+        this.ui.detailsTabGroups.forEach(function (group, index) {
             var query = self.queries[index];
 
             group.keywordList = group.root.find('.keywords-list');
@@ -310,13 +312,13 @@ define(function (require) {
 
     };
 
-    App.prototype.setDiscussionState = function(cssClass) {
+    App.prototype.setDiscussionState = function (cssClass) {
         this.ui.collaborator
             .removeClass('show-left show-mid show-right')
             .addClass(cssClass);
     };
 
-    App.prototype.initSignInView = function() {
+    App.prototype.initSignInView = function () {
         this.ui.signIn = this.ui.collaborator.find('.user-box');
 
         this.signIn = new SignIn({
@@ -327,7 +329,7 @@ define(function (require) {
         var self = this;
 
         //When a user is available...
-        this.user.on('signed-in', function() {
+        this.user.on('signed-in', function () {
             //Hide the sign-in box, show the discussions
             self.discussionList.show();
             self.signIn.hide();
@@ -406,7 +408,7 @@ define(function (require) {
         this.updateUrl();
     };
 
-    App.prototype.displayChanged = function(e, display, changedFields) {
+    App.prototype.displayChanged = function (e, display, changedFields) {
         if (changedFields === 'annotations' || changedFields.indexOf('annotations') >= 0) {
             //Don't update if annotations was the updated field.
             return;
@@ -420,11 +422,11 @@ define(function (require) {
         this.updateUrl();
     };
 
-    App.prototype.restoreViewState = function(e, stateString) {
+    App.prototype.restoreViewState = function (e, stateString) {
         urls.set_query_string(stateString);
     };
 
-    App.prototype.updateModelsFromUrl = function() {
+    App.prototype.updateModelsFromUrl = function () {
 
         //Parse the url
         var params = urls.parse();
@@ -480,19 +482,21 @@ define(function (require) {
         functions.release_changes();
     };
 
-    App.prototype.onQueryHovered = function(index, hoverOn) {
+    App.prototype.onQueryHovered = function (index, hoverOn) {
         var event = 'brush';
         if (!hoverOn) {
             event = 'unbrush';
         }
 
-        this.api.trigger(event, [{
-            type: 'query',
-            id: this.queries[index].id()
-        }]);
+        this.api.trigger(event, [
+            {
+                type: 'query',
+                id: this.queries[index].id()
+            }
+        ]);
     };
 
-    App.prototype.onBrush = function(e, brushed) {
+    App.prototype.onBrush = function (e, brushed) {
         var self = this;
         _.each(brushed, function (item) {
             if (item.type !== 'query') {
@@ -504,7 +508,7 @@ define(function (require) {
         });
     };
 
-    App.prototype.onUnBrush = function(e, brushed) {
+    App.prototype.onUnBrush = function (e, brushed) {
         var self = this;
         _.each(brushed, function (item) {
             if (item.type !== 'query') {
@@ -514,6 +518,18 @@ define(function (require) {
             var half = self.ui.detailsHalves[item.id];
             $(half).removeClass('highlight');
         });
+    };
+
+    App.prototype.annotationPoll = function () {
+        var self = this;
+        this._annotationsPoll = new Poll({
+            callback: function () {
+                self.api.annotations();
+            },
+            interval: this.config.annotation_poll_interval
+        });
+
+        this._annotationsPoll.start();
     };
 
     return App;

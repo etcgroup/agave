@@ -2,7 +2,6 @@ define(['jquery',
     'underscore',
     'util/extend',
     'util/transform',
-    'util/poll',
     'components/timeline',
     'vis/histogram',
     'vis/stack_histogram',
@@ -11,9 +10,8 @@ define(['jquery',
     'util/rectangle',
     'util/sampling',
     'lib/d3'],
-    function ($, _, extend, Transform, Poll, Timeline, Histogram, StackHistogram, Tooltip, sentiment, Rectangle, sampling, d3) {
+    function ($, _, extend, Transform, Timeline, Histogram, StackHistogram, Tooltip, sentiment, Rectangle, sampling, d3) {
 
-        var ANNOTATION_POLL_INTERVAL = 10000;
         var AXIS_OFFSET = 3;
         var ANNOTATION_TOOLTIP_TEMPLATE = _.template(
             "<%=label%> <span class='muted'>(<%=user%>)</span>"
@@ -54,12 +52,6 @@ define(['jquery',
                 .domain(COLOR_DOMAIN)
                 .range(COLOR_RANGE);
 
-            this._annotationsPoll = new Poll({
-                callback: $.proxy(this._requestAnnotations, this),
-                interval: ANNOTATION_POLL_INTERVAL
-            });
-
-            this._annotationsPoll.start();
 
             this.tooltip = new Tooltip();
         };
@@ -107,16 +99,6 @@ define(['jquery',
             } else {
                 this.queries.forEach(request);
             }
-        };
-
-
-        /**
-         * Submit a request for new annotation data.
-         *
-         * @private
-         */
-        FocusTimeline.prototype._requestAnnotations = function () {
-            this.api.annotations();
         };
 
         FocusTimeline.prototype._initAnnotations = function() {
@@ -300,9 +282,6 @@ define(['jquery',
 
             this._initAnnotations();
             this._renderCountAxis();
-
-            //Request the annotation data now, I guess
-            this._requestAnnotations();
         };
 
         FocusTimeline.prototype._brushQuery = function(item, brushOn) {
