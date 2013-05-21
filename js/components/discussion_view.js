@@ -15,6 +15,7 @@ define(['jquery',
         this.api = options.api;
         this.user = options.user;
         this.interval = options.interval;
+        this.display = options.display;
 
         this.discussion_id = null;
 
@@ -130,8 +131,8 @@ define(['jquery',
     };
 
     DiscussionView.prototype.toggleReferenceMode = function(value) {
-        this._referenceMode = value;
-        $('body').toggleClass('reference-mode', this._referenceMode);
+        $('body').toggleClass('reference-mode', value);
+        this.display.reference_mode(value);
     };
 
     DiscussionView.prototype._onReferenceButtonClicked = function() {
@@ -158,7 +159,7 @@ define(['jquery',
     };
 
     DiscussionView.prototype._onReferenceInserted = function(e, result) {
-        if (!this.isShowing() || !this._referenceMode) {
+        if (!this.isShowing() || !this.display.reference_mode()) {
             // TODO: this isn't the best place for this, but its the only listener for
             // reference-selected and its the only one that knows about insert mode
             // also ignore annotations for the moment

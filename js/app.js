@@ -362,7 +362,8 @@ define(function (require) {
             into: this.ui.discussionView,
             api: this.api,
             user: this.user,
-            interval: this.interval
+            interval: this.interval,
+            display: this.display
         });
 
         var self = this;
@@ -409,11 +410,6 @@ define(function (require) {
     };
 
     App.prototype.displayChanged = function (e, display, changedFields) {
-        if (changedFields === 'annotations' || changedFields.indexOf('annotations') >= 0) {
-            //Don't update if annotations was the updated field.
-            return;
-        }
-
         this.updateUrl();
     };
 

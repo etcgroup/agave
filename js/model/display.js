@@ -3,7 +3,8 @@ define(['underscore', 'util/events', 'util/functions'], function(_, events, func
     var DATA_DEFAULTS = {
         mode: 'simple',
         focus: null,
-        annotations: true
+        annotations: true,
+        reference_mode: false
     };
 
     /**
@@ -41,6 +42,14 @@ define(['underscore', 'util/events', 'util/functions'], function(_, events, func
      * @param silent don't trigger an event
      */
     Display.prototype.mode = functions.evented_mutator('data', 'mode');
+
+    /**
+     * Get or set the 'reference_mode' value.
+     *
+     * @param view
+     * @param silent don't trigger an event
+     */
+    Display.prototype.reference_mode = functions.evented_mutator('data', 'reference_mode');
 
     /**
      * Get or set the 'focus' value.
