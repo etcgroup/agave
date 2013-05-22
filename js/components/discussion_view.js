@@ -86,6 +86,11 @@ define(['jquery',
 
         //Clear the current list contents
         this.ui.commentList.html('');
+        if (this.discussion_id) {
+            this.ui.discussionTitle.html('');
+        } else {
+            this.ui.discussionTitle.html('New Discussion');
+        }
 
         //Clear the input box
         this.ui.commentInput.val('');
