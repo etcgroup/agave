@@ -9,7 +9,21 @@ define(['underscore', 'util/strings'], function (_, strings) {
     //Templates for generating reference codes.
     var REFERENCE_TEMPLATES = {
         annotation: _.template("A<%=id%>[<%=snippet(label, 25)%>]"),
-        tweet: _.template("T<%=id%>[<%=snippet(text, 25)%>]")
+        tweet: _.template("<div class='tweet' data-id='<%=id%>'" +
+            "<div class='username muted'>" +
+            "<a class='user-link subtle-link tooltip-me' title='View <%=name%> on Twitter' target='tweet-link-tab' href='https://twitter.com/<%=screen_name%>'>" +
+            "@<%=screen_name%>" +
+            "</a></div>" +
+            "<div class='tweet_count muted tooltip-me' title='Number of retweets'><%=retweet_count%> retweets</div>" +
+            " <a class='twitter-link subtle-link tooltip-me' title='View this on Twitter' target='tweet-link-tab' href='https://twitter.com/<%=screen_name%>/status/<%=id%>'>" +
+            "<span>see on</span> " +
+            "<i class='twitter-icon-light'></i>" +
+            "</a> " +
+            "<div class='body'>" +
+            "<div class='indicator sentiment-<%=sentiment_str%>'></div>" +
+            "<div class='tweet_text'><%=text%></div>" +
+            "</div>" +
+            "</div>")
     };
 
     /**
