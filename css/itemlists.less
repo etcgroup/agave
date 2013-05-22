@@ -1,9 +1,8 @@
-.content-panel {
-    background: rgba(255, 255, 255, 0.1);
+@import-once "lib/mixins";
 
-    -webkit-box-shadow: 0 0 4px rgba(0,0,0,0.4);
-    -moz-box-shadow: 0 0 4px rgba(0,0,0,0.4);
-    box-shadow: 0 0 4px rgba(0,0,0,0.4);
+.content-panel {
+    background: #373737;
+    .box-shadow(0 0 4px rgba(0,0,0,0.4));
 }
 
 .item-list {
@@ -21,11 +20,7 @@ ul.item-list {
     position: relative;
     overflow-wrap: break-word;
 
-    -webkit-transition: background 200ms ;
-    -moz-transition: background 200ms ;
-    -ms-transition: background 200ms ;
-    -o-transition: background 200ms ;
-    transition: background 200ms ;
+    .transition(background 200ms);
 }
 
 .tab-pane-explanation {
