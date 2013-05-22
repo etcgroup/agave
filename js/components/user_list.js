@@ -94,6 +94,12 @@ define([
             }
 
             ItemList.prototype._onData.call(this, result.data);
+
+            //Tooltips!
+            this.ui.list.find('.tooltip-me').tooltip({
+                container: this.into,
+                animation: false
+            });
         };
 
         UserList.prototype.renderItem = function(itemData) {

@@ -66,6 +66,10 @@
   vertical-align: bottom;
   display: inline-block;
 }
-.tweet-list .subtle-link {
+.subtle-link {
   color: #81ACBD;
+}
+.subtle-link:hover,
+.subtle-link:active {
+  color: #98b5bd;
 }
