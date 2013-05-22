@@ -55,7 +55,7 @@ define([
         };
 
         UserList.prototype.renderExplanation = function() {
-            this.ui.explanation.html('Top 50 most <i>prolific</i> Tweets');
+            this.ui.explanation.html('Top 50 most <i>prolific</i> Users');
         };
 
         /**
