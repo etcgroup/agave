@@ -50,7 +50,7 @@ function timeline_controls()
         <?php echo modeButton(array(
             'mode' => 'expand',
             'focus' => 0,
-            'label' => '# Left',
+            'label' => '% Left',
             'title' => 'Percent Tweet sentiment from <b>left</b> filter'
         )); ?>
 

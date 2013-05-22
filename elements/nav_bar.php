@@ -8,7 +8,7 @@ function nav_bar()
         <div class="navbar-inner">
             <div class="container-fluid">
                 <div class="nav-main-info">
-                    <a class="brand" href="#">TwitterVis</a>
+                    <a class="brand" href="?">TwitterVis</a>
                     <span class="colon">:</span>
                     <span class="title muted">Super Bowl 47</span>
                 </div>
