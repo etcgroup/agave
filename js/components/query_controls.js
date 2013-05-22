@@ -104,7 +104,7 @@ define(['jquery', 'underscore', 'util/events', 'model/query'], function ($, _, e
         var data = {};
 
         //Get the search string
-        data.search = $.trim(this.ui.search_input.val()) || null;
+        data.search = this.ui.search_input.val() || null;
 
         //Get the author string
         data.author = $.trim(this.ui.author_input.val()) || null;
