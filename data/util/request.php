@@ -21,6 +21,8 @@ class Request
 
     private $performance = NULL;
     private $db = NULL;
+    private $user_cookie_name = 'user_data';
+    private $_user_data;
 
     /**
      * Get a performance timer for this request.
@@ -40,7 +42,7 @@ class Request
 
     /**
      * Initialize and get the database connection for this request.
-     * @param type $params
+     * @param string|array $params
      * @return \Queries
      */
     public function db($params = NULL)
@@ -77,6 +79,23 @@ class Request
 
         header('Content-type: application/json');
         echo json_encode($response);
+    }
+
+    /**
+     * Returns an object containing data about the user,
+     * based on cookie info. Null if no or invalid data.
+     *
+     * @return mixed|null
+     */
+    public function user_data() {
+        if (!$this->_user_data) {
+            if (isset($_COOKIE[$this->user_cookie_name])) {
+                $user_data = $_COOKIE[$this->user_cookie_name];
+                $this->_user_data = json_decode($user_data);
+            }
+        }
+
+        return $this->_user_data;
     }
 
     /**

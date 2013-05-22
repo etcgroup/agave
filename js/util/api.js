@@ -10,7 +10,8 @@ define(['jquery', 'underscore', 'util/events'], function ($, _, events) {
         'tweets': 'data/tweets.php',
         'annotations': 'data/annotations.php',
         'keywords': 'data/burst_keywords.php',
-        'users': 'data/users.php'
+        'users': 'data/users.php',
+        'auth': 'data/auth.php'
     };
 
     /**
@@ -271,6 +272,14 @@ define(['jquery', 'underscore', 'util/events'], function ($, _, events) {
         });
     };
 
+    API.prototype.auth = function(parameters) {
+        this.request('get', 'auth', {
+            params: parameters,
+            post_process: function(results) {
+                return results.payload;
+            }
+        });
+    };
 
     //Mix in events
     events(API);

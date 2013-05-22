@@ -32,6 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     $inserted_id = $db->insert_message($user, $message, $view_state, $discussion_id);
     if (!$inserted_id) {
+        $db->log_action('messages error', $request->user_data());
         echo 'Failure.';
         return -1;
     }
@@ -39,10 +40,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (!$discussion_id) {
         $message = $db->get_message($inserted_id);
         $discussion_id = $message['discussion_id'];
+
+        $db->log_action('create discussion', $request->user_data(), NULL, $discussion_id);
     }
+
+    $db->log_action('create message', $request->user_data(), NULL, $inserted_id);
+
 } else {
-    $params = $request->get(array('discussion_id'));
+    $params = $request->get(array('discussion_id'), array('first_load'));
     $discussion_id = $params->discussion_id;
+
+    if ($params->first_load) {
+        $db->log_action('messages', $request->user_data(), NULL, $discussion_id);
+    }
 }
 
 $rendered = array();

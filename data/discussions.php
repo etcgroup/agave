@@ -21,6 +21,8 @@ $perf = $request->timing();
 
 $result = $db->get_discussions();
 
+$db->log_action('discussions', $request->user_data());
+
 $perf->start('processing');
 
 $rendered = array();
