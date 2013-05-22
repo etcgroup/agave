@@ -74,7 +74,7 @@ define([
 
 
         TweetList.prototype.renderExplanation = function() {
-            this.ui.explanation.html('Top 50 most <i>retweeted</i> Tweets');
+            this.ui.explanation.html('Top 100 most <i>retweeted</i> Tweets');
         };
 
         TweetList.prototype._tweetClicked = function(tweetUI) {
