@@ -6,7 +6,11 @@ define([
     function ($, _, extend, ItemList) {
 
         var USER_TEMPLATE = _.template("<li class='user clearfix' data-id='<%=id%>'>" +
-            "<div class='name'>@<%=screen_name%></div>" +
+            "<div class='name'>" +
+            "<a class='user-link subtle-link tooltip-me' title='View <%=name%> on Twitter' target='tweet-link-tab' href='https://twitter.com/<%=screen_name%>'>" +
+            "@<%=screen_name%>" +
+            "</a>" +
+            "</div>" +
             "<div class='count'><%=count%> <span class='muted'>tweets</span></div>" +
             "<div class='follower'><%=followers%> <span class='muted'>followers</span></div>" +
             "</li>");

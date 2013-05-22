@@ -607,7 +607,7 @@ class Queries
         $subquery->where_sentiment_is($sentiment);
 
         $builder = new Builder('users');
-        $builder->select('subquery.*, users.screen_name');
+        $builder->select('subquery.*, users.screen_name, users.name');
         $builder->from('users');
         $builder->from("({$subquery->sql()}) AS subquery");
         $builder->where('users.id', '=', 'subquery.id');
