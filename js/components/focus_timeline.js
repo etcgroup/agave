@@ -23,6 +23,9 @@ define(['jquery',
 
         var VALID_MODES = ['simple', 'stack', 'expand'];
 
+        //Move the annotation target under the cursor
+        var ANNOTATION_TARGET_OFFSET = 2;
+
         /**
          * A class for rendering and maintaining a focus timeline.
          *
@@ -642,7 +645,7 @@ define(['jquery',
 
             } else {
                 //Get the coordinate that was clicked
-                var x = d3.event.offsetX - this.boxes.inner.left();
+                var x = d3.event.layerX - this.boxes.inner.left() + ANNOTATION_TARGET_OFFSET;
 
                 //Convert to a time, in real UTC
                 var time = this._timeScale.invert(x) - this._utcOffset;
@@ -678,7 +681,7 @@ define(['jquery',
          */
         FocusTimeline.prototype._updateAnnotationTarget = function () {
             //Get the coordinate of the mouse
-            var x = d3.event.offsetX - this.boxes.inner.left();
+            var x = d3.event.layerX - this.boxes.inner.left() + ANNOTATION_TARGET_OFFSET;
 
             //Move the annotation target to the mouse position
             this.ui.annotationTarget
