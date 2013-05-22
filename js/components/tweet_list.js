@@ -23,7 +23,7 @@ define([
             "</li>");
 
         //The max number of tweets to load.
-        var TWEET_LIMIT = 50;
+        var TWEET_LIMIT = 100;
 
         var TWEET_SORT_ORDER = 'retweet_count';
 
