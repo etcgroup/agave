@@ -11,13 +11,13 @@ function details_tabs($index)
     <div class="tab-group row">
         <ul class="nav nav-pills row">
             <li class="active tooltip-me" title="Top 50 most retweeted Tweets.">
-                <a data-target="#<?php echo $tweetListId ?>" data-toggle="tab">Tweets <i class="tweet-list-spinner spinner-16"></i></a>
+                <a data-target="#<?php echo $tweetListId ?>" data-toggle="tab">Tweets</a>
             </li>
             <li class="tooltip-me" title="Top 50 most prolific users.">
-                <a data-target="#<?php echo $usersListId ?>" data-toggle="tab">Users <i class="user-list-spinner spinner-16"></i></a>
+                <a data-target="#<?php echo $usersListId ?>" data-toggle="tab">Users</a>
             </li>
             <li class="tooltip-me" title="Top 50 'bursting keywords' - words with rapidly increased usage.">
-                <a data-target="#<?php echo $keywordsListId ?>" data-toggle="tab">Keywords <i class="keyword-list-spinner spinner-16"></i></a>
+                <a data-target="#<?php echo $keywordsListId ?>" data-toggle="tab">Keywords</a>
             </li>
         </ul>
 

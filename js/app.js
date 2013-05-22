@@ -288,14 +288,12 @@ define(function (require) {
             var query = self.queries[index];
 
             group.tweetList = group.root.find('.tweet-list');
-            var spinner = group.root.find('.tweet-list-spinner');
 
             self.tweetLists.push(new TweetList({
                 api: self.api,
                 interval: self.interval,
                 query: query,
-                into: group.tweetList,
-                spinner: spinner
+                into: group.tweetList
             }));
         });
     };
@@ -310,14 +308,12 @@ define(function (require) {
             var query = self.queries[index];
 
             group.userList = group.root.find('.users-list');
-            var spinner = group.root.find('.user-list-spinner');
 
             self.userLists.push(new UserList({
                 api: self.api,
                 interval: self.interval,
                 query: query,
-                into: group.userList,
-                spinner: spinner
+                into: group.userList
             }));
         });
     };
@@ -333,14 +329,12 @@ define(function (require) {
             var query = self.queries[index];
 
             group.keywordList = group.root.find('.keywords-list');
-            var spinner = group.root.find('.keywords-list-spinner');
 
             self.keywordLists.push(new KeywordList({
                 api: self.api,
                 interval: self.interval,
                 query: query,
-                into: group.keywordList,
-                spinner: spinner
+                into: group.keywordList
             }));
         });
 
