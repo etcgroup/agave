@@ -159,7 +159,7 @@ module.exports = function (grunt) {
                     mainConfigFile: "<%=dirs.src_js%>/require-config.js",
 
                     //Compress the js files
-                    optimize: "uglify",
+                    optimize: "none",
 
                     //All the built layers will use almond.
                     name: 'lib/almond',
