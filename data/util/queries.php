@@ -326,7 +326,8 @@ class Queries
             "SELECT UNIX_TIMESTAMP(created) AS created,
             id, user, label,
             UNIX_TIMESTAMP(time) AS time
-            FROM annotations"
+            FROM annotations
+            WHERE public = 1"
         );
 
     }
@@ -463,14 +464,16 @@ class Queries
     private function _build_discussions()
     {
         $this->prepare('discussions',
-            "SELECT discussion_id AS id,
-                COUNT(*) AS message_count,
-                GROUP_CONCAT(DISTINCT user ORDER BY created DESC SEPARATOR ', ') AS users,
-                GROUP_CONCAT(message SEPARATOR '... ') AS subject,
-                UNIX_TIMESTAMP(MIN(created)) AS started_at,
-                UNIX_TIMESTAMP(MAX(created)) AS last_comment_at
-            FROM messages
-            GROUP BY discussion_id
+            "SELECT m.discussion_id AS id,
+                COUNT(DISTINCT m.id) AS message_count,
+                GROUP_CONCAT(DISTINCT m.user ORDER BY m.created DESC SEPARATOR ', ') AS users,
+                GROUP_CONCAT(m.message SEPARATOR '... ') AS subject,
+                UNIX_TIMESTAMP(MIN(m.created)) AS started_at,
+                UNIX_TIMESTAMP(MAX(m.created)) AS last_comment_at
+            FROM messages m, discussions d
+            WHERE d.id = m.discussion_id
+              AND d.public = 1
+            GROUP BY m.discussion_id
             ORDER BY last_comment_at DESC;"
         );
 

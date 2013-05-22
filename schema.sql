@@ -6,8 +6,10 @@ CREATE TABLE `annotations` (
   `user` varchar(150) NOT NULL,
   `label` varchar(150) NOT NULL,
   `time` datetime NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=23 DEFAULT CHARSET=utf8mb4$$
+  `public` bit(1) NOT NULL DEFAULT b'1',
+  PRIMARY KEY (`id`),
+  KEY `public_time` (`public`,`time`)
+) ENGINE=MyISAM AUTO_INCREMENT=41 DEFAULT CHARSET=utf8mb4$$
 
 
 delimiter $$
@@ -59,8 +61,9 @@ delimiter $$
 CREATE TABLE `discussions` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `created` datetime NOT NULL,
+  `public` bit(1) NOT NULL DEFAULT b'1',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4$$
+) ENGINE=MyISAM AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4$$
 
 
 delimiter $$
@@ -108,7 +111,7 @@ CREATE TABLE `messages` (
   `message` varchar(1000) NOT NULL,
   `view_state` varchar(1000) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=95 DEFAULT CHARSET=utf8mb4$$
+) ENGINE=MyISAM AUTO_INCREMENT=114 DEFAULT CHARSET=utf8mb4$$
 
 
 delimiter $$
