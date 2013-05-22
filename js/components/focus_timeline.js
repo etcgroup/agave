@@ -14,7 +14,7 @@ define(['jquery',
 
         var AXIS_OFFSET = 3;
         var ANNOTATION_TOOLTIP_TEMPLATE = _.template(
-            "<%=label%> <span class='muted'>(<%=user%>)</span>"
+            "<b><%=user%></b>: <%=label%>"
         );
 
         //Color defaults
