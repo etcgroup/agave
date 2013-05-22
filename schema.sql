@@ -9,7 +9,7 @@ CREATE TABLE `annotations` (
   `public` bit(1) NOT NULL DEFAULT b'1',
   PRIMARY KEY (`id`),
   KEY `public_time` (`public`,`time`)
-) ENGINE=MyISAM AUTO_INCREMENT=41 DEFAULT CHARSET=utf8mb4$$
+) ENGINE=MyISAM AUTO_INCREMENT=51 DEFAULT CHARSET=utf8mb4$$
 
 
 delimiter $$
@@ -63,7 +63,7 @@ CREATE TABLE `discussions` (
   `created` datetime NOT NULL,
   `public` bit(1) NOT NULL DEFAULT b'1',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4$$
+) ENGINE=MyISAM AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4$$
 
 
 delimiter $$
@@ -91,6 +91,20 @@ CREATE TABLE `hashtags` (
 
 delimiter $$
 
+CREATE TABLE `instrumentation` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `time` datetime NOT NULL,
+  `ip_address` varchar(45) NOT NULL,
+  `action` varchar(45) NOT NULL,
+  `user` varchar(150) DEFAULT NULL,
+  `data` varchar(250) DEFAULT NULL,
+  `ref_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=219 DEFAULT CHARSET=utf8mb4$$
+
+
+delimiter $$
+
 CREATE TABLE `mentions` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `tweet_id` bigint(20) unsigned NOT NULL,
@@ -111,7 +125,7 @@ CREATE TABLE `messages` (
   `message` varchar(1000) NOT NULL,
   `view_state` varchar(1000) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=114 DEFAULT CHARSET=utf8mb4$$
+) ENGINE=MyISAM AUTO_INCREMENT=122 DEFAULT CHARSET=utf8mb4$$
 
 
 delimiter $$
