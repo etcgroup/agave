@@ -1716,14 +1716,14 @@ select:focus:invalid:focus {
   width: auto;
   height: 16px;
   min-width: 16px;
-  padding: 4px 5px;
+  padding: 3px 4px;
   font-size: 12px;
   font-weight: normal;
   line-height: 16px;
   text-align: center;
   text-shadow: 0 1px 0 #ffffff;
-  background-color: #eeeeee;
-  border: 1px solid #ccc;
+  background-color: #1f1f1f;
+  border: 1px solid #333333;
 }
 
 .input-append .add-on,

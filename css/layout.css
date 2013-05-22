@@ -160,11 +160,11 @@ body {
  * These are the detail panel contents
  */
 .details .query.row {
-    top: 5px;
+    top:14px;
     height: 26px;
 }
 .details .tab-group.row {
-    top: 40px;
+    top: 54px;
     bottom: 5px;
     left: 5px;
     right: 5px;
