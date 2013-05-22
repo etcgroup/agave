@@ -122,11 +122,13 @@ define(function (require) {
         //Listen for sign ins to save
         this.user.on('signed-in', function() {
             cookie.set(USER_COOKIE_NAME, JSON.stringify(self.user.data));
+            self.api.auth();
         });
 
         //And sign outs
-        this.user.on('signed-out', function() {
+        this.user.on('signed-out', function(e, userData) {
             cookie.remove(USER_COOKIE_NAME);
+            self.api.auth(userData);
         });
 
         var data = cookie.get(USER_COOKIE_NAME);

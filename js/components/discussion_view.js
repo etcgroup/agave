@@ -86,12 +86,17 @@ define(['jquery',
 
         //Clear the current list contents
         this.ui.commentList.html('');
+        if (this.discussion_id) {
+            this.ui.discussionTitle.html('');
+        } else {
+            this.ui.discussionTitle.html('New Discussion');
+        }
 
         //Clear the input box
         this.ui.commentInput.val('');
 
         this.loader.start();
-        this._requestData();
+        this._requestData(true);
 
         this.poll.start();
 
@@ -372,10 +377,17 @@ define(['jquery',
             });
     };
 
-    DiscussionView.prototype._requestData = function () {
-        this.api.messages({
+    DiscussionView.prototype._requestData = function (firstLoad) {
+        var request = {
             discussion_id: this.discussion_id
-        });
+        };
+
+        //We do this the first time this discussion is requested
+        if (firstLoad) {
+            request.first_load = firstLoad;
+        }
+
+        this.api.messages(request);
     };
 
     /**

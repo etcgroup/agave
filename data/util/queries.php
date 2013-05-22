@@ -28,6 +28,7 @@ class Queries
     private $performance;
     private $utc;
 
+
     /**
      * Construct a new Queries object.
      *
@@ -36,7 +37,7 @@ class Queries
      *
      * If $params is not provided, 'db.ini' will be searched for parameters.
      *
-     * @param mixed $params
+     * @param string|array $params
      */
     public function __construct($params = NULL)
     {
@@ -276,6 +277,33 @@ class Queries
         }
     }
 
+    private function _build_log_action()
+    {
+        $this->prepare('log_action',
+            "INSERT INTO instrumentation (time, ip_address, action, user, data, ref_id)
+            VALUES (NOW(), ?, ?, ?, ?, ?)",
+            'ssssi');
+    }
+
+    /**
+     * Log an action.
+     *
+     * @param string $action
+     * @param object|null $user_data
+     * @param string|null $data
+     * @param int|null $reference_id
+     */
+    public function log_action($action, $user_data = NULL, $data = NULL, $reference_id = NULL) {
+        $ip_address = $_SERVER['REMOTE_ADDR'];
+
+        $user = NULL;
+        if ($user_data) {
+            $user = $user_data->name;
+        }
+
+        $this->run('log_action', $ip_address, $action, $user, $data, $reference_id);
+    }
+
     private function _build_insert_annotation()
     {
         $this->prepare('insert_annotation',
@@ -364,7 +392,7 @@ class Queries
      * @param string $message
      * @param string $view_state
      * @param int $discussion_id
-     * @return mysqli_result
+     * @return int
      */
     public function insert_message($user, $message, $view_state, $discussion_id)
     {

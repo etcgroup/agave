@@ -3,8 +3,9 @@ define([
     'underscore',
     'components/item_list',
     'util/extend',
+    'util/urls',
     'util/sentiment'],
-    function ($, _, ItemList, extend, sentiment) {
+    function ($, _, ItemList, extend, urls, sentiment) {
 
         var TWEET_TEMPLATE = _.template("<li class='tweet' data-id='<%=id%>'" +
             "<div class='username muted'>" +
@@ -101,7 +102,8 @@ define([
                 author: this.query.author(),
                 sentiment: this.query.sentiment(),
                 limit: TWEET_LIMIT,
-                sort: TWEET_SORT_ORDER
+                sort: TWEET_SORT_ORDER,
+                state_str: urls.query_string()
             });
         };
 

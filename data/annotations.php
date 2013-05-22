@@ -35,12 +35,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if ($params->id === NULL) {
         $inserted_id = $db->insert_annotation($user, $label, $time);
         if (!$inserted_id) {
+            $db->log_action('annotations error', $request->user_data());
+
             echo 'Failure.';
             return -1;
         }
+
+        $db->log_action('create annotation', $request->user_data(), $label, $inserted_id);
+
     } else {
         //The label is the only thing that can change
         $inserted_id = $db->update_annotation($params->id, $label);
+        $db->log_action('update annotation', $request->user_data(), $label, $params->id);
     }
 }
 

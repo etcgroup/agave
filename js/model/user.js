@@ -60,13 +60,15 @@ define(['underscore', 'util/events', 'util/functions'], function(_, events, func
     };
 
     User.prototype.sign_me_out = function() {
+        var data = this.data;
+
         this.set({
             name: null
         });
 
         this._signed_in = false;
 
-        this.trigger('signed-out');
+        this.trigger('signed-out', data);
     };
 
     events(User);

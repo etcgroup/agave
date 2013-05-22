@@ -18,7 +18,7 @@ $db = $request->db();
  * Required parameters: grouped time parameters (from, to, interval) and limit.
  * Optional: noise_threshold and search.
  */
-$params = $request->get(array('limit'), array('sort'));
+$params = $request->get(array('limit'), array('sort', 'query_id', 'state_str'));
 $timeParams = $request->timeParameters();
 $filter = $request->queryParameters();
 $from = $timeParams->from;
@@ -27,6 +27,8 @@ $sort = $params->sort;
 $limit = $params->limit;
 
 $result = $db->get_tweets($from, $to, $filter->rt, $filter->min_rt, $filter->search, $filter->sentiment, $filter->author, $sort, $limit);
+
+$db->log_action('view', $request->user_data(), $params->state_str, $params->query_id);
 
 $perf->start('processing');
 

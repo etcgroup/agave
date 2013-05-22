@@ -14,6 +14,12 @@ function asset($name) {
     return $static_root . $name;
 }
 
+include_once 'data/util/request.php';
+
+$request = new Request();
+$db = $request->db('data/db.ini');
+$db->log_action('load', $request->user_data());
+
 //Load in elements
 include_once 'elements/nav_bar.php';
 include_once 'elements/query_box.php';

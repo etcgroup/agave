@@ -26,6 +26,9 @@ define(['jquery',
         //Move the annotation target under the cursor
         var ANNOTATION_TARGET_OFFSET = 2;
 
+        var ABSOLUTE_TWEETS_LABEL = 'tweets / sec.';
+        var EXPAND_TWEETS_LABEL = '% tweets / sec.';
+
         /**
          * A class for rendering and maintaining a focus timeline.
          *
@@ -323,10 +326,9 @@ define(['jquery',
                 .style('opacity', 0);
 
             //Add an axis label
-            this.ui.svg.append('text')
+            this.ui.countAxisLabel = this.ui.svg.append('text')
                 .classed('counts axis-title', true)
-                .text('tweets / sec.');
-//                .attr('transform', new Transform('rotate', -90));
+                .text(ABSOLUTE_TWEETS_LABEL);
 
             this._updateCountAxis();
         };
@@ -508,6 +510,12 @@ define(['jquery',
             function sentimentFor(queryIndex) {
                 var loaded = cache.query[queryIndex];
                 return loaded ? loaded.sentiment : '';
+            }
+
+            if (toExpand) {
+                this.ui.countAxisLabel.text(EXPAND_TWEETS_LABEL);
+            } else {
+                this.ui.countAxisLabel.text(ABSOLUTE_TWEETS_LABEL);
             }
 
             if (mode === 'simple') {
