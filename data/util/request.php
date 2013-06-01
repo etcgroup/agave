@@ -39,6 +39,20 @@ class Request
         return isset($this->config['environment']) && $this->config['environment'] == $environment;
     }
 
+    public function ga_id()
+    {
+        if (isset($this->config['google'])) {
+            return $this->config['google']['id'];
+        }
+    }
+
+    public function ga_domain()
+    {
+        if (isset($this->config['google'])) {
+            return $this->config['google']['domain'];
+        }
+    }
+
     /**
      * Get a performance timer for this request.
      * @return Performance
