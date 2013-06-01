@@ -74,6 +74,7 @@ include_once 'elements/help_icon.inc.php';
                         <div class="header">
                             <div class="title">Welcome!</div>
                             <div class="message">Sign in to discuss this data set</div>
+                            <div class="muted">(Make up any name to remain anonymous)</div>
                         </div>
                         <div class="form">
                             <input type="text" placeholder="Enter your user name"/><br/>
