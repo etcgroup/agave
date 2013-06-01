@@ -17,6 +17,10 @@ class Queries
 {
 
     private $db;
+    //The value used to filter user generated content
+    private $public = 1;
+    private $logging_enabled = 1;
+
     /**
      * @var PDOStatement[]
      */
@@ -36,10 +40,19 @@ class Queries
      *
      * @param array $params
      */
-    public function __construct($params)
+    public function __construct($config)
     {
         $this->utc = new DateTimeZone('UTC');
 
+        if (isset($config['public'])) {
+            $this->public = $config['public'];
+        }
+
+        if (isset($config['logging_enabled'])) {
+            $this->logging_enabled = $config['logging_enabled'];
+        }
+
+        $params = $config['db'];
         if (!is_array($params)) {
             print "No DB params";
             die();
@@ -189,7 +202,7 @@ class Queries
         $this->start($query_name);
 
         $args = array_slice(func_get_args(), 1);
-        if ($args) {
+        if (is_array($args)) {
             foreach ($args as $i => $value) {
                 $type = $paramTypes[$i];
                 $query->bindValue($i + 1, $value, $type);
@@ -273,9 +286,9 @@ class Queries
     private function _build_log_action()
     {
         $this->prepare('log_action',
-            "INSERT INTO instrumentation (time, ip_address, action, user, data, ref_id)
-            VALUES (NOW(), ?, ?, ?, ?, ?)",
-            'ssssi');
+            "INSERT INTO instrumentation (time, ip_address, action, user, data, ref_id, public)
+            VALUES (NOW(), ?, ?, ?, ?, ?, ?)",
+            'ssssii');
     }
 
     /**
@@ -287,6 +300,10 @@ class Queries
      * @param int|null $reference_id
      */
     public function log_action($action, $user_data = NULL, $data = NULL, $reference_id = NULL) {
+        if (!$this->logging_enabled) {
+            return;
+        }
+
         $ip_address = $_SERVER['REMOTE_ADDR'];
 
         $user = NULL;
@@ -294,15 +311,15 @@ class Queries
             $user = $user_data->name;
         }
 
-        $this->run('log_action', $ip_address, $action, $user, $data, $reference_id);
+        $this->run('log_action', $ip_address, $action, $user, $data, $reference_id, $this->public);
     }
 
     private function _build_insert_annotation()
     {
         $this->prepare('insert_annotation',
-            "INSERT INTO annotations (created, user, label, time)
-            VALUES (?, ?, ?, ?)",
-            'ssss'
+            "INSERT INTO annotations (created, user, label, time, public)
+            VALUES (?, ?, ?, ?, ?)",
+            'ssssi'
         );
     }
 
@@ -321,7 +338,7 @@ class Queries
 
         $datetime = $datetime->format('Y-m-d H:i:s');
 
-        $this->run('insert_annotation', $created, $user, $label, $datetime);
+        $this->run('insert_annotation', $created, $user, $label, $datetime, $this->public);
         return $this->db->lastInsertId();
     }
 
@@ -341,18 +358,6 @@ class Queries
         }
     }
 
-    private function _build_annotations()
-    {
-        $this->prepare('annotations',
-            "SELECT UNIX_TIMESTAMP(created) AS created,
-            id, user, label,
-            UNIX_TIMESTAMP(time) AS time
-            FROM annotations
-            WHERE public = 1"
-        );
-
-    }
-
     /**
      * Retrieve annotations from the database.
      *
@@ -360,7 +365,16 @@ class Queries
      */
     public function get_annotations()
     {
-        return $this->run('annotations');
+        $builder = new Builder('annotations');
+
+        $builder->select('UNIX_TIMESTAMP(created) AS created, id, user, label, UNIX_TIMESTAMP(time) AS time');
+        $builder->from('annotations');
+
+        $binder = new Binder();
+        $public = $binder->param('public', $this->public, PDO::PARAM_INT);
+
+        $builder->where("annotations.public", "=", $public);
+        return $this->run2($builder, $binder);
     }
 
     private function _build_insert_message()
@@ -372,9 +386,9 @@ class Queries
         );
 
         $this->prepare('insert_discussion',
-            "INSERT INTO discussions (created)
-            VALUES (?)",
-            's'
+            "INSERT INTO discussions (created, public)
+            VALUES (?, ?)",
+            'si'
         );
     }
 
@@ -393,7 +407,7 @@ class Queries
         $time = $now->format('Y-m-d H:i:s');
 
         if (!$discussion_id) {
-            $this->run('insert_discussion', $time);
+            $this->run('insert_discussion', $time, $this->public);
             $discussion_id = $this->db->lastInsertId();
         }
 
@@ -482,24 +496,6 @@ class Queries
         return $result;
     }
 
-    private function _build_discussions()
-    {
-        $this->prepare('discussions',
-            "SELECT m.discussion_id AS id,
-                COUNT(DISTINCT m.id) AS message_count,
-                GROUP_CONCAT(DISTINCT m.user ORDER BY m.created DESC SEPARATOR ', ') AS users,
-                GROUP_CONCAT(m.message SEPARATOR '... ') AS subject,
-                UNIX_TIMESTAMP(MIN(m.created)) AS started_at,
-                UNIX_TIMESTAMP(MAX(m.created)) AS last_comment_at
-            FROM messages m, discussions d
-            WHERE d.id = m.discussion_id
-              AND d.public = 1
-            GROUP BY m.discussion_id
-            ORDER BY last_comment_at DESC;"
-        );
-
-    }
-
     /**
      * Gets a list of discussions.
      *
@@ -507,8 +503,25 @@ class Queries
      */
     public function get_discussions()
     {
-        $result = $this->run('discussions');
-        return $result;
+        $builder = new Builder('discussions');
+
+        $builder->select('m.discussion_id AS id');
+        $builder->select('COUNT(DISTINCT m.id) AS message_count');
+        $builder->select('GROUP_CONCAT(DISTINCT m.user ORDER BY m.created DESC SEPARATOR \', \') AS users');
+        $builder->select('GROUP_CONCAT(m.message SEPARATOR \'... \') AS subject');
+        $builder->select('UNIX_TIMESTAMP(MIN(m.created)) AS started_at');
+        $builder->select('UNIX_TIMESTAMP(MAX(m.created)) AS last_comment_at');
+        $builder->from('messages m');
+        $builder->join('discussions d', 'd.id = m.discussion_id');
+
+        $binder = new Binder();
+        $public = $binder->param('public', $this->public);
+
+        $builder->where('d.public', '=', $public);
+        $builder->group_by('m.discussion_id');
+        $builder->order_by('last_comment_at', 'desc');
+
+        return $this->run2($builder, $binder);
     }
 
     /**

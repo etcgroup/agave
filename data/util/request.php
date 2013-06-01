@@ -62,11 +62,7 @@ class Request
      */
     public function db($params = NULL)
     {
-        if ($params === NULL) {
-            $params = $this->config['db'];
-        }
-
-        $this->db = new Queries($params);
+        $this->db = new Queries($this->config);
 
         if ($this->performance) {
             //If the performance tracker is already initialized, share it with the db
