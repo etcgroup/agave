@@ -18,11 +18,26 @@ include_once 'queries.php';
  */
 class Request
 {
-
+    public $config;
     private $performance = NULL;
     private $db = NULL;
     private $user_cookie_name = 'user_data';
     private $_user_data;
+
+    public function __construct($config_file = NULL)
+    {
+
+        if ($config_file === NULL) {
+            $config_file = '../app.ini';
+        }
+
+        $this->config = parse_ini_file($config_file, TRUE);
+    }
+
+    public function is_env($environment)
+    {
+        return isset($this->config['environment']) && $this->config['environment'] == $environment;
+    }
 
     /**
      * Get a performance timer for this request.
@@ -47,6 +62,10 @@ class Request
      */
     public function db($params = NULL)
     {
+        if ($params === NULL) {
+            $params = $this->config['db'];
+        }
+
         $this->db = new Queries($params);
 
         if ($this->performance) {

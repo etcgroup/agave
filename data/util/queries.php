@@ -32,22 +32,15 @@ class Queries
     /**
      * Construct a new Queries object.
      *
-     * $params may either be an associative array containing 'host', 'port', 'user', 'password', and 'schema'
-     * or it may be the string name of a .ini file containing those variables.
+     * $params must be an associative array containing 'host', 'port', 'user', 'password', and 'schema'.
      *
-     * If $params is not provided, 'db.ini' will be searched for parameters.
-     *
-     * @param string|array $params
+     * @param array $params
      */
-    public function __construct($params = NULL)
+    public function __construct($params)
     {
         $this->utc = new DateTimeZone('UTC');
 
-        if ($params === NULL) {
-            $params = parse_ini_file('db.ini');
-        } else if (is_string($params)) {
-            $params = parse_ini_file($params);
-        } else if (!is_array($params)) {
+        if (!is_array($params)) {
             print "No DB params";
             die();
         }
