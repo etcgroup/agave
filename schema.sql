@@ -6,10 +6,10 @@ CREATE TABLE `annotations` (
   `user` varchar(150) NOT NULL,
   `label` varchar(150) NOT NULL,
   `time` datetime NOT NULL,
-  `public` bit(1) NOT NULL DEFAULT b'1',
+  `public` int(1) unsigned NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   KEY `public_time` (`public`,`time`)
-) ENGINE=MyISAM AUTO_INCREMENT=51 DEFAULT CHARSET=utf8mb4$$
+) ENGINE=MyISAM AUTO_INCREMENT=68 DEFAULT CHARSET=utf8mb4$$
 
 
 delimiter $$
@@ -61,9 +61,10 @@ delimiter $$
 CREATE TABLE `discussions` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `created` datetime NOT NULL,
-  `public` bit(1) NOT NULL DEFAULT b'1',
-  PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4$$
+  `public` int(1) unsigned NOT NULL DEFAULT '1',
+  PRIMARY KEY (`id`),
+  KEY `public` (`public`)
+) ENGINE=MyISAM AUTO_INCREMENT=35 DEFAULT CHARSET=utf8mb4$$
 
 
 delimiter $$
@@ -99,8 +100,9 @@ CREATE TABLE `instrumentation` (
   `user` varchar(150) DEFAULT NULL,
   `data` varchar(250) DEFAULT NULL,
   `ref_id` int(11) DEFAULT NULL,
+  `public` int(10) unsigned NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=219 DEFAULT CHARSET=utf8mb4$$
+) ENGINE=MyISAM AUTO_INCREMENT=3723 DEFAULT CHARSET=utf8mb4$$
 
 
 delimiter $$
@@ -124,8 +126,9 @@ CREATE TABLE `messages` (
   `user` varchar(150) NOT NULL,
   `message` varchar(1000) NOT NULL,
   `view_state` varchar(1000) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=122 DEFAULT CHARSET=utf8mb4$$
+  PRIMARY KEY (`id`),
+  KEY `created` (`created`)
+) ENGINE=MyISAM AUTO_INCREMENT=164 DEFAULT CHARSET=utf8mb4$$
 
 
 delimiter $$
