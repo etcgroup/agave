@@ -51,6 +51,31 @@ module.exports = function (grunt) {
             }
         },
 
+        ver: {
+            dist: {
+                phases: [
+                    {
+                        files: [
+                            '<%=dirs.dist_img%>/**/*'
+                        ],
+                        references: [
+                            '<%=dirs.dist_css%>/**/*.css',
+                            '<%=dirs.dist%>/index.php'
+                        ]
+                    },
+                    {
+                        files: [
+                            '<%=dirs.dist_css%>/**/*.css',
+                            '<%=dirs.dist_js%>/**/*.js'
+                        ],
+                        references: [
+                            '<%=dirs.dist%>/index.php'
+                        ]
+                    }
+                ]
+            }
+        },
+
         jshint: {
 
             // Some typical JSHint options and globals
@@ -266,7 +291,9 @@ module.exports = function (grunt) {
 
     grunt.loadNpmTasks('grunt-phplint');
 
+    grunt.loadNpmTasks('grunt-ver');
+
     // Define your tasks here
     grunt.registerTask('default', ['phplint', 'jshint', 'csslint', 'jasmine:app']);
-    grunt.registerTask('build', ['clean', 'copy:dist', 'requirejs']);
+    grunt.registerTask('build', ['clean', 'copy:dist', 'requirejs', 'ver:dist']);
 };
