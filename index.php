@@ -6,18 +6,6 @@ $request = new Request('app.ini');
 $db = $request->db();
 $db->log_action('load', $request->user_data());
 
-global $static_root;
-if ($request->is_env('development')) {
-    $static_root = '';
-} else {
-    $static_root = 'dist/';
-}
-
-function asset($name) {
-    global $static_root;
-    return $static_root . $name;
-}
-
 //Load in elements
 include_once 'elements/nav_bar.php';
 include_once 'elements/query_box.php';
@@ -33,12 +21,19 @@ include_once 'elements/help_icon.php';
     <title>Twitter Vis!</title>
     <meta name="description" content="A neat twitter visualization">
     <meta name="viewport" content="width=device-width">
-    <link rel="icon"
-          type="image/png"
-          href="<?php echo asset('css/img/logo.png')?>">
 
-    <link rel="stylesheet" href="<?php echo asset('css/main.css') ?>">
+    <?php if ($request->is_env('development')) { ?>
+        <link rel="icon"
+              type="image/png"
+              href="css/img/logo.png">
+        <link rel="stylesheet" href="css/main.css">
+    <?php } else { ?>
+        <link rel="icon"
+              type="image/png"
+              href="dist/css/img/logo.png">
 
+        <link rel="stylesheet" href="dist/css/main.css">
+    <?php } ?>
 
 </head>
 <body>
@@ -134,8 +129,8 @@ include_once 'elements/help_icon.php';
 
 <?php if ($request->is_env('development')) { ?>
     <!-- Loading development resources -->
-    <script src="<?php echo asset('js/lib/require.js')?>"></script>
-    <script src="<?php echo asset('js/require-config.js')?>"></script>
+    <script src="js/lib/require.js"></script>
+    <script src="js/require-config.js"></script>
     <script type="text/javascript">
         //Have to make sure that we override the common config's base url with the real one
         require.config({
@@ -145,7 +140,7 @@ include_once 'elements/help_icon.php';
 <?php } else { ?>
     <!-- Loading production resources -->
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-    <script src="<?php echo asset('js/main.js')?>"></script>
+    <script src="dist/js/main.js"></script>
     <script type="text/javascript">
         //A shim since jQuery didn't know about define when it initialized
         define('jquery', function() {
