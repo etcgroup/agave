@@ -175,9 +175,17 @@
     float: right;
     margin-right: 10px;
     cursor: pointer;
-    opacity: 0.5;
+    font-size: 11px;
+    color: #999;
 }
 .discussion-view .comment .view-state:hover {
+    color: #FFF;
+}
+
+.discussion-view .comment .view-state .icon-white {
+    opacity: 0.5;
+}
+.discussion-view .comment .view-state:hover .icon-white {
     opacity: 1;
 }
 

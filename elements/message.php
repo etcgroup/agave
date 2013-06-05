@@ -12,7 +12,8 @@ function discussion_message($row)
             <div class="view-state tooltip-me" data-placement="bottom"
                 title="Restore this view"
                  data-view="<?php echo $row['view_state'] ?>">
-                <i class="icon-white icon-fullscreen"></i>
+                see it
+                <i class="icon-white icon-bookmark"></i>
             </div>
         <?php } ?>
         <div class="user muted"><?php echo $row['user'] ?></div>
