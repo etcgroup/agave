@@ -8,6 +8,7 @@ module.exports = function (grunt) {
                 js: "tests/js",
                 php: "tests/php"
             },
+            src: "",
             src_js: "js/",
             src_css: "css/",
             src_img: "css/img/",
@@ -39,6 +40,12 @@ module.exports = function (grunt) {
                         cwd: '<%=dirs.src_img%>',
                         src: ['**/*'],
                         dest: '<%=dirs.dist_img%>/'
+                    },
+                    {
+                        expand: true,
+                        cwd: '<%=dirs.src%>',
+                        src: ['data/**/*', 'elements/**/*', 'index.php', 'app.ini'],
+                        dest: '<%=dirs.dist%>/'
                     }
                 ]
             }

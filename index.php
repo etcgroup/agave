@@ -22,18 +22,10 @@ include_once 'elements/help_icon.php';
     <meta name="description" content="A neat twitter visualization">
     <meta name="viewport" content="width=device-width">
 
-    <?php if ($request->is_env('development')) { ?>
-        <link rel="icon"
-              type="image/png"
-              href="css/img/logo.png">
-        <link rel="stylesheet" href="css/main.css">
-    <?php } else { ?>
-        <link rel="icon"
-              type="image/png"
-              href="dist/css/img/logo.png">
-
-        <link rel="stylesheet" href="dist/css/main.css">
-    <?php } ?>
+    <link rel="icon"
+          type="image/png"
+          href="css/img/logo.png">
+    <link rel="stylesheet" href="css/main.css">
 
 </head>
 <body>
@@ -140,7 +132,7 @@ include_once 'elements/help_icon.php';
 <?php } else { ?>
     <!-- Loading production resources -->
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-    <script src="dist/js/main.js"></script>
+    <script src="js/main.js"></script>
     <script type="text/javascript">
         //A shim since jQuery didn't know about define when it initialized
         define('jquery', function() {
