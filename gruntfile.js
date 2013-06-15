@@ -44,7 +44,7 @@ module.exports = function (grunt) {
                     {
                         expand: true,
                         cwd: '<%=dirs.src%>',
-                        src: ['data/**/*', 'elements/**/*', 'index.php', 'app.ini'],
+                        src: ['data/**/*', 'util/**/*', 'elements/**/*', 'index.php', 'app.ini'],
                         dest: '<%=dirs.dist%>/'
                     }
                 ]
@@ -178,7 +178,7 @@ module.exports = function (grunt) {
 
         phplint: {
             app: {
-                src: ['data/**/*.php', 'elements/**/*.php', 'templates/**/*.php', 'index.php']
+                src: ['data/**/*.php', 'util/**/*.php', 'elements/**/*.php', 'templates/**/*.php', 'index.php']
             }
         },
 
