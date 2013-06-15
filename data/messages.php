@@ -7,9 +7,9 @@
  */
 
 
-include_once '../util/data.php';
-include_once '../util/request.php';
-include_once '../elements/message.php';
+include_once '../util/data.inc.php';
+include_once '../util/request.inc.php';
+include_once '../elements/message.inc.php';
 
 $request = new Request();
 

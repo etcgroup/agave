@@ -1,7 +1,8 @@
 <?php
+if(basename(__FILE__) == basename($_SERVER['PHP_SELF'])){exit();}
 
-include_once 'performance.php';
-include_once 'queries.php';
+include_once 'performance.inc.php';
+include_once 'queries.inc.php';
 
 /**
  * The Request class collects together several disparate pieces of information that

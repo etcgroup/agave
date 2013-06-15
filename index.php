@@ -1,17 +1,17 @@
 <?php
 
-include_once 'util/request.php';
+include_once 'util/request.inc.php';
 
 $request = new Request('app.ini');
 $db = $request->db();
 $db->log_action('load', $request->user_data());
 
 //Load in elements
-include_once 'elements/nav_bar.php';
-include_once 'elements/query_box.php';
-include_once 'elements/timeline_controls.php';
-include_once 'elements/details_tabs.php';
-include_once 'elements/help_icon.php';
+include_once 'elements/nav_bar.inc.php';
+include_once 'elements/query_box.inc.php';
+include_once 'elements/timeline_controls.inc.php';
+include_once 'elements/details_tabs.inc.php';
+include_once 'elements/help_icon.inc.php';
 
 ?>
 <!DOCTYPE html>

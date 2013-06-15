@@ -1,6 +1,6 @@
 <?php
 
-include_once 'data/util/builder.php';
+include_once 'util/builder.inc.php';
 
 /**
  * Class BuilderTest

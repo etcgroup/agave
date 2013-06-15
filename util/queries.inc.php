@@ -1,7 +1,8 @@
 <?php
+if(basename(__FILE__) == basename($_SERVER['PHP_SELF'])){exit();}
 
-include_once 'builder.php';
-include_once 'binder.php';
+include_once 'builder.inc.php';
+include_once 'binder.inc.php';
 
 /**
  * The Queries class contains all of the SQL queries for retrieving data.

@@ -1,6 +1,7 @@
 <?php
+if(basename(__FILE__) == basename($_SERVER['PHP_SELF'])){exit();}
 
-include_once 'time_ago.php';
+include_once 'time_ago.inc.php';
 
 function discussion_message($row)
 {

@@ -1,4 +1,5 @@
 <?php
+if(basename(__FILE__) == basename($_SERVER['PHP_SELF'])){exit();}
 
 /**
  * A timer class for measuring performance of multiple

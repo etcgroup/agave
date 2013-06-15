@@ -4,9 +4,9 @@
  */
 
 
-include_once '../util/data.php';
-include_once '../util/request.php';
-include_once '../elements/discussion.php';
+include_once '../util/data.inc.php';
+include_once '../util/request.inc.php';
+include_once '../elements/discussion.inc.php';
 
 $request = new Request();
 

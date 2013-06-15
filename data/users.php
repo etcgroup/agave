@@ -7,8 +7,8 @@
  * Optionally, a noise threshold can be provided. Only tweets with at least this
  * number of retweets will be returned.
  */
-include_once '../util/data.php';
-include_once '../util/request.php';
+include_once '../util/data.inc.php';
+include_once '../util/request.inc.php';
 
 $request = new Request();
 $perf = $request->timing();

@@ -1,4 +1,6 @@
 <?php
+if(basename(__FILE__) == basename($_SERVER['PHP_SELF'])){exit();}
+
 /**
  * This file defines several classes for transitioning data to/from
  * the database to/from the client.

@@ -1,6 +1,6 @@
 <?php
 
-include_once 'data/util/binder.php';
+include_once 'util/binder.inc.php';
 
 /**
  * Class BinderTest

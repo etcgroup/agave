@@ -3,8 +3,8 @@
  * burst_keywords.php gets burst keywords in a time range.
  *
  */
-include_once '../util/data.php';
-include_once '../util/request.php';
+include_once '../util/data.inc.php';
+include_once '../util/request.inc.php';
 
 $request = new Request();
 $perf = $request->timing();
