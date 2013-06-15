@@ -1,6 +1,6 @@
 <?php
 
-include_once 'data/util/request.php';
+include_once 'util/request.php';
 
 $request = new Request('app.ini');
 $db = $request->db();

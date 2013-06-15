@@ -4,8 +4,8 @@
  */
 
 
-include_once 'util/data.php';
-include_once 'util/request.php';
+include_once '../util/data.php';
+include_once '../util/request.php';
 include_once '../elements/discussion.php';
 
 $request = new Request();
