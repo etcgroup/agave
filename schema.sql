@@ -180,4 +180,11 @@ CREATE TABLE `users` (
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8$$
 
+delimiter $$
 
+CREATE TABLE sb47.sessions (
+  `id` varchar(32) NOT NULL,
+  `access` INT UNSIGNED NOT NULL,
+  data TEXT NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8$$

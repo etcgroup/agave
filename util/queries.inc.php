@@ -3,6 +3,7 @@ if(basename(__FILE__) == basename($_SERVER['PHP_SELF'])){exit();}
 
 include_once 'builder.inc.php';
 include_once 'binder.inc.php';
+include_once 'session.inc.php';
 
 /**
  * The Queries class contains all of the SQL queries for retrieving data.
@@ -17,10 +18,14 @@ include_once 'binder.inc.php';
 class Queries
 {
 
+    /**
+     * @var PDO
+     */
     private $db;
     //The value used to filter user generated content
     private $public = 1;
     private $logging_enabled = 1;
+    private $session_handler;
 
     /**
      * @var PDOStatement[]
@@ -73,6 +78,8 @@ class Queries
         $this->build_queries();
         $this->set_timezone();
         $this->set_encoding();
+
+        $this->session_handler = new DbSessionHandler($this);
     }
 
     /**
@@ -744,6 +751,63 @@ class Queries
         $builder->where('mid_point', '<', $stop_datetime);
 
         return $this->run2($builder, $binder);
+    }
+
+    public function get_session($id)
+    {
+        $binder = new Binder();
+        $id = $binder->param('id', $id);
+
+        $builder = new Builder('get_session');
+        $builder->select('*');
+        $builder->from('sessions');
+        $builder->where('id', '=', $id);
+        $builder->limit(1);
+
+        $result = $this->run2($builder, $binder);
+
+        if ($result) {
+            return $result[0];
+        }
+    }
+
+
+    private function _build_sessions()
+    {
+        $this->prepare('save_session',
+            "REPLACE INTO sessions
+            (id, access, data)
+            VALUES (?, ?, ?)",
+            'sis'
+        );
+
+        $this->prepare('delete_session',
+            "DELETE FROM sessions
+            WHERE id = ?",
+            's'
+        );
+
+        $this->prepare('delete_old_sessions',
+            'DELETE FROM sessions
+            WHERE access < ?',
+            'i'
+        );
+    }
+    public function save_session($id, $data)
+    {
+        $access = time();
+        return $this->run('save_session', $id, $access, $data);
+    }
+
+    public function delete_session($id)
+    {
+        return $this->run('delete_session', $id);
+    }
+
+    public function clean_sessions($max_lifetime)
+    {
+        $old = time() - $max_lifetime;
+        return $this->run('delete_old_sessions', $old);
     }
 }
 
