@@ -25,28 +25,34 @@ $inserted_id = FALSE;
  * Optionally, fields for a new message can be provided.
  */
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $params = $request->post(array('user', 'time', 'label'), array('id'));
+    $user_data = $request->user_data();
+    if ($user_data) {
+        $user = $user_data->id;
+        $params = $request->post(array('time', 'label'), array('id'));
 
-    $user = htmlspecialchars($params->user);
-    $label = htmlspecialchars($params->label);
-    $time = floor($params->time / 1000); //converting from ms to s
-    $time = new DateTime("@$time"); // converting to a DateTime
+        $label = htmlspecialchars($params->label);
+        $time = floor($params->time / 1000); //converting from ms to s
+        $time = new DateTime("@$time"); // converting to a DateTime
 
-    if ($params->id === NULL) {
-        $inserted_id = $db->insert_annotation($user, $label, $time);
-        if (!$inserted_id) {
-            $db->log_action('annotations error', $request->user_data());
+        if ($params->id === NULL) {
 
-            echo 'Failure.';
-            return -1;
+            $inserted_id = $db->insert_annotation($user, $label, $time);
+            if (!$inserted_id) {
+                $db->log_action('annotations error', $request->user_data());
+
+                echo 'Failure.';
+                return -1;
+            }
+
+            $db->log_action('create annotation', $request->user_data(), $label, $inserted_id);
+        } else {
+            //The label is the only thing that can change
+            $inserted_id = $db->update_annotation($params->id, $user, $label);
+            $db->log_action('update annotation', $user_data, $label, $params->id);
         }
-
-        $db->log_action('create annotation', $request->user_data(), $label, $inserted_id);
-
     } else {
-        //The label is the only thing that can change
-        $inserted_id = $db->update_annotation($params->id, $label);
-        $db->log_action('update annotation', $request->user_data(), $label, $params->id);
+        echo 'You are not signed in!';
+        die();
     }
 }
 

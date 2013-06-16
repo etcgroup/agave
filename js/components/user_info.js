@@ -71,7 +71,9 @@ define(['jquery'], function($) {
     };
 
     UserInfoView.prototype.onSignOutClicked = function() {
-        this.user.sign_me_out();
+        var return_to = window.location.href;
+        var auth_url = 'auth.php?sign_out=1&return_to=' + encodeURIComponent(return_to);
+        window.location.href = auth_url;
     };
 
     return UserInfoView;
