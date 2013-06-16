@@ -5,6 +5,14 @@ include_once 'util/request.inc.php';
 $request = new Request('app.ini');
 $db = $request->db();
 
+if (isset($request->config['secure']) && $request->config['secure']) {
+    if (!isset($_SERVER['HTTPS'] ) || $_SERVER['HTTPS'] === 'off') {
+        $url = 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+        header('Location: ' . $url);
+        die();
+    }
+}
+
 $user_data = $request->user_data();
 $db->log_action('load', $user_data);
 
