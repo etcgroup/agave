@@ -64,3 +64,6 @@
 .navbar .user-display .sign-out-button {
   margin: 0 0 0 10px;
 }
+.navbar .user-display .user-name {
+  font-weight: bold;
+}

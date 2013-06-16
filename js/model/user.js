@@ -1,7 +1,8 @@
 define(['underscore', 'util/events', 'util/functions'], function(_, events, functions) {
 
     var DATA_DEFAULTS = {
-        name: null
+        name: null,
+        screen_name: null
     };
 
     /**
@@ -41,6 +42,14 @@ define(['underscore', 'util/events', 'util/functions'], function(_, events, func
      * @param silent don't trigger an event
      */
     User.prototype.name = functions.evented_mutator('data', 'name');
+
+    /**
+     * Get or set the 'screen_name' value.
+     *
+     * @param search
+     * @param silent don't trigger an event
+     */
+    User.prototype.screen_name = functions.evented_mutator('data', 'screen_name');
 
     /**
      * Get or set the signed_in value.

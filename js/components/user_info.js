@@ -39,7 +39,7 @@ define(['jquery'], function($) {
             return false;
         }
 
-        this.ui.user_name.text(this.user.name());
+        this.ui.user_name.html(this.user.screen_name());
 
         this.ui.user_display.show();
 
