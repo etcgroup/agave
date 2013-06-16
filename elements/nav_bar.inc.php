@@ -24,7 +24,7 @@ function nav_bar()
                     <span class="welcome-message">
                         Welcome, <span class="user-name"></span>!
                     </span>
-                    <a href="#" class="btn sign-out-button">Sign out</a>
+                    <button type="button" class="btn sign-out-button">Sign out</button>
                 </div>
             </div>
         </div>

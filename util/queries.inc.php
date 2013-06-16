@@ -3,6 +3,7 @@ if(basename(__FILE__) == basename($_SERVER['PHP_SELF'])){exit();}
 
 include_once 'builder.inc.php';
 include_once 'binder.inc.php';
+include_once 'session.inc.php';
 
 /**
  * The Queries class contains all of the SQL queries for retrieving data.
@@ -17,10 +18,14 @@ include_once 'binder.inc.php';
 class Queries
 {
 
+    /**
+     * @var PDO
+     */
     private $db;
     //The value used to filter user generated content
     private $public = 1;
     private $logging_enabled = 1;
+    private $session_handler;
 
     /**
      * @var PDOStatement[]
@@ -73,6 +78,8 @@ class Queries
         $this->build_queries();
         $this->set_timezone();
         $this->set_encoding();
+
+        $this->session_handler = new DbSessionHandler($this, $config);
     }
 
     /**
@@ -309,7 +316,7 @@ class Queries
 
         $user = NULL;
         if ($user_data) {
-            $user = $user_data->name;
+            $user = $user_data->id;
         }
 
         $this->run('log_action', $ip_address, $action, $user, $data, $reference_id, $this->public);
@@ -347,14 +354,14 @@ class Queries
     {
         $this->prepare('update_annotation',
             "UPDATE annotations SET label = ?
-            WHERE id = ?",
-            'si'
+            WHERE user = ? AND id = ?",
+            'ssi'
         );
     }
 
-    public function update_annotation($id, $label)
+    public function update_annotation($id, $user, $label)
     {
-        if ($this->run('update_annotation', $label, $id)) {
+        if ($this->run('update_annotation', $label, $user, $id)) {
             return $id;
         }
     }
@@ -368,13 +375,15 @@ class Queries
     {
         $builder = new Builder('annotations');
 
-        $builder->select('UNIX_TIMESTAMP(created) AS created, id, user, label, UNIX_TIMESTAMP(time) AS time');
-        $builder->from('annotations');
+        $builder->select('UNIX_TIMESTAMP(a.created) AS created, a.id, a.user, a.label, UNIX_TIMESTAMP(a.time) AS time');
+        $builder->select('app_users.name, app_users.screen_name');
+        $builder->from('annotations a');
+        $builder->join('app_users', 'a.user = app_users.id', 'left');
 
         $binder = new Binder();
         $public = $binder->param('public', $this->public, PDO::PARAM_INT);
 
-        $builder->where("annotations.public", "=", $public);
+        $builder->where("a.public", "=", $public);
         return $this->run2($builder, $binder);
     }
 
@@ -476,8 +485,10 @@ class Queries
     private function _build_discussion_messages()
     {
         $this->prepare('discussion_messages',
-            "SELECT messages.*, UNIX_TIMESTAMP(created) AS created
+            "SELECT messages.*, UNIX_TIMESTAMP(messages.created) AS created,
+              app_users.name, app_users.screen_name
             FROM messages
+            LEFT JOIN app_users ON messages.user = app_users.id
             WHERE discussion_id = ?
             ORDER BY created DESC",
             'i'
@@ -508,7 +519,6 @@ class Queries
 
         $builder->select('m.discussion_id AS id');
         $builder->select('COUNT(DISTINCT m.id) AS message_count');
-        $builder->select('GROUP_CONCAT(DISTINCT m.user ORDER BY m.created DESC SEPARATOR \', \') AS users');
         $builder->select('GROUP_CONCAT(m.message SEPARATOR \'... \') AS subject');
         $builder->select('UNIX_TIMESTAMP(MIN(m.created)) AS started_at');
         $builder->select('UNIX_TIMESTAMP(MAX(m.created)) AS last_comment_at');
@@ -744,6 +754,168 @@ class Queries
         $builder->where('mid_point', '<', $stop_datetime);
 
         return $this->run2($builder, $binder);
+    }
+
+    public function get_session($id)
+    {
+        $binder = new Binder();
+        $id = $binder->param('id', $id);
+
+        $builder = new Builder('get_session');
+        $builder->select('*');
+        $builder->from('sessions');
+        $builder->where('id', '=', $id);
+        $builder->limit(1);
+
+        $result = $this->run2($builder, $binder);
+
+        if ($result) {
+            return $result[0];
+        }
+    }
+
+
+    private function _build_sessions()
+    {
+        $this->prepare('save_session',
+            "REPLACE INTO sessions
+            (id, access, data)
+            VALUES (?, ?, ?)",
+            'sis'
+        );
+
+        $this->prepare('delete_session',
+            "DELETE FROM sessions
+            WHERE id = ?",
+            's'
+        );
+
+        $this->prepare('delete_old_sessions',
+            'DELETE FROM sessions
+            WHERE access < ?',
+            'i'
+        );
+    }
+    public function save_session($id, $data)
+    {
+        $access = time();
+        return $this->run('save_session', $id, $access, $data);
+    }
+
+    public function delete_session($id)
+    {
+        return $this->run('delete_session', $id);
+    }
+
+    public function clean_sessions($max_lifetime)
+    {
+        $old = time() - $max_lifetime;
+        return $this->run('delete_old_sessions', $old);
+    }
+
+
+    private function _build_app_users()
+    {
+        $this->prepare('save_app_user',
+            "INSERT INTO app_users
+            (created, twitter_id, screen_name, name, utc_offset, time_zone)
+            VALUES (NOW(), ?, ?, ?, ?, ?)",
+            'issis'
+        );
+
+        $this->prepare('update_app_user',
+            "UPDATE app_users
+            SET screen_name=?,
+                name=?,
+                utc_offset=?,
+                time_zone=?
+            WHERE id=?",
+            'ssisi'
+        );
+
+        $this->prepare('sign_in_user',
+            "UPDATE app_users
+            SET last_signed_in = NOW()
+            WHERE id=?",
+            'i'
+        );
+    }
+    /**
+     * Get or create an app user record for the provided twitter user.
+     *
+     * @param stdClass $twitter_user
+     * @return int
+     */
+    public function get_app_user_id($twitter_user) {
+
+        $twitter_id = $twitter_user->id;
+
+        $binder = new Binder();
+        $twitter_id_param = $binder->param('twitter_id', $twitter_id, PDO::PARAM_INT);
+
+        $builder = new Builder('get_app_user_id');
+        $builder->select('id');
+        $builder->from('app_users');
+        $builder->where('twitter_id', '=', $twitter_id_param);
+        $builder->limit(1);
+
+        $result = $this->run2($builder, $binder);
+
+        if ($result) {
+            $id =$result[0]['id'];
+
+            //Create a new user record
+            $screen_name = $twitter_user->screen_name;
+            $name = $twitter_user->name;
+            $utc_offset = NULL;
+            if (isset($twitter_user->utc_offset)) {
+                $utc_offset = $twitter_user->utc_offset;
+            }
+            $time_zone = NULL;
+            if (isset($twitter_user->time_zone)) {
+                $time_zone = $twitter_user->time_zone;
+            }
+
+            $this->run('update_app_user', $screen_name, $name, $utc_offset, $time_zone, $id);
+
+            return $id;
+        } else {
+            //Create a new user record
+            $screen_name = $twitter_user->screen_name;
+            $name = $twitter_user->name;
+            $utc_offset = NULL;
+            if (isset($twitter_user->utc_offset)) {
+                $utc_offset = $twitter_user->utc_offset;
+            }
+            $time_zone = NULL;
+            if (isset($twitter_user->time_zone)) {
+                $time_zone = $twitter_user->time_zone;
+            }
+
+            $this->run('save_app_user', $twitter_id, $screen_name, $name, $utc_offset, $time_zone);
+            return $this->db->lastInsertId();
+        }
+    }
+
+    public function get_app_user($id, $sign_in=FALSE) {
+        $binder = new Binder();
+        $id = $binder->param('id', $id);
+
+        $builder = new Builder('get_app_user');
+        $builder->select('*');
+        $builder->from('app_users');
+        $builder->where('id', '=', $id);
+        $builder->limit(1);
+
+        $result = $this->run2($builder, $binder);
+
+        if ($result) {
+            if ($sign_in === TRUE) {
+                $this->run('sign_in_user', $id);
+            }
+
+            return $result[0];
+        }
     }
 }
 

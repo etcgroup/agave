@@ -14,7 +14,7 @@ define(['jquery',
 
         var AXIS_OFFSET = 3;
         var ANNOTATION_TOOLTIP_TEMPLATE = _.template(
-            "<b><%=user%></b>: <%=label%>"
+            "<b><%=screen_name%></b>: <%=label%>"
         );
 
         //Color defaults

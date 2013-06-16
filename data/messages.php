@@ -24,28 +24,34 @@ $perf = $request->timing();
  * Optionally, fields for a new message can be provided.
  */
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $params = $request->post(array('user', 'message', 'view_state'), array('discussion_id'));
-    $user = htmlspecialchars($params->user);
-    $message = htmlspecialchars($params->message);
-    $discussion_id = $params->discussion_id;
-    $view_state = $params->view_state;
+    $user_data = $request->user_data();
+    if ($user_data) {
+        $user = $user_data->id;
 
-    $inserted_id = $db->insert_message($user, $message, $view_state, $discussion_id);
-    if (!$inserted_id) {
-        $db->log_action('messages error', $request->user_data());
-        echo 'Failure.';
-        return -1;
+        $params = $request->post(array('message', 'view_state'), array('discussion_id'));
+        $message = htmlspecialchars($params->message);
+        $discussion_id = $params->discussion_id;
+        $view_state = $params->view_state;
+
+        $inserted_id = $db->insert_message($user, $message, $view_state, $discussion_id);
+        if (!$inserted_id) {
+            $db->log_action('messages error', $request->user_data());
+            echo 'Failure.';
+            return -1;
+        }
+
+        if (!$discussion_id) {
+            $message = $db->get_message($inserted_id);
+            $discussion_id = $message['discussion_id'];
+
+            $db->log_action('create discussion', $request->user_data(), NULL, $discussion_id);
+        }
+
+        $db->log_action('create message', $request->user_data(), NULL, $inserted_id);
+    } else {
+        echo 'You are not signed in!';
+        die();
     }
-
-    if (!$discussion_id) {
-        $message = $db->get_message($inserted_id);
-        $discussion_id = $message['discussion_id'];
-
-        $db->log_action('create discussion', $request->user_data(), NULL, $discussion_id);
-    }
-
-    $db->log_action('create message', $request->user_data(), NULL, $inserted_id);
-
 } else {
     $params = $request->get(array('discussion_id'), array('first_load'));
     $discussion_id = $params->discussion_id;

@@ -21,6 +21,9 @@ class Request
 {
     public $config;
     private $performance = NULL;
+    /**
+     * @var Queries
+     */
     private $db = NULL;
     private $user_cookie_name = 'user_data';
     private $_user_data;
@@ -88,6 +91,37 @@ class Request
     }
 
     /**
+     * Call without any parameters to retrieve (and clear) the current flash message.
+     * The result will be an array containing 'message' and 'type'.
+     *
+     * Call with a string and an optional flash type to save a message.
+     *
+     * @param string $message
+     * @param string $type
+     * @return mixed
+     */
+    public function flash($message=NULL, $type='error')
+    {
+        if ($message !== NULL) {
+
+            $_SESSION['flash'] = $message;
+            $_SESSION['flash_type'] = $type;
+
+        } else if (isset($_SESSION['flash'])) {
+            $message = $_SESSION['flash'];
+            $type = $_SESSION['flash_type'];
+            unset($_SESSION['flash']);
+            unset($_SESSION['flash_type']);
+            return array(
+                'message' => $message,
+                'type' => $type
+            );
+        } else {
+            return NULL;
+        }
+    }
+
+    /**
      * JSON encode and print the response.
      *
      * The response will be an object containing the payload,
@@ -115,17 +149,35 @@ class Request
      * Returns an object containing data about the user,
      * based on cookie info. Null if no or invalid data.
      *
+     * @param bool $sign_in
      * @return mixed|null
      */
-    public function user_data() {
+    public function user_data($sign_in = FALSE) {
         if (!$this->_user_data) {
-            if (isset($_COOKIE[$this->user_cookie_name])) {
-                $user_data = $_COOKIE[$this->user_cookie_name];
-                $this->_user_data = json_decode($user_data);
+            if (isset($_SESSION['user_id'])) {
+                $this->_user_data = $this->db->get_app_user($_SESSION['user_id'], $sign_in);
+                if ($this->_user_data) {
+                    $this->_user_data = (object)$this->_user_data;
+                } else {
+                    //The user id was BADDDDD
+                    $this->sign_out();
+                    $this->db->log_action('bad user id');
+                }
             }
         }
 
         return $this->_user_data;
+    }
+
+    /**
+     * Clear any cached user data and sign out.
+     */
+    public function sign_out() {
+        $this->_user_data = NULL;
+        unset($_SESSION['oauth_token']);
+        unset($_SESSION['oauth_token_secret']);
+        unset($_SESSION['oauth_verify']);
+        unset($_SESSION['user_id']);
     }
 
     /**
