@@ -79,7 +79,7 @@ class Queries
         $this->set_timezone();
         $this->set_encoding();
 
-        $this->session_handler = new DbSessionHandler($this);
+        $this->session_handler = new DbSessionHandler($this, $config);
     }
 
     /**

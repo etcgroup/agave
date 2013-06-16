@@ -9,8 +9,9 @@ class DbSessionHandler
 
     /**
      * @param Queries $queries
+     * @param array $config
      */
-    public function __construct($queries)
+    public function __construct($queries, $config)
     {
         $this->queries = $queries;
 
@@ -25,6 +26,19 @@ class DbSessionHandler
             array($this, 'destroy'),
             array($this, 'gc')
         );
+
+        //4 hours
+        $SESSION_TIMEOUT = 14400;
+        $current_domain = $_SERVER['SERVER_NAME'];
+        if (isset($config['environment']) && $config['environment'] == 'development') {
+            $current_domain = '';
+        }
+
+        if (isset($config['secure']) && $config['secure']) {
+            session_set_cookie_params($SESSION_TIMEOUT, '/', $current_domain, TRUE);
+        } else {
+            session_set_cookie_params($SESSION_TIMEOUT, '/', $current_domain, FALSE);
+        }
 
         //set the session cookie name
         session_name('tvappsession');
