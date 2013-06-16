@@ -66,6 +66,15 @@ foreach($result as $row) {
     $row['created'] *= 1000; //convert to ms
     $row['time'] *= 1000;
 
+    //Fill in possibly null user data
+    if ($row['name'] === NULL) {
+        $row['name'] = $row['user'];
+    }
+
+    if ($row['screen_name'] === NULL) {
+        $row['screen_name'] = $row['user'];
+    }
+
     //Mark the annotation that was new, if there was one
     if ($inserted_id && $row['id'] === $inserted_id) {
         $row['new'] = TRUE;

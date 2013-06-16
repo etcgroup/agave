@@ -375,13 +375,15 @@ class Queries
     {
         $builder = new Builder('annotations');
 
-        $builder->select('UNIX_TIMESTAMP(created) AS created, id, user, label, UNIX_TIMESTAMP(time) AS time');
-        $builder->from('annotations');
+        $builder->select('UNIX_TIMESTAMP(a.created) AS created, a.id, a.user, a.label, UNIX_TIMESTAMP(a.time) AS time');
+        $builder->select('app_users.name, app_users.screen_name');
+        $builder->from('annotations a');
+        $builder->join('app_users', 'a.user = app_users.id', 'left');
 
         $binder = new Binder();
         $public = $binder->param('public', $this->public, PDO::PARAM_INT);
 
-        $builder->where("annotations.public", "=", $public);
+        $builder->where("a.public", "=", $public);
         return $this->run2($builder, $binder);
     }
 
@@ -483,8 +485,10 @@ class Queries
     private function _build_discussion_messages()
     {
         $this->prepare('discussion_messages',
-            "SELECT messages.*, UNIX_TIMESTAMP(created) AS created
+            "SELECT messages.*, UNIX_TIMESTAMP(messages.created) AS created,
+              app_users.name, app_users.screen_name
             FROM messages
+            LEFT JOIN app_users ON messages.user = app_users.id
             WHERE discussion_id = ?
             ORDER BY created DESC",
             'i'
@@ -515,7 +519,6 @@ class Queries
 
         $builder->select('m.discussion_id AS id');
         $builder->select('COUNT(DISTINCT m.id) AS message_count');
-        $builder->select('GROUP_CONCAT(DISTINCT m.user ORDER BY m.created DESC SEPARATOR \', \') AS users');
         $builder->select('GROUP_CONCAT(m.message SEPARATOR \'... \') AS subject');
         $builder->select('UNIX_TIMESTAMP(MIN(m.created)) AS started_at');
         $builder->select('UNIX_TIMESTAMP(MAX(m.created)) AS last_comment_at');
