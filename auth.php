@@ -23,7 +23,7 @@ if ($params->sign_out) {
 
     // get the request token
     $reply = $cb->oauth_requestToken(array(
-        'oauth_callback' => 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']
+        'oauth_callback' => 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']
     ));
 
     // store the token
