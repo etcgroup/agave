@@ -11,42 +11,26 @@ define(['jquery'], function($) {
     SignIn.prototype._initUI = function() {
         this.ui = {};
 
-        this.ui.userInput = this.into.find('input');
         this.ui.userSubmit = this.into.find('.user-submit');
     };
 
     SignIn.prototype._attachEvents = function() {
         var self = this;
-        this.ui.userInput.on('keydown', function(e) {
-            if (e.which === 13) {
-                e.preventDefault();
-                //pressed enter
-                self._onUserSubmitted();
-                return false;
-            }
-        });
         this.ui.userSubmit.on('click', $.proxy(this._onUserSubmitted, this));
     };
 
     SignIn.prototype._onUserSubmitted = function() {
-        var user = $.trim(this.ui.userInput.val());
-        if (!user) {
-            this.ui.userInput.focus();
-            return;
-        }
-
-        //Save the user data and sign in
-        this.user.sign_me_in({
-            name: user
-        });
+        var return_to = window.location.href;
+        var auth_url = 'auth.php?return_to=' + encodeURIComponent(return_to);
+        window.location.href = auth_url;
     };
 
     SignIn.prototype.hide = function() {
-        this.ui.userInput.val('');
+
     };
 
     SignIn.prototype.show = function() {
-        this.ui.userInput.focus();
+
     };
 
     return SignIn;

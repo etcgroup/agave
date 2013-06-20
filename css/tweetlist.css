@@ -58,13 +58,11 @@
   filter: alpha(opacity=100);
 }
 .tweet-list .tweet .twitter-icon-light {
-  background: url('img/twitter-bird-dark-bgs.png');
   background-position: center;
   background-size: 24px 24px;
   width: 18px;
   height: 18px;
   vertical-align: bottom;
-  display: inline-block;
 }
 .subtle-link {
   color: #81ACBD;

@@ -182,3 +182,7 @@ ul.item-list {
 .details-right.highlight > div {
   background: #141414;
 }
+.twitter-icon-light {
+  display: inline-block;
+  background: url('img/twitter-bird-dark-bgs.png');
+}
