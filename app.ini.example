@@ -1,0 +1,20 @@
+environment=development
+; environment=production
+logging_enabled=1
+public=0
+secure=true
+
+[google]
+id=UA-XXXXXXXX-X
+domain=XXXXXXXXXXXX
+
+[db]
+host=XXXXXXXXX
+port=####
+schema=XXXXXXXXXX
+user=XXXXX
+password=XXXXX
+
+[twitter]
+consumer_key=XXXXXXXXXXXXXXXXXXXXX
+consumer_secret=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
