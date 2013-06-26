@@ -80,8 +80,8 @@ class Queries
             PDO::ATTR_PERSISTENT => true
         ));
 
-        if (isset($config['corpus']) && is_array($config['corpus'])) {
-            $params = $config['corpus'];
+        if (isset($config['corpus-db']) && is_array($config['corpus-db'])) {
+            $params = $config['corpus-db'];
 
             //Load a second database connection for the corpus data
             if (!array_key_exists('port', $params)) {
