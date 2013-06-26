@@ -14,8 +14,9 @@ port=####
 schema=XXXXXXXXXX
 user=XXXXX
 password=XXXXX
+corpus=CORPUS_ID
 
-[corpus-db]
+[corpus-CORPUS_ID]
 host=XXXXXXXXX
 port=####
 schema=XXXXXXXXXX
