@@ -1,5 +1,7 @@
 delimiter $$
 
+delimiter $$
+
 CREATE TABLE `annotations` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `created` datetime NOT NULL,
@@ -7,9 +9,10 @@ CREATE TABLE `annotations` (
   `label` varchar(150) NOT NULL,
   `time` datetime NOT NULL,
   `public` int(1) unsigned NOT NULL DEFAULT '1',
+  `corpus` varchar(45) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `public_time` (`public`,`time`)
-) ENGINE=MyISAM AUTO_INCREMENT=68 DEFAULT CHARSET=utf8mb4$$
+) ENGINE=MyISAM AUTO_INCREMENT=78 DEFAULT CHARSET=utf8mb4$$
 
 
 delimiter $$
@@ -18,9 +21,10 @@ CREATE TABLE `discussions` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `created` datetime NOT NULL,
   `public` int(1) unsigned NOT NULL DEFAULT '1',
+  `corpus` varchar(45) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `public` (`public`)
-) ENGINE=MyISAM AUTO_INCREMENT=35 DEFAULT CHARSET=utf8mb4$$
+) ENGINE=MyISAM AUTO_INCREMENT=42 DEFAULT CHARSET=utf8mb4$$
 
 
 delimiter $$
@@ -34,8 +38,9 @@ CREATE TABLE `instrumentation` (
   `data` varchar(250) DEFAULT NULL,
   `ref_id` int(11) DEFAULT NULL,
   `public` int(10) unsigned NOT NULL DEFAULT '1',
+  `corpus` varchar(45) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=3723 DEFAULT CHARSET=utf8mb4$$
+) ENGINE=MyISAM AUTO_INCREMENT=5580 DEFAULT CHARSET=utf8mb4$$
 
 
 delimiter $$
@@ -75,4 +80,14 @@ CREATE TABLE `app_users` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_twitter_id` (`twitter_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4$$
+
+
+delimiter $$
+
+CREATE TABLE `corpora` (
+  `id` varchar(45) NOT NULL,
+  `name` varchar(150) NOT NULL,
+  `created` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4$$
 

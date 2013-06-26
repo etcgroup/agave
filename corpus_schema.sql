@@ -126,3 +126,12 @@ CREATE TABLE `users` (
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8$$
 
+delimiter $$
+
+CREATE TABLE `corpus_info` (
+  `id` varchar(45) NOT NULL,
+  `description` varchar(250) DEFAULT NULL,
+  `created` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4$$
+

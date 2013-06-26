@@ -26,6 +26,7 @@ class Queries
      * @var PDO
      */
     private $corpus;
+    private $corpus_id;
     //The value used to filter user generated content
     private $public = 1;
     private $logging_enabled = 1;
@@ -76,12 +77,24 @@ class Queries
         $pdo_string = "mysql:host=${params['host']};dbname=${params['schema']};port=${params['port']}";
 
         //Create a persistent PDO connection
-        $this->db = new PDO($pdo_string, $params['user'], $params['password'], array(
-            PDO::ATTR_PERSISTENT => true
-        ));
+        try {
+            $this->db = new PDO($pdo_string, $params['user'], $params['password'], array(
+                PDO::ATTR_PERSISTENT => true
+            ));
+        } catch (PDOException $e) {
+            echo 'Connection failed: ' . $e->getMessage();
+            die();
+        }
 
-        if (isset($config['corpus-db']) && is_array($config['corpus-db'])) {
-            $params = $config['corpus-db'];
+        $corpus_id = $params['corpus'];
+        if (!isset($config["corpus-$corpus_id"]) || !is_array($config["corpus-$corpus_id"])) {
+            //Re-use the same connection and hope the data is there! this should not be used in production
+            $this->corpus_id = 'self';
+            $this->corpus = $this->db;
+        } else {
+            $this->corpus_id = $corpus_id;
+
+            $params = $config["corpus-$corpus_id"];
 
             //Load a second database connection for the corpus data
             if (!array_key_exists('port', $params)) {
@@ -91,12 +104,14 @@ class Queries
             $pdo_string = "mysql:host=${params['host']};dbname=${params['schema']};port=${params['port']}";
 
             //Create a persistent PDO connection
-            $this->corpus = new PDO($pdo_string, $params['user'], $params['password'], array(
-                PDO::ATTR_PERSISTENT => true
-            ));
-        } else {
-            //Reuse the first connection
-            $this->corpus = $this->db;
+            try {
+                $this->corpus = new PDO($pdo_string, $params['user'], $params['password'], array(
+                    PDO::ATTR_PERSISTENT => true
+                ));
+            } catch (PDOException $e) {
+                echo 'Connection failed: ' . $e->getMessage();
+                die();
+            }
         }
 
         $this->build_queries();
@@ -104,6 +119,8 @@ class Queries
         $this->set_encoding();
 
         $this->session_handler = new DbSessionHandler($this, $config);
+
+        $this->check_corpus();
     }
 
     /**
@@ -171,6 +188,47 @@ class Queries
         $this->db->query('set names utf8mb4');
         if ($this->corpus !== $this->db) {
             $this->corpus->query('set names utf8mb4');
+        }
+    }
+
+    private function _build_corpus_check()
+    {
+        $this->prepare('corpus_info',
+            "SELECT * FROM corpus_info
+             WHERE id=?",
+            's',
+            $this->corpus
+        );
+
+        $this->prepare('corpora',
+            "SELECT * FROM corpora
+             WHERE id=?",
+            's',
+            $this->db
+        );
+
+        $this->prepare('insert_corpus',
+            'INSERT INTO corpora (id, name, created)
+            VALUES (?, ?, NOW())',
+            'ss',
+            $this->db
+        );
+    }
+
+    private function check_corpus()
+    {
+        //First make sure the corpus we are connected to is actually the one we think
+        //we are connected to.
+        $result = $this->run('corpus_info', $this->corpus_id);
+        if (!$result || count($result) != 1) {
+            echo 'Not connected to corpus ' . $this->corpus_id;
+            die();
+        }
+
+        //Make sure the corpus is registered in the app db
+        $result = $this->run('corpora', $this->corpus_id);
+        if (!is_array($result) || count($result) != 1) {
+            $this->run('insert_corpus', $this->corpus_id, $this->corpus_id . ' (auto)');
         }
     }
 
@@ -334,9 +392,9 @@ class Queries
     private function _build_log_action()
     {
         $this->prepare('log_action',
-            "INSERT INTO instrumentation (time, ip_address, action, user, data, ref_id, public)
-            VALUES (NOW(), ?, ?, ?, ?, ?, ?)",
-            'ssssii',
+            "INSERT INTO instrumentation (time, ip_address, action, user, data, ref_id, public, corpus)
+            VALUES (NOW(), ?, ?, ?, ?, ?, ?, ?)",
+            'ssssiis',
             $this->db
         );
     }
@@ -361,15 +419,15 @@ class Queries
             $user = $user_data->id;
         }
 
-        $this->run('log_action', $ip_address, $action, $user, $data, $reference_id, $this->public);
+        $this->run('log_action', $ip_address, $action, $user, $data, $reference_id, $this->public, $this->corpus_id);
     }
 
     private function _build_insert_annotation()
     {
         $this->prepare('insert_annotation',
-            "INSERT INTO annotations (created, user, label, time, public)
-            VALUES (?, ?, ?, ?, ?)",
-            'ssssi',
+            "INSERT INTO annotations (created, user, label, time, public, corpus)
+            VALUES (?, ?, ?, ?, ?, ?)",
+            'ssssis',
             $this->db
         );
     }
@@ -389,7 +447,7 @@ class Queries
 
         $datetime = $datetime->format('Y-m-d H:i:s');
 
-        $this->run('insert_annotation', $created, $user, $label, $datetime, $this->public);
+        $this->run('insert_annotation', $created, $user, $label, $datetime, $this->public, $this->corpus_id);
         return $this->db->lastInsertId();
     }
 
@@ -426,24 +484,26 @@ class Queries
 
         $binder = new Binder();
         $public = $binder->param('public', $this->public, PDO::PARAM_INT);
+        $corpus = $binder->param('corpus', $this->corpus_id);
 
         $builder->where("a.public", "=", $public);
+        $builder->where("a.corpus", "=", $corpus);
         return $this->run2($builder, $binder, $this->db);
     }
 
     private function _build_insert_message()
     {
         $this->prepare('insert_message',
-            "INSERT INTO messages (created, user, message, view_state, discussion_id)
-            VALUES (?, ?, ?, ?, ?)",
-            'ssssi',
+            "INSERT INTO messages (created, user, message, view_state, discussion_id, corpus)
+            VALUES (?, ?, ?, ?, ?, ?)",
+            'ssssis',
             $this->db
         );
 
         $this->prepare('insert_discussion',
-            "INSERT INTO discussions (created, public)
-            VALUES (?, ?)",
-            'si',
+            "INSERT INTO discussions (created, public, corpus)
+            VALUES (?, ?, ?)",
+            'sis',
             $this->db
         );
     }
@@ -463,11 +523,11 @@ class Queries
         $time = $now->format('Y-m-d H:i:s');
 
         if (!$discussion_id) {
-            $this->run('insert_discussion', $time, $this->public);
+            $this->run('insert_discussion', $time, $this->public, $this->corpus_id);
             $discussion_id = $this->db->lastInsertId();
         }
 
-        $this->run('insert_message', $time, $user, $message, $view_state, $discussion_id);
+        $this->run('insert_message', $time, $user, $message, $view_state, $discussion_id, $this->corpus_id);
         return $this->db->lastInsertId();
     }
 
@@ -476,8 +536,8 @@ class Queries
         $this->prepare('message',
             "SELECT messages.*, UNIX_TIMESTAMP(created) AS created
              FROM messages
-             WHERE id = ?",
-            'i',
+             WHERE id = ? AND corpus = ?",
+            'is',
             $this->db
         );
     }
@@ -490,7 +550,7 @@ class Queries
      */
     public function get_message($message_id)
     {
-        $result = $this->run('message', $message_id);
+        $result = $this->run('message', $message_id, $this->corpus_id);
 
         if (count($result) > 0) {
             $row = $result[0];
@@ -576,8 +636,11 @@ class Queries
 
         $binder = new Binder();
         $public = $binder->param('public', $this->public);
+        $corpus = $binder->param('corpus', $this->corpus_id);
 
         $builder->where('d.public', '=', $public);
+        $builder->where("d.corpus", "=", $corpus);
+
         $builder->group_by('m.discussion_id');
         $builder->order_by('last_comment_at', 'desc');
 
