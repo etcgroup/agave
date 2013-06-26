@@ -82,9 +82,13 @@ define(['jquery', 'underscore', 'lib/spin', 'lib/bootstrap'], function ($, _, Sp
                 $el.removeClass('in');
 
                 //When done fading, stop/remove the spinner
-                $el.one($.support.transition.end, function () {
+                if ($.support.transition) {
+                    $el.one($.support.transition.end, function () {
+                        spinner.stop();
+                    });
+                } else {
                     spinner.stop();
-                });
+                }
             }
         };
 
