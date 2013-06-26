@@ -33,7 +33,7 @@ if ($params->sign_out) {
     $_SESSION['oauth_verify'] = true;
 
     // redirect to auth website
-    $auth_url = $cb->oauth_authorize();
+    $auth_url = $cb->oauth_authenticate();
     header('Location: ' . $auth_url);
     die();
 
