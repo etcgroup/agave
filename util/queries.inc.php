@@ -494,9 +494,9 @@ class Queries
     private function _build_insert_message()
     {
         $this->prepare('insert_message',
-            "INSERT INTO messages (created, user, message, view_state, discussion_id, corpus)
-            VALUES (?, ?, ?, ?, ?, ?)",
-            'ssssis',
+            "INSERT INTO messages (created, user, message, view_state, discussion_id)
+            VALUES (?, ?, ?, ?, ?)",
+            'ssssi',
             $this->db
         );
 
@@ -527,7 +527,7 @@ class Queries
             $discussion_id = $this->db->lastInsertId();
         }
 
-        $this->run('insert_message', $time, $user, $message, $view_state, $discussion_id, $this->corpus_id);
+        $this->run('insert_message', $time, $user, $message, $view_state, $discussion_id);
         return $this->db->lastInsertId();
     }
 
@@ -536,8 +536,8 @@ class Queries
         $this->prepare('message',
             "SELECT messages.*, UNIX_TIMESTAMP(created) AS created
              FROM messages
-             WHERE id = ? AND corpus = ?",
-            'is',
+             WHERE id = ?",
+            'i',
             $this->db
         );
     }
@@ -550,7 +550,7 @@ class Queries
      */
     public function get_message($message_id)
     {
-        $result = $this->run('message', $message_id, $this->corpus_id);
+        $result = $this->run('message', $message_id);
 
         if (count($result) > 0) {
             $row = $result[0];
