@@ -22,6 +22,10 @@ class Queries
      * @var PDO
      */
     private $db;
+    /**
+     * @var PDO
+     */
+    private $corpus;
     //The value used to filter user generated content
     private $public = 1;
     private $logging_enabled = 1;
@@ -44,7 +48,8 @@ class Queries
      *
      * $params must be an associative array containing 'host', 'port', 'user', 'password', and 'schema'.
      *
-     * @param array $params
+     * @param $config
+     * @internal param array $params
      */
     public function __construct($config)
     {
@@ -74,6 +79,25 @@ class Queries
         $this->db = new PDO($pdo_string, $params['user'], $params['password'], array(
             PDO::ATTR_PERSISTENT => true
         ));
+
+        if (isset($config['corpus']) && is_array($config['corpus'])) {
+            $params = $config['corpus'];
+
+            //Load a second database connection for the corpus data
+            if (!array_key_exists('port', $params)) {
+                $params['port'] = 3306;
+            }
+
+            $pdo_string = "mysql:host=${params['host']};dbname=${params['schema']};port=${params['port']}";
+
+            //Create a persistent PDO connection
+            $this->corpus = new PDO($pdo_string, $params['user'], $params['password'], array(
+                PDO::ATTR_PERSISTENT => true
+            ));
+        } else {
+            //Reuse the first connection
+            $this->corpus = $this->db;
+        }
 
         $this->build_queries();
         $this->set_timezone();
@@ -134,6 +158,9 @@ class Queries
     private function set_timezone()
     {
         $this->db->query("set time_zone = '+00:00'");
+        if ($this->corpus !== $this->db) {
+            $this->corpus->query("set time_zone = '+00:00'");
+        }
     }
 
     /**
@@ -142,6 +169,9 @@ class Queries
     private function set_encoding()
     {
         $this->db->query('set names utf8mb4');
+        if ($this->corpus !== $this->db) {
+            $this->corpus->query('set names utf8mb4');
+        }
     }
 
     /**
@@ -171,10 +201,15 @@ class Queries
      * @param $queryname
      * @param $querystr
      * @param string $types
+     * @param null $db the PDO connection to use, defaults to application database
      * @return bool
      */
-    private function prepare($queryname, $querystr, $types = '')
+    private function prepare($queryname, $querystr, $types = '', $db = NULL)
     {
+        if ($db == NULL) {
+            $db = $this->db;
+        }
+
         $pdoTypes = array();
         for ($i = 0; $i < strlen($types); $i++) {
             $c = $types[$i];
@@ -185,12 +220,12 @@ class Queries
             $pdoTypes[] = $t;
         }
 
-        $this->queries[$queryname] = $this->db->prepare($querystr);
+        $this->queries[$queryname] = $db->prepare($querystr);
         $this->types[$queryname] = $pdoTypes;
 
         if (!$this->queries[$queryname]) {
-            echo "Prepare ${$queryname} failed: (" . $this->db->errorCode() . ")";
-            print_r($this->db->errorInfo());
+            echo "Prepare ${$queryname} failed: (" . $db->errorCode() . ")";
+            print_r($db->errorInfo());
             return FALSE;
         }
 
@@ -241,21 +276,26 @@ class Queries
     /**
      * @param Builder $builder
      * @param Binder $binder
+     * @param null $db the PDO connection to use, defaults to the application db.
      * @return mixed
      */
-    private function run2($builder, $binder)
+    private function run2($builder, $binder, $db=NULL)
     {
+        if ($db === NULL) {
+            $db = $this->db;
+        }
+
         $this->start($builder->name);
 
         $sql = $builder->sql();
 
         $this->save_sql($builder->name, $sql, $binder->param_map);
 
-        $query = $this->db->prepare($sql);
+        $query = $db->prepare($sql);
 
         if (!$query) {
-            echo "Prepare {$builder->name} failed: (" . $this->db->errorCode() . ")";
-            print_r($this->db->errorInfo());
+            echo "Prepare {$builder->name} failed: (" . $db->errorCode() . ")";
+            print_r($db->errorInfo());
             print_r($sql);
             return FALSE;
         }
@@ -263,8 +303,8 @@ class Queries
         $query = $binder->bind($query);
 
         if (!$query) {
-            echo "Bind for {$builder->name} faild: (" . $this->db->errorCode() . ")";
-            print_r($this->db->errorInfo());
+            echo "Bind for {$builder->name} faild: (" . $db->errorCode() . ")";
+            print_r($db->errorInfo());
             print_r($sql);
             print_r($binder->param_map);
             return FALSE;
@@ -296,7 +336,9 @@ class Queries
         $this->prepare('log_action',
             "INSERT INTO instrumentation (time, ip_address, action, user, data, ref_id, public)
             VALUES (NOW(), ?, ?, ?, ?, ?, ?)",
-            'ssssii');
+            'ssssii',
+            $this->db
+        );
     }
 
     /**
@@ -327,7 +369,8 @@ class Queries
         $this->prepare('insert_annotation',
             "INSERT INTO annotations (created, user, label, time, public)
             VALUES (?, ?, ?, ?, ?)",
-            'ssssi'
+            'ssssi',
+            $this->db
         );
     }
 
@@ -355,7 +398,8 @@ class Queries
         $this->prepare('update_annotation',
             "UPDATE annotations SET label = ?
             WHERE user = ? AND id = ?",
-            'ssi'
+            'ssi',
+            $this->db
         );
     }
 
@@ -384,7 +428,7 @@ class Queries
         $public = $binder->param('public', $this->public, PDO::PARAM_INT);
 
         $builder->where("a.public", "=", $public);
-        return $this->run2($builder, $binder);
+        return $this->run2($builder, $binder, $this->db);
     }
 
     private function _build_insert_message()
@@ -392,13 +436,15 @@ class Queries
         $this->prepare('insert_message',
             "INSERT INTO messages (created, user, message, view_state, discussion_id)
             VALUES (?, ?, ?, ?, ?)",
-            'ssssi'
+            'ssssi',
+            $this->db
         );
 
         $this->prepare('insert_discussion',
             "INSERT INTO discussions (created, public)
             VALUES (?, ?)",
-            'si'
+            'si',
+            $this->db
         );
     }
 
@@ -431,7 +477,8 @@ class Queries
             "SELECT messages.*, UNIX_TIMESTAMP(created) AS created
              FROM messages
              WHERE id = ?",
-            'i'
+            'i',
+            $this->db
         );
     }
 
@@ -457,7 +504,8 @@ class Queries
             "SELECT users.*
              FROM users
              WHERE screen_name = ?",
-            's'
+            's',
+            $this->corpus
         );
     }
 
@@ -491,7 +539,8 @@ class Queries
             LEFT JOIN app_users ON messages.user = app_users.id
             WHERE discussion_id = ?
             ORDER BY created DESC",
-            'i'
+            'i',
+            $this->db
         );
     }
 
@@ -532,7 +581,7 @@ class Queries
         $builder->group_by('m.discussion_id');
         $builder->order_by('last_comment_at', 'desc');
 
-        return $this->run2($builder, $binder);
+        return $this->run2($builder, $binder, $this->db);
     }
 
     /**
@@ -552,7 +601,7 @@ class Queries
         $id = $binder->param('id', $id);
 
         $builder->where("tweets.id", "=", $id);
-        return $this->run2($builder, $binder);
+        return $this->run2($builder, $binder, $this->corpus);
     }
 
 
@@ -604,7 +653,7 @@ class Queries
         $builder->where_user_is($user_id);
         $builder->where_sentiment_is($sentiment);
 
-        return $this->run2($builder, $binder);
+        return $this->run2($builder, $binder, $this->corpus);
     }
 
     /**
@@ -657,7 +706,7 @@ class Queries
         $builder->from("({$subquery->sql()}) AS subquery");
         $builder->where('users.id', '=', 'subquery.id');
 
-        return $this->run2($builder, $binder);
+        return $this->run2($builder, $binder, $this->corpus);
     }
 
     /**
@@ -715,7 +764,7 @@ class Queries
         $builder->where_user_is($user_id);
         $builder->where_sentiment_is($sentiment);
 
-        return $this->run2($builder, $binder);
+        return $this->run2($builder, $binder, $this->corpus);
     }
 
     /**
@@ -753,7 +802,7 @@ class Queries
         $builder->where('mid_point', '>=', $start_datetime);
         $builder->where('mid_point', '<', $stop_datetime);
 
-        return $this->run2($builder, $binder);
+        return $this->run2($builder, $binder, $this->corpus);
     }
 
     public function get_session($id)
@@ -767,7 +816,7 @@ class Queries
         $builder->where('id', '=', $id);
         $builder->limit(1);
 
-        $result = $this->run2($builder, $binder);
+        $result = $this->run2($builder, $binder, $this->db);
 
         if ($result) {
             return $result[0];
@@ -781,19 +830,22 @@ class Queries
             "REPLACE INTO sessions
             (id, access, data)
             VALUES (?, ?, ?)",
-            'sis'
+            'sis',
+            $this->db
         );
 
         $this->prepare('delete_session',
             "DELETE FROM sessions
             WHERE id = ?",
-            's'
+            's',
+            $this->db
         );
 
         $this->prepare('delete_old_sessions',
             'DELETE FROM sessions
             WHERE access < ?',
-            'i'
+            'i',
+            $this->db
         );
     }
     public function save_session($id, $data)
@@ -820,7 +872,8 @@ class Queries
             "INSERT INTO app_users
             (created, twitter_id, screen_name, name, utc_offset, time_zone)
             VALUES (NOW(), ?, ?, ?, ?, ?)",
-            'issis'
+            'issis',
+            $this->db
         );
 
         $this->prepare('update_app_user',
@@ -830,14 +883,16 @@ class Queries
                 utc_offset=?,
                 time_zone=?
             WHERE id=?",
-            'ssisi'
+            'ssisi',
+            $this->db
         );
 
         $this->prepare('sign_in_user',
             "UPDATE app_users
             SET last_signed_in = NOW()
             WHERE id=?",
-            'i'
+            'i',
+            $this->db
         );
     }
     /**
@@ -859,7 +914,7 @@ class Queries
         $builder->where('twitter_id', '=', $twitter_id_param);
         $builder->limit(1);
 
-        $result = $this->run2($builder, $binder);
+        $result = $this->run2($builder, $binder, $this->db);
 
         if ($result) {
             $id =$result[0]['id'];
@@ -907,7 +962,7 @@ class Queries
         $builder->where('id', '=', $id);
         $builder->limit(1);
 
-        $result = $this->run2($builder, $binder);
+        $result = $this->run2($builder, $binder, $this->db);
 
         if ($result) {
             if ($sign_in === TRUE) {
