@@ -14,6 +14,14 @@ port=####
 schema=XXXXXXXXXX
 user=XXXXX
 password=XXXXX
+corpus=CORPUS_ID
+
+[corpus-CORPUS_ID]
+host=XXXXXXXXX
+port=####
+schema=XXXXXXXXXX
+user=XXXXX
+password=XXXXX
 
 [twitter]
 consumer_key=XXXXXXXXXXXXXXXXXXXXX
