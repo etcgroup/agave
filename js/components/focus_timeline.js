@@ -50,6 +50,12 @@ define(['jquery',
             //Call the parent constructor
             Timeline.call(this, options);
 
+            //Store offset time internally
+            var staticExtent = this.extentFromUTC(this.interval.getRangeExtent());
+
+            //Set up the x axis domain, which stays constant, in offset time
+            this._timeScale.domain(staticExtent);
+
             //Create a vertical scale
             this._countScale = d3.scale.linear();
 
@@ -129,6 +135,90 @@ define(['jquery',
             this.ui.annotations.selectAll('.background,.annotation-target')
                 .on('click', $.proxy(this._createAnnotation, this));
         };
+
+
+         FocusTimeline.prototype._initZoomBehavior = function() {
+            //var x = d3.scale.linear().rangeRound([0, this.boxes.inner.width()]).domain([0, this.boxes.inner.width()]);
+            var y = d3.scale.identity();
+ 
+            console.log('init Zoom');
+            console.dir(this._timeScale.domain());
+ 
+            this.ui.behaviorzoom = d3.behavior.zoom()
+                .x(this._timeScale)
+                .y(y)
+                .scaleExtent([1,100])
+                .on("zoom", $.proxy(this._onZoom, this));
+ 
+            this.ui.background.call(this.ui.behaviorzoom);
+         };
+ 
+         FocusTimeline.prototype._onZoom = function() {
+            console.log('onZoom');
+            console.dir(d3.event);
+            //console.dir(this._timeScale.range());
+            //console.dir(this._timeScale.domain());
+
+            var extent = this.extentToUTC(this._timeScale.domain());
+            var maxExtent = this.interval.getRangeExtent();
+
+            console.dir(extent);
+            console.dir(maxExtent);
+
+            if(extent[0] < maxExtent[0] || extent[1] > maxExtent[1]) {
+                var span = Math.min(extent[1] - extent[0], maxExtent[1] - maxExtent[0]);
+
+                if(extent[0] < maxExtent[0]) {
+                    extent[0] = maxExtent[0];
+                    extent[1] = extent[0] + span;
+                } else if( extent[1] > maxExtent[1] ) {
+                    extent[1] = maxExtent[1];
+                    extent[0] = extent[1] - span;
+                }
+
+            }
+
+            
+            this.interval.set({
+                from: extent[0],
+                to: extent[1]
+            });
+            
+            
+         };
+
+         /**
+         * Called when the interval model changes.
+         *
+         * @param e Event
+         * @param interval
+         * @param field
+         * @private
+         */
+        FocusTimeline.prototype._onIntervalChanged = function (e, interval, field) {
+            //Call the parent method
+            Timeline.prototype._onIntervalChanged.call(this, interval, field);
+
+            var utc = this.interval.getExtent();
+            var local = this.extentFromUTC(utc);
+
+            var rangeExtent = this.interval.getRangeExtent();
+            if(utc[0] === rangeExtent[0] &&
+                utc[1] === rangeExtent[1]) {
+                this.ui.behaviorzoom.scale(1);
+
+            }
+
+            console.log('interval changed');
+
+            //this._zoomScale.domain(rangeExtent);
+
+            //Let other people know we moved
+            this.trigger('selection-change', utc);
+        };
+ 
+
+
 
         FocusTimeline.prototype._renderAnnotations = function(annotations) {
             var boxHeight = this.boxes.annotations.height();
@@ -277,6 +367,7 @@ define(['jquery',
             this.addBrushHandler('query', this._brushQuery);
 
             this._initAnnotations();
+            this._initZoomBehavior();
             this._renderCountAxis();
         };
 
