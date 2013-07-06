@@ -154,17 +154,11 @@ define(['jquery',
          };
  
          FocusTimeline.prototype._onZoom = function() {
-            console.log('onZoom');
-            console.dir(d3.event);
-            //console.dir(this._timeScale.range());
-            //console.dir(this._timeScale.domain());
-
             var extent = this.extentToUTC(this._timeScale.domain());
             var maxExtent = this.interval.getRangeExtent();
 
-            console.dir(extent);
-            console.dir(maxExtent);
-
+            // keep the extent within the overall min and max values, while keeping the 
+            // the range length the same
             if(extent[0] < maxExtent[0] || extent[1] > maxExtent[1]) {
                 var span = Math.min(extent[1] - extent[0], maxExtent[1] - maxExtent[0]);
 
@@ -178,13 +172,11 @@ define(['jquery',
 
             }
 
-            
+            // update the interval
             this.interval.set({
                 from: extent[0],
                 to: extent[1]
-            });
-            
-            
+            });            
          };
 
          /**
