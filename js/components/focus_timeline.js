@@ -140,6 +140,9 @@ define(['jquery',
          FocusTimeline.prototype._initZoomBehavior = function() {
             var y = d3.scale.identity();
  
+            console.log('creating zoombehavior');
+            console.dir(this._timeScale.domain());
+
             this.ui.behaviorzoom = d3.behavior.zoom()
                 .x(this._timeScale)
                 .y(y)
@@ -148,10 +151,16 @@ define(['jquery',
  
             this.ui.background.call(this.ui.behaviorzoom);
          };
+
  
          FocusTimeline.prototype._onZoom = function() {
             var extent = this.extentToUTC(this._timeScale.domain());
             var maxExtent = this.interval.getRangeExtent();
+
+            console.log("onZoom");
+            console.dir(extent);
+            console.dir(maxExtent);
+            console.dir(this.ui.behaviorzoom.translate());
 
             // keep the extent within the overall min and max values, while keeping the 
             // the range length the same
@@ -165,14 +174,14 @@ define(['jquery',
                     extent[1] = maxExtent[1];
                     extent[0] = extent[1] - span;
                 }
-
             }
 
             // update the interval
             this.interval.set({
                 from: extent[0],
                 to: extent[1]
-            });            
+            });
+
          };
 
          /**
@@ -303,8 +312,22 @@ define(['jquery',
          * @param domain
          */
         FocusTimeline.prototype.domain = function (domain) {
+            var extent = this.extentFromUTC(domain),
+                maxExtent = this.extentFromUTC(this.interval.getRangeExtent()),
+                diff1 = extent[1] - extent[0],
+                diff2 = maxExtent[1] - maxExtent[0],
+                scale = diff2 / diff1,
+                midpoint = diff1/2 ;
+
+            console.log('set domain - ' + midpoint);
+            console.dir(domain);
+            console.dir(extent);
+
             //don't forget to translate from utc to translated time
-            this._timeScale.domain(this.extentFromUTC(domain));
+            this.ui.behaviorzoom.scale(scale);
+            //this.ui.behaviorzoom.translate([-midpoint,0]);
+            this._timeScale.domain(extent);
+
 
             if (this._updateDownsamplingFactor() ) {
                 this._updateDataBinding();
