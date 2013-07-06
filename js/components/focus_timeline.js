@@ -138,11 +138,7 @@ define(['jquery',
 
 
          FocusTimeline.prototype._initZoomBehavior = function() {
-            //var x = d3.scale.linear().rangeRound([0, this.boxes.inner.width()]).domain([0, this.boxes.inner.width()]);
             var y = d3.scale.identity();
- 
-            console.log('init Zoom');
-            console.dir(this._timeScale.domain());
  
             this.ui.behaviorzoom = d3.behavior.zoom()
                 .x(this._timeScale)
