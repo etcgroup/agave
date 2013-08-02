@@ -369,13 +369,10 @@ define(['jquery',
             }
         });
         
-        $('.ref').click(function() {
-            //$(this).css("background-color","yellow");
+        $('.type-T').click(function() {
             var tweetId = $(this).attr("data-id");            
             if ($(this).hasClass('expand')) {
                 $(this).removeClass('expand');
-                //var child = $("#expandTweet");
-                //$(this).remove($("#expandTweet"));
                 ($('#expandTweet')).remove();
             } else {
                 var num;
@@ -385,7 +382,6 @@ define(['jquery',
                     }
                 }
                 $(this).addClass('expand');
-                console.log(result.data.tweets[num]);
                 var par = $('<p>', {'id':'expandTweet'}).text(result.data.tweets[num].text);
                 $(this).append(par);
             }
