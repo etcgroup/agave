@@ -372,7 +372,6 @@ define(['jquery',
         $('.type-T').click(function() {
             var tweetId = $(this).attr("data-id");            
             if ($(this).hasClass('expand')) {
-                $(this).removeClass('expand');
                 ($('#expandTweet')).remove();
             } else {
                 var num;
@@ -381,7 +380,6 @@ define(['jquery',
                         num = i;
                     }
                 }
-                $(this).addClass('expand');
                 var par = $('<p>', {'id':'expandTweet'}).text(result.data.tweets[num].text);
                 $(this).append(par);
             }
