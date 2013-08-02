@@ -226,3 +226,7 @@
 .discussion-view .comment .message .ref.type-T:hover {
     background-color: rgba(104, 208, 242, 0.3);
 }
+
+#expandTweet {
+    width:104px;
+}

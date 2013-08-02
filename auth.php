@@ -1,5 +1,4 @@
 <?php
-
 include_once 'util/request.inc.php';
 include_once 'util/twitter.inc.php';
 
@@ -76,7 +75,7 @@ if ($params->sign_out) {
     $db->log_action('auth deny');
 }
 
-if ($error) {
+if (isset($error)) {
     unset($_SESSION['oauth_token']);
     unset($_SESSION['oauth_token_secret']);
     unset($_SESSION['oauth_verify']);
