@@ -36,11 +36,12 @@ class Burst(object):
         self.arrivalRateDelta = match.group('arrivalRateDelta')
         self.ratePercentDelta = match.group('ratePercentDelta')
 
-    # Parses a date in 20130203 00:20:00 +0000 format
     def _parseTime(self, dateTime):
+        # Parses a date in 20130203 00:20:00 +0000 format
         return datetime.strptime(dateTime, DATETIME_FORMAT)
     
     def _formatTime(self, dateTime):
+        # creates a Unix timestamp from the given datetime
         return calendar.timegm(dateTime.utctimetuple())
     
     @staticmethod

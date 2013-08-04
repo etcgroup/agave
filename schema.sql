@@ -1,7 +1,5 @@
 delimiter $$
 
-delimiter $$
-
 CREATE TABLE `annotations` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `created` datetime NOT NULL,
@@ -10,8 +8,11 @@ CREATE TABLE `annotations` (
   `time` datetime NOT NULL,
   `public` int(1) unsigned NOT NULL DEFAULT '1',
   `corpus` varchar(45) NOT NULL,
+  `series` varchar(65) NOT NULL DEFAULT 'user',
+  `value` float NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
-  KEY `public_time` (`public`,`time`)
+  KEY `public_time` (`public`,`time`),
+  KEY `value` (`value`)
 ) ENGINE=MyISAM AUTO_INCREMENT=78 DEFAULT CHARSET=utf8mb4$$
 
 
