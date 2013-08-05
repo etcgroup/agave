@@ -9,8 +9,9 @@ define(['jquery',
     'util/sentiment',
     'util/rectangle',
     'util/sampling',
-    'lib/d3'],
-    function ($, _, extend, Transform, Timeline, Histogram, StackHistogram, Tooltip, sentiment, Rectangle, sampling, d3) {
+    'lib/d3',
+    'lib/bootstrap-slider'],
+    function ($, _, extend, Transform, Timeline, Histogram, StackHistogram, Tooltip, sentiment, Rectangle, sampling, d3, slider) {
 
         var AXIS_OFFSET = 3;
         var ANNOTATION_TOOLTIP_TEMPLATE = _.template(
@@ -148,8 +149,37 @@ define(['jquery',
                 .classed('background', true);
 
             //Create the burst adjust button
+            var self = this;
+            var popover_showing = false;
             this.ui.burstFilterButton = $('<div class="slider-button btn"><i class="icon-filter icon-white"></i></div>')
-                .appendTo(this.into);
+                .appendTo(this.into)
+                .popover({
+                    html: true,
+                    placement: 'right',
+                    trigger: 'manual',
+                    content: '<input>'
+                })
+                .on('click', function() {
+                    popover_showing = !popover_showing;
+                    if (popover_showing) {
+                        self.ui.burstFilterButton.popover('show');
+
+                        var popover = self.ui.burstFilterButton.data('popover').tip();
+                        popover.find('input')
+                            .slider({
+                                min: 0,
+                                max: 1,
+                                step: 0.01,
+                                value: 1,
+                                formater: function(v) {
+                                    return Math.round(100 * v) + "%";
+                                }
+                            });
+                    } else {
+                        self.ui.burstFilterButton.popover('hide');
+                    }
+
+                });
         };
 
         FocusTimeline.prototype._renderBursts = function(bursts) {
