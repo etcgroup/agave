@@ -138,7 +138,7 @@ class Request
         $response['request'] = $_GET;
 
         if ($this->performance !== NULL) {
-            $response['performance'] = $this->performance;
+            $response['performance'] = $this->performance->finalize();
         }
 
         header('Content-type: application/json');
