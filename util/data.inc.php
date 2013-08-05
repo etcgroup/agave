@@ -68,6 +68,9 @@ class CountGroup {
      */
     public function get_bin_at($time)
     {
+        if (!isset($this->time_value_map[$time])) {
+            $this->add_bin($time);
+        }
         return $this->time_value_map[$time];
     }
 
