@@ -9,15 +9,15 @@ define(['app'], function(App) {
     var config = {
         defaults: {
             //Default time interval (UTC seconds) for the superbowl data set
-            from: 1359932400,
-            to: 1359952200,
+            from: 1359759600,
+            to: 1360125000,
             mode: 'simple',
             focus: null,
             annotations: true
         },
         //Time interval (UTC seconds) for the superbowl data set
-        overview_from: 1359932400,
-        overview_to: 1359952200,
+        overview_from: 1359759600,
+        overview_to: 1360125000,
         //The overview bin size in seconds
         bin_size: 5,
 
