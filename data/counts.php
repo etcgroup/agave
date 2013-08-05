@@ -53,7 +53,7 @@ $result = $db->get_grouped_counts($from, $to, $interval, $split_sentiment, $filt
 $perf->start('processing');
 
 //A container for storing the results
-$groups = new GroupedSeries();
+$bin_counts = array();
 
 //The database will fail to return any count at all for bins with no contents
 //so we need to initialize all the bins to be empty before we even look
@@ -62,13 +62,10 @@ $next_bin = $from->getTimestamp();
 $end = $to->getTimestamp();
 while ($next_bin < $end)
 {
-    //Create a bin for each of the three sentiment values,
-    //at the current time (next_bin).
-    $groups->get_group(1)->add_bin($next_bin);
-
     if ($split_sentiment) {
-        $groups->get_group(0)->add_bin($next_bin);
-        $groups->get_group(-1)->add_bin($next_bin);
+        $bin_counts[$next_bin] = array($next_bin * 1000, 0,0,0);
+    } else {
+        $bin_counts[$next_bin] = array($next_bin * 1000, 0);
     }
 
     $next_bin += $interval;
@@ -80,27 +77,18 @@ while ($row = $result->fetch(PDO::FETCH_ASSOC))
     //The time for this row
     $binned_time = $row[$time_field];
 
-    //Get the positive bin at this time
-    $positive_bin = $groups->get_group(1)->get_bin_at($binned_time);
-    //Set the count for the bin equal to the tweet rate
-    $positive_bin->count = (int) $row[$positive_count_field] / (double)$interval;
-
     if ($split_sentiment) {
-        //Get the negative bin at this time
-        $negative_bin = $groups->get_group(-1)->get_bin_at($binned_time);
-        $negative_bin->count = (int) $row[$negative_count_field] / (double)$interval;
-
-        //Get the neutral bin at this time
-        $neutral_bin = $groups->get_group(0)->get_bin_at($binned_time);
-        $neutral_bin->count = (int) $row[$neutral_count_field] / (double)$interval;
+        $bin_counts[$binned_time] = array($binned_time * 1000,
+            $row[$negative_count_field] / (double)$interval,
+            $row[$neutral_count_field] / (double)$interval,
+            $row[$positive_count_field] / (double)$interval);
+    } else {
+        $bin_counts[$binned_time] = array($binned_time * 1000,
+            $row[$positive_count_field] / (double)$interval);
     }
 }
 
 $perf->stop('processing');
 
 //Emit the response
-if ($split_sentiment) {
-    $request->response($groups->groups_array());
-} else {
-    $request->response($groups->get_group(1)->values);
-}
+$request->response(array_values($bin_counts));

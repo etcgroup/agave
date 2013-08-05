@@ -109,18 +109,14 @@ define(['jquery',
          */
         OverviewTimeline.prototype._onData = function (e, result) {
 
-            var data = result.data; //data
-
-            var countsOnly = result.data.reduce(function (prev, layer) {
-                return {
-                    values: layer.values.map(function (v, i) {
-                        return {
-                            count: prev.values[i].count + v.count,
-                            time: prev.values[i].time
-                        };
-                    })
+            var countsOnly = result.data.map(function (bundle) {
+                var summed = {
+                    time: bundle[0],
+                    count: bundle[1] + bundle[2] + bundle[3]
                 };
-            }).values;
+
+                return summed;
+            });
 
             this._loadedQueries[result.params.query_id] = result.params;
             this._series[result.params.query_id] = countsOnly;
@@ -129,7 +125,7 @@ define(['jquery',
             this._updateDataBinding();
 
             //Call through to parent method
-            Timeline.prototype._onData.call(this, data);
+            Timeline.prototype._onData.apply(this, arguments);
         };
 
         /**
