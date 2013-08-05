@@ -50,7 +50,6 @@ include_once 'elements/help_icon.inc.php';
                 <div class="tweet-timeline padding-bottom">
                 </div>
             </div>
-            <div class="slider-button btn"><i class="icon-filter icon-white"></i></div>
             <div class="tweet-overview-panel row">
                 <div class="tweet-overview padding-bottom">
                     <div class="time-selector popover-me" data-animation="true" data-trigger="hover" title="Time Selector"

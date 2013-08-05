@@ -128,9 +128,8 @@
 .slider-button {
   position: absolute;
   right: 16px;
-  top: 46px;
+  top: 14px;
   width: 20px;
   line-height: 14px;
   padding: 2px 0 0 0;
-  z-index: 1000;
 }

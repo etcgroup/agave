@@ -146,6 +146,10 @@ define(['jquery',
 
             this.ui.burstsBackground = this.ui.bursts.append('rect')
                 .classed('background', true);
+
+            //Create the burst adjust button
+            this.ui.burstFilterButton = $('<div class="slider-button btn"><i class="icon-filter icon-white"></i></div>')
+                .appendTo(this.into);
         };
 
         FocusTimeline.prototype._renderBursts = function(bursts) {
