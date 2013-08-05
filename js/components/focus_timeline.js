@@ -19,6 +19,7 @@ define(['jquery',
 
         var ANNOTATION_BAR_HEIGHT = 13;
         var ANNOTATION_BAR_MARGIN = 2;
+        var SLIDER_BUTTON_WIDTH = 26;
 
         var BURST_TOOLTIP_TEMPLATE = _.template(
             "<b><%=series%></b>: <%=label%>"
@@ -385,7 +386,7 @@ define(['jquery',
             this.boxes.bursts.set({
                 top: this.boxes.annotations.bottom() + ANNOTATION_BAR_MARGIN,
                 left: this.boxes.inner.left(),
-                width: this.boxes.inner.width(),
+                width: this.boxes.inner.width() - SLIDER_BUTTON_WIDTH,
                 height: ANNOTATION_BAR_HEIGHT
             });
         };
