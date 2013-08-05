@@ -389,6 +389,54 @@ class Queries
         }
     }
 
+    private function run2_stream($builder, $binder, $db=NULL)
+    {
+        if ($db === NULL) {
+            $db = $this->db;
+        }
+
+        $this->start($builder->name);
+
+        $sql = $builder->sql();
+
+        $this->save_sql($builder->name, $sql, $binder->param_map);
+
+        $query = $db->prepare($sql);
+
+        if (!$query) {
+            echo "Prepare {$builder->name} failed: (" . $db->errorCode() . ")";
+            print_r($db->errorInfo());
+            print_r($sql);
+            return FALSE;
+        }
+
+        $query = $binder->bind($query);
+
+        if (!$query) {
+            echo "Bind for {$builder->name} faild: (" . $db->errorCode() . ")";
+            print_r($db->errorInfo());
+            print_r($sql);
+            print_r($binder->param_map);
+            return FALSE;
+        }
+
+        $success = $query->execute();
+
+        if ($success === FALSE) {
+            echo "Execute {$builder->name} failed: ({$query->errorCode()})";
+            print_r($query->errorInfo());
+            print_r($builder);
+
+            $this->stop($builder->name);
+        } else {
+
+            $this->stop($builder->name);
+
+            return $query;
+
+        }
+    }
+
     private function _build_log_action()
     {
         $this->prepare('log_action',
@@ -838,7 +886,7 @@ class Queries
         $builder->where_user_is($user_id);
         $builder->where_sentiment_is($sentiment);
 
-        return $this->run2($builder, $binder, $this->corpus);
+        return $this->run2_stream($builder, $binder, $this->corpus);
     }
 
     /**

@@ -75,7 +75,7 @@ while ($next_bin < $end)
 }
 
 //Now go through the database results and fill in the binned data
-foreach ($result as $row)
+while ($row = $result->fetch(PDO::FETCH_ASSOC))
 {
     //The time for this row
     $binned_time = $row[$time_field];
@@ -95,7 +95,6 @@ foreach ($result as $row)
         $neutral_bin->count = (int) $row[$neutral_count_field] / (double)$interval;
     }
 }
-
 
 $perf->stop('processing');
 
