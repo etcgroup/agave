@@ -471,13 +471,15 @@ class Queries
     /**
      * Retrieve annotations from the database.
      *
+     * @param bool $bursts
      * @return mixed
      */
-    public function get_annotations()
+    public function get_annotations($bursts = FALSE)
     {
         $builder = new Builder('annotations');
 
         $builder->select('UNIX_TIMESTAMP(a.created) AS created, a.id, a.user, a.label, UNIX_TIMESTAMP(a.time) AS time');
+        $builder->select('a.series, a.value');
         $builder->select('app_users.name, app_users.screen_name');
         $builder->from('annotations a');
         $builder->join('app_users', 'a.user = app_users.id', 'left');
@@ -488,6 +490,13 @@ class Queries
 
         $builder->where("a.public", "=", $public);
         $builder->where("a.corpus", "=", $corpus);
+
+        if ($bursts) {
+            $builder->where('a.series', '!=', '"user"');
+        } else {
+            $builder->where('a.series', '=', '"user"');
+        }
+
         return $this->run2($builder, $binder, $this->db);
     }
 

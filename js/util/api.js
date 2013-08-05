@@ -9,6 +9,7 @@ define(['jquery', 'underscore', 'util/events'], function ($, _, events) {
         'messages': 'data/messages.php',
         'tweets': 'data/tweets.php',
         'annotations': 'data/annotations.php',
+        'bursts': 'data/bursts.php',
         'keywords': 'data/burst_keywords.php',
         'users': 'data/users.php',
         'auth': 'data/auth.php'
@@ -233,6 +234,15 @@ define(['jquery', 'underscore', 'util/events'], function ($, _, events) {
 
     API.prototype.annotations = function(parameters) {
         this.request('get', 'annotations', {
+            params: parameters,
+            post_process: function (results) {
+                return results.payload;
+            }
+        });
+    };
+
+    API.prototype.bursts = function(parameters) {
+        this.request('get', 'bursts', {
             params: parameters,
             post_process: function (results) {
                 return results.payload;

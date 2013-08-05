@@ -72,4 +72,39 @@
     }
 }
 
+.bursts {
+    .background {
+        fill: rgba(255, 255, 255, 0.03);
+    }
 
+    .series {
+        .burst {
+            shape-rendering: crispEdges;
+            stroke: transparent;
+            stroke-width: 4px;
+            .opacity(70);
+
+            .transition(~'stroke 300ms,opacity 300ms');
+
+            &:hover {
+                .opacity(100);
+            }
+        }
+
+        &.keywords .burst {
+            fill: #0B0;
+
+            &:hover {
+                stroke: #0B0;
+            }
+        }
+
+        &.sentiment .burst {
+            fill: #00cfff;
+
+            &:hover {
+                stroke: #00cfff;
+            }
+        }
+    }
+}

@@ -17,6 +17,13 @@ define(['jquery',
             "<b><%=screen_name%></b>: <%=label%>"
         );
 
+        var ANNOTATION_BAR_HEIGHT = 13;
+        var ANNOTATION_BAR_MARGIN = 2;
+
+        var BURST_TOOLTIP_TEMPLATE = _.template(
+            "<b><%=series%></b>: <%=label%>"
+        );
+
         //Color defaults
         var COLOR_DOMAIN = sentiment.numbers;
         var COLOR_RANGE = sentiment.classes;
@@ -105,6 +112,9 @@ define(['jquery',
             } else {
                 this.queries.forEach(request);
             }
+
+            //Request burst data
+            this.api.bursts();
         };
 
         FocusTimeline.prototype._initAnnotations = function() {
@@ -128,6 +138,57 @@ define(['jquery',
             //At this point, clicking on the timeline creates a new annotation
             this.ui.annotations.selectAll('.background,.annotation-target')
                 .on('click', $.proxy(this._createAnnotation, this));
+
+            //Create the ui for showing bursts
+            this.ui.bursts = this.ui.svg.append('svg')
+                .classed('bursts', true);
+
+            this.ui.burstsBackground = this.ui.bursts.append('rect')
+                .classed('background', true);
+        };
+
+        FocusTimeline.prototype._renderBursts = function(bursts) {
+            //Bind the new bursts data
+            var series = this.ui.bursts.selectAll('g.series')
+                .data(bursts);
+
+            var self = this;
+
+            //Just save it for later, geez
+            this.series_count = bursts.length;
+
+            series.enter().append('g')
+                .attr('class', function(s) {
+                    return "series " + s.name;
+                });
+
+            series.exit()
+                .remove();
+
+            var bind = series.selectAll('rect.burst')
+                .data(function(s, i) {
+
+                    //Add a top and bottom coordinate for nice stacking - as percentages of the total
+                    s.values.forEach(function(d) {
+                        d.series_index = i;
+                    });
+
+                    return s.values;
+                });
+
+            bind.enter().append('rect')
+                .classed('burst', true)
+                .attr('width', 2)
+                .on('mousemove', function (d) {
+                    self._onBurstHover(d3.event, d, true);
+                })
+                .on('mouseout', function (d) {
+                    self._onBurstHover(d3.event, d, false);
+                });
+
+            //Remove un-needed lines
+            bind.exit()
+                .remove();
         };
 
         FocusTimeline.prototype._renderAnnotations = function(annotations) {
@@ -191,6 +252,28 @@ define(['jquery',
         };
 
         /**
+         * Called when the mouse enters or leaves a burst.
+         *
+         * @param event
+         * @param data
+         * @param mouseHovering whether or not the mouse is now hovering
+         * @private
+         */
+        Timeline.prototype._onBurstHover = function (event, data, mouseHovering) {
+            if (mouseHovering) {
+                //Show a tooltip near the mouse
+                var label = BURST_TOOLTIP_TEMPLATE(data);
+                this.tooltip.show({
+                    top: event.pageY,
+                    left: event.pageX
+                }, label);
+            } else {
+                //Hide the tooltip
+                this.tooltip.hide();
+            }
+        };
+
+        /**
          * Update the annotations being displayed. This needs to be called
          * when the annotation data have changed, or when the graph is being updated
          * overall.
@@ -220,6 +303,40 @@ define(['jquery',
         };
 
         /**
+         * Update the bursts being displayed. This needs to be called
+         * when the burst data have changed, or when the graph is being updated
+         * overall.
+         *
+         * @private
+         */
+        FocusTimeline.prototype._updateBursts = function () {
+            var boxHeight = this.boxes.bursts.height();
+            var boxWidth = this.boxes.bursts.width();
+
+            var self = this;
+
+            var bursts = this.ui.bursts;
+
+            var series = bursts.selectAll('g.series').length;
+
+            //Resize the svg and background
+            bursts.call(this.boxes.bursts);
+            this.ui.burstsBackground
+                .attr('width', boxWidth)
+                .attr('height', boxHeight);
+
+            var series_height = (boxHeight - this.series_count - 1) / this.series_count;
+
+            bursts.selectAll('rect.burst')
+                .attr('y', function(d) {
+                    return 1 + d.series_index * (series_height + 1);
+                })
+                .attr('height', series_height)
+                .attr('x', this._highlightXPosition)
+
+        };
+
+        /**
          * Set the time scale domain. This is used by the overview timeline.
          *
          * @param domain
@@ -244,13 +361,15 @@ define(['jquery',
          */
         FocusTimeline.prototype._getMargins = function () {
             var margins = Timeline.prototype._getMargins.call(this);
-            margins.top += 15; //make room for annotation bar
+            margins.top += ANNOTATION_BAR_HEIGHT + ANNOTATION_BAR_MARGIN; //make room for annotation bar
+            margins.top += ANNOTATION_BAR_HEIGHT + ANNOTATION_BAR_MARGIN; //make room for the bursts bar
             return margins;
         };
 
         FocusTimeline.prototype._buildBoxes = function () {
             Timeline.prototype._buildBoxes.call(this);
             this.boxes.annotations = new Rectangle();
+            this.boxes.bursts = new Rectangle();
         };
 
         FocusTimeline.prototype._updateBoxes = function () {
@@ -260,7 +379,14 @@ define(['jquery',
                 top: this.boxes.outer.top(),
                 left: this.boxes.inner.left(),
                 width: this.boxes.inner.width(),
-                bottom: this.boxes.inner.top() - 2
+                height: ANNOTATION_BAR_HEIGHT
+            });
+
+            this.boxes.bursts.set({
+                top: this.boxes.annotations.bottom() + ANNOTATION_BAR_MARGIN,
+                left: this.boxes.inner.left(),
+                width: this.boxes.inner.width(),
+                height: ANNOTATION_BAR_HEIGHT
             });
         };
 
@@ -277,7 +403,19 @@ define(['jquery',
             this.addBrushHandler('query', this._brushQuery);
 
             this._initAnnotations();
+            this.api.on('bursts', $.proxy(this._onBurstData, this));
+
             this._renderCountAxis();
+        };
+
+        /**
+         * Called when new burst data arrives.
+         * @private
+         */
+        FocusTimeline.prototype._onBurstData = function (e, result) {
+            this._renderBursts(result.data);
+
+            this._updateBursts();
         };
 
         FocusTimeline.prototype._brushQuery = function(item, brushOn) {
@@ -296,6 +434,7 @@ define(['jquery',
             Timeline.prototype.update.call(this, animate);
 
             this._updateCountAxis();
+            this._updateBursts();
         };
 
         /**
