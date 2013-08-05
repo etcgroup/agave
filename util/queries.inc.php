@@ -474,7 +474,7 @@ class Queries
      * @param bool $bursts
      * @return mixed
      */
-    public function get_annotations($bursts = FALSE)
+    public function get_annotations($bursts = FALSE, $max_value = NULL)
     {
         $builder = new Builder('annotations');
 
@@ -493,6 +493,8 @@ class Queries
 
         if ($bursts) {
             $builder->where('a.series', '!=', '"user"');
+            $max_value = $binder->param('max_value', $max_value);
+            $builder->where('a.value', '<=', $max_value);
         } else {
             $builder->where('a.series', '=', '"user"');
         }

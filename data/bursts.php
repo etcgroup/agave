@@ -14,9 +14,15 @@ $db = $request->db();
 //Get the performance tracker
 $perf = $request->timing();
 
+$params = $request->get(array(), array('max_value'));
+$max_value = $params->max_value;
+if ($max_value === NULL) {
+    $max_value = 1;
+}
+
 $bursts = array();
 
-$result = $db->get_annotations(TRUE);
+$result = $db->get_annotations(TRUE, $max_value);
 
 $perf->start('processing');
 
