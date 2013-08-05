@@ -159,7 +159,7 @@ define(['jquery',
                     html: true,
                     placement: 'right',
                     trigger: 'manual',
-                    content: '<div>Show top %</div><input>'
+                    content: '<div>Show top x% of bursts</div><input>'
                 })
                 .on('click', function() {
                     popover_showing = !popover_showing;
