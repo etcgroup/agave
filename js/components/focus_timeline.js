@@ -49,7 +49,7 @@ define(['jquery',
          * @constructor
          */
         var FocusTimeline = function (options) {
-
+            this.burst_max_value = 1;
             this.user = options.user;
             this.display = options.display;
 
@@ -116,7 +116,9 @@ define(['jquery',
             }
 
             //Request burst data
-            this.api.bursts();
+            this.api.bursts({
+                max_value: this.burst_max_value
+            });
         };
 
         FocusTimeline.prototype._initAnnotations = function() {
@@ -157,7 +159,7 @@ define(['jquery',
                     html: true,
                     placement: 'right',
                     trigger: 'manual',
-                    content: '<input>'
+                    content: '<div>Show top %</div><input>'
                 })
                 .on('click', function() {
                     popover_showing = !popover_showing;
@@ -170,16 +172,29 @@ define(['jquery',
                                 min: 0,
                                 max: 1,
                                 step: 0.01,
-                                value: 1,
+                                value: self.burst_max_value,
                                 formater: function(v) {
                                     return Math.round(100 * v) + "%";
                                 }
+                            })
+                            .on('slideStop', function(e) {
+                                self._onBurstSliderStop(e.value);
                             });
                     } else {
                         self.ui.burstFilterButton.popover('hide');
                     }
 
                 });
+        };
+
+        FocusTimeline.prototype._onBurstSliderStop = function(value) {
+
+            this.burst_max_value = value;
+
+            //Request burst data
+            this.api.bursts({
+                max_value: this.burst_max_value
+            });
         };
 
         FocusTimeline.prototype._renderBursts = function(bursts) {
