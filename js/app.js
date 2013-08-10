@@ -320,7 +320,8 @@ define(function (require) {
                 api: self.api,
                 interval: self.interval,
                 query: query,
-                into: group.keywordList
+                into: group.keywordList,
+                utcOffset: self.config.utc_offset_millis
             }));
         });
 

@@ -2,13 +2,14 @@ define([
     'jquery',
     'underscore',
     'util/extend',
+    'moment',
     'components/item_list'],
-    function ($, _, extend, ItemList) {
+    function ($, _, extend, moment, ItemList) {
 
         var KEYWORD_TEMPLATE = _.template("<li class='keyword clearfix' data-id='<%=id%>'>" +
             "<div class='keyword_term'><%=term%></div>" +
-            "<div class='keyword_before muted'>from <%=before_count%> uses</div>" +
-            "<div class='keyword_delta'><i class='icon-white icon-arrow-up'></i> <%=count_delta%> </div>" +
+            "<div class='mid_point muted'><%=mid_point_friendly%></div>" +
+            "<div class='relevance_variation' title='Change in relevance'><%=relevance_delta%></div>" +
             "</li>");
 
         //The max number of keywords to load.
@@ -29,6 +30,8 @@ define([
          */
         var KeywordList = function (options) {
             ItemList.call(this, options, 'keyword');
+
+            this._utcOffset = options.utcOffset || 0;
 
             this._initData('keywords');
             this._requestData();
@@ -103,6 +106,12 @@ define([
         };
 
         KeywordList.prototype.renderItem = function(itemData) {
+            if (!itemData.mid_point_friendly) {
+
+                var friendly = moment.unix((itemData.mid_point + this._utcOffset) / 1000)
+                    .utc();
+                itemData.mid_point_friendly = friendly.format("h:mma M/D/YYYY");
+            }
             return $(KEYWORD_TEMPLATE(itemData));
         };
 

@@ -3,11 +3,11 @@
     cursor: pointer;
 }
 
-.keywords-list .keyword_before {
+.keywords-list .mid_point {
     float: right;
 }
 
-.keywords-list .keyword_delta {
+.keywords-list .relevance_variation {
 	float: right;
     margin-right: 6px;
 }
