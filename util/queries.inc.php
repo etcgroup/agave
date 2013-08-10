@@ -912,7 +912,7 @@ class Queries
         $builder = new Builder('burst_keywords');
         $builder->select('*, UNIX_TIMESTAMP(mid_point) AS mid_point');
         $builder->from('burst_keywords');
-        $builder->order_by('count_percent_delta', 'DESC');
+        $builder->order_by('relevance_delta', 'DESC');
         $builder->limit($limit);
 
         //Declare the parameters
