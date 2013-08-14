@@ -12,7 +12,7 @@ if(basename(__FILE__) == basename($_SERVER['PHP_SELF'])){exit();}
  */
 class Performance
 {
-
+    public $memory = NULL;
     public $counts = array();
     public $times = array();
     public $queries = array();
@@ -68,6 +68,12 @@ class Performance
         }
 
         $this->counts[$name] += 1;
+    }
+
+    public function finalize() {
+        $this->memory = memory_get_usage(TRUE);
+
+        return $this;
     }
 
 }

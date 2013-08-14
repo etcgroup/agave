@@ -4,7 +4,17 @@ include_once 'util/request.inc.php';
 
 $request = new Request('app.ini');
 $db = $request->db();
-$db->log_action('load', $request->user_data());
+
+if (isset($request->config['secure']) && $request->config['secure']) {
+    if (!isset($_SERVER['HTTPS'] ) || $_SERVER['HTTPS'] === 'off') {
+        $url = 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+        header('Location: ' . $url);
+        die();
+    }
+}
+
+$user_data = $request->user_data();
+$db->log_action('load', $user_data);
 
 //Load in elements
 include_once 'elements/nav_bar.inc.php';
@@ -73,16 +83,25 @@ include_once 'elements/help_icon.inc.php';
                     <div class="user-box col">
                         <div class="header">
                             <div class="title">Welcome!</div>
-                            <div class="message">Sign in to discuss this data set</div>
+                            <div class="message">Discuss this data set!</div>
                         </div>
                         <div class="form">
-                            <input type="text" placeholder="Enter your user name"/><br/>
-                            <button type="button" class="user-submit btn btn-large btn-primary">Sign in</button>
+                            <button type="button" class="user-submit btn btn-large btn-primary">
+                                <i class="twitter-icon-light"></i>
+                                Sign in with Twitter
+                            </button>
                         </div>
                     </div>
                     <div class="discussions col">
                         <div class="header row">
                             <div class="title">Discussions</div>
+                            <div class="discussion-search-wrapper input-append">
+                                <input type="text" class="discussion-search-input" placeholder="Search discussions"/>
+                                <span class="add-on">
+                                    <i class="icon-search icon-white"></i>
+                                </span>
+                            </div>
+
                             <button type="button" class="btn btn-primary new-button tooltip-me" data-placement="bottom"
                                     title="Create a new discussion">
                                 <i class="icon-white icon-plus-sign"></i>
@@ -118,7 +137,15 @@ include_once 'elements/help_icon.inc.php';
         </div>
     </div>
 </div>
-
+<?php
+$flash = $request->flash();
+if ($flash) {
+?>
+    <div class="flash alert alert-<?php echo $flash['type']?>">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <?php echo $flash['message']?>
+    </div>
+<?php } ?>
 <?php if ($request->is_env('development')) { ?>
     <!-- Loading development resources -->
     <script src="js/lib/require.js"></script>
@@ -142,6 +169,10 @@ include_once 'elements/help_icon.inc.php';
 <?php } ?>
 
 <script type="text/javascript">
+    <?php if ($user_data) { ?>
+    window.user_data = <?php echo json_encode($user_data); ?>;
+    <?php } ?>
+
     //Start the app
     require(["main"]);
 

@@ -14,7 +14,7 @@ define(['jquery',
 
         var AXIS_OFFSET = 3;
         var ANNOTATION_TOOLTIP_TEMPLATE = _.template(
-            "<b><%=user%></b>: <%=label%>"
+            "<b><%=screen_name%></b>: <%=label%>"
         );
 
         //Color defaults
@@ -454,23 +454,48 @@ define(['jquery',
             //Stop the spinner
             this.loader.stop(params.query_id);
 
+            var grouped = [{
+                id: -1,
+                values: []
+            }, {
+                id: 0,
+                values: []
+            }, {
+                id: 1,
+                values: []
+            }];
+
             //Compute sum data (ha)
-            var countsOnly = result.data.reduce(function (prev, layer) {
-                return {
-                    values: layer.values.map(function (v, i) {
-                        return {
-                            count: prev.values[i].count + v.count,
-                            time: prev.values[i].time
-                        };
-                    })
+            //also reconstitute the fancy layer structure
+            var countsOnly = result.data.map(function (bundle) {
+                var summed = {
+                    time: bundle[0],
+                    count: bundle[1] + bundle[2] + bundle[3]
                 };
-            }).values;
+
+                grouped[0].values.push({
+                    time: bundle[0],
+                    count: bundle[1]
+                });
+
+                grouped[1].values.push({
+                    time: bundle[0],
+                    count: bundle[2]
+                });
+
+                grouped[2].values.push({
+                    time: bundle[0],
+                    count: bundle[3]
+                });
+
+                return summed;
+            });
+
 
             //If some sentiment filter is in use besides all (''), then
             //we'll remove the zero-valued series
-            var data = result.data;
             if (params.sentiment) {
-                data = data.filter(function (layer) {
+                grouped = grouped.filter(function (layer) {
                     return +layer.id === +params.sentiment;
                 });
             }
@@ -482,7 +507,7 @@ define(['jquery',
 
             //Store things in the cache
             this.cache.counts[params.query_id] = countsOnly;
-            this.cache.layers[params.query_id] = data;
+            this.cache.layers[params.query_id] = grouped;
             this.cache.max[params.query_id] = maxCount;
             this.cache.query[params.query_id] = params;
 
@@ -494,7 +519,7 @@ define(['jquery',
                 .style('opacity', 1);
 
             //Call the parent method
-            Timeline.prototype._onData.call(this, result);
+            Timeline.prototype._onData.apply(this, arguments);
         };
 
         FocusTimeline.prototype._updateDataBinding = function () {

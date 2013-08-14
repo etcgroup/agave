@@ -119,22 +119,8 @@ define(function (require) {
     App.prototype.initUserInfo = function() {
         var self = this;
 
-        //Listen for sign ins to save
-        this.user.on('signed-in', function() {
-            cookie.set(USER_COOKIE_NAME, JSON.stringify(self.user.data));
-            self.api.auth();
-        });
-
-        //And sign outs
-        this.user.on('signed-out', function(e, userData) {
-            cookie.remove(USER_COOKIE_NAME);
-            self.api.auth(userData);
-        });
-
-        var data = cookie.get(USER_COOKIE_NAME);
-        if (data) {
-            data = JSON.parse(data);
-            this.user.sign_me_in(data);
+        if (window.user_data) {
+            this.user.sign_me_in(window.user_data);
         }
 
         this.userDisplay = new UserInfoView({
