@@ -20,6 +20,9 @@ $perf = $request->timing();
  */
 $params = $request->get(array(), array('search'));
 $search = $params->search;
+if (strlen($search) == 0) {
+    $search = NULL;
+}
 
 $result = $db->get_discussions($search);
 
