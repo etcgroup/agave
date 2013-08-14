@@ -18,8 +18,10 @@ $perf = $request->timing();
 /**
  * Requests to /discussions.php have no parameters.
  */
+$params = $request->get(array(), array('search'));
+$search = $params->search;
 
-$result = $db->get_discussions();
+$result = $db->get_discussions($search);
 
 $db->log_action('discussions', $request->user_data());
 
