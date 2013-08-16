@@ -620,9 +620,10 @@ class Queries
     /**
      * Gets a list of discussions.
      *
+     * @param string $search
      * @return mysqli_result
      */
-    public function get_discussions()
+    public function get_discussions($search = NULL)
     {
         $builder = new Builder('discussions');
 
@@ -638,11 +639,19 @@ class Queries
         $public = $binder->param('public', $this->public);
         $corpus = $binder->param('corpus', $this->corpus_id);
 
+        $builder->group_by('m.discussion_id');
+
+        if ($search !== NULL) {
+            $search = $binder->param('search', "%$search%");
+            $builder->select('SUM(IF(m.message LIKE ' . $search . ', 1, 0)) AS match_count');
+            $builder->order_by('match_count', 'desc');
+            $builder->having('match_count', '>', '0');
+        } else {
+            $builder->order_by('last_comment_at', 'desc');
+        }
+
         $builder->where('d.public', '=', $public);
         $builder->where("d.corpus", "=", $corpus);
-
-        $builder->group_by('m.discussion_id');
-        $builder->order_by('last_comment_at', 'desc');
 
         return $this->run2($builder, $binder, $this->db);
     }

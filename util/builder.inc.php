@@ -8,6 +8,7 @@ class Builder
     private $_froms = array();
     private $_joins = array();
     private $_groupings = array();
+    private $_havings = array();
     private $_orderings = array();
     private $_limit = NULL;
 
@@ -52,6 +53,11 @@ class Builder
         if (count($this->_groupings)) {
             $groupings = implode(', ', $this->_groupings);
             $parts[] = "GROUP BY {$groupings}";
+        }
+
+        if (count($this->_havings)) {
+            $havings = implode(', ', $this->_havings);
+            $parts[] = "HAVING {$havings}";
         }
 
         if (count($this->_orderings)) {
@@ -160,6 +166,17 @@ class Builder
         }
 
         $this->_groupings[] = $field;
+    }
+
+    public function having($field, $op, $param) {
+        if ($param === NULL) {
+            return NULL;
+        }
+
+        $condition = "$field $op $param";
+        $this->_havings[] = $condition;
+
+        return $condition;
     }
 
     public function limit($count = NULL, $offset = 0)

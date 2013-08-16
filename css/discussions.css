@@ -61,6 +61,17 @@
     vertical-align: bottom;
 }
 
+.discussions .discussion-search-wrapper {
+    position: absolute;
+    top: 3px;
+    right: 0;
+    margin: 0;
+}
+
+.discussions .discussion-search-wrapper input {
+    width: 125px;
+}
+
 .discussions .instructions {
     margin-top: 10px;
 }

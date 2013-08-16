@@ -95,6 +95,13 @@ include_once 'elements/help_icon.inc.php';
                     <div class="discussions col">
                         <div class="header row">
                             <div class="title">Discussions</div>
+                            <div class="discussion-search-wrapper input-append">
+                                <input type="text" class="discussion-search-input" placeholder="Search discussions"/>
+                                <span class="add-on">
+                                    <i class="icon-search icon-white"></i>
+                                </span>
+                            </div>
+
                             <button type="button" class="btn btn-primary new-button tooltip-me" data-placement="bottom"
                                     title="Create a new discussion">
                                 <i class="icon-white icon-plus-sign"></i>
