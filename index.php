@@ -18,13 +18,13 @@ include_once 'elements/help_icon.inc.php';
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Twitter Vis!</title>
+    <title>Agave</title>
     <meta name="description" content="A neat twitter visualization">
     <meta name="viewport" content="width=device-width">
 
     <link rel="icon"
           type="image/png"
-          href="css/img/logo.png">
+          href="css/img/logo-only.png">
     <link rel="stylesheet" href="css/main.css">
 
 </head>

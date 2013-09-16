@@ -24,20 +24,24 @@
             line-height: 40px;
         }
 
-        .colon, .brand {
-            font-size: 24px;
-
+        .colon{
+            font-size: 18px;
             color: #eee;
+            vertical-align: initial;
+
+            display:none;
         }
 
         .brand {
-            padding: 0 0 0 58px;
+            //padding: 0 0 0 58px;
 
-            background: url(img/logo.png);
-            background-position: 12px center;
-            background-repeat: no-repeat;
-            background-size: 32px 32px;
+            padding: 0 30px 0 10px;
 
+            img {
+                margin: 4px 0;
+                height: 32px;
+                display: block;
+            }
         }
 
         .colon {
@@ -54,7 +58,7 @@
     .details {
         list-style: none;
         padding: 0;
-        margin: 0 0 0 70px;
+        margin: 0 0 0 30px;
         float: left;
 
         > li {
