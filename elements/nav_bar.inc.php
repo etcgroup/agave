@@ -10,7 +10,6 @@ function nav_bar()
             <div class="container-fluid">
                 <div class="nav-main-info">
                     <a class="brand" href="?">
-                        <img src="css/img/logo.png" alt="Agave"/>
                     </a>
                     <span class="colon"><i class="icon-chevron-right icon-white"></i></span>
                     <span class="title muted">Super Bowl 47</span>
