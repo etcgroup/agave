@@ -22,6 +22,7 @@ include_once 'elements/query_box.inc.php';
 include_once 'elements/timeline_controls.inc.php';
 include_once 'elements/details_tabs.inc.php';
 include_once 'elements/help_icon.inc.php';
+include_once 'elements/discussion_ui.inc.php';
 
 ?>
 <!DOCTYPE html>
@@ -80,58 +81,9 @@ include_once 'elements/help_icon.inc.php';
         <div class="collaborator-wrapper col">
             <div class="collaborator padding-left show-left hide">
                 <div class="sliding-panel col">
-                    <div class="user-box col">
-                        <div class="header">
-                            <div class="title">Welcome!</div>
-                            <div class="message">Discuss this data set!</div>
-                        </div>
-                        <div class="form">
-                            <button type="button" class="user-submit btn btn-large btn-primary">
-                                <i class="twitter-icon-light"></i>
-                                Sign in with Twitter
-                            </button>
-                        </div>
-                    </div>
-                    <div class="discussions col">
-                        <div class="header row">
-                            <div class="title">Discussions</div>
-                            <div class="discussion-search-wrapper input-append">
-                                <input type="text" class="discussion-search-input" placeholder="Search discussions"/>
-                                <span class="add-on">
-                                    <i class="icon-search icon-white"></i>
-                                </span>
-                            </div>
-
-                            <button type="button" class="btn btn-primary new-button tooltip-me" data-placement="bottom"
-                                    title="Create a new discussion">
-                                <i class="icon-white icon-plus-sign"></i>
-                                New</button>
-                            <div>Join an existing discussion</div>
-                        </div>
-                        <ul class="discussion-list content-panel item-list row scroll-y"></ul>
-                    </div>
-                    <div class="discussion-view col">
-                        <div class="comment-box row">
-                            <button type="button" class="btn back-button tooltip-me" data-placement="right"
-                                    title="Back to discussion list">
-                                <i class="icon-white icon-arrow-left"></i>
-                                Back
-                            </button>
-                            <div class="discussion-title"></div>
-                            <textarea></textarea>
-                            <button type="button"
-                                    class="send-button btn btn-primary tooltip-me" data-placement="bottom"
-                                    title="Post your comment">
-                                <i class="icon-white icon-comment"></i> Post
-                            </button>
-                            <button type="button" data-toggle="button"
-                                    class="reference-button btn tooltip-me" data-placement="right"
-                                    title="Reference a tweet or annotation">
-                                <i class="icon-white icon-map-marker"></i> Reference
-                            </button>
-                        </div>
-                        <ul class="comments item-list content-panel row scroll-y"></ul>
-                    </div>
+                    <?php echo sign_in_box() ?>
+                    <?php echo discussion_box() ?>
+                    <?php echo discussion_view() ?>
                 </div>
             </div>
         </div>
