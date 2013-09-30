@@ -9,8 +9,9 @@ function nav_bar()
         <div class="navbar-inner">
             <div class="container-fluid">
                 <div class="nav-main-info">
-                    <a class="brand" href="?">TwitterVis</a>
-                    <span class="colon">:</span>
+                    <a class="brand" href="?">
+                    </a>
+                    <span class="colon"><i class="icon-chevron-right icon-white"></i></span>
                     <span class="title muted">Super Bowl 47</span>
                 </div>
                 <ul class="details">
