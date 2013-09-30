@@ -361,12 +361,31 @@ define(['jquery',
                 }
                 switch(getReferenceType($(this))) {
                     case 'tweet':
-                        return 'Go to this Tweet';
+                        console.log($(this));
+                        return 'Go to this Tweet!';
                     case 'annotation':
                         return 'Go to this label';
                 }
             }
         });
+        
+        $('.type-T').click(function() {
+            var tweetId = $(this).attr("data-id");            
+            if ($(this).hasClass('expand')) {
+                ($('#expandTweet')).remove();
+            } else {
+                var num;
+                for (var i = 0; i <result.data.tweets.length; i++) {
+                    if (result.data.tweets[i].id === tweetId) {
+                        num = i;
+                    }
+                }
+                var par = $('<p>', {'id':'expandTweet'}).text(result.data.tweets[num].text);
+                $(this).append(par);
+            }
+           
+        });
+    
     };
 
     DiscussionView.prototype._setDiscussionTitle = function(title, user) {
