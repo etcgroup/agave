@@ -1,21 +1,31 @@
+; environment can be development or production
 environment=development
-; environment=production
 logging_enabled=1
+
+; public is an integer specifying which "slice" of
+; the user-generated data to read from and write to.
 public=0
+
+; Use SSL
 secure=true
 
+; optional IDs for Google Analytics
 [google]
 id=UA-XXXXXXXX-X
 domain=XXXXXXXXXXXX
 
+; The database configuration for the user-generated data
 [db]
 host=XXXXXXXXX
 port=####
 schema=XXXXXXXXXX
 user=XXXXX
 password=XXXXX
+; which of the below corpora to pull Twitter data from
 corpus=CORPUS_ID
 
+; Any number of corpora can be defined below.
+; Use the corpus setting above to select one of them.
 [corpus-CORPUS_ID]
 host=XXXXXXXXX
 port=####
@@ -23,6 +33,7 @@ schema=XXXXXXXXXX
 user=XXXXX
 password=XXXXX
 
+; Keys for Twitter authentication
 [twitter]
 consumer_key=XXXXXXXXXXXXXXXXXXXXX
 consumer_secret=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
