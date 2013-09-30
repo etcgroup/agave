@@ -17,7 +17,7 @@ function sign_in_box($auth_mode)
                 Sign in with Twitter
             </button>
             <?php } else { ?>
-                <input type="text" placeholder="Make up a user name"/><br/>
+                <input type="text" class="user-input" placeholder="Make up a user name"/><br/>
                 <button type="button" class="user-submit btn btn-large btn-primary">Sign in</button>
             <?php } ?>
         </div>
