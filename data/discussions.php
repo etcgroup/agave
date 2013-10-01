@@ -24,7 +24,14 @@ if (strlen($search) == 0) {
     $search = NULL;
 }
 
-$result = $db->get_discussions($search);
+$user_data = $request->user_data();
+if ($user_data) {
+    $user_id = $user_data->id;
+} else {
+    $user_id = NULL;
+}
+
+$result = $db->get_discussions($search, $user_id);
 
 $db->log_action('discussions', $request->user_data());
 

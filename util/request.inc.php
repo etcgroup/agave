@@ -66,6 +66,14 @@ class Request
         }
     }
 
+    public function keep_data_private() {
+        if (isset($this->config['keep_data_private'])) {
+            return (bool)($this->config['keep_data_private']);
+        } else {
+            return FALSE;
+        }
+    }
+
     /**
      * Get a performance timer for this request.
      * @return Performance
@@ -89,7 +97,7 @@ class Request
      */
     public function db($params = NULL)
     {
-        $this->db = new Queries($this->config);
+        $this->db = new Queries($this);
 
         if ($this->performance) {
             //If the performance tracker is already initialized, share it with the db

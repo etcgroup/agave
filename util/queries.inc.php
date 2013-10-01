@@ -31,6 +31,7 @@ class Queries
     private $public = 1;
     private $logging_enabled = 1;
     private $session_handler;
+    private $keep_data_private = FALSE;
 
     /**
      * @var PDOStatement[]
@@ -49,12 +50,16 @@ class Queries
      *
      * $params must be an associative array containing 'host', 'port', 'user', 'password', and 'schema'.
      *
-     * @param $config
+     * @param Request $request
      * @internal param array $params
      */
-    public function __construct($config)
+    public function __construct($request)
     {
         $this->utc = new DateTimeZone('UTC');
+
+        $config = $request->config;
+
+        $this->keep_data_private = $request->keep_data_private();
 
         if (isset($config['public'])) {
             $this->public = $config['public'];
@@ -471,9 +476,10 @@ class Queries
     /**
      * Retrieve annotations from the database.
      *
+     * @param $user_id
      * @return mixed
      */
-    public function get_annotations()
+    public function get_annotations($user_id=NULL)
     {
         $builder = new Builder('annotations');
 
@@ -488,6 +494,18 @@ class Queries
 
         $builder->where("a.public", "=", $public);
         $builder->where("a.corpus", "=", $corpus);
+
+        if ($this->keep_data_private) {
+
+            //If we are in private mode, you must be signed in to get annotations
+            if ($user_id === NULL) {
+                return array();
+            }
+
+            $user_id = $binder->param('user', $user_id);
+            $builder->where('a.user', '=', $user_id);
+        }
+
         return $this->run2($builder, $binder, $this->db);
     }
 
@@ -611,19 +629,43 @@ class Queries
      *
      * @return mysqli_result
      */
-    public function get_discussion_messages($discussion_id)
+    public function get_discussion_messages($discussion_id, $user_id)
     {
-        $result = $this->run('discussion_messages', $discussion_id);
-        return $result;
+        $builder = new Builder('discussion_messages');
+        $builder->select('messages.*');
+        $builder->select('UNIX_TIMESTAMP(messages.created) AS created');
+        $builder->select('app_users.name');
+        $builder->select('app_users.screen_name');
+        $builder->from('messages');
+        $builder->join('app_users', 'messages.user = app_users.id', 'LEFT');
+        $builder->order_by('created', 'desc');
+
+        $binder = new Binder();
+        $discussion_id = $binder->param('discussion', $discussion_id);
+        $builder->where('messages.discussion_id', '=', $discussion_id);
+
+        if ($this->keep_data_private) {
+
+            //If we are in private mode, you must be signed in to get discussions
+            if ($user_id === NULL) {
+                return array();
+            }
+
+            $user_id = $binder->param('user', $user_id);
+            $builder->where('messages.user', '=', $user_id);
+        }
+
+        return $this->run2($builder, $binder, $this->db);;
     }
 
     /**
      * Gets a list of discussions.
      *
      * @param string $search
+     * @param $user_id
      * @return mysqli_result
      */
-    public function get_discussions($search = NULL)
+    public function get_discussions($search = NULL, $user_id=NULL)
     {
         $builder = new Builder('discussions');
 
@@ -648,6 +690,17 @@ class Queries
             $builder->having('match_count', '>', '0');
         } else {
             $builder->order_by('last_comment_at', 'desc');
+        }
+
+        if ($this->keep_data_private) {
+
+            //If we are in private mode, you must be signed in to get discussions
+            if ($user_id === NULL) {
+                return array();
+            }
+
+            $user_id = $binder->param('user', $user_id);
+            $builder->where('m.user', '=', $user_id);
         }
 
         $builder->where('d.public', '=', $public);
