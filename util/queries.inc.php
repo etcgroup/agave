@@ -967,6 +967,37 @@ class Queries
             $this->db
         );
     }
+
+    public function get_simple_app_user_id($username) {
+        $binder = new Binder();
+        $username_param = $binder->param('screen_name', $username);
+
+        $builder = new Builder('get_simple_app_user_id');
+        $builder->select('id');
+        $builder->from('app_users');
+        $builder->where('screen_name', '=', $username_param);
+        //only match simple users
+        $builder->where_condition('twitter_id IS NULL');
+        $builder->limit(1);
+
+        $result = $this->run2($builder, $binder, $this->db);
+
+        if ($result) {
+            $id = $result[0]['id'];
+            return $id;
+        } else {
+            //Create a new user record
+            $twitter_id = NULL;
+            $screen_name = $username;
+            $name = $username;
+            $utc_offset = NULL;
+            $time_zone = NULL;
+
+            $this->run('save_app_user', $twitter_id, $screen_name, $name, $utc_offset, $time_zone);
+            return $this->db->lastInsertId();
+        }
+    }
+
     /**
      * Get or create an app user record for the provided twitter user.
      *
@@ -991,7 +1022,7 @@ class Queries
         if ($result) {
             $id =$result[0]['id'];
 
-            //Create a new user record
+            //Update the user record
             $screen_name = $twitter_user->screen_name;
             $name = $twitter_user->name;
             $utc_offset = NULL;

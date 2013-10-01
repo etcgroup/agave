@@ -72,7 +72,7 @@ CREATE TABLE `app_users` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `created` datetime NOT NULL,
   `last_signed_in` datetime DEFAULT NULL,
-  `twitter_id` bigint(20) unsigned NOT NULL,
+  `twitter_id` bigint(20) unsigned DEFAULT NULL,
   `screen_name` varchar(100) NOT NULL,
   `name` varchar(100) DEFAULT NULL,
   `utc_offset` int(11) DEFAULT NULL,

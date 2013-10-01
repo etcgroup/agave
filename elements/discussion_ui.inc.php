@@ -1,7 +1,7 @@
 <?php
 if(basename(__FILE__) == basename($_SERVER['PHP_SELF'])){exit();}
 
-function sign_in_box()
+function sign_in_box($auth_mode)
 {
     ob_start();
     ?>
@@ -11,10 +11,15 @@ function sign_in_box()
             <div class="message">Discuss this data set!</div>
         </div>
         <div class="form">
+            <?php if ($auth_mode == 'twitter') { ?>
             <button type="button" class="user-submit btn btn-large btn-primary">
                 <i class="twitter-icon-light"></i>
                 Sign in with Twitter
             </button>
+            <?php } else { ?>
+                <input type="text" class="user-input" placeholder="Make up a user name"/><br/>
+                <button type="button" class="user-submit btn btn-large btn-primary">Sign in</button>
+            <?php } ?>
         </div>
     </div>
     <?php

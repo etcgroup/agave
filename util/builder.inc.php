@@ -72,6 +72,15 @@ class Builder
         return implode("\n", $parts);
     }
 
+    /**
+     * Raw version of where condition.
+     * @param $condition
+     */
+    public function where_condition($condition) {
+        $this->_conditions[] = $condition;
+        return $condition;
+    }
+
     public function where($field, $op, $param = NULL)
     {
         if ($param === NULL) {
