@@ -63,9 +63,7 @@ define(function (require) {
         this.initDiscussionView();
 
         var self = this;
-        setTimeout(function() {
-            self.initDiscussionsState();
-        }, 500);
+        self.initDiscussionsState();
 
         this.windowResize();
         this.annotationPoll();
@@ -387,9 +385,6 @@ define(function (require) {
     App.prototype.collapseDiscussionPanel = function(collapse) {
 
         var self = this;
-        var complete = function() {
-            self.resizeTimelines();
-        };
 
         //Only do these if needed
         if (collapse && !this.ui.collaboratorWrapper.is('.collapsed')) {
@@ -398,9 +393,7 @@ define(function (require) {
             this.ui.explorer.addClass('expanded');
             this.ui.collaboratorWrapper.addClass('collapsed');
 
-            $.support.transition ?
-                this.ui.explorer.one($.support.transition.end, complete) :
-                complete();
+            this.resizeTimelines();
 
         } else if (!collapse && this.ui.collaboratorWrapper.is('.collapsed')) {
 
@@ -416,9 +409,7 @@ define(function (require) {
                 this.showDiscussionList(false);
             }
 
-            $.support.transition ?
-                this.ui.explorer.one($.support.transition.end, complete) :
-                complete();
+            this.resizeTimelines();
         }
     };
 
