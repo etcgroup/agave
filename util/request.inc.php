@@ -57,6 +57,15 @@ class Request
         }
     }
 
+    public function auth_mode()
+    {
+        if (isset($this->config['auth_mode'])) {
+            return $this->config['auth_mode'];
+        } else {
+            return 'simple';
+        }
+    }
+
     /**
      * Get a performance timer for this request.
      * @return Performance

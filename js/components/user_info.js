@@ -23,6 +23,7 @@ define(['jquery'], function($) {
         this.ui.user_display = this.into;;
         this.ui.user_name = this.ui.user_display.find('.user-name');
         this.ui.sign_out_button = this.ui.user_display.find('.sign-out-button');
+        this.ui.twitter_icon = this.ui.user_display.find('.twitter-icon-light');
     };
 
     UserInfoView.prototype.attachEvents = function() {
@@ -37,6 +38,10 @@ define(['jquery'], function($) {
     UserInfoView.prototype.show = function() {
         if (this.isShowing()) {
             return false;
+        }
+
+        if (this.user.data.twitter_id) {
+            this.ui.twitter_icon.removeClass('hide');
         }
 
         this.ui.user_name.html(this.user.screen_name());
