@@ -61,7 +61,11 @@ define(function (require) {
         this.initSignInView();
         this.initDiscussionList();
         this.initDiscussionView();
-        this.initDiscussionsState();
+
+        var self = this;
+        setTimeout(function() {
+            self.initDiscussionsState();
+        }, 500);
 
         this.windowResize();
         this.annotationPoll();
@@ -442,19 +446,19 @@ define(function (require) {
 
         //if a user is available...
         if (this.user.signed_in()) {
-            this.showDiscussionList(true);
+            this.collapseDiscussionPanel(true);
         } else {
-            this.showDiscussionList(false);
+            this.collapseDiscussionPanel(false);
         }
 
         //When a user is available...
         this.user.on('signed-in', function () {
-            self.showDiscussionList(true);
+            self.collapseDiscussionPanel(true);
         });
 
         //When a user signs out
         this.user.on('signed-out', function() {
-            self.showDiscussionList(false);
+            self.collapseDiscussionPanel(false);
         });
     };
 

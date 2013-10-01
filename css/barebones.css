@@ -8,3 +8,18 @@
 .details-left.col {
     width: 100%;
 }
+
+.sliding-panel.col {
+    width: 100%;
+}
+
+.collaborator.show-left .sliding-panel,
+.collaborator.show-mid .sliding-panel,
+.collaborator.show-right .sliding-panel {
+    margin-left: 0;
+}
+
+.user-box.col {
+    left: 0;
+    width: 100%;
+}

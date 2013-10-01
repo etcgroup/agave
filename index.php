@@ -43,7 +43,7 @@ include_once 'elements/discussion_ui.inc.php';
 <?php echo nav_bar(); ?>
 <div class="content row">
     <div class="padding-all">
-        <div class="explorer col">
+        <div class="explorer col expanded">
             <div class="timeline-controls row">
                 <?php echo timeline_controls(); ?>
             </div>
@@ -72,12 +72,10 @@ include_once 'elements/discussion_ui.inc.php';
                 </div>
             </div>
         </div>
-        <div class="collaborator-wrapper col">
+        <div class="collaborator-wrapper col collapsed">
             <div class="collaborator padding-left show-left hide fade in">
                 <div class="sliding-panel col">
                     <?php echo sign_in_box($request->auth_mode()) ?>
-                    <?php echo discussion_box() ?>
-                    <?php echo discussion_view() ?>
                 </div>
             </div>
         </div>
