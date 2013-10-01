@@ -71,3 +71,10 @@
 .navbar .user-display .user-name {
   font-weight: bold;
 }
+.navbar .user-display .twitter-icon-light {
+  background-position: center;
+  background-size: 20px 20px;
+  width: 14px;
+  height: 18px;
+  vertical-align: middle;
+}
