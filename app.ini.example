@@ -6,6 +6,12 @@ logging_enabled=1
 ; the user-generated data to read from and write to.
 public=0
 
+; keep_data_private can be TRUE or FALSE.
+; If keep_data_private is TRUE then the user
+; will only see annotations and discussions that
+; they created.
+keep_data_private=FALSE
+
 ; Use SSL
 secure=true
 

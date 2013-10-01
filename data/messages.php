@@ -18,22 +18,26 @@ $db = $request->db();
 //Get the performance tracker
 $perf = $request->timing();
 
+$user_data = $request->user_data();
+if ($user_data) {
+    $user_id = $user_data->id;
+} else {
+    $user_id = NULL;
+}
+
 /**
  * Requests to /messages.php should provide a discussion id.
  *
  * Optionally, fields for a new message can be provided.
  */
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $user_data = $request->user_data();
-    if ($user_data) {
-        $user = $user_data->id;
-
+    if ($user_id) {
         $params = $request->post(array('message', 'view_state'), array('discussion_id'));
         $message = htmlspecialchars($params->message);
         $discussion_id = $params->discussion_id;
         $view_state = $params->view_state;
 
-        $inserted_id = $db->insert_message($user, $message, $view_state, $discussion_id);
+        $inserted_id = $db->insert_message($user_id, $message, $view_state, $discussion_id);
         if (!$inserted_id) {
             $db->log_action('messages error', $request->user_data());
             echo 'Failure.';
@@ -65,7 +69,7 @@ $rendered = array();
 
 $tweets = array();
 if ($discussion_id) {
-    $result = $db->get_discussion_messages($discussion_id);
+    $result = $db->get_discussion_messages($discussion_id, $user_id);
 
     $perf->start('processing');
 
