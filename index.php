@@ -79,7 +79,7 @@ include_once 'elements/discussion_ui.inc.php';
             </div>
         </div>
         <div class="collaborator-wrapper col">
-            <div class="collaborator padding-left show-left hide">
+            <div class="collaborator padding-left show-left hide fade in">
                 <div class="sliding-panel col">
                     <?php echo sign_in_box($request->auth_mode()) ?>
                     <?php echo discussion_box() ?>

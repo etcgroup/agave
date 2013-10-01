@@ -176,9 +176,10 @@ define(function (require) {
     App.prototype.initUI = function () {
         this.ui = {};
 
-        var content = $('body > .content');
-        this.ui.explorer = content.find('.explorer');
-        this.ui.collaborator = content.find('.collaborator');
+        this.ui.content = $('body > .content');
+        this.ui.explorer = this.ui.content.find('.explorer');
+        this.ui.collaborator = this.ui.content.find('.collaborator');
+        this.ui.collaboratorWrapper = this.ui.content.find('.collaborator-wrapper');
 
         this.ui.user_display = $('.navbar .user-display');
     };
@@ -379,50 +380,92 @@ define(function (require) {
         this.discussionView.on('restore-state', $.proxy(this.restoreViewState, this));
     };
 
+    App.prototype.collapseDiscussionPanel = function(collapse) {
+
+        var self = this;
+        var complete = function() {
+            self.resizeTimelines();
+        };
+
+        //Only do these if needed
+        if (collapse && !this.ui.collaboratorWrapper.is('.collapsed')) {
+
+            this.ui.collaborator.removeClass('in');
+            this.ui.explorer.addClass('expanded');
+            this.ui.collaboratorWrapper.addClass('collapsed');
+
+            $.support.transition ?
+                this.ui.explorer.one($.support.transition.end, complete) :
+                complete();
+
+        } else if (this.ui.collaboratorWrapper.is('.collapsed')) {
+
+            this.ui.explorer.removeClass('expanded');
+            this.ui.collaboratorWrapper.removeClass('collapsed');
+            //Force reflow before fading in
+            this.ui.collaboratorWrapper[0].offsetWidth;
+            this.ui.collaborator.addClass('in');
+
+            if (this.user.signed_in()) {
+                this.showDiscussionList(true);
+            } else {
+                this.showDiscussionList(false);
+            }
+
+            $.support.transition ?
+                this.ui.explorer.one($.support.transition.end, complete) :
+                complete();
+        }
+    };
+
+    //Toggles between the sign-in panel and the discussion list
+    App.prototype.showDiscussionList = function(showMe) {
+        if (showMe) {
+            //Hide the sign-in box, show the discussions
+            this.discussionList.show();
+            this.discussionView.hide();
+            this.signIn.hide();
+            this.setDiscussionState('show-mid');
+        } else {
+            //Show the sign-in box, hide the discussion list and view
+            this.discussionList.hide();
+            this.discussionView.hide();
+            this.setDiscussionState('show-left');
+
+            //Doing this after so that it will be focused
+            this.signIn.show();
+        }
+    };
+
     App.prototype.initDiscussionsState = function() {
         var self = this;
-        function showDiscussionList(showMe) {
-            if (showMe) {
-                //Hide the sign-in box, show the discussions
-                self.discussionList.show();
-                self.discussionView.hide();
-                self.signIn.hide();
-                self.setDiscussionState('show-mid');
-            } else {
-                //Show the sign-in box, hide the discussion list and view
-                self.discussionList.hide();
-                self.discussionView.hide();
-                self.setDiscussionState('show-left');
-
-                //Doing this after so that it will be focused
-                self.signIn.show();
-            }
-        }
 
         //if a user is available...
         if (this.user.signed_in()) {
-            showDiscussionList(true);
+            this.showDiscussionList(true);
         } else {
-            showDiscussionList(false);
+            this.showDiscussionList(false);
         }
 
         //When a user is available...
         this.user.on('signed-in', function () {
-            showDiscussionList(true);
+            self.showDiscussionList(true);
         });
 
         //When a user signs out
         this.user.on('signed-out', function() {
-            showDiscussionList(false);
+            self.showDiscussionList(false);
         });
+    };
+
+    App.prototype.resizeTimelines = function () {
+        this.focusTimeline.update(false);
+        this.overviewTimeline.update(false);
     };
 
     App.prototype.windowResize = function () {
         var self = this;
-        $(window).on('resize', function () {
-            self.focusTimeline.update(false);
-            self.overviewTimeline.update(false);
-        });
+        $(window).on('resize', $.proxy(this.resizeTimelines, this));
     };
 
     /**

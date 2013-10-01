@@ -112,12 +112,24 @@ body {
  */
 .explorer.col {
     width: 75%;
+
+    transition: width 0.35s ease;
+}
+
+.explorer.col.expanded {
+    width: 100%;
 }
 
 /* A wrapper so that padding can be in pixels */
 .collaborator-wrapper.col {
     width: 25%;
-    left: 75%;
+    right: 0;
+
+    transition: width 0.35s ease;
+}
+
+.collaborator-wrapper.col.collapsed {
+    width: 0;
 }
 
 /*
