@@ -75,10 +75,7 @@ define(['lib/d3', 'underscore',
                 return self._xScale(self._xAccessor(d));
             };
             var _scaledY = function (d) {
-                return Math.round(self._yScale(d.y0 + d.y)) + self._bumpValue;
-            };
-            var _scaledY0 = function (d) {
-                return Math.round(self._yScale(d.y0));
+                return self._yScale(self._yAccessor(d));
             };
 
             this._defined = function (d, i) {
@@ -86,10 +83,9 @@ define(['lib/d3', 'underscore',
             };
 
             //This overwrites the super class's area generator
-            this._area = d3.svg.area()
+            this._area = d3.svg.line()
                 .x(_scaledX)
-                .y1(_scaledY0)
-                .y0(_scaledY)
+                .y(_scaledY)
                 .defined(this._defined);
 
             this._colorValue = function (grp) {
@@ -136,27 +132,35 @@ define(['lib/d3', 'underscore',
              * Update the x and y scales.
              */
             _updateScales: function () {
+                var self = this;
+
                 //Redo the x scale range
                 this._xScale.range([0, this._box.width()]);
-
 
                 //Redo the y scale domain
                 if (this._raw_data) {
 
                     if (!this._stacked_data) {
-                        this._stacked_data = this._stack(this._raw_data);
+                        this._stacked_data = this._raw_data;
                         this._calculateTotals();
                     }
 
                     var stacked = this._stacked_data;
 
-                    var lastGroupValues = this._groupValuesAccessor(stacked[stacked.length - 1]);
-                    var firstGroupValues = this._groupValuesAccessor(stacked[0]);
-                    var min = d3.min(firstGroupValues, function (d) {
-                        return d.y0;
+                    var dataCounts = stacked.map(function(g) {
+                        var counts = self._groupValuesAccessor(g).map(self._yAccessor);
+                        return {
+                            min: d3.min(counts),
+                            max: d3.max(counts)
+                        };
                     });
-                    var max = d3.max(lastGroupValues, function (d) {
-                        return d.y0 + d.y;
+
+                    var min = d3.min(dataCounts, function(g) {
+                        return g.min;
+                    });
+
+                    var max = d3.max(dataCounts, function(g) {
+                        return g.max;
                     });
 
                     this._yScale.domain([min, max]);
@@ -233,7 +237,7 @@ define(['lib/d3', 'underscore',
                 }
 
                 if (!this._stacked_data) {
-                    this._stacked_data = this._stack(this._raw_data);
+                    this._stacked_data = this._raw_data;
                     this._calculateTotals();
                 }
 
@@ -276,7 +280,7 @@ define(['lib/d3', 'underscore',
                 //}
 
                 bind.attr('class', this._colorValue)
-                    .classed('area', true);
+                    .classed('line', true);
             },
 
             /**

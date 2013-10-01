@@ -29,6 +29,8 @@ define(['jquery',
         var ABSOLUTE_TWEETS_LABEL = 'tweets / sec.';
         var EXPAND_TWEETS_LABEL = '% tweets / sec.';
 
+        var HIDE_NEUTRALS = true;
+
         /**
          * A class for rendering and maintaining a focus timeline.
          *
@@ -491,6 +493,10 @@ define(['jquery',
                 return summed;
             });
 
+            if (HIDE_NEUTRALS) {
+                grouped.splice(1, 1);
+                countsOnly.splice(1, 1)
+            }
 
             //If some sentiment filter is in use besides all (''), then
             //we'll remove the zero-valued series
@@ -524,10 +530,10 @@ define(['jquery',
 
         FocusTimeline.prototype._updateDataBinding = function () {
 
-            //Which series are we showing?
-            var mode = this.display.mode();
+            //For the barebones UI we force it into stack mode with focus 0
+            var mode = 'stack';//this.display.mode();
             var toExpand = mode === 'expand';
-            var queryShown = this.display.focus();
+            var queryShown = 0;//this.display.focus();
             var cache = this.cache;
             var self = this;
 

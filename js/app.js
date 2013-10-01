@@ -226,7 +226,7 @@ define(function (require) {
             interval: this.interval,
             display: this.display,
             binSize: this.config.bin_size * 1000,
-            desiredBins: 200,
+            desiredBins: 280,
             interpolation: 'basis',
             utcOffset: this.config.utc_offset_millis
         });
