@@ -398,7 +398,7 @@ define(function (require) {
                 this.ui.explorer.one($.support.transition.end, complete) :
                 complete();
 
-        } else if (this.ui.collaboratorWrapper.is('.collapsed')) {
+        } else if (!collapse && this.ui.collaboratorWrapper.is('.collapsed')) {
 
             this.ui.explorer.removeClass('expanded');
             this.ui.collaboratorWrapper.removeClass('collapsed');
