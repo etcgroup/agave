@@ -1,0 +1,10 @@
+.timeline-help-text {
+    position: absolute;
+    left: 62px;
+    top: 0;
+    line-height: 30px;
+}
+
+.details-left.col {
+    width: 100%;
+}

@@ -18,50 +18,8 @@ function timeline_controls()
 
     ob_start();
     ?>
-    <?php echo help_icon(array(
-        'class' => 'popover-me display-mode-help',
-        'placement' => 'right',
-        'title' => 'Switch timeline modes.',
-        'content' => 'You can see # of Tweets from <u>both</u> of your filter sets at once or view the sentiment composition of just one, in either <u># of Tweets</u> or <u>% of Tweets</u>.',
-        'trigger' => 'hover'
-    )); ?>
-    <ul class="nav nav-pills mode-switch-buttons">
-        <?php echo modeButton(array(
-            'class' => 'active',
-            'mode' => 'simple',
-            'focus' => '',
-            'label' => 'Both',
-            'title' => 'Tweets from <b>both</b> filter sets.'
-        )); ?>
 
-        <?php echo modeButton(array(
-            'mode' => 'stack',
-            'focus' => 0,
-            'label' => '# Left',
-            'title' => 'Tweet sentiment from <b>left</b> filter'
-        )); ?>
-
-        <?php echo modeButton(array(
-            'mode' => 'stack',
-            'focus' => 1,
-            'label' => '# Right',
-            'title' => 'Tweet sentiment from <b>right</b> filter'
-        )); ?>
-
-        <?php echo modeButton(array(
-            'mode' => 'expand',
-            'focus' => 0,
-            'label' => '% Left',
-            'title' => 'Percent Tweet sentiment from <b>left</b> filter'
-        )); ?>
-
-        <?php echo modeButton(array(
-            'mode' => 'expand',
-            'focus' => 1,
-            'label' => '% Right',
-            'title' => 'Percent Tweet sentiment from <b>right</b> filter'
-        )); ?>
-    </ul>
+    <div class="muted timeline-help-text">Amount of positive, neutral, and negative tweets over time.</div>
 
     <div class="annotation-help">
         <span class="add-help">click to label a time</span>

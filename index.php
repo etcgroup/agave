@@ -70,12 +70,6 @@ include_once 'elements/discussion_ui.inc.php';
                         <?php echo details_tabs(1); ?>
                     </div>
                 </div>
-                <div class="details-right col" data-query-index='1'>
-                    <div class="padding-left-half">
-                        <?php echo query_box('Series 2') ?>
-                        <?php echo details_tabs(2); ?>
-                    </div>
-                </div>
             </div>
         </div>
         <div class="collaborator-wrapper col">

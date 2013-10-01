@@ -21,6 +21,8 @@
 @import url(keywordlist.css);
 
 @import url(userlist.css);
+
+@import url(barebones.css);
 form.query {
   margin: 0;
 }
