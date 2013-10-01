@@ -8,7 +8,7 @@ function sign_in_box($auth_mode)
     <div class="user-box col">
         <div class="header">
             <div class="title">Welcome!</div>
-            <div class="message">Discuss this data set!</div>
+            <div class="message">Please sign in to begin.</div>
         </div>
         <div class="form">
             <?php if ($auth_mode == 'twitter') { ?>
