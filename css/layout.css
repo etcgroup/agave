@@ -112,8 +112,6 @@ body {
  */
 .explorer.col {
     width: 75%;
-
-    transition: width 0.35s ease;
 }
 
 .explorer.col.expanded {
@@ -124,8 +122,6 @@ body {
 .collaborator-wrapper.col {
     width: 25%;
     right: 0;
-
-    transition: width 0.35s ease;
 }
 
 .collaborator-wrapper.col.collapsed {
