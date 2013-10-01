@@ -78,3 +78,6 @@
   height: 18px;
   vertical-align: middle;
 }
+.navbar .user-display .twitter-icon-light.hide {
+  display: none;
+}
