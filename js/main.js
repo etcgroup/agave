@@ -9,17 +9,18 @@ define(['app'], function(App) {
     var config = {
         defaults: {
             //Default time interval (UTC seconds) for the superbowl data set
-            from: 1359932400,
-            to: 1359952200,
+	    from: 1273421369,
+	    to: 1280894063,
             mode: 'simple',
             focus: null,
             annotations: true
         },
         //Time interval (UTC seconds) for the superbowl data set
-        overview_from: 1359932400,
-        overview_to: 1359952200,
+	overview_from: 1273421369,
+	overview_to: 1280894063,
         //The overview bin size in seconds
-        bin_size: 5,
+        //bin_size: 5,
+        bin_size: 3600, //1 hour
 
         //The UTC offset for Eastern Time (during the Super Bowl)
         utc_offset_millis: -5 * 60 * 60 * 1000,

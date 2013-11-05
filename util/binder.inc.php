@@ -32,10 +32,10 @@ class Binder
         return "(:$param)";
     }
 
-    public function grouped_created_at_params($start_datetime, $stop_datetime, $group_seconds=5) {
-        if ($group_seconds !== 5) {
-            throw new Exception("Group seconds must be 5!");
-        }
+    public function grouped_created_at_params($start_datetime, $stop_datetime, $group_seconds=3600) {
+      //if ($group_seconds !== 5) {
+      //    throw new Exception("Group seconds must be 5!");
+      //}
 
 
         $start_datetime = $start_datetime->getTimestamp() / $group_seconds;
