@@ -22,61 +22,6 @@ CREATE TABLE `burst_keywords` (
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=28539 DEFAULT CHARSET=utf8$$
 
-
-delimiter $$
-
-CREATE TABLE `conversations` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `breadth` int(11) DEFAULT NULL,
-  `depth` int(11) DEFAULT NULL,
-  `root_tweet` bigint(20) DEFAULT NULL,
-  `tweet_count` int(11) DEFAULT NULL,
-  `start` datetime DEFAULT NULL,
-  `end` datetime DEFAULT NULL,
-  `users_count` int(11) DEFAULT NULL,
-  `retweet_count` int(11) DEFAULT NULL,
-  `sentiment` float(10,9) DEFAULT NULL,
-  `abs_sentiment` float DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `root_tweet` (`root_tweet`)
-) ENGINE=MyISAM AUTO_INCREMENT=315221 DEFAULT CHARSET=utf8$$
-
-
-delimiter $$
-
-CREATE TABLE `hashtag_uses` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `tweet_id` bigint(20) unsigned NOT NULL,
-  `hashtag_id` int(10) unsigned NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `hashtag_id` (`hashtag_id`),
-  KEY `tweet_id` (`tweet_id`),
-  KEY `secondary` (`tweet_id`,`hashtag_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=6808690 DEFAULT CHARSET=utf8$$
-
-
-delimiter $$
-
-CREATE TABLE `hashtags` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `string` varchar(150) NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `string` (`string`)
-) ENGINE=MyISAM AUTO_INCREMENT=294782 DEFAULT CHARSET=utf8$$
-
-
-delimiter $$
-
-CREATE TABLE `mentions` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `tweet_id` bigint(20) unsigned NOT NULL,
-  `user_id` int(10) unsigned NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `tweet_id` (`tweet_id`),
-  KEY `user_id` (`user_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=5742381 DEFAULT CHARSET=utf8$$
-
-
 delimiter $$
 
 CREATE TABLE `tweets` (
