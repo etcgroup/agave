@@ -1,8 +1,6 @@
 delimiter $$
 
-delimiter $$
-
-CREATE TABLE `annotations` (
+CREATE TABLE IF NOT EXISTS `annotations` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `created` datetime NOT NULL,
   `user` varchar(150) NOT NULL,
@@ -12,24 +10,18 @@ CREATE TABLE `annotations` (
   `corpus` varchar(45) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `public_time` (`public`,`time`)
-) ENGINE=MyISAM AUTO_INCREMENT=78 DEFAULT CHARSET=utf8mb4$$
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4$$
 
-
-delimiter $$
-
-CREATE TABLE `discussions` (
+CREATE TABLE IF NOT EXISTS `discussions` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `created` datetime NOT NULL,
   `public` int(1) unsigned NOT NULL DEFAULT '1',
   `corpus` varchar(45) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `public` (`public`)
-) ENGINE=MyISAM AUTO_INCREMENT=42 DEFAULT CHARSET=utf8mb4$$
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4$$
 
-
-delimiter $$
-
-CREATE TABLE `instrumentation` (
+CREATE TABLE IF NOT EXISTS `instrumentation` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `time` datetime NOT NULL,
   `ip_address` varchar(45) NOT NULL,
@@ -40,12 +32,9 @@ CREATE TABLE `instrumentation` (
   `public` int(10) unsigned NOT NULL DEFAULT '1',
   `corpus` varchar(45) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=5580 DEFAULT CHARSET=utf8mb4$$
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4$$
 
-
-delimiter $$
-
-CREATE TABLE `messages` (
+CREATE TABLE IF NOT EXISTS `messages` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `discussion_id` int(11) NOT NULL,
   `created` datetime NOT NULL,
@@ -54,21 +43,16 @@ CREATE TABLE `messages` (
   `view_state` varchar(1000) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `created` (`created`)
-) ENGINE=MyISAM AUTO_INCREMENT=164 DEFAULT CHARSET=utf8mb4$$
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4$$
 
-
-delimiter $$
-
-CREATE TABLE `sessions` (
+CREATE TABLE IF NOT EXISTS `sessions` (
   `id` varchar(32) NOT NULL,
   `access` INT UNSIGNED NOT NULL,
   data TEXT NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8$$
 
-delimiter $$
-
-CREATE TABLE `app_users` (
+CREATE TABLE IF NOT EXISTS `app_users` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `created` datetime NOT NULL,
   `last_signed_in` datetime DEFAULT NULL,
@@ -79,15 +63,12 @@ CREATE TABLE `app_users` (
   `time_zone` varchar(250) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_twitter_id` (`twitter_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4$$
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4$$
 
-
-delimiter $$
-
-CREATE TABLE `corpora` (
+CREATE TABLE IF NOT EXISTS `corpora` (
   `id` varchar(45) NOT NULL,
   `name` varchar(150) NOT NULL,
   `created` datetime NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4$$
+) ENGINE=MyISAM DEFAULT CHARSET=utf8$$
 

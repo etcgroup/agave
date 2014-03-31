@@ -9,7 +9,7 @@
 
 include_once '../util/data.inc.php';
 include_once '../util/request.inc.php';
-include_once '../elements/message.inc.php';
+include_once '../templates/message.inc.php';
 
 $request = new Request();
 

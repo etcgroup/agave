@@ -1,4 +1,8 @@
 <?php
+/**
+ * Authenticate the user against Twitter.
+ * Redirect to the return_to url when done.
+ */
 
 include_once 'util/request.inc.php';
 

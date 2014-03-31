@@ -6,7 +6,7 @@
 
 include_once '../util/data.inc.php';
 include_once '../util/request.inc.php';
-include_once '../elements/discussion.inc.php';
+include_once '../templates/discussion.inc.php';
 
 $request = new Request();
 

@@ -1,6 +1,6 @@
 delimiter $$
 
-CREATE TABLE `burst_keywords` (
+CREATE TABLE IF NOT EXISTS `burst_keywords` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `mid_point` datetime NOT NULL,
   `window_size` int(11) NOT NULL,
@@ -20,11 +20,10 @@ CREATE TABLE `burst_keywords` (
   `relevance_delta` float NOT NULL,
   `relevance_percent_delta` float NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=28539 DEFAULT CHARSET=utf8$$
+) ENGINE=MyISAM DEFAULT CHARSET=utf8$$
 
-delimiter $$
 
-CREATE TABLE `tweets` (
+CREATE TABLE IF NOT EXISTS `tweets` (
   `id` bigint(20) unsigned NOT NULL,
   `user_id` int(10) unsigned NOT NULL,
   `created_at` datetime NOT NULL,
@@ -55,13 +54,10 @@ CREATE TABLE `tweets` (
   KEY `filters` (`is_retweet`,`created_at_5s`,`sentiment`,`retweet_count`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8$$
 
-
-delimiter $$
-
-CREATE TABLE `users` (
+CREATE TABLE IF NOT EXISTS `users` (
   `id` int(11) NOT NULL,
-  `screen_name` varchar(100) NOT NULL,
-  `name` varchar(100) NOT NULL,
+  `screen_name` varchar(100) CHARACTER SET utf8mb4 NOT NULL,
+  `name` varchar(100) CHARACTER SET utf8mb4 NOT NULL,
   `created_at` datetime DEFAULT NULL,
   `location` varchar(150) DEFAULT NULL,
   `utc_offset` int(11) DEFAULT NULL,
@@ -70,13 +66,3 @@ CREATE TABLE `users` (
   `statuses_count` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8$$
-
-delimiter $$
-
-CREATE TABLE `corpus_info` (
-  `id` varchar(45) NOT NULL,
-  `description` varchar(250) DEFAULT NULL,
-  `created` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4$$
-

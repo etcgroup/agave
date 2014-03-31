@@ -124,8 +124,6 @@ class Queries
         $this->set_encoding();
 
         $this->session_handler = new DbSessionHandler($this, $config);
-
-        $this->check_corpus();
     }
 
     /**
@@ -193,47 +191,6 @@ class Queries
         $this->db->query('set names utf8mb4');
         if ($this->corpus !== $this->db) {
             $this->corpus->query('set names utf8mb4');
-        }
-    }
-
-    private function _build_corpus_check()
-    {
-        $this->prepare('corpus_info',
-            "SELECT * FROM corpus_info
-             WHERE id=?",
-            's',
-            $this->corpus
-        );
-
-        $this->prepare('corpora',
-            "SELECT * FROM corpora
-             WHERE id=?",
-            's',
-            $this->db
-        );
-
-        $this->prepare('insert_corpus',
-            'INSERT INTO corpora (id, name, created)
-            VALUES (?, ?, NOW())',
-            'ss',
-            $this->db
-        );
-    }
-
-    private function check_corpus()
-    {
-        //First make sure the corpus we are connected to is actually the one we think
-        //we are connected to.
-        $result = $this->run('corpus_info', $this->corpus_id);
-        if (!$result || count($result) != 1) {
-            echo 'Not connected to corpus ' . $this->corpus_id;
-            die();
-        }
-
-        //Make sure the corpus is registered in the app db
-        $result = $this->run('corpora', $this->corpus_id);
-        if (!is_array($result) || count($result) != 1) {
-            $this->run('insert_corpus', $this->corpus_id, $this->corpus_id . ' (auto)');
         }
     }
 
