@@ -71,57 +71,22 @@ class Queries
 
         $params = $config['db'];
         if (!is_array($params)) {
-            print "No DB params";
+            trigger_error("No DB params in configuration", E_USER_ERROR);
             die();
         }
 
-        if (!array_key_exists('port', $params)) {
-            $params['port'] = 3306;
-        }
-
-        $pdo_string = "mysql:host=${params['host']};dbname=${params['schema']};port=${params['port']}";
-
-        //Create a persistent PDO connection
-        try {
-            $this->db = new PDO($pdo_string, $params['user'], $params['password'], array(
-                PDO::ATTR_PERSISTENT => true
-            ));
-        } catch (PDOException $e) {
-            trigger_error('Connection failed: ' . $e->getMessage(), E_USER_ERROR);
+        if (!array_key_exists('corpus', $params)) {
+            trigger_error("No corpus set in DB configuration", E_USER_ERROR);
             die();
         }
+        $this->corpus_id = $params['corpus'];
 
-        $corpus_id = $params['corpus'];
-        if (!isset($config["corpus-$corpus_id"]) || !is_array($config["corpus-$corpus_id"])) {
-            //Re-use the same connection and hope the data is there! this should not be used in production
-            $this->corpus_id = 'self';
-            $this->corpus = $this->db;
-        } else {
-            $this->corpus_id = $corpus_id;
+        $this->db = $this->get_pdo_connection($params);
 
-            $params = $config["corpus-$corpus_id"];
-
-            //Load a second database connection for the corpus data
-            if (!array_key_exists('port', $params)) {
-                $params['port'] = 3306;
-            }
-
-            $pdo_string = "mysql:host=${params['host']};dbname=${params['schema']};port=${params['port']}";
-
-            //Create a persistent PDO connection
-            try {
-                $this->corpus = new PDO($pdo_string, $params['user'], $params['password'], array(
-                    PDO::ATTR_PERSISTENT => true
-                ));
-            } catch (PDOException $e) {
-                trigger_error('Connection failed: ' . $e->getMessage(), E_USER_ERROR);
-                die();
-            }
-        }
+        $this->corpus = $this->get_pdo_connection($this->get_corpus_info());
 
         $this->build_queries();
         $this->set_timezone();
-        $this->set_encoding();
 
         $this->session_handler = new DbSessionHandler($this, $config);
     }
@@ -180,17 +145,6 @@ class Queries
         $this->db->query("set time_zone = '+00:00'");
         if ($this->corpus !== $this->db) {
             $this->corpus->query("set time_zone = '+00:00'");
-        }
-    }
-
-    /**
-     * Set the encoding to utf8mb4
-     */
-    private function set_encoding()
-    {
-        $this->db->query('set names utf8mb4');
-        if ($this->corpus !== $this->db) {
-            $this->corpus->query('set names utf8mb4');
         }
     }
 
@@ -349,6 +303,24 @@ class Queries
                 return array();
             }
         }
+    }
+
+    private function get_corpus_info()
+    {
+        $this->prepare('corpora',
+            "SELECT * FROM corpora
+             WHERE id=?",
+            's',
+            $this->db
+        );
+
+        //Make sure the corpus is registered in the app db
+        $results = $this->run('corpora', $this->corpus_id);
+        if (!is_array($results) OR count($results) != 1) {
+            trigger_error("Corpus $this->corpus_id is not defined in the database", E_USER_ERROR);
+        }
+
+        return $results[0];
     }
 
     private function _build_log_action()
@@ -1083,6 +1055,44 @@ class Queries
             }
 
             return $result[0];
+        }
+    }
+
+    /**
+     * Get a MySQL PDO connection string (DSN) from an array containing
+     * 'host', 'schema', and 'port'.
+     * @param $params
+     * @return string
+     */
+    private function get_pdo_string($params)
+    {
+        return "mysql:host=${params['host']};dbname=${params['schema']};port=${params['port']}";
+    }
+
+    /**
+     * Obtain a PDO connection to the MySQL database defined by $params.
+     * Should include 'host', 'port', and 'schema', along with 'user', and 'password'.
+     *
+     * @param $params
+     * @return PDO
+     */
+    private function get_pdo_connection($params)
+    {
+        if (!array_key_exists('port', $params)) {
+            $params['port'] = 3306;
+        }
+
+        $pdo_string = $this->get_pdo_string($params);
+
+        //Create a persistent PDO connection
+        try {
+            return new PDO($pdo_string, $params['user'], $params['password'], array(
+                PDO::ATTR_PERSISTENT => true,
+                PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8mb4'
+            ));
+        } catch (PDOException $e) {
+            trigger_error('Connection failed: ' . $e->getMessage(), E_USER_ERROR);
+            die();
         }
     }
 }

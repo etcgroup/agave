@@ -30,17 +30,8 @@ port=####
 schema=XXXXXXXXXX
 user=XXXXX
 password=XXXXX
-; which of the below corpora to pull Twitter data from
-corpus=CORPUS_ID
-
-; Any number of corpora can be defined below.
-; Use the corpus setting above to select one of them.
-[corpus-CORPUS_ID]
-host=XXXXXXXXX
-port=####
-schema=XXXXXXXXXX
-user=XXXXX
-password=XXXXX
+; which of the corpora to pull Twitter data from
+corpus=CORPUS_NAME
 
 ; Keys for Twitter authentication
 ;[twitter]
