@@ -87,7 +87,7 @@ class Queries
                 PDO::ATTR_PERSISTENT => true
             ));
         } catch (PDOException $e) {
-            echo 'Connection failed: ' . $e->getMessage();
+            trigger_error('Connection failed: ' . $e->getMessage(), E_USER_ERROR);
             die();
         }
 
@@ -114,7 +114,7 @@ class Queries
                     PDO::ATTR_PERSISTENT => true
                 ));
             } catch (PDOException $e) {
-                echo 'Connection failed: ' . $e->getMessage();
+                trigger_error('Connection failed: ' . $e->getMessage(), E_USER_ERROR);
                 die();
             }
         }
@@ -287,8 +287,8 @@ class Queries
         $this->types[$queryname] = $pdoTypes;
 
         if (!$this->queries[$queryname]) {
-            echo "Prepare ${$queryname} failed: (" . $db->errorCode() . ")";
-            print_r($db->errorInfo());
+            trigger_error("Prepare ${$queryname} failed: (" . $db->errorCode() . ")", E_USER_WARNING);
+            var_dump($db->errorInfo());
             return FALSE;
         }
 
@@ -318,9 +318,9 @@ class Queries
         $success = $query->execute();
 
         if ($success === FALSE) {
-            echo "Execute $query_name failed: ({$query->errorCode()})";
-            print_r($query->errorInfo());
-            print_r($args);
+            trigger_error("Execute $query_name failed: ({$query->errorCode()})", E_USER_WARNING);
+            var_dump($query->errorInfo());
+            var_dump($args);
             $query->debugDumpParams();
             $this->stop($query_name);
         } else {
@@ -357,28 +357,28 @@ class Queries
         $query = $db->prepare($sql);
 
         if (!$query) {
-            echo "Prepare {$builder->name} failed: (" . $db->errorCode() . ")";
-            print_r($db->errorInfo());
-            print_r($sql);
+            trigger_error("Prepare {$builder->name} failed: (" . $db->errorCode() . ")", E_USER_WARNING);
+            var_dump($db->errorInfo());
+            var_dump($sql);
             return FALSE;
         }
 
         $query = $binder->bind($query);
 
         if (!$query) {
-            echo "Bind for {$builder->name} faild: (" . $db->errorCode() . ")";
-            print_r($db->errorInfo());
-            print_r($sql);
-            print_r($binder->param_map);
+            trigger_error("Bind for {$builder->name} failed: (" . $db->errorCode() . ")", E_USER_WARNING);
+            var_dump($db->errorInfo());
+            var_dump($sql);
+            var_dump($binder->param_map);
             return FALSE;
         }
 
         $success = $query->execute();
 
         if ($success === FALSE) {
-            echo "Execute {$builder->name} failed: ({$query->errorCode()})";
-            print_r($query->errorInfo());
-            print_r($builder);
+            trigger_error("Execute {$builder->name} failed: ({$query->errorCode()})", E_USER_WARNING);
+            var_dump($query->errorInfo());
+            var_dump($builder);
 
             $this->stop($builder->name);
         } else {
