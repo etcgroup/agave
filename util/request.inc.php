@@ -35,7 +35,15 @@ class Request
             $config_file = '../app.ini';
         }
 
-        $this->config = parse_ini_file($config_file, TRUE);
+        $config_file_path = realpath($config_file);
+        if ($config_file_path === FALSE) {
+            trigger_error("Config file $config_file does not exist", E_USER_ERROR);
+        }
+
+        $this->config = parse_ini_file($config_file_path, TRUE);
+        if ($this->config === FALSE) {
+            trigger_error("Error parsing $config_file_path", E_USER_ERROR);
+        }
     }
 
     public function is_env($environment)
