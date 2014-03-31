@@ -24,7 +24,7 @@ define(function (require) {
     var API = require('util/api');
     var Poll = require('util/poll');
 
-    var USER_COOKIE_NAME = 'user_data'
+    var USER_COOKIE_NAME = 'user_data';
 
     /**
      * This class orchestrates the overall setup of the application.

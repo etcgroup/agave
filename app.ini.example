@@ -18,6 +18,9 @@ secure=true
 ; auth_mode can be either 'simple' or 'twitter'
 auth_mode=simple
 
+; base url for static files
+; static_url=/static
+
 ; optional IDs for Google Analytics
 ;[google]
 ;id=UA-XXXXXXXX-X

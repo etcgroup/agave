@@ -4,14 +4,14 @@ define(['jquery', 'underscore', 'util/events'], function ($, _, events) {
      * A map from API request names to urls.
      */
     var URLS = {
-        'counts': 'data/counts.php',
-        'discussions': 'data/discussions.php',
-        'messages': 'data/messages.php',
-        'tweets': 'data/tweets.php',
-        'annotations': 'data/annotations.php',
-        'keywords': 'data/burst_keywords.php',
-        'users': 'data/users.php',
-        'auth': 'data/auth.php'
+        'counts': 'api/counts.php',
+        'discussions': 'api/discussions.php',
+        'messages': 'api/messages.php',
+        'tweets': 'api/tweets.php',
+        'annotations': 'api/annotations.php',
+        'keywords': 'api/burst_keywords.php',
+        'users': 'api/users.php',
+        'auth': 'api/auth.php'
     };
 
     /**

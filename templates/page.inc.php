@@ -8,8 +8,8 @@
 
     <link rel="icon"
           type="image/png"
-          href="css/img/logo-only.png">
-    <link rel="stylesheet" href="css/main.css">
+          href="<?php $request->stat('css/img/logo-only.png'); ?>">
+    <link rel="stylesheet" href="<?php $request->stat('css/main.css'); ?>">
 
 </head>
 <body>
@@ -73,18 +73,18 @@ if ($flash) {
 <?php } ?>
 <?php if ($request->is_env('development')) { ?>
     <!-- Loading development resources -->
-    <script src="js/lib/require.js"></script>
-    <script src="js/require-config.js"></script>
+    <script src="<?php $request->stat('js/lib/require.js'); ?>"></script>
+    <script src="<?php $request->stat('js/require-config.js'); ?>"></script>
     <script type="text/javascript">
         //Have to make sure that we override the common config's base url with the real one
         require.config({
-            'baseUrl': "js"
+            'baseUrl': "<?php $request->stat('js'); ?>"
         });
     </script>
 <?php } else { ?>
     <!-- Loading production resources -->
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-    <script src="js/main.js"></script>
+    <script src="<?php $request->stat('js/main.js'); ?>"></script>
     <script type="text/javascript">
         //A shim since jQuery didn't know about define when it initialized
         define('jquery', function() {

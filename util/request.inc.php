@@ -340,4 +340,17 @@ class Request
         return $bundle;
     }
 
+    public function stat($path, $return=FALSE) {
+        if (array_key_exists('static_url', $this->config)) {
+            $static_url = rtrim($this->config['static_url'], '/');
+        } else {
+            $static_url = '/static';
+        }
+
+        if ($return) {
+            return $static_url . '/' . ltrim($path, '/');
+        } else {
+            echo $static_url . '/' . ltrim($path, '/');
+        }
+    }
 }
