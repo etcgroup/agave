@@ -15,19 +15,22 @@ function nav_bar($request)
     $tweet_count = Helpers::friendly_bignum($stats['tweet_count']);
     $user_count = Helpers::friendly_bignum($stats['user_count']);
 
+    $start_time = Helpers::friendly_date($stats['start_time']);
+    $end_time  = Helpers::friendly_date($stats['end_time']);
+
     ob_start();
     ?>
     <div class="navbar row">
         <div class="navbar-inner">
             <div class="container-fluid">
                 <div class="nav-main-info">
-                    <a class="brand" href="?">
+                    <a class="brand" href="/">
                     </a>
                     <span class="colon"><i class="icon-chevron-right icon-white"></i></span>
                     <span class="title muted"><?php echo $title; ?></span>
                 </div>
                 <ul class="details">
-                    <li><?php echo $stats['start_time'] ?> - <?php echo $stats['end_time'] ?> <?php echo $stats['timezone'] ?></li>
+                    <li><?php echo $start_time ?> - <?php echo $end_time ?> <?php echo $stats['timezone'] ?></li>
                     <li class="divider-vertical"></li>
                     <li><?php echo $tweet_count ?> tweets</li>
                     <li class="divider-vertical"></li>

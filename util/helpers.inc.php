@@ -4,11 +4,11 @@ class Helpers
 {
 
     private static $powers = array(
-        array(1e12, 1e12, '%.1f trillion', '%.1fT'),
-        array(1e9, 1e9, '%.1f billion', '%.1fB'),
-        array(1e6, 1e6, '%.1f million', '%.1fM'),
-        array(1e4, 1e3, '%.1f thousand', '%.1fK'), // only use thousands if over 10k
-        array(1, 1, '%f', '%f')
+        array(1e12, 1e12, ' trillion', 'T'),
+        array(1e9, 1e9, ' billion', 'B'),
+        array(1e6, 1e6, ' million', 'M'),
+        array(1e4, 1e3, ' thousand', 'K'), // only use thousands if over 10k
+        array(1, 1, '', '')
     );
 
     /**
@@ -26,9 +26,13 @@ class Helpers
      */
     public static function friendly_bignum($number, $abbrev = FALSE)
     {
+        if ($number < 1 && $number > 0) {
+            return strval($number);
+        }
+
         // Find the first power that is <= the number
         $power = 1;
-        $label = '%f';
+        $label = '';
         foreach (self::$powers as $level) {
             if ($level[0] <= $number) {
                 $power = $level[1];
@@ -43,7 +47,21 @@ class Helpers
             }
         }
 
-        $number = $number / $power;
-        return sprintf($label, $number);
+        $number = sprintf('%.1f', $number / $power);
+        if ($number == round($number)) {
+            $number = sprintf('%.0f', $number);
+        }
+
+        return $number . $label;
+    }
+
+    /**
+     * Generate a friendly datetime string.
+     *
+     * @param DateTime $datetime
+     * @return string
+     */
+    public static function friendly_date($datetime) {
+        return $datetime->format('m/d/Y g:i A');
     }
 } 

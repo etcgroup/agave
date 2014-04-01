@@ -664,6 +664,34 @@ class Queries
         return $this->run2($builder, $binder, $this->corpus);
     }
 
+    /**
+     * Gets statistics about the selected corpus.
+     *
+     * @return array
+     */
+    public function get_corpus_stats()
+    {
+        $binder = new Binder();
+
+        $builder = new Builder('tweet_stats');
+        $builder->select('COUNT(*) AS tweet_count');
+        $builder->select('UNIX_TIMESTAMP(MIN(tweets.created_at)) AS start_time');
+        $builder->select('UNIX_TIMESTAMP(MAX(tweets.created_at)) AS end_time');
+        $builder->from('tweets');
+
+
+        $results = $this->run2($builder, $binder, $this->corpus);
+        $tweet_stats = $results[0];
+
+        $builder = new Builder('user_stats');
+        $builder->select('COUNT(*) AS user_count');
+        $builder->from('users');
+
+        $results = $this->run2($builder, $binder, $this->corpus);
+        $user_stats = $results[0];
+
+        return array_merge($tweet_stats, $user_stats);
+    }
 
     /**
      * Gets tweets in the specified interval.

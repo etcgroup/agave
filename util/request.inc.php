@@ -29,6 +29,7 @@ class Request
     private $_db = NULL;
     private $user_cookie_name = 'user_data';
     private $_user_data;
+    private $_corpus_properties = NULL;
 
     public function __construct($config_file = NULL)
     {
@@ -410,12 +411,36 @@ class Request
      * @return array
      */
     public function corpus_properties() {
-        return array(
-            'start_time' => '2/3/2013 6:30pm',
-            'end_time' => '2/3/2013 10:00pm',
-            'timezone' => 'EST',
-            'tweet_count' => 7912345,
-            'user_count' => 3812345
-        );
+        if ($this->_corpus_properties === NULL) {
+            $stats = $this->db()->get_corpus_stats();
+
+            $this_tz_string = date_default_timezone_get();
+            $this_tz = new DateTimeZone($this_tz_string);
+            $now = new DateTime("now", $this_tz);
+            $tz_offset = $this_tz->getOffset($now);
+
+            if ($stats['start_time'] !== NULL) {
+                $start_time = new DateTime("@${stats['start_time']}");
+            } else {
+                $start_time = $now;
+            }
+
+            if ($stats['end_time'] !== NULL) {
+                $end_time = new DateTime("@${stats['end_time']}");
+            } else {
+                $end_time = $now;
+            }
+
+            $this->_corpus_properties = array(
+                'start_time' => $start_time,
+                'end_time' => $end_time,
+                'timezone' => $this_tz_string,
+                'timezone_offset' => $tz_offset,
+                'tweet_count' => $stats['tweet_count'],
+                'user_count' => $stats['user_count']
+            );
+        }
+
+        return $this->_corpus_properties;
     }
 }
