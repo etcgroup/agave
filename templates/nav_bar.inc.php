@@ -1,8 +1,20 @@
 <?php
 if(basename(__FILE__) == basename($_SERVER['PHP_SELF'])){exit();}
 
-function nav_bar()
+include_once 'util/helpers.inc.php';
+
+/**
+ * @param $request Request
+ * @return string
+ */
+function nav_bar($request)
 {
+    $title = $request->corpus_title();
+    $stats = $request->corpus_properties();
+
+    $tweet_count = Helpers::friendly_bignum($stats['tweet_count']);
+    $user_count = Helpers::friendly_bignum($stats['user_count']);
+
     ob_start();
     ?>
     <div class="navbar row">
@@ -12,14 +24,14 @@ function nav_bar()
                     <a class="brand" href="?">
                     </a>
                     <span class="colon"><i class="icon-chevron-right icon-white"></i></span>
-                    <span class="title muted">Super Bowl 47</span>
+                    <span class="title muted"><?php echo $title; ?></span>
                 </div>
                 <ul class="details">
-                    <li>2/3/2013 6:30pm - 2/3/2013 10:00pm EST</li>
+                    <li><?php echo $stats['start_time'] ?> - <?php echo $stats['end_time'] ?> <?php echo $stats['timezone'] ?></li>
                     <li class="divider-vertical"></li>
-                    <li>7.9 million tweets</li>
+                    <li><?php echo $tweet_count ?> tweets</li>
                     <li class="divider-vertical"></li>
-                    <li>3.8 million authors</li>
+                    <li><?php echo $user_count ?> authors</li>
                 </ul>
                 <div class="user-display hide fade">
                     <span class="welcome-message">

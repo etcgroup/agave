@@ -204,6 +204,16 @@ module.exports = function (grunt) {
             }
         },
 
+        phpunit: {
+            classes: {
+                dir: 'tests/php/'
+            },
+            options: {
+                bootstrap: 'tests/php/phpunit.php',
+                colors: true
+            }
+        },
+
         phplint: {
             app: {
                 src: ['<%=dirs.src.api%>/**/*.php', '<%=dirs.src.util%>/**/*.php', '<%=dirs.src.templates%>/**/*.php', '<%=dirs.src.base%>*.php']
@@ -314,6 +324,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-lesslint');
 
     grunt.loadNpmTasks('grunt-contrib-jasmine');
+    grunt.loadNpmTasks('grunt-phpunit');
 
     grunt.loadNpmTasks('grunt-contrib-less');
     grunt.loadNpmTasks('grunt-contrib-requirejs');
@@ -323,6 +334,6 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-ver');
 
     // Define your tasks here
-    grunt.registerTask('default', ['phplint', 'jshint', 'lesslint', 'jasmine:app']);
+    grunt.registerTask('default', ['phplint', 'jshint', 'lesslint', 'jasmine:app', 'phpunit']);
     grunt.registerTask('build', ['clean', 'copy:dist', 'requirejs', 'ver:dist']);
 };

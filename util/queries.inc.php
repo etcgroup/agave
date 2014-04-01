@@ -32,6 +32,7 @@ class Queries
     private $logging_enabled = 1;
     private $session_handler;
     private $keep_data_private = FALSE;
+    private $_corpus_info = NULL;
 
     /**
      * @var PDOStatement[]
@@ -305,22 +306,27 @@ class Queries
         }
     }
 
-    private function get_corpus_info()
+    public function get_corpus_info()
     {
-        $this->prepare('corpora',
-            "SELECT * FROM corpora
-             WHERE id=?",
-            's',
-            $this->db
-        );
+        if ($this->_corpus_info === NULL) {
+            $this->prepare('corpora',
+                "SELECT * FROM corpora
+                 WHERE id=?",
+                's',
+                $this->db
+            );
 
-        //Make sure the corpus is registered in the app db
-        $results = $this->run('corpora', $this->corpus_id);
-        if (!is_array($results) OR count($results) != 1) {
-            trigger_error("Corpus $this->corpus_id is not defined in the database", E_USER_ERROR);
+            //Make sure the corpus is registered in the app db
+            $results = $this->run('corpora', $this->corpus_id);
+            if (!is_array($results) OR count($results) != 1) {
+                trigger_error("Corpus $this->corpus_id is not defined in the database", E_USER_ERROR);
+                $this->_corpus_info = FALSE;
+            }
+
+            $this->_corpus_info = $results[0];
         }
 
-        return $results[0];
+        return $this->_corpus_info;
     }
 
     private function _build_log_action()

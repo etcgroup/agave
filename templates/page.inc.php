@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Agave</title>
+    <title>Agave: <?php echo $request->corpus_title(); ?></title>
     <meta name="description" content="A neat twitter visualization">
     <meta name="viewport" content="width=device-width">
 
@@ -13,7 +13,7 @@
 
 </head>
 <body>
-<?php echo nav_bar(); ?>
+<?php echo nav_bar($request); ?>
 <div class="content row">
     <div class="padding-all">
         <div class="explorer col">

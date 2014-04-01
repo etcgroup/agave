@@ -26,7 +26,7 @@ class Request
     /**
      * @var Queries
      */
-    private $db = NULL;
+    private $_db = NULL;
     private $user_cookie_name = 'user_data';
     private $_user_data;
 
@@ -92,9 +92,9 @@ class Request
     {
         $this->performance = new Performance();
 
-        if ($this->db) {
+        if ($this->_db) {
             //If the db is already initialized, share the performance tracker with it
-            $this->db->record_timing($this->performance);
+            $this->_db->record_timing($this->performance);
         }
 
         return $this->performance;
@@ -107,14 +107,16 @@ class Request
      */
     public function db($params = NULL)
     {
-        $this->db = new Queries($this);
+        if ($this->_db === NULL) {
+            $this->_db = new Queries($this);
 
-        if ($this->performance) {
-            //If the performance tracker is already initialized, share it with the db
-            $this->db->record_timing($this->performance);
+            if ($this->performance) {
+                //If the performance tracker is already initialized, share it with the db
+                $this->_db->record_timing($this->performance);
+            }
         }
 
-        return $this->db;
+        return $this->_db;
     }
 
     /**
@@ -182,13 +184,13 @@ class Request
     public function user_data($sign_in = FALSE) {
         if (!$this->_user_data) {
             if (isset($_SESSION['user_id'])) {
-                $this->_user_data = $this->db->get_app_user($_SESSION['user_id'], $sign_in);
+                $this->_user_data = $this->db()->get_app_user($_SESSION['user_id'], $sign_in);
                 if ($this->_user_data) {
                     $this->_user_data = (object)$this->_user_data;
                 } else {
                     //The user id was BADDDDD
                     $this->sign_out();
-                    $this->db->log_action('bad user id');
+                    $this->db()->log_action('bad user id');
                 }
             }
         }
@@ -307,7 +309,7 @@ class Request
 
         //Look up the author
         if (strlen($params->author)) {
-            $user = $this->db->get_user_by_name($params->author);
+            $user = $this->db()->get_user_by_name($params->author);
             if ($user !== NULL) {
                 $params->author = $user['id'];
             } else {
@@ -390,5 +392,30 @@ class Request
         } else {
             return $path;
         }
+    }
+
+    /**
+     * Get the title of the corpus.
+     *
+     * @return string
+     */
+    public function corpus_title() {
+        $corpus = $this->db()->get_corpus_info();
+        return $corpus['name'];
+    }
+
+    /**
+     * Get some statistical properties of the corpus.
+     *
+     * @return array
+     */
+    public function corpus_properties() {
+        return array(
+            'start_time' => '2/3/2013 6:30pm',
+            'end_time' => '2/3/2013 10:00pm',
+            'timezone' => 'EST',
+            'tweet_count' => 7912345,
+            'user_count' => 3812345
+        );
     }
 }
