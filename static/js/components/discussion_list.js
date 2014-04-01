@@ -42,13 +42,13 @@ define(['jquery', 'util/events', 'util/loader'], function ($, events, loader) {
     };
 
     DiscussionList.prototype._searchKeyPressed = function(e) {
-        if (e.which == 27) {
+        if (e.which === 27) {
             //Clear the input box
             this.ui.discussionSearch.val('');
         }
 
         var newSearch = this.ui.discussionSearch.val();
-        if (this._lastSearch != newSearch) {
+        if (this._lastSearch !== newSearch) {
 
             //Remove any old scheduled updates
             if (this._searchTimeout) {
@@ -56,7 +56,7 @@ define(['jquery', 'util/events', 'util/loader'], function ($, events, loader) {
             }
 
             //Schedule an update
-            if (e.which == 13 || e.which == 27) { //enter/esc key
+            if (e.which === 13 || e.which === 27) { //enter/esc key
                 //request right away
                 this._requestData();
             } else {
@@ -68,7 +68,7 @@ define(['jquery', 'util/events', 'util/loader'], function ($, events, loader) {
 
     DiscussionList.prototype._searchInputChanged = function() {
         var newSearch = this.ui.discussionSearch.val();
-        if (this._lastSearch != newSearch) {
+        if (this._lastSearch !== newSearch) {
             //Clear any scheduled update
             if (this._searchTimeout) {
                 clearTimeout(this._searchTimeout);

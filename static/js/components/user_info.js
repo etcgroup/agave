@@ -20,7 +20,7 @@ define(['jquery'], function($) {
 
     UserInfoView.prototype.initUI = function() {
         this.ui = {};
-        this.ui.user_display = this.into;;
+        this.ui.user_display = this.into;
         this.ui.user_name = this.ui.user_display.find('.user-name');
         this.ui.sign_out_button = this.ui.user_display.find('.sign-out-button');
         this.ui.twitter_icon = this.ui.user_display.find('.twitter-icon-light');
@@ -55,7 +55,7 @@ define(['jquery'], function($) {
     };
 
     UserInfoView.prototype.isShowing = function() {
-        return this.ui.user_display.is('.in')
+        return this.ui.user_display.is('.in');
     };
 
     UserInfoView.prototype.hide = function() {

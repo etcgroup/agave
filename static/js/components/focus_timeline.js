@@ -690,7 +690,7 @@ define(['jquery',
 
                 console.log('creating annotation at time ' + time);
 
-                var label = prompt("Label this time:");
+                label = prompt("Label this time:");
 
                 if (!label) {
                     //Cancel

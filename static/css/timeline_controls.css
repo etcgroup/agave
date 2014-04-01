@@ -57,13 +57,13 @@
   filter: alpha(opacity=50);
 }
 .mode-switch-buttons > li > a .display-icon.display-simple {
-  background-image: url("img/display_simple.png");
+  background-image: url("../img/display_simple.png");
 }
 .mode-switch-buttons > li > a .display-icon.display-stack {
-  background-image: url("img/display_stack.png");
+  background-image: url("../img/display_stack.png");
 }
 .mode-switch-buttons > li > a .display-icon.display-expand {
-  background-image: url("img/display_expand.png");
+  background-image: url("../img/display_expand.png");
 }
 .mode-switch-buttons > li > a:hover .display-icon {
   opacity: 1;
@@ -82,13 +82,12 @@
     padding-right: 2px;
     padding-left: 2px;
     /* this is the first li visually, because they are floated left */
-  
   }
   .legend > li:last-child {
     padding-left: 4px;
   }
   .legend > li:first-child {
-    padding-right: 0px;
+    padding-right: 0;
   }
   .mode-switch-buttons {
     width: 55%;

@@ -439,7 +439,7 @@ define(['jquery',
             if (item.type === 'tweet') {
                 time = item.data.created_at;
             } else if (item.type === 'keyword') {
-                time = item.data.mid_point
+                time = item.data.mid_point;
             } else {
                 throw 'huh? bad item item.type ' + item.type;
             }

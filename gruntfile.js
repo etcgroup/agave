@@ -8,26 +8,56 @@ module.exports = function (grunt) {
                 js: "tests/js",
                 php: "tests/php"
             },
-            src: "",
-            src_js: "js/",
-            src_css: "css/",
-            src_img: "css/img/",
-            dist: 'dist/',
-            dist_js: 'dist/js/',
-            dist_css: 'dist/css/',
-            dist_img: 'dist/css/img'
+            src: {
+                base: '',
+                js: "static/js/",
+                css: "static/css/",
+                img: "static/img/",
+                api: "api/",
+                util: "util/",
+                templates: "templates/"
+            },
+            dist: {
+                base: 'dist/',
+                templates: 'dist/templates/',
+                static: 'dist/static',
+                js: 'dist/static/js/',
+                css: 'dist/static/css/',
+                img: 'dist/static/img/'
+            }
         },
 
-        clean: ["<%=dirs.dist%>"],
+        clean: ["<%=dirs.dist.base%>"],
 
-        csslint: {
+        lesslint: {
             options: {
-                'fallback-colors': 0,
-                'box-sizing': 0,
-                import: 0
+                csslint: {
+                    'fallback-colors': false,
+                    'overqualified-elements': false,
+                    'empty-rules': false,
+                    'box-model': false,
+                    'known-properties': false,
+                    'adjoining-classes': false
+                }
             },
             app: {
-                src: ['<%=dirs.src_css%>/**.css', '!<%=dirs.src_css%>/lib/**.css']
+                src: ['<%=dirs.src.css%>/**.less', '!<%=dirs.src.css%>/lib/**.less']
+            }
+        },
+
+        less: {
+            app: {
+                options: {
+                },
+                files: [
+                    {
+                        cwd: '<%=dirs.src.css%>',
+                        expand: true,
+                        src: ['**/*.less', '!lib/mixins.less'],
+                        dest: '<%=dirs.src.css%>',
+                        ext: '.css'
+                    }
+                ]
             }
         },
 
@@ -37,15 +67,15 @@ module.exports = function (grunt) {
                 files: [
                     {
                         expand: true,
-                        cwd: '<%=dirs.src_img%>',
+                        cwd: '<%=dirs.src.img%>',
                         src: ['**/*'],
-                        dest: '<%=dirs.dist_img%>/'
+                        dest: '<%=dirs.dist.img%>/'
                     },
                     {
                         expand: true,
-                        cwd: '<%=dirs.src%>',
-                        src: ['data/**/*', 'util/**/*', 'elements/**/*', '*.php', 'app.ini'],
-                        dest: '<%=dirs.dist%>/'
+                        cwd: '<%=dirs.src.base%>',
+                        src: ['<%=dirs.src.api%>/**/*', '<%=dirs.src.util%>/**/*', '<%=dirs.src.templates%>/**/*', '*.php', 'app.ini'],
+                        dest: '<%=dirs.dist.base%>/'
                     }
                 ]
             }
@@ -56,23 +86,21 @@ module.exports = function (grunt) {
                 phases: [
                     {
                         files: [
-                            '<%=dirs.dist_img%>/**/*'
+                            '<%=dirs.dist.img%>/**/*'
                         ],
                         references: [
-                            '<%=dirs.dist_css%>/**/*.css',
-                            '<%=dirs.dist%>/index.php'
+                            '<%=dirs.dist.css%>/**/*.css'
                         ]
                     },
                     {
                         files: [
-                            '<%=dirs.dist_css%>/**/*.css',
-                            '<%=dirs.dist_js%>/**/*.js'
-                        ],
-                        references: [
-                            '<%=dirs.dist%>/index.php'
+                            '<%=dirs.dist.css%>/**/*.css',
+                            '<%=dirs.dist.js%>/**/*.js'
                         ]
                     }
-                ]
+                ],
+                baseDir: '<%=dirs.dist.static%>',
+                versionFile: '<%=dirs.dist.base%>/staticfiles.json'
             }
         },
 
@@ -107,8 +135,8 @@ module.exports = function (grunt) {
                     }
                 },
                 src: [
-                    '<%=dirs.src_js%>/**/*.js',
-                    '!<%=dirs.src_js%>/lib/**/*.js'
+                    '<%=dirs.src.js%>/**/*.js',
+                    '!<%=dirs.src.js%>/lib/**/*.js'
                 ]
             },
 
@@ -141,7 +169,7 @@ module.exports = function (grunt) {
                 template: require('grunt-template-jasmine-requirejs'),
                 templateOptions: {
                     requireConfig: {
-                        baseUrl: 'js',
+                        baseUrl: 'static/js',
                         paths: {
                             'underscore': 'lib/underscore-amd',
                             'backbone': 'lib/backbone-amd',
@@ -178,7 +206,7 @@ module.exports = function (grunt) {
 
         phplint: {
             app: {
-                src: ['data/**/*.php', 'util/**/*.php', 'elements/**/*.php', '*.php']
+                src: ['<%=dirs.src.api%>/**/*.php', '<%=dirs.src.util%>/**/*.php', '<%=dirs.src.templates%>/**/*.php', '<%=dirs.src.base%>*.php']
             }
         },
 
@@ -187,8 +215,8 @@ module.exports = function (grunt) {
         requirejs: {
             js: {
                 options: {
-                    baseUrl: "<%=dirs.src_js%>",
-                    mainConfigFile: "<%=dirs.src_js%>/require-config.js",
+                    baseUrl: "<%=dirs.src.js%>",
+                    mainConfigFile: "<%=dirs.src.js%>/require-config.js",
 
                     //Compress the js files
                     optimize: "none",
@@ -222,8 +250,8 @@ module.exports = function (grunt) {
                 tasks: ['jshint:app', 'jasmine:app']
             },
             styles: {
-                files: ['<%=csslint.app.src%>'],
-                tasks: ['csslint']
+                files: ['<%=lesslint.app.src%>'],
+                tasks: ['lesslint', 'less']
             },
             tests: {
                 files: ['<%=jshint.tests.src%>'],
@@ -254,17 +282,17 @@ module.exports = function (grunt) {
             result['js-' + name] = {
                 options: _.defaults({
                     include: [name],
-                    out: '<%= dirs.dist_js %>/' + name + '.js'
+                    out: '<%= dirs.dist.js %>/' + name + '.js'
                 }, from.js.options)
-            }
+            };
         });
 
         //Go through the CSS modules
         from.css.modules.forEach(function(name) {
             result['css-' + name] = {
                 options: _.defaults({
-                    cssIn: '<%=dirs.src_css%>/' + name + '.css',
-                    out: '<%=dirs.dist_css%>/' + name + '.css'
+                    cssIn: '<%=dirs.src.css%>/' + name + '.css',
+                    out: '<%=dirs.dist.css%>/' + name + '.css'
                 }, from.css.options)
             };
         });
@@ -283,10 +311,11 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-clean');
 
     grunt.loadNpmTasks('grunt-contrib-jshint');
-    grunt.loadNpmTasks('grunt-contrib-csslint');
+    grunt.loadNpmTasks('grunt-lesslint');
 
     grunt.loadNpmTasks('grunt-contrib-jasmine');
 
+    grunt.loadNpmTasks('grunt-contrib-less');
     grunt.loadNpmTasks('grunt-contrib-requirejs');
 
     grunt.loadNpmTasks('grunt-phplint');
@@ -294,6 +323,6 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-ver');
 
     // Define your tasks here
-    grunt.registerTask('default', ['phplint', 'jshint', 'csslint', 'jasmine:app']);
+    grunt.registerTask('default', ['phplint', 'jshint', 'lesslint', 'jasmine:app']);
     grunt.registerTask('build', ['clean', 'copy:dist', 'requirejs', 'ver:dist']);
 };

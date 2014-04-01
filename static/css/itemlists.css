@@ -27,7 +27,6 @@ ul.item-list {
   right: 2px;
   left: 220px;
   /* enough space for the menu */
-
   font-size: 11px;
   overflow: hidden;
   text-overflow: ellipsis;

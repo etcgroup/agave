@@ -1,3 +1,4 @@
+/* global require */
 require.config({
     baseUrl: "dist/js",
     paths: {

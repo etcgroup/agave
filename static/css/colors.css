@@ -9,7 +9,6 @@
 }
 .sentiment-combined {
   /* no stroke for areas */
-
 }
 .area.sentiment-combined {
   fill: #44c151;
@@ -35,7 +34,6 @@
 }
 .sentiment-positive {
   /* no stroke for areas */
-
 }
 .area.sentiment-positive {
   fill: #05c5e7;
@@ -61,7 +59,6 @@
 }
 .sentiment-neutral {
   /* no stroke for areas */
-
 }
 .area.sentiment-neutral {
   fill: #444444;
@@ -87,7 +84,6 @@
 }
 .sentiment-negative {
   /* no stroke for areas */
-
 }
 .area.sentiment-negative {
   fill: #f9294a;

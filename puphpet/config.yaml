@@ -165,7 +165,7 @@ mysql:
             host: localhost
             user: agave
             password: agave
-            sql_file: '/home/vagrant/agave/schema.sql'
+            sql_file: '/home/vagrant/agave/setup/schema.sql'
         agave_corpus:
             grant:
                 - ALL
@@ -173,7 +173,7 @@ mysql:
             host: localhost
             user: agave
             password: agave
-            sql_file: '/home/vagrant/agave/corpus_schema.sql'
+            sql_file: '/home/vagrant/agave/setup/corpus_schema.sql'
 postgresql:
     install: 0
     settings:

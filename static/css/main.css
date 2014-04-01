@@ -1,25 +1,14 @@
 @import url(lib/bootstrap.css);
-
 @import url(navbar.css);
-
 @import url(layout.css);
-
 @import url(tabs.css);
-
 @import url(timeline.css);
-
 @import url(timeline_controls.css);
-
 @import url(annotation.css);
-
 @import url(colors.css);
-
 @import url(discussions.css);
-
 @import url(tweetlist.css);
-
 @import url(keywordlist.css);
-
 @import url(userlist.css);
 form.query {
   margin: 0;
@@ -126,7 +115,7 @@ form.query .query-sentiment {
   width: 70px;
 }
 form.query .sentiment-icon {
-  background: url("img/sentiment.png");
+  background: url("../img/sentiment.png");
   display: inline-block;
   width: 38px;
   height: 26px;
@@ -161,7 +150,6 @@ ul.item-list {
   right: 2px;
   left: 220px;
   /* enough space for the menu */
-
   font-size: 11px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -184,5 +172,5 @@ ul.item-list {
 }
 .twitter-icon-light {
   display: inline-block;
-  background: url('img/twitter-bird-dark-bgs.png');
+  background: url('../img/twitter-bird-dark-bgs.png');
 }

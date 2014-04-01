@@ -21,6 +21,8 @@ class Request
 {
     public $config;
     private $performance = NULL;
+    private $staticfiles_map = NULL;
+
     /**
      * @var Queries
      */
@@ -32,7 +34,7 @@ class Request
     {
 
         if ($config_file === NULL) {
-            $config_file = '../app.ini';
+            $config_file = dirname(__FILE__) . '/../app.ini';
         }
 
         $config_file_path = realpath($config_file);
@@ -347,10 +349,46 @@ class Request
             $static_url = '/static';
         }
 
+        $path = ltrim($path, '/');
+
+        if ($this->is_env('production')) {
+            $path = $this->map_staticfile($path);
+        }
+
+        $url = $static_url . '/' . $path;
+
         if ($return) {
-            return $static_url . '/' . ltrim($path, '/');
+            return $url;
         } else {
-            echo $static_url . '/' . ltrim($path, '/');
+            echo $url;
+        }
+    }
+
+    private function map_staticfile($path) {
+        if ($this->staticfiles_map === NULL) {
+            if (isset($this->config['staticfiles_map'])) {
+                $filename = $this->config['staticfiles_map'];
+            } else {
+                $filename = 'staticfiles.json';
+            }
+
+            $file_path = realpath($filename);
+            if ($file_path === FALSE) {
+                trigger_error("Static files map $file_path does not exist", E_USER_WARNING);
+                return $path;
+            }
+
+            $this->staticfiles_map = json_decode(file_get_contents($file_path), TRUE);
+            if ($this->staticfiles_map === NULL) {
+                trigger_error("Unable to parse static files map $file_path", E_USER_WARNING);
+                return $path;
+            }
+        }
+
+        if (array_key_exists($path, $this->staticfiles_map)) {
+            return $this->staticfiles_map[$path];
+        } else {
+            return $path;
         }
     }
 }

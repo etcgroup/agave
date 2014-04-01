@@ -79,7 +79,7 @@ define(['underscore', 'util/events', 'util/functions'], function(_, events, func
             from: from,
             to: to
         });
-    }
+    };
 
 
     /**
@@ -93,7 +93,7 @@ define(['underscore', 'util/events', 'util/functions'], function(_, events, func
         } else {
             this.data.min = val;
         }
-     }
+     };
 
     /**
      * Gets/sets the maximum value
@@ -106,7 +106,7 @@ define(['underscore', 'util/events', 'util/functions'], function(_, events, func
         } else {
             this.data.max = val;
         }
-     }
+     };
 
     /**
      * Sets the range
@@ -115,7 +115,7 @@ define(['underscore', 'util/events', 'util/functions'], function(_, events, func
      Interval.prototype.setRange = function(min,max) {
         this.data.min = min;
         this.data.max = max;
-     }
+     };
 
 
      /**
@@ -127,7 +127,7 @@ define(['underscore', 'util/events', 'util/functions'], function(_, events, func
             this.data.from,
             this.data.to
         ];
-     }
+     };
 
 
      /**
@@ -139,7 +139,7 @@ define(['underscore', 'util/events', 'util/functions'], function(_, events, func
             this.data.min,
             this.data.max
         ];
-     }
+     };
 
 
     //Mix in events

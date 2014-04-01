@@ -63,3 +63,13 @@ databases, along with some initial data (no tweets though).
 
 The database user is `agave` and the password is `agave`
 (the root user is similar).
+
+### Running the Tests
+
+sudo add-apt-repository ppa:chris-lea/node.js
+sudo apt-get update
+sudo apt-get install python-software-properties python g++ make nodejs
+
+npm install --no-bin-link
+
+To run the javascript tests (in `tests/js`) you
