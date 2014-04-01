@@ -94,6 +94,37 @@ if ($flash) {
 <?php } ?>
 
 <script type="text/javascript">
+    <?php
+    $stats = $request->corpus_properties();
+
+    $start_time = $stats['start_time']->getTimestamp();
+    $end_time = $stats['end_time']->getTimestamp();
+    $tz_offset_millis = $stats['timezone_offset'] * 1000;
+    ?>
+
+    window.agave_config = {
+        defaults: {
+            //Default time interval (UTC seconds) for the superbowl data set
+            from: <?php echo $start_time ?>,
+            to: <?php echo $end_time ?>,
+            mode: 'simple',
+            focus: null,
+            annotations: true
+        },
+        //Time interval (UTC seconds) for the superbowl data set
+        overview_from: <?php echo $start_time ?>,
+        overview_to: <?php echo $end_time ?>,
+
+        //The overview bin size in seconds
+        bin_size: 5,
+
+        //Display times in this timezone
+        utc_offset_millis: <?php echo $tz_offset_millis ?>,
+
+        //Time between annotation polls in millis
+        annotation_poll_interval: 10000
+    };
+
     <?php if ($user_data) { ?>
     window.user_data = <?php echo json_encode($user_data); ?>;
     <?php } ?>
