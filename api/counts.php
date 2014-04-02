@@ -58,7 +58,7 @@ $bin_counts = array();
 //The database will fail to return any count at all for bins with no contents
 //so we need to initialize all the bins to be empty before we even look
 //at the data.
-$next_bin = $from->getTimestamp();
+$next_bin = $interval * floor($from->getTimestamp() / $interval);
 $end = $to->getTimestamp();
 while ($next_bin < $end)
 {
