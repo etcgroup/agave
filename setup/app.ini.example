@@ -40,8 +40,11 @@ auth_mode=simple
 
 ; Keys for Twitter authentication
 ;[twitter]
-;consumer_key=XXXXXXXXXXXXXXXXXXXXX
-;consumer_secret=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+;api_key=XXXXXXXXXXXXXXXXXXXXX
+;api_secret=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+; These are needed for streaming from Twitter
+;access_token=XXXXXXXXXXXXXXX
+;access_token_secret=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 ; optional IDs for Google Analytics
 ;[google]

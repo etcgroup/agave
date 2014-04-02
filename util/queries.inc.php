@@ -21,16 +21,15 @@ class Queries
     /**
      * @var PDO
      */
-    private $db;
+    public $db;
     /**
      * @var PDO
      */
-    private $corpus;
+    public $corpus;
     private $corpus_id;
     //The value used to filter user generated content
     private $public = 1;
     private $logging_enabled = 1;
-    private $session_handler;
     private $keep_data_private = FALSE;
     private $_corpus_info = NULL;
 
@@ -51,26 +50,19 @@ class Queries
      *
      * $params must be an associative array containing 'host', 'port', 'user', 'password', and 'schema'.
      *
-     * @param Request $request
+     * @param Config $config
      * @internal param array $params
      */
-    public function __construct($request)
+    public function __construct($config)
     {
         $this->utc = new DateTimeZone('UTC');
 
-        $config = $request->config;
+        $this->keep_data_private = $config->keep_data_private();
 
-        $this->keep_data_private = $request->keep_data_private();
+        $this->public = (int)$config->get('public', 1);
+        $this->logging_enabled = (bool)$config->get('logging_enabled', 1);
 
-        if (isset($config['public'])) {
-            $this->public = $config['public'];
-        }
-
-        if (isset($config['logging_enabled'])) {
-            $this->logging_enabled = $config['logging_enabled'];
-        }
-
-        $params = $config['db'];
+        $params = $config->get('db');
         if (!is_array($params)) {
             trigger_error("No DB params in configuration", E_USER_ERROR);
             die();
@@ -88,8 +80,6 @@ class Queries
 
         $this->build_queries();
         $this->set_timezone();
-
-        $this->session_handler = new DbSessionHandler($this, $config);
     }
 
     /**

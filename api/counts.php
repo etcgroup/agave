@@ -34,6 +34,7 @@ $to = $timeParams->to;
 $interval = $timeParams->interval;
 
 //Some constants that refer to field names in the SELECT query
+$total_count_field = 'count';
 $positive_count_field = 'positive';
 $negative_count_field = 'negative';
 $neutral_count_field = 'neutral';
@@ -44,7 +45,6 @@ if ($split_sentiment === NULL || $split_sentiment === 'true') {
     $split_sentiment = TRUE;
 } else {
     $split_sentiment = FALSE;
-    $positive_count_field = 'count';
 }
 
 //Execute the database query
@@ -63,7 +63,7 @@ $end = $to->getTimestamp();
 while ($next_bin < $end)
 {
     if ($split_sentiment) {
-        $bin_counts[$next_bin] = array($next_bin * 1000, 0,0,0);
+        $bin_counts[$next_bin] = array($next_bin * 1000, 0,0,0,0);
     } else {
         $bin_counts[$next_bin] = array($next_bin * 1000, 0);
     }
@@ -79,12 +79,13 @@ foreach ($result as $row)
 
     if ($split_sentiment) {
         $bin_counts[$binned_time] = array($binned_time * 1000,
+            $row[$total_count_field] / (double)$interval,
             $row[$negative_count_field] / (double)$interval,
             $row[$neutral_count_field] / (double)$interval,
             $row[$positive_count_field] / (double)$interval);
     } else {
         $bin_counts[$binned_time] = array($binned_time * 1000,
-            $row[$positive_count_field] / (double)$interval);
+            $row[$total_count_field] / (double)$interval);
     }
 }
 

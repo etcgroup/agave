@@ -112,7 +112,7 @@ define(['jquery',
             var countsOnly = result.data.map(function (bundle) {
                 var summed = {
                     time: bundle[0],
-                    count: bundle[1] + bundle[2] + bundle[3]
+                    count: bundle[1]
                 };
 
                 return summed;

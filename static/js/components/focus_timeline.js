@@ -470,22 +470,22 @@ define(['jquery',
             var countsOnly = result.data.map(function (bundle) {
                 var summed = {
                     time: bundle[0],
-                    count: bundle[1] + bundle[2] + bundle[3]
+                    count: bundle[1]
                 };
 
                 grouped[0].values.push({
                     time: bundle[0],
-                    count: bundle[1]
+                    count: bundle[2]
                 });
 
                 grouped[1].values.push({
                     time: bundle[0],
-                    count: bundle[2]
+                    count: bundle[3]
                 });
 
                 grouped[2].values.push({
                     time: bundle[0],
-                    count: bundle[3]
+                    count: bundle[4]
                 });
 
                 return summed;

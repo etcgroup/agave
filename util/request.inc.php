@@ -2,6 +2,7 @@
 if(basename(__FILE__) == basename($_SERVER['PHP_SELF'])){exit();}
 
 include_once 'performance.inc.php';
+include_once 'config.inc.php';
 include_once 'queries.inc.php';
 
 /**
@@ -20,6 +21,7 @@ include_once 'queries.inc.php';
 class Request
 {
     public $config;
+    private $config_obj;
     private $performance = NULL;
     private $staticfiles_map = NULL;
 
@@ -27,26 +29,15 @@ class Request
      * @var Queries
      */
     private $_db = NULL;
+    private $_session_handler = NULL;
     private $user_cookie_name = 'user_data';
     private $_user_data;
     private $_corpus_properties = NULL;
 
     public function __construct($config_file = NULL)
     {
-
-        if ($config_file === NULL) {
-            $config_file = dirname(__FILE__) . '/../app.ini';
-        }
-
-        $config_file_path = realpath($config_file);
-        if ($config_file_path === FALSE) {
-            trigger_error("Config file $config_file does not exist", E_USER_ERROR);
-        }
-
-        $this->config = parse_ini_file($config_file_path, TRUE);
-        if ($this->config === FALSE) {
-            trigger_error("Error parsing $config_file_path", E_USER_ERROR);
-        }
+        $this->config_obj = new Config($config_file);
+        $this->config = $this->config_obj->raw;
     }
 
     public function is_env($environment)
@@ -77,14 +68,6 @@ class Request
         }
     }
 
-    public function keep_data_private() {
-        if (isset($this->config['keep_data_private'])) {
-            return (bool)($this->config['keep_data_private']);
-        } else {
-            return FALSE;
-        }
-    }
-
     /**
      * Get a performance timer for this request.
      * @return Performance
@@ -109,7 +92,8 @@ class Request
     public function db($params = NULL)
     {
         if ($this->_db === NULL) {
-            $this->_db = new Queries($this);
+            $this->_db = new Queries($this->config_obj);
+            $this->_session_handler = new DbSessionHandler($this->_db, $this->config);
 
             if ($this->performance) {
                 //If the performance tracker is already initialized, share it with the db

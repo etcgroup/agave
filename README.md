@@ -68,3 +68,17 @@ The database user is `agave` and the password is `agave`
 
 To run the javascript tests (in `tests/js`) you
 
+### Streaming Tweets
+
+You can stream tweets into your database
+using [twitter-monitor](https://github.com/michaelbrooks/twitter-monitor).
+
+You will first need to define a file `track.txt` containing
+one filter term per line.
+In `app.ini` make sure to fill out the twitter section
+with your api key and access token.
+Then run this command to begin streaming:
+
+```bash
+$ stream_tweets --ini-file app.ini | php setup/import_tweets.php
+```

@@ -22,7 +22,7 @@ class TwitterAPI
     {
         $twitter_config = $request->config['twitter'];
 
-        \Codebird\Codebird::setConsumerKey($twitter_config['consumer_key'], $twitter_config['consumer_secret']);
+        \Codebird\Codebird::setConsumerKey($twitter_config['api_key'], $twitter_config['api_secret']);
         $this->cb = \Codebird\Codebird::getInstance();
 
         $this->user_auth();
