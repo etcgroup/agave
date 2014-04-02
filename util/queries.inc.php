@@ -244,7 +244,7 @@ class Queries
      * @param null $db the PDO connection to use, defaults to the application db.
      * @return mixed
      */
-    private function run2($builder, $binder, $db=NULL)
+    private function run2($builder, $binder, $db=NULL, $stream=FALSE)
     {
         if ($db === NULL) {
             $db = $this->db;
@@ -284,14 +284,21 @@ class Queries
 
             $this->stop($builder->name);
         } else {
-            $result = $query->fetchAll(PDO::FETCH_ASSOC);
+            if ($stream) {
 
-            $this->stop($builder->name);
+                $this->stop($builder->name);
 
-            if ($result) {
-                return $result;
+                return $query;
             } else {
-                return array();
+                $result = $query->fetchAll(PDO::FETCH_ASSOC);
+
+                $this->stop($builder->name);
+
+                if ($result) {
+                    return $result;
+                } else {
+                    return array();
+                }
             }
         }
     }
@@ -842,7 +849,7 @@ class Queries
         $builder->where_user_is($user_id);
         $builder->where_sentiment_is($sentiment);
 
-        return $this->run2($builder, $binder, $this->corpus);
+        return $this->run2($builder, $binder, $this->corpus, TRUE);
     }
 
     /**
