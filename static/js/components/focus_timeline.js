@@ -338,6 +338,7 @@ define(['jquery',
             //Add an axis label
             this.ui.countAxisLabel = this.ui.svg.append('text')
                 .classed('counts axis-title', true)
+                .attr('transform', 'rotate(-90) translate(-10, 20)')
                 .text(ABSOLUTE_TWEETS_LABEL);
 
             this._updateCountAxis();

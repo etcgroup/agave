@@ -91,10 +91,6 @@ svg .highlight.keyword {
 .axis-title {
   fill: #AAA;
   text-anchor: end;
-  -webkit-transform: rotate(-90deg) translate(-10px, 20px);
-  -moz-transform: rotate(-90deg) translate(-10px, 20px);
-  -o-transform: rotate(-90deg) translate(-10px, 20px);
-  transform: rotate(-90deg) translate(-10px, 20px);
 }
 .brush .extent {
   stroke: #fff;
