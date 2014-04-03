@@ -31,7 +31,8 @@ list($route, $arguments) = $router->get_route();
 if (isset($arguments['corpus_id'])) {
     $corpus_id = $arguments['corpus_id'];
 } else {
-    $corpus_id = $config->get('db')['corpus'];
+    $dbconf = $config->get('db');
+    $corpus_id = $dbconf['corpus'];
 }
 
 $db = new Queries($config, $corpus_id);
