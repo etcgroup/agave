@@ -1,13 +1,15 @@
-define(['util/api', 'jquery'], function(API, $) {
+define(['util/api', 'util/urls', 'jquery'], function(API, urls, $) {
 
     describe('API', function() {
 
         var myResponse;
+        var requestUrl = 'my/request/url';
 
         beforeEach(function() {
             myResponse = $.Deferred();
-        });
 
+            spyOn(urls, 'get_url').andReturn(requestUrl);
+        });
 
         it('calls requests from shorthand method', function() {
             var api = new API();
