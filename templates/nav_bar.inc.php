@@ -25,7 +25,7 @@ function nav_bar($corpus_title, $corpus_stats, $router)
         <div class="navbar-inner">
             <div class="container-fluid">
                 <div class="nav-main-info">
-                    <a class="brand" href="<?php $base_url ?>">
+                    <a class="brand" href="<?php echo $base_url ?>">
                     </a>
                     <span class="colon"><i class="icon-chevron-right icon-white"></i></span>
                     <span class="title muted"><?php echo $corpus_title; ?></span>
