@@ -15,17 +15,6 @@ logging_enabled=1
 ; the user-generated data to read from and write to.
 public=0
 
-; The database configuration for the user-generated data
-[db]
-host=XXXXXXXXX
-port=####
-schema=XXXXXXXXXX
-user=XXXXX
-password=XXXXX
-; which corpus to pull Twitter data from
-; this id must be in your corpora table in the agave database
-corpus=CORPUS_ID
-
 ; Base url for static files
 ;static_url=/static
 
@@ -42,6 +31,17 @@ secure=true
 ; If set to 'twitter', then Twitter authentication
 ; keys must be provided below.
 auth_mode=simple
+
+; The database configuration for the user-generated data
+[db]
+host=XXXXXXXXX
+port=####
+schema=XXXXXXXXXX
+user=XXXXX
+password=XXXXX
+; which corpus to pull Twitter data from
+; this id must be in your corpora table in the agave database
+corpus=CORPUS_ID
 
 ; Keys for Twitter authentication
 ;[twitter]
