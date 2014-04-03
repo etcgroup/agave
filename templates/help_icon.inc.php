@@ -5,13 +5,14 @@ function help_icon($options)
 {
     if (isset($options['class'])) {
         $class = $options['class'];
+        unset($options['class']);
     } else {
         $class = '';
     }
 
     $attrs = array();
     foreach ($options as $key => $value) {
-        $attrs[] = "data-$key='$value''";
+        $attrs[] = "data-$key='$value'";
     }
     ob_start();
     ?>
