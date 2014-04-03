@@ -6,6 +6,7 @@ include_once 'util/helpers.inc.php';
 /**
  * @param string $corpus_title
  * @param array $corpus_stats
+ * @param Router $router
  * @return string
  */
 function nav_bar($corpus_title, $corpus_stats, $router)
