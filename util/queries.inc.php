@@ -623,7 +623,7 @@ class Queries
 
         $builder->select('m.discussion_id AS id');
         $builder->select('COUNT(DISTINCT m.id) AS message_count');
-        $builder->select('GROUP_CONCAT(m.message SEPARATOR \'... \') AS subject');
+        $builder->select('GROUP_CONCAT(m.message ORDER BY m.created DESC SEPARATOR \'... \') AS subject');
         $builder->select('UNIX_TIMESTAMP(MIN(m.created)) AS started_at');
         $builder->select('UNIX_TIMESTAMP(MAX(m.created)) AS last_comment_at');
         $builder->from('messages m');
