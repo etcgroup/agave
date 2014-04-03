@@ -74,6 +74,8 @@ CREATE TABLE IF NOT EXISTS `corpora` (
   `schema` varchar(150) NOT NULL,
   `user` varchar(150) NOT NULL,
   `password` varchar(150) NOT NULL,
+  `start_time` datetime DEFAULT NULL,
+  `end_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8$$
 

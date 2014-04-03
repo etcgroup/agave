@@ -310,7 +310,8 @@ class Queries
     {
         if ($this->_corpus_info === NULL) {
             $this->prepare('corpora',
-                "SELECT * FROM corpora
+                "SELECT id, name, created, host, port, `schema`, user, password,
+                  UNIX_TIMESTAMP(start_time) AS start_time, UNIX_TIMESTAMP(end_time) AS end_time FROM corpora
                  WHERE id=?",
                 's',
                 $this->db
@@ -671,17 +672,42 @@ class Queries
      */
     private function _get_corpus_stats()
     {
+        $corpus_info = $this->get_corpus_info();
+        if (isset($corpus_info['start_time']) && $corpus_info['start_time']) {
+            $start_time = $corpus_info['start_time'];
+        }
+
         $binder = new Binder();
 
         $builder = new Builder('tweet_stats');
         $builder->select('COUNT(*) AS tweet_count');
-        $builder->select('UNIX_TIMESTAMP(MIN(tweets.created_at)) AS start_time');
-        $builder->select('UNIX_TIMESTAMP(MAX(tweets.created_at)) AS end_time');
-        $builder->from('tweets');
 
+        if (isset($corpus_info['start_time']) && $corpus_info['start_time']) {
+            $start_time = $corpus_info['start_time'];
+        } else {
+            $start_time = NULL;
+            $builder->select('UNIX_TIMESTAMP(MIN(tweets.created_at)) AS start_time');
+        }
+
+        if (isset($corpus_info['end_time']) && $corpus_info['end_time']) {
+            $end_time = $corpus_info['end_time'];
+        } else {
+            $end_time = NULL;
+            $builder->select('UNIX_TIMESTAMP(MAX(tweets.created_at)) AS end_time');
+        }
+
+        $builder->from('tweets');
 
         $results = $this->run2($builder, $binder, $this->corpus);
         $tweet_stats = $results[0];
+
+        if ($end_time) {
+            $tweet_stats['end_time'] = $end_time;
+        }
+
+        if ($start_time) {
+            $tweet_stats['start_time'] = $start_time;
+        }
 
         $builder = new Builder('user_stats');
         $builder->select('COUNT(*) AS user_count');
