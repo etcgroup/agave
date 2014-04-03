@@ -13,7 +13,7 @@ $corpus_stats = $db->get_corpus_stats();
 
     <link rel="icon"
           type="image/png"
-          href="<?php $request->stat('css/img/logo-only.png'); ?>">
+          href="<?php $request->stat('img/logo-only.png'); ?>">
     <link rel="stylesheet" href="<?php $request->stat('css/main.css'); ?>">
 
 </head>
