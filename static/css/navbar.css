@@ -72,7 +72,8 @@
 }
 .navbar .user-display .twitter-icon-light {
   background-position: center;
-  background-size: 20px 20px;
+  background-size: 20px;
+  background-image: url('../img/twitter-bird-dark-bgs-20.png');
   width: 14px;
   height: 18px;
   vertical-align: middle;

@@ -55,6 +55,7 @@
 .user-box .form .user-submit .twitter-icon-light {
     background-position: center;
     background-size: 32px;
+    background-image: url('../img/twitter-bird-dark-bgs-32.png');
 
     width: 20px;
     height: 20px;
