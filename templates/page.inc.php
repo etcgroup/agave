@@ -18,7 +18,7 @@ $corpus_stats = $db->get_corpus_stats();
 
 </head>
 <body>
-<?php echo nav_bar($corpus_title, $corpus_stats); ?>
+<?php echo nav_bar($corpus_title, $corpus_stats, $router); ?>
 <div class="content row">
     <div class="padding-all">
         <div class="explorer col">

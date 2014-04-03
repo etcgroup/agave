@@ -8,7 +8,7 @@ include_once 'util/helpers.inc.php';
  * @param array $corpus_stats
  * @return string
  */
-function nav_bar($corpus_title, $corpus_stats)
+function nav_bar($corpus_title, $corpus_stats, $router)
 {
     $tweet_count = Helpers::friendly_bignum($corpus_stats['tweet_count']);
     $user_count = Helpers::friendly_bignum($corpus_stats['user_count']);
@@ -16,13 +16,15 @@ function nav_bar($corpus_title, $corpus_stats)
     $start_time = Helpers::friendly_date($corpus_stats['start_time']);
     $end_time  = Helpers::friendly_date($corpus_stats['end_time']);
 
+    $base_url = $router->base_url();
+
     ob_start();
     ?>
     <div class="navbar row">
         <div class="navbar-inner">
             <div class="container-fluid">
                 <div class="nav-main-info">
-                    <a class="brand" href="/">
+                    <a class="brand" href="<?php $base_url ?>">
                     </a>
                     <span class="colon"><i class="icon-chevron-right icon-white"></i></span>
                     <span class="title muted"><?php echo $corpus_title; ?></span>
