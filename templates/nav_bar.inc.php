@@ -39,7 +39,8 @@ function nav_bar($corpus_title, $corpus_stats, $router)
                 </ul>
                 <div class="user-display hide fade">
                     <span class="welcome-message">
-                        Welcome, <i class="twitter-icon-light hide" title="Signed in with Twitter"></i> <span class="user-name"></span>!
+                        Welcome, <i class="twitter-icon-light hide" title="Signed in with Twitter"></i>
+                        <span class="user-name"></span>!
                     </span>
                     <button type="button" class="btn sign-out-button">Sign out</button>
                 </div>

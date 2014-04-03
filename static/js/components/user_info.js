@@ -23,7 +23,7 @@ define(['jquery', 'util/urls'], function($, urls) {
         this.ui.user_display = this.into;
         this.ui.user_name = this.ui.user_display.find('.user-name');
         this.ui.sign_out_button = this.ui.user_display.find('.sign-out-button');
-        this.ui.twitter_icon = this.ui.user_display.find('.twitter-icon-light');
+        this.ui.twitter_signed_in = this.ui.user_display.find('.twitter-icon-light');
     };
 
     UserInfoView.prototype.attachEvents = function() {
@@ -40,11 +40,14 @@ define(['jquery', 'util/urls'], function($, urls) {
             return false;
         }
 
+        var screen_name = this.user.screen_name();
+
         if (this.user.data.twitter_id) {
-            this.ui.twitter_icon.removeClass('hide');
+            this.ui.twitter_signed_in.removeClass('hide');
+            screen_name = "@" + screen_name;
         }
 
-        this.ui.user_name.html(this.user.screen_name());
+        this.ui.user_name.html(screen_name);
 
         this.ui.user_display.show();
 
