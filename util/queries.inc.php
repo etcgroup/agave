@@ -401,11 +401,25 @@ class Queries
             'ssi',
             $this->db
         );
+
+        $this->prepare('disable_annotation',
+            "UPDATE annotations SET enabled = 0
+            WHERE user = ? AND id = ?",
+            'si',
+            $this->db
+        );
     }
 
     public function update_annotation($id, $user, $label)
     {
         if ($this->run('update_annotation', $label, $user, $id)) {
+            return $id;
+        }
+    }
+
+    public function delete_annotation($id, $user)
+    {
+        if ($this->run('disable_annotation', $user, $id)) {
             return $id;
         }
     }
@@ -431,6 +445,7 @@ class Queries
 
         $builder->where("a.public", "=", $public);
         $builder->where("a.corpus", "=", $corpus);
+        $builder->where_condition("a.enabled = 1");
 
         if ($this->keep_data_private) {
 

@@ -30,21 +30,16 @@
         }
     }
 
-
     .tweet-timeline & .annotation {
         fill: yellow;
         stroke: transparent;
         stroke-width: 4px;
         shape-rendering: crispEdges;
         .opacity(70);
+
         pointer-events: all;
 
         .transition(~'stroke 300ms,opacity 300ms,fill 300ms');
-
-        &.highlight, &:hover {
-            stroke: yellow;
-            .opacity(100);
-        }
 
         &.new {
             fill: #4AFF42;
@@ -53,6 +48,18 @@
 
         .reference-mode & {
             cursor: pointer;
+            .opacity(100);
+        }
+
+        .reference-mode &:hover {
+            stroke: yellow;
+        }
+    }
+
+    .tweet-timeline & .annotation.mine {
+
+        &.highlight, &:hover {
+            stroke: yellow;
             .opacity(100);
         }
     }
@@ -68,6 +75,10 @@
         &.highlight {
             .opacity(100);
             .scale(~'1, 10');
+        }
+
+        &.mine {
+            stroke-width: 4px;
         }
     }
 }

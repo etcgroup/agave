@@ -37,12 +37,6 @@
   -o-transition: stroke 300ms,opacity 300ms,fill 300ms;
   transition: stroke 300ms,opacity 300ms,fill 300ms;
 }
-.tweet-timeline .annotations .annotation.highlight,
-.tweet-timeline .annotations .annotation:hover {
-  stroke: yellow;
-  opacity: 1;
-  filter: alpha(opacity=100);
-}
 .tweet-timeline .annotations .annotation.new {
   fill: #4AFF42;
   opacity: 0.8;
@@ -50,6 +44,15 @@
 }
 .reference-mode .tweet-timeline .annotations .annotation {
   cursor: pointer;
+  opacity: 1;
+  filter: alpha(opacity=100);
+}
+.reference-mode .tweet-timeline .annotations .annotation:hover {
+  stroke: yellow;
+}
+.tweet-timeline .annotations .annotation.mine.highlight,
+.tweet-timeline .annotations .annotation.mine:hover {
+  stroke: yellow;
   opacity: 1;
   filter: alpha(opacity=100);
 }
@@ -77,4 +80,7 @@
   -ms-transform: scale(1, 10);
   -o-transform: scale(1, 10);
   transform: scale(1, 10);
+}
+.tweet-overview .annotations .annotation.mine {
+  stroke-width: 4px;
 }

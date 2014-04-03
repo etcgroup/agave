@@ -406,6 +406,9 @@ define(['jquery',
                 .classed('highlight', function (d) {
                     return d.id in self._brushedAnnotations;
                 })
+                .classed('mine', function(d) {
+                    return d.mine;
+                })
                 .attr('x1', this._highlightXPosition)
                 .attr('x2', this._highlightXPosition)
                 .attr('y1', 0)

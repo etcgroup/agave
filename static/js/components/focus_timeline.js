@@ -14,7 +14,11 @@ define(['jquery',
 
         var AXIS_OFFSET = 3;
         var ANNOTATION_TOOLTIP_TEMPLATE = _.template(
-            "<b><%=screen_name%></b>: <%=label%>"
+            "<%=label%> " +
+            "<span class='muted'>" +
+                "&mdash; <%=screen_name%>" +
+                "<%= mine ? ' (click to edit)' : ''%>" +
+            "</span>"
         );
 
         //Color defaults
@@ -142,7 +146,9 @@ define(['jquery',
             bind.enter().append('rect')
                 .classed('annotation', true)
                 .attr('y', 1)
-                .attr('width', 2)
+                .attr('width', function(d) {
+                    return d.mine ? 4 : 2;
+                })
                 .on('mousemove', function (d) {
                     self._onAnnotationHover(d3.event, d, true);
                 })
@@ -180,6 +186,7 @@ define(['jquery',
             if (mouseHovering) {
                 //Show a tooltip near the mouse
                 var label = ANNOTATION_TOOLTIP_TEMPLATE(data);
+
                 this.tooltip.show({
                     top: event.pageY,
                     left: event.pageX
@@ -214,6 +221,9 @@ define(['jquery',
             annotations.selectAll('rect.annotation')
                 .classed('highlight', function (d) {
                     return d.id in self._brushedAnnotations;
+                })
+                .classed('mine', function(d) {
+                    return d.mine;
                 })
                 .attr('x', this._highlightXPosition)
                 .attr('height', boxHeight - 2);
@@ -668,10 +678,16 @@ define(['jquery',
 
             var label;
             if (annotation) {
-                //Edit existing annotation
-                label = prompt("Edit " + annotation.screen_name + "'s label:", annotation.label);
 
-                if (!label || label === annotation.label) {
+                if (!annotation.mine) {
+                    //Cancel
+                    return;
+                }
+
+                //Edit existing annotation
+                label = prompt("Edit your annotation. Clear text to delete.", annotation.label);
+
+                if (label === annotation.label) {
                     //Cancel
                     return;
                 }
