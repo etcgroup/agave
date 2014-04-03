@@ -320,6 +320,7 @@ class Queries
             //Make sure the corpus is registered in the app db
             $results = $this->run('corpora', $this->corpus_id);
             if (!is_array($results) OR count($results) != 1) {
+                header("HTTP/1.0 404 Not Found - Unknown corpus $this->corpus_id");
                 trigger_error("Corpus $this->corpus_id is not defined in the database", E_USER_ERROR);
                 $this->_corpus_info = FALSE;
             }
@@ -1193,6 +1194,7 @@ class Queries
                 PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8mb4'
             ));
         } catch (PDOException $e) {
+            header("HTTP/1.0 500 Internal Server Error - Could not reach database");
             trigger_error('Connection failed: ' . $e->getMessage(), E_USER_ERROR);
             die();
         }
