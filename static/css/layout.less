@@ -1,0 +1,283 @@
+/*csslint ids:false, box-model:false, adjoining-classes: false*/
+/* Inspired by
+ * http://blog.stevensanderson.com/2011/10/05/full-height-app-layouts-a-css-trick-to-make-it-easier/
+ */
+@import "lib/mixins";
+
+/* Generic pane rules */
+body {
+    margin: 0
+}
+
+.row, .col {
+    /*overflow: hidden;*/
+    overflow: visible;
+    position: absolute;
+}
+
+.row {
+    left: 0;
+    right: 0;
+    /* this overrides bootstrap's row class */
+    margin-left: 0;
+}
+
+.col {
+    top: 0;
+    bottom: 0;
+}
+
+.scroll-x {
+    overflow-x: auto;
+}
+
+.scroll-y {
+    overflow-y: auto;
+}
+
+.padding-all,
+.padding-top,
+.padding-right,
+.padding-bottom,
+.padding-left,
+.padding-top-half,
+.padding-right-half,
+.padding-bottom-half,
+.padding-left-half {
+    /*overflow: hidden;*/
+    overflow: visible;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+.padding-left,
+.padding-all {
+    left: 10px;
+}
+
+.padding-top,
+.padding-all {
+    top: 10px;
+}
+
+.padding-right,
+.padding-all {
+    right: 10px;
+}
+
+.padding-bottom,
+.padding-all {
+    bottom: 10px;
+}
+
+.padding-left-half,
+.padding-all-half {
+    left: 5px;
+}
+
+.padding-top-half,
+.padding-all-half {
+    top: 5px;
+}
+
+.padding-right-half,
+.padding-all-half {
+    right: 5px;
+}
+
+.padding-bottom-half,
+.padding-all-half {
+    bottom: 5px;
+}
+
+/*
+ * These are the top-level panels
+ */
+.navbar.row {
+    height: 41px;
+    top: 0;
+    overflow: visible; /* so the box shadow can hang out */
+}
+
+.content.row {
+    top: 41px;
+    bottom: 0;
+}
+
+/*
+ * These are the main content panels
+ */
+.explorer.col {
+    width: 75%;
+
+    &.expanded {
+        width: 100%;
+    }
+}
+
+/* A wrapper so that padding can be in pixels */
+.collaborator-wrapper.col {
+    width: 25%;
+    right: 0;
+
+    &.collapsed {
+        width: 0;
+    }
+}
+
+/*
+ * These are the explorer panels
+ */
+.timeline-controls.row {
+    top: 0;
+    height: 32px;
+    /*min-height: 70px;*/
+    overflow: visible; /* show the overflow, for the dropdown menu */
+}
+
+.tweet-timeline-panel.row {
+    top: 32px;
+    height: 200px;
+}
+
+.tweet-overview-panel.row {
+    top: 232px;
+    height: 60px;
+}
+
+.details.row {
+    top: 292px;
+    bottom: 0;
+}
+
+/*
+ * These are the details panels
+ */
+.details-left.col {
+    width: 50%;
+    left: 0;
+}
+
+/* A wrapper column so that padding can be in pixels */
+.details-right.col {
+    width: 50%;
+    left: 50%;
+}
+
+/*
+ * These are the detail panel contents
+ */
+.details {
+    .query.row {
+        top: 14px;
+        height: 26px;
+    }
+
+    .tab-group {
+        &.row {
+            top: 54px;
+            bottom: 5px;
+            left: 5px;
+            right: 5px;
+            overflow: visible;
+        }
+        .nav.row {
+            top: 0;
+            height: 28px; /* the natural height of the nav tabs */
+        }
+    }
+
+    .tab-content {
+        &.row {
+            top: 31px; /* the natural height of the nav tabs */
+            bottom: 0;
+        }
+        .tab-pane {
+            position: relative;
+            height: 100%;
+        }
+    }
+}
+
+/*
+ * These are the collaborator panels.
+ */
+
+.collaborator {
+    overflow: hidden;
+}
+
+.sliding-panel.col {
+    left: 0;
+    width: 300%;
+
+    .transition(margin-left 300ms ease-in-out);
+
+    /* Shift over to the left depending on the state of the collaborator panel */
+    .collaborator.show-left & {
+        margin-left: 0;
+    }
+
+    .collaborator.show-mid & {
+        margin-left: -100%;
+    }
+    .collaborator.show-right & {
+        margin-left: -200%;
+    }
+}
+
+.user-box.col {
+    left: 0;
+    width: 33.333%;
+}
+
+.discussions.col {
+    left: 33.334%;
+    width: 33.333%;
+}
+
+.discussion-view.col {
+    left: 66.667%;
+    right: 0;
+}
+
+/*
+ * These are the discussion list panels
+ */
+.discussions {
+    .header.row {
+        height: 60px;
+        top: 5px;
+        left: 5px;
+        right: 5px;
+    }
+
+    .discussion-list.row {
+        top: 75px;
+        /* 5 px of margin for shadows */
+        bottom: 5px;
+        left: 5px;
+        right: 5px;
+    }
+}
+
+/*
+ * These are the discussion view panels
+ */
+.discussion-view {
+    .comment-box.row {
+        top: 5px;
+        left: 5px;
+        right: 5px;
+        height: 132px;
+    }
+    .comments.row {
+        top: 147px;
+        bottom: 5px;
+        left: 5px;
+        right: 5px;
+    }
+}
