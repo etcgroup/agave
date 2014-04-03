@@ -43,9 +43,23 @@ define(['jquery',
         //Create a time scale for the timeline
         this._timeScale = d3.time.scale.utc();
 
+        var basicTimeFormatter = this._timeScale.tickFormat();
+        var timeFormatter = function(time) {
+            var result = basicTimeFormatter(time);
+
+            //remove leading zeros http://stackoverflow.com/a/6676498
+            result = result.replace(/^0+/, '');
+
+            //Lowercase and de-space AM and PM at the end
+            result = result.replace(/ AM$/, 'am');
+            result = result.replace(/ PM$/, 'pm');
+            return result;
+        };
+
         //Create an axis generator for the timeline
         this._timeAxis = d3.svg.axis()
             .scale(this._timeScale)
+            .tickFormat(timeFormatter)
             .tickSubdivide(true)
             .orient("bottom");
 
