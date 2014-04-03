@@ -74,10 +74,21 @@ module.exports = function (grunt) {
                     {
                         expand: true,
                         cwd: '<%=dirs.src.base%>',
-                        src: ['<%=dirs.src.views%>/**/*', '<%=dirs.src.util%>/**/*', '<%=dirs.src.templates%>/**/*', '*.php', 'app.ini'],
+                        src: ['<%=dirs.src.views%>/**/*', '<%=dirs.src.util%>/**/*', '<%=dirs.src.templates%>/**/*', 'index.php'],
                         dest: '<%=dirs.dist.base%>/'
                     }
                 ]
+            },
+            dist_ini: {
+                cwd: '<%=dirs.src.base%>',
+                src: 'app.ini',
+                dest: '<%=dirs.dist.base%>/app.ini',
+                options: {
+                    mode: '0640',
+                    process: function (content, srcpath) {
+                        return content.replace(/environment=development/g,"environment=production");
+                    }
+                }
             }
         },
 
@@ -335,5 +346,5 @@ module.exports = function (grunt) {
 
     // Define your tasks here
     grunt.registerTask('default', ['phplint', 'jshint', 'lesslint', 'jasmine:app', 'phpunit']);
-    grunt.registerTask('build', ['clean', 'copy:dist', 'requirejs', 'ver:dist']);
+    grunt.registerTask('build', ['clean', 'copy:dist', 'copy:dist_ini', 'requirejs', 'ver:dist']);
 };
