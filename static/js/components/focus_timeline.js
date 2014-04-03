@@ -669,7 +669,7 @@ define(['jquery',
             var label;
             if (annotation) {
                 //Edit existing annotation
-                label = prompt("Edit " + annotation.user + "'s label:", annotation.label);
+                label = prompt("Edit " + annotation.screen_name + "'s label:", annotation.label);
 
                 if (!label || label === annotation.label) {
                     //Cancel
