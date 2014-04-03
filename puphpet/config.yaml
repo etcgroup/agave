@@ -87,7 +87,7 @@ apache:
                 - 'APP_ENV dev'
             override:
                 - All
-            custom_fragment: 'Redirect permanent / https://agave.dev'
+            custom_fragment: 'Redirect permanent / https://agave.dev/'
         agave.dev_https:
             servername: agave.dev
             serveraliases:

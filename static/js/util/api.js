@@ -1,18 +1,4 @@
-define(['jquery', 'underscore', 'util/events'], function ($, _, events) {
-
-    /**
-     * A map from API request names to urls.
-     */
-    var URLS = {
-        'counts': 'api/counts.php',
-        'discussions': 'api/discussions.php',
-        'messages': 'api/messages.php',
-        'tweets': 'api/tweets.php',
-        'annotations': 'api/annotations.php',
-        'keywords': 'api/burst_keywords.php',
-        'users': 'api/users.php',
-        'auth': 'api/auth.php'
-    };
+define(['jquery', 'underscore', 'util/events', 'util/urls'], function ($, _, events, urls) {
 
     /**
      * API is an object that knows how to asynchronously
@@ -29,29 +15,7 @@ define(['jquery', 'underscore', 'util/events'], function ($, _, events) {
      * Data events are triggered with an object containing request params and the data (result).
      */
     var API = function () {
-
-        this.urls = {};
         this.rid_counters = {};
-
-        for (var name in URLS) {
-            //Initialize the local URLS dictionary
-            this.urls[name] = URLS[name];
-        }
-    };
-
-    /**
-     * Method to register a new URL after the fact, mostly useful for testing.
-     *
-     * @param name the request type name
-     * @param url the url to request from
-     * @param [method] an optional shorthand method to add to the API object
-     */
-    API.prototype.register = function (name, url, method) {
-        this.urls[name] = url;
-
-        if (method) {
-            this[name] = method;
-        }
     };
 
     API.prototype.get_last_rid_sent = function (name) {
@@ -109,7 +73,7 @@ define(['jquery', 'underscore', 'util/events'], function ($, _, events) {
 
         //Issue an AJAX request
         var r = $.ajax({
-            url: this.urls[name],
+            url: urls.get_url(name),
             data: params,
             type: method,
             dataType: 'json'

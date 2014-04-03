@@ -245,8 +245,6 @@ define(['jquery', 'underscore', 'lib/Uri', 'util/events'], function ($, _, Uri, 
         }
     };
 
-
-
     urls.watch_url_changes = function() {
         if (!this._watching) {
             this._watching = true;
@@ -262,6 +260,14 @@ define(['jquery', 'underscore', 'lib/Uri', 'util/events'], function ($, _, Uri, 
                 }
             });
         }
+    };
+
+    urls.configure = function(url_map) {
+        urls.url_map = url_map;
+    };
+
+    urls.get_url = function(name) {
+        return urls.url_map[name];
     };
 
     return urls;

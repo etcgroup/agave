@@ -1,4 +1,4 @@
-define(['jquery'], function($) {
+define(['jquery', 'util/urls'], function($, urls) {
 
     var SignIn = function(parameters) {
         this.user = parameters.user;
@@ -40,7 +40,7 @@ define(['jquery'], function($) {
 
     SignIn.prototype._onUserSubmitted = function() {
         var return_to = window.location.href;
-        var auth_url = 'auth.php?return_to=' + encodeURIComponent(return_to);
+        var auth_url = urls.get_url('auth') + '?return_to=' + encodeURIComponent(return_to);
 
         if (this.ui.userInput) {
             var user = $.trim(this.ui.userInput.val());

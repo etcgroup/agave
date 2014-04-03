@@ -3,29 +3,38 @@
  * Serves the primary visualization page.
  */
 
+include_once 'util/router.inc.php';
 include_once 'util/request.inc.php';
+include_once 'util/config.inc.php';
+include_once 'util/queries.inc.php';
 
-$request = new Request('app.ini');
-$db = $request->db();
+$config = new Config('app.ini');
+$request = new Request($config);
+
+$router = new Router($config);
 
 //If in secure mode, ensure https
-if (isset($request->config['secure']) && $request->config['secure']) {
-    if (!isset($_SERVER['HTTPS'] ) || $_SERVER['HTTPS'] === 'off') {
-        $url = 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-        header('Location: ' . $url);
-        die();
+if ($config->get('secure')) {
+    if (!$router->is_https()) {//$url = 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+        $request->redirect($router->site_url($router->current_url(), 'https'));
     }
 }
 
-$user_data = $request->user_data();
-$db->log_action('load', $user_data);
+//If they didn't provide a corpus, redirect to the default corpus.
+//TODO: replace this with some kind of corpus list page or something.
+if ($router->current_url() === '') {
+    $corpus_id = $config->get('db')['corpus'];
+    $request->redirect($router->site_url($corpus_id));
+}
 
-//Load in elements
-include_once 'templates/nav_bar.inc.php';
-include_once 'templates/query_box.inc.php';
-include_once 'templates/timeline_controls.inc.php';
-include_once 'templates/details_tabs.inc.php';
-include_once 'templates/help_icon.inc.php';
-include_once 'templates/discussion_ui.inc.php';
-include_once 'templates/page.inc.php';
-?>
+list($route, $arguments) = $router->get_route();
+if (isset($arguments['corpus_id'])) {
+    $corpus_id = $arguments['corpus_id'];
+} else {
+    $corpus_id = $config->get('db')['corpus'];
+}
+
+$db = new Queries($config, $corpus_id);
+$request->start_session($db);
+
+include $route;

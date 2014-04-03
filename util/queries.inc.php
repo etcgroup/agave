@@ -3,7 +3,6 @@ if(basename(__FILE__) == basename($_SERVER['PHP_SELF'])){exit();}
 
 include_once 'builder.inc.php';
 include_once 'binder.inc.php';
-include_once 'session.inc.php';
 
 /**
  * The Queries class contains all of the SQL queries for retrieving data.
@@ -32,7 +31,7 @@ class Queries
     private $logging_enabled = 1;
     private $keep_data_private = FALSE;
     private $_corpus_info = NULL;
-
+    private $_corpus_stats = NULL;
     /**
      * @var PDOStatement[]
      */
@@ -41,7 +40,7 @@ class Queries
     /**
      * @var Performance
      */
-    private $performance;
+    private $_performance;
     private $utc;
 
 
@@ -51,9 +50,9 @@ class Queries
      * $params must be an associative array containing 'host', 'port', 'user', 'password', and 'schema'.
      *
      * @param Config $config
-     * @internal param array $params
+     * @param string $corpus_id
      */
-    public function __construct($config)
+    public function __construct($config, $corpus_id=NULL)
     {
         $this->utc = new DateTimeZone('UTC');
 
@@ -68,11 +67,15 @@ class Queries
             die();
         }
 
-        if (!array_key_exists('corpus', $params)) {
-            trigger_error("No corpus set in DB configuration", E_USER_ERROR);
-            die();
+        if (!$corpus_id) {
+            if (!isset($params['corpus'])) {
+                trigger_error("No corpus set in DB configuration", E_USER_ERROR);
+                die();
+            }
+            $this->corpus_id = $params['corpus'];
+        } else {
+            $this->corpus_id = $corpus_id;
         }
-        $this->corpus_id = $params['corpus'];
 
         $this->db = $this->get_pdo_connection($params);
 
@@ -89,7 +92,7 @@ class Queries
      */
     public function record_timing($performance)
     {
-        $this->performance = $performance;
+        $this->_performance = $performance;
     }
 
     /**
@@ -98,9 +101,9 @@ class Queries
      */
     private function start($query_name)
     {
-        if ($this->performance !== NULL) {
-            $this->performance->counter($query_name);
-            $this->performance->start($query_name);
+        if ($this->_performance !== NULL) {
+            $this->_performance->counter($query_name);
+            $this->_performance->start($query_name);
         }
     }
 
@@ -112,8 +115,8 @@ class Queries
      */
     private function save_sql($query_name, $sql, $valueMap)
     {
-        if ($this->performance !== NULL) {
-            $this->performance->sql($query_name, $sql, $valueMap);
+        if ($this->_performance !== NULL) {
+            $this->_performance->sql($query_name, $sql, $valueMap);
         }
     }
 
@@ -123,8 +126,8 @@ class Queries
      */
     private function stop($query_name)
     {
-        if ($this->performance !== NULL) {
-            $this->performance->stop($query_name);
+        if ($this->_performance !== NULL) {
+            $this->_performance->stop($query_name);
         }
     }
 
@@ -666,7 +669,7 @@ class Queries
      *
      * @return array
      */
-    public function get_corpus_stats()
+    private function _get_corpus_stats()
     {
         $binder = new Binder();
 
@@ -688,6 +691,46 @@ class Queries
         $user_stats = $results[0];
 
         return array_merge($tweet_stats, $user_stats);
+    }
+
+
+    /**
+     * Get some statistical properties of the corpus.
+     *
+     * @return array
+     */
+    public function get_corpus_stats() {
+        if ($this->_corpus_stats === NULL) {
+            $stats = $this->_get_corpus_stats();
+
+            $this_tz_string = date_default_timezone_get();
+            $this_tz = new DateTimeZone($this_tz_string);
+            $now = new DateTime("now", $this_tz);
+            $tz_offset = $this_tz->getOffset($now);
+
+            if ($stats['start_time'] !== NULL) {
+                $start_time = new DateTime("@${stats['start_time']}");
+            } else {
+                $start_time = $now;
+            }
+
+            if ($stats['end_time'] !== NULL) {
+                $end_time = new DateTime("@${stats['end_time']}");
+            } else {
+                $end_time = $now;
+            }
+
+            $this->_corpus_stats = array(
+                'start_time' => $start_time,
+                'end_time' => $end_time,
+                'timezone' => $this_tz_string,
+                'timezone_offset' => $tz_offset,
+                'tweet_count' => $stats['tweet_count'],
+                'user_count' => $stats['user_count']
+            );
+        }
+
+        return $this->_corpus_stats;
     }
 
     /**
@@ -1068,7 +1111,7 @@ class Queries
         }
     }
 
-    public function get_app_user($id, $sign_in=FALSE) {
+    public function get_app_user($id) {
         $binder = new Binder();
         $id = $binder->param('id', $id);
 
@@ -1081,12 +1124,14 @@ class Queries
         $result = $this->run2($builder, $binder, $this->db);
 
         if ($result) {
-            if ($sign_in === TRUE) {
-                $this->run('sign_in_user', $id);
-            }
-
             return $result[0];
         }
+    }
+
+    public function sign_in_user($id) {
+        $this->run('sign_in_user', $id);
+
+        return $this->get_app_user($id);
     }
 
     /**

@@ -1,22 +1,16 @@
 <?php
+if (basename(__FILE__) == basename($_SERVER['PHP_SELF'])) exit();
 /**
- * messages.php retrieves and renders discussion messages for a specific discussion.
+ * messages.inc.php retrieves and renders discussion messages for a specific discussion.
  *
- * POSTing to messages.php will add a new message to the database, and render
+ * POSTing to messages.inc.php will add a new message to the database, and render
  * all of the messages.
  */
 
+include_once 'templates/message.inc.php';
 
-include_once '../util/data.inc.php';
-include_once '../util/request.inc.php';
-include_once '../templates/message.inc.php';
-
-$request = new Request();
-
-//Initialize the db connection
-$db = $request->db();
-//Get the performance tracker
-$perf = $request->timing();
+$perf = $request->performance();
+$db->record_timing($perf);
 
 $user_data = $request->user_data();
 if ($user_data) {
@@ -26,7 +20,7 @@ if ($user_data) {
 }
 
 /**
- * Requests to /messages.php should provide a discussion id.
+ * Requests to /messages.inc.php should provide a discussion id.
  *
  * Optionally, fields for a new message can be provided.
  */

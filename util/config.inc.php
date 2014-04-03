@@ -22,6 +22,10 @@ class Config {
         if ($this->raw === FALSE) {
             trigger_error("Error parsing $config_file_path", E_USER_ERROR);
         }
+
+        if (!isset($this->raw['db'])) {
+            trigger_error("Config file $config_file must contain [db] section", E_USER_ERROR);
+        }
     }
 
     public function get($name, $default=NULL) {

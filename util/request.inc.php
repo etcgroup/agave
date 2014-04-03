@@ -1,9 +1,8 @@
 <?php
 if(basename(__FILE__) == basename($_SERVER['PHP_SELF'])){exit();}
 
+include_once 'session.inc.php';
 include_once 'performance.inc.php';
-include_once 'config.inc.php';
-include_once 'queries.inc.php';
 
 /**
  * The Request class collects together several disparate pieces of information that
@@ -22,21 +21,19 @@ class Request
 {
     public $config;
     private $config_obj;
-    private $performance = NULL;
+    private $_performance = NULL;
     private $staticfiles_map = NULL;
 
     /**
      * @var Queries
      */
-    private $_db = NULL;
     private $_session_handler = NULL;
     private $user_cookie_name = 'user_data';
     private $_user_data;
-    private $_corpus_properties = NULL;
 
-    public function __construct($config_file = NULL)
+    public function __construct($config)
     {
-        $this->config_obj = new Config($config_file);
+        $this->config_obj = $config;
         $this->config = $this->config_obj->raw;
     }
 
@@ -68,40 +65,21 @@ class Request
         }
     }
 
+    public function redirect($url) {
+        header('Location: ' . $url);
+        die();
+    }
+
     /**
      * Get a performance timer for this request.
      * @return Performance
      */
-    public function timing()
+    public function performance()
     {
-        $this->performance = new Performance();
-
-        if ($this->_db) {
-            //If the db is already initialized, share the performance tracker with it
-            $this->_db->record_timing($this->performance);
+        if ($this->_performance === NULL) {
+            $this->_performance = new Performance();
         }
-
-        return $this->performance;
-    }
-
-    /**
-     * Initialize and get the database connection for this request.
-     * @param string|array $params
-     * @return \Queries
-     */
-    public function db($params = NULL)
-    {
-        if ($this->_db === NULL) {
-            $this->_db = new Queries($this->config_obj);
-            $this->_session_handler = new DbSessionHandler($this->_db, $this->config);
-
-            if ($this->performance) {
-                //If the performance tracker is already initialized, share it with the db
-                $this->_db->record_timing($this->performance);
-            }
-        }
-
-        return $this->_db;
+        return $this->_performance;
     }
 
     /**
@@ -151,35 +129,44 @@ class Request
 
         $response['request'] = $_GET;
 
-        if ($this->performance !== NULL) {
-            $response['performance'] = $this->performance->finalize();
+        if ($this->_performance !== NULL) {
+            $response['performance'] = $this->_performance->finalize();
         }
 
         header('Content-type: application/json');
         echo json_encode($response);
     }
 
+
+    /**
+     * @param $db Queries
+     */
+    public function start_session($db) {
+        if ($this->_session_handler === NULL) {
+            $this->_session_handler = new DbSessionHandler($db, $this->config);
+        }
+
+        if (isset($_SESSION['user_id'])) {
+            $this->_user_data = $db->get_app_user($_SESSION['user_id']);
+            if ($this->_user_data) {
+                $this->_user_data = (object)$this->_user_data;
+            } else {
+                //The user id was BADDDDD
+                $this->sign_out();
+                $db->log_action('bad user id');
+            }
+        }
+    }
+
     /**
      * Returns an object containing data about the user,
      * based on cookie info. Null if no or invalid data.
      *
-     * @param bool $sign_in
+     * Will be null if start_session() has not been called.
+     *
      * @return mixed|null
      */
-    public function user_data($sign_in = FALSE) {
-        if (!$this->_user_data) {
-            if (isset($_SESSION['user_id'])) {
-                $this->_user_data = $this->db()->get_app_user($_SESSION['user_id'], $sign_in);
-                if ($this->_user_data) {
-                    $this->_user_data = (object)$this->_user_data;
-                } else {
-                    //The user id was BADDDDD
-                    $this->sign_out();
-                    $this->db()->log_action('bad user id');
-                }
-            }
-        }
-
+    public function user_data() {
         return $this->_user_data;
     }
 
@@ -232,7 +219,7 @@ class Request
         return $this->_retrieve_params($_POST, $required, $optional);
     }
 
-    public function _retrieve_params($global, $required, $optional = array())
+    private function _retrieve_params($global, $required, $optional = array())
     {
         $request = array();
         foreach ($required as $param_name) {
@@ -274,8 +261,13 @@ class Request
 
     /**
      * Get the query model parameters: 'min_rt', 'rt', 'search', 'author', and 'sentiment'.
+     *
+     * Requires a Queries instance to look up author info.
+     *
+     * @param Queries $db
+     * @return mixed
      */
-    public function queryParameters()
+    public function queryParameters($db = NULL)
     {
         $times = $this->timeParameters();
         $params = $this->get(array(), array('min_rt', 'rt', 'search', 'author', 'sentiment'));
@@ -293,8 +285,8 @@ class Request
         $params->screen_name = strlen($params->author) ? $params->author : NULL;
 
         //Look up the author
-        if (strlen($params->author)) {
-            $user = $this->db()->get_user_by_name($params->author);
+        if ($db && strlen($params->author)) {
+            $user = $db->get_user_by_name($params->author);
             if ($user !== NULL) {
                 $params->author = $user['id'];
             } else {
@@ -377,54 +369,5 @@ class Request
         } else {
             return $path;
         }
-    }
-
-    /**
-     * Get the title of the corpus.
-     *
-     * @return string
-     */
-    public function corpus_title() {
-        $corpus = $this->db()->get_corpus_info();
-        return $corpus['name'];
-    }
-
-    /**
-     * Get some statistical properties of the corpus.
-     *
-     * @return array
-     */
-    public function corpus_properties() {
-        if ($this->_corpus_properties === NULL) {
-            $stats = $this->db()->get_corpus_stats();
-
-            $this_tz_string = date_default_timezone_get();
-            $this_tz = new DateTimeZone($this_tz_string);
-            $now = new DateTime("now", $this_tz);
-            $tz_offset = $this_tz->getOffset($now);
-
-            if ($stats['start_time'] !== NULL) {
-                $start_time = new DateTime("@${stats['start_time']}");
-            } else {
-                $start_time = $now;
-            }
-
-            if ($stats['end_time'] !== NULL) {
-                $end_time = new DateTime("@${stats['end_time']}");
-            } else {
-                $end_time = $now;
-            }
-
-            $this->_corpus_properties = array(
-                'start_time' => $start_time,
-                'end_time' => $end_time,
-                'timezone' => $this_tz_string,
-                'timezone_offset' => $tz_offset,
-                'tweet_count' => $stats['tweet_count'],
-                'user_count' => $stats['user_count']
-            );
-        }
-
-        return $this->_corpus_properties;
     }
 }

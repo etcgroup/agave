@@ -1,32 +1,28 @@
 <?php
+if (basename(__FILE__) == basename($_SERVER['PHP_SELF'])) exit();
+
 /**
- * counts.php returns the number of tweets over time, divided
+ * counts.inc.php returns the number of tweets over time, divided
  * by sentiment classification as -1, 0, or 1.
  *
  * Tweets are binned by time and the count of positive, negative, and neutral
  * tweets in each time bin is returned.
  */
 
+include_once 'util/data.inc.php';
 
-include_once '../util/data.inc.php';
-include_once '../util/request.inc.php';
-
-$request = new Request();
-
-//Initialize the db connection
-$db = $request->db();
-//Get the performance tracker
-$perf = $request->timing();
+$perf = $request->performance();
+$db->record_timing($perf);
 
 /**
- * Requests to /counts.php should provide the binned time parameters:
+ * Requests to /counts.inc.php should provide the binned time parameters:
  * from, to, and interval.
  *
  * Optionally, a text search parameter can be provided.
  */
 $params = $request->get(array(), array('split_sentiment'));
 $timeParams = $request->binnedTimeParams();
-$filter = $request->queryParameters();
+$filter = $request->queryParameters($db);
 
 //Get the retrieved parameters
 $from = $timeParams->from;

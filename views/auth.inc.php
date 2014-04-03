@@ -1,14 +1,9 @@
 <?php
+if (basename(__FILE__) == basename($_SERVER['PHP_SELF'])) exit();
 /**
  * Authenticate the user against Twitter.
  * Redirect to the return_to url when done.
  */
-
-include_once 'util/request.inc.php';
-
-
-$request = new Request('app.ini');
-$db = $request->db();
 
 $params = $request->get(array('return_to'), array('sign_out', 'username'));
 
@@ -70,7 +65,7 @@ if ($params->sign_out) {
                 $user_id = $db->get_app_user_id($twitter_user);
                 if ($user_id) {
                     $_SESSION['user_id'] = $user_id;
-                    $user_data = $request->user_data(TRUE);
+                    $user_data = $db->sign_in_user($user_id);
                     $db->log_action('sign in', $user_data);
                 } else {
                     $error = 'Could not sign in.';
@@ -99,7 +94,7 @@ if ($params->sign_out) {
         $user_id = $db->get_simple_app_user_id($username);
         if ($user_id) {
             $_SESSION['user_id'] = $user_id;
-            $user_data = $request->user_data(TRUE);
+            $user_data = $db->sign_in_user($user_id);
             $db->log_action('sign in', $user_data);
         } else {
             $error = 'Could not sign in.';

@@ -1,18 +1,17 @@
 <?php
+if (basename(__FILE__) == basename($_SERVER['PHP_SELF'])) exit();
+
 /**
- * tweets.php gets individual tweets in a time range.
+ * tweets.inc.php gets individual tweets in a time range.
  *
  * It only returns non-retweet tweets, and a limit parameter is required.
  *
  * Optionally, a noise threshold can be provided. Only tweets with at least this
  * number of retweets will be returned.
  */
-include_once '../util/data.inc.php';
-include_once '../util/request.inc.php';
 
-$request = new Request();
-$perf = $request->timing();
-$db = $request->db();
+$perf = $request->performance();
+$db->record_timing($perf);
 
 /**
  * Required parameters: grouped time parameters (from, to, interval) and limit.
@@ -20,7 +19,7 @@ $db = $request->db();
  */
 $params = $request->get(array('limit'), array('sort', 'query_id', 'state_str'));
 $timeParams = $request->timeParameters();
-$filter = $request->queryParameters();
+$filter = $request->queryParameters($db);
 $from = $timeParams->from;
 $to = $timeParams->to;
 $sort = $params->sort;

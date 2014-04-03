@@ -1,8 +1,13 @@
+<?php
+$corpus_info = $db->get_corpus_info();
+$corpus_title = $corpus_info['name'];
+$corpus_stats = $db->get_corpus_stats();
+?>
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Agave: <?php echo $request->corpus_title(); ?></title>
+    <title>Agave: <?php echo $corpus_title ?></title>
     <meta name="description" content="A neat twitter visualization">
     <meta name="viewport" content="width=device-width">
 
@@ -13,7 +18,7 @@
 
 </head>
 <body>
-<?php echo nav_bar($request); ?>
+<?php echo nav_bar($corpus_title, $corpus_stats); ?>
 <div class="content row">
     <div class="padding-all">
         <div class="explorer col">
@@ -61,6 +66,9 @@
             </div>
         </div>
     </div>
+    <?php if ($request->is_env('development')) {
+        include 'templates/debugger.inc.php';
+    } ?>
 </div>
 <?php
 $flash = $request->flash();
@@ -95,11 +103,9 @@ if ($flash) {
 
 <script type="text/javascript">
     <?php
-    $stats = $request->corpus_properties();
-
-    $start_time = $stats['start_time']->getTimestamp();
-    $end_time = $stats['end_time']->getTimestamp();
-    $tz_offset_millis = $stats['timezone_offset'] * 1000;
+    $start_time = $corpus_stats['start_time']->getTimestamp();
+    $end_time = $corpus_stats['end_time']->getTimestamp();
+    $tz_offset_millis = $corpus_stats['timezone_offset'] * 1000;
     ?>
 
     window.agave_config = {
@@ -122,7 +128,9 @@ if ($flash) {
         utc_offset_millis: <?php echo $tz_offset_millis ?>,
 
         //Time between annotation polls in millis
-        annotation_poll_interval: 10000
+        annotation_poll_interval: 10000,
+
+        urls: <?php echo json_encode($router->route_urls($corpus_id)); ?>
     };
 
     <?php if ($user_data) { ?>

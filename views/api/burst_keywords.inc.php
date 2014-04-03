@@ -1,14 +1,15 @@
 <?php
+
+if (basename(__FILE__) == basename($_SERVER['PHP_SELF'])) exit();
+
 /**
- * burst_keywords.php gets burst keywords in a time range.
+ * burst_keywords.inc.php gets burst keywords in a time range.
  *
  */
-include_once '../util/data.inc.php';
-include_once '../util/request.inc.php';
+include_once 'util/data.inc.php';
 
-$request = new Request();
-$perf = $request->timing();
-$db = $request->db();
+$perf = $request->performance();
+$db->record_timing($perf);
 
 /**
  * Required parameters: grouped time parameters (from, to, window_size) and limit.

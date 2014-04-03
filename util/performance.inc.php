@@ -55,6 +55,7 @@ class Performance
         }
 
         $this->times[$name] += microtime(TRUE) - $this->start_times[$name];
+        unset($this->start_times[$name]);
     }
 
     /**
@@ -72,6 +73,10 @@ class Performance
 
     public function finalize() {
         $this->memory = memory_get_usage(TRUE);
+
+        foreach (array_keys($this->start_times) as $name) {
+            $this->stop($name);
+        }
 
         return $this;
     }

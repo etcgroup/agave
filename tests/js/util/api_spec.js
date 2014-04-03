@@ -81,37 +81,6 @@ define(['util/api', 'jquery'], function(API, $) {
             expect(handler).toHaveBeenCalled();
         });
 
-        it('can make new kinds of requests', function() {
-            var api = new API();
-
-            //Just prevent ajax calls
-            spyOn($, 'ajax').andReturn(myResponse);
-
-            var handler = jasmine.createSpy();
-            api.on('newrequest', handler);
-
-            var requester = function() {};
-
-            api.register('newrequest', 'http://example.com', requester);
-
-            expect(api.newrequest).toBe(requester);
-
-            api.request('get', 'newrequest');
-
-            myResponse.resolve({
-                payload: 'asdf'
-            });
-
-            expect(handler).toHaveBeenCalled();
-
-            expect($.ajax).toHaveBeenCalledWith({
-                url: 'http://example.com',
-                data: {},
-                type: 'get',
-                dataType: 'json'
-            });
-        });
-
     });
 
 });

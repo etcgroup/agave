@@ -6,6 +6,11 @@
 environment=development
 logging_enabled=1
 
+; If you set up url rewriting then you
+; could change this to be empty.
+; See http://ellislab.com/codeigniter/user-guide/general/urls.html
+;index_page=index.php
+
 ; public is an integer specifying which "slice" of
 ; the user-generated data to read from and write to.
 public=0

@@ -1,4 +1,4 @@
-define(['jquery'], function($) {
+define(['jquery', 'util/urls'], function($, urls) {
 
     /**
      * A view for managing the user welcome message and sign out box.
@@ -77,7 +77,7 @@ define(['jquery'], function($) {
 
     UserInfoView.prototype.onSignOutClicked = function() {
         var return_to = window.location.href;
-        var auth_url = 'auth.php?sign_out=1&return_to=' + encodeURIComponent(return_to);
+        var auth_url = urls.get_url('auth') + '?sign_out=1&return_to=' + encodeURIComponent(return_to);
         window.location.href = auth_url;
     };
 

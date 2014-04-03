@@ -1,21 +1,16 @@
 <?php
+if (basename(__FILE__) == basename($_SERVER['PHP_SELF'])) exit();
+
 /**
- * annotations.php retrieves and renders annotations.
+ * annotations.inc.php retrieves and renders annotations.
  *
- * POSTing to annotations.php will add a new annotation to the database, and return
+ * POSTing to annotations.inc.php will add a new annotation to the database, and return
  * all of the annotations.
  */
 
-
-include_once '../util/data.inc.php';
-include_once '../util/request.inc.php';
-
-$request = new Request();
-
-//Initialize the db connection
-$db = $request->db();
 //Get the performance tracker
-$perf = $request->timing();
+$perf = $request->performance();
+$db->record_timing($perf);
 
 $inserted_id = FALSE;
 
@@ -27,7 +22,7 @@ if ($user_data) {
 }
 
 /**
- * Requests to /messages.php should provide a discussion id.
+ * Requests to annotations.inc.php should provide a discussion id.
  *
  * Optionally, fields for a new message can be provided.
  */

@@ -1,22 +1,19 @@
 <?php
+if (basename(__FILE__) == basename($_SERVER['PHP_SELF'])) exit();
+
 /**
- * discussions.php retrieves and renders the discussions.
+ * discussions.inc.php retrieves and renders the discussions.
  */
 
 
-include_once '../util/data.inc.php';
-include_once '../util/request.inc.php';
-include_once '../templates/discussion.inc.php';
+include_once 'util/data.inc.php';
+include_once 'templates/discussion.inc.php';
 
-$request = new Request();
-
-//Initialize the db connection
-$db = $request->db();
-//Get the performance tracker
-$perf = $request->timing();
+$perf = $request->performance();
+$db->record_timing($perf);
 
 /**
- * Requests to /discussions.php have no parameters.
+ * Requests to /discussions.inc.php have no parameters.
  */
 $params = $request->get(array(), array('search'));
 $search = $params->search;

@@ -33,6 +33,7 @@ define(function (require) {
      */
     var App = function (config) {
         this.config = config;
+        urls.configure(config.urls);
     };
 
     /**

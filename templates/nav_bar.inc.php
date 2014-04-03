@@ -4,19 +4,17 @@ if(basename(__FILE__) == basename($_SERVER['PHP_SELF'])){exit();}
 include_once 'util/helpers.inc.php';
 
 /**
- * @param $request Request
+ * @param string $corpus_title
+ * @param array $corpus_stats
  * @return string
  */
-function nav_bar($request)
+function nav_bar($corpus_title, $corpus_stats)
 {
-    $title = $request->corpus_title();
-    $stats = $request->corpus_properties();
+    $tweet_count = Helpers::friendly_bignum($corpus_stats['tweet_count']);
+    $user_count = Helpers::friendly_bignum($corpus_stats['user_count']);
 
-    $tweet_count = Helpers::friendly_bignum($stats['tweet_count']);
-    $user_count = Helpers::friendly_bignum($stats['user_count']);
-
-    $start_time = Helpers::friendly_date($stats['start_time']);
-    $end_time  = Helpers::friendly_date($stats['end_time']);
+    $start_time = Helpers::friendly_date($corpus_stats['start_time']);
+    $end_time  = Helpers::friendly_date($corpus_stats['end_time']);
 
     ob_start();
     ?>
@@ -27,10 +25,10 @@ function nav_bar($request)
                     <a class="brand" href="/">
                     </a>
                     <span class="colon"><i class="icon-chevron-right icon-white"></i></span>
-                    <span class="title muted"><?php echo $title; ?></span>
+                    <span class="title muted"><?php echo $corpus_title; ?></span>
                 </div>
                 <ul class="details">
-                    <li><?php echo $start_time ?> - <?php echo $end_time ?> <?php echo $stats['timezone'] ?></li>
+                    <li><?php echo $start_time ?> - <?php echo $end_time ?> <?php echo $corpus_stats['timezone'] ?></li>
                     <li class="divider-vertical"></li>
                     <li><?php echo $tweet_count ?> tweets</li>
                     <li class="divider-vertical"></li>
