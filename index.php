@@ -23,8 +23,8 @@ if ($config->get('secure')) {
 //If they didn't provide a corpus, redirect to the default corpus.
 //TODO: replace this with some kind of corpus list page or something.
 if ($router->current_url() === '') {
-    $corpus_id = $config->get('db')['corpus'];
-    $request->redirect($router->site_url($corpus_id));
+    $dbconf = $config->get('db');
+    $request->redirect($router->site_url($dbconf['corpus']));
 }
 
 list($route, $arguments) = $router->get_route();
