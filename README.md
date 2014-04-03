@@ -1,4 +1,4 @@
-twittervis
+Agave
 ==========
 
 There are CSS and LESS files contained in the css folder. Do not edit the CSS file when there is 
