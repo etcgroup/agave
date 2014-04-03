@@ -13,7 +13,7 @@ module.exports = function (grunt) {
                 js: "static/js/",
                 css: "static/css/",
                 img: "static/img/",
-                api: "api/",
+                views: "views/",
                 util: "util/",
                 templates: "templates/"
             },
@@ -74,7 +74,7 @@ module.exports = function (grunt) {
                     {
                         expand: true,
                         cwd: '<%=dirs.src.base%>',
-                        src: ['<%=dirs.src.api%>/**/*', '<%=dirs.src.util%>/**/*', '<%=dirs.src.templates%>/**/*', '*.php', 'app.ini'],
+                        src: ['<%=dirs.src.views%>/**/*', '<%=dirs.src.util%>/**/*', '<%=dirs.src.templates%>/**/*', '*.php', 'app.ini'],
                         dest: '<%=dirs.dist.base%>/'
                     }
                 ]
@@ -216,7 +216,7 @@ module.exports = function (grunt) {
 
         phplint: {
             app: {
-                src: ['<%=dirs.src.api%>/**/*.php', '<%=dirs.src.util%>/**/*.php', '<%=dirs.src.templates%>/**/*.php', '<%=dirs.src.base%>*.php']
+                src: ['<%=dirs.src.views%>/**/*.php', '<%=dirs.src.util%>/**/*.php', '<%=dirs.src.templates%>/**/*.php', '<%=dirs.src.base%>*.php']
             }
         },
 

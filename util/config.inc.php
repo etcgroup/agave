@@ -23,6 +23,15 @@ class Config {
             trigger_error("Error parsing $config_file_path", E_USER_ERROR);
         }
 
+        $env = $this->get('environment', 'production');
+        if ($env === 'development') {
+            error_reporting(-1);
+            ini_set('display_errors', 1);
+        } elseif ($env === 'production') {
+            error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED & ~E_STRICT);
+            ini_set('display_errors', 0);
+        }
+
         if (!isset($this->raw['db'])) {
             trigger_error("Config file $config_file must contain [db] section", E_USER_ERROR);
         }
