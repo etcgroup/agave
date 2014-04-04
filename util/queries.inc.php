@@ -63,12 +63,16 @@ class Queries
 
         $params = $config->get('db');
         if (!is_array($params)) {
+            $error_code = 500;
+            include('templates/error.inc.php');
             trigger_error("No DB params in configuration", E_USER_ERROR);
             die();
         }
 
         if (!$corpus_id) {
             if (!isset($params['corpus'])) {
+                $error_code = 500;
+                include('templates/error.inc.php');
                 trigger_error("No corpus set in DB configuration", E_USER_ERROR);
                 die();
             }
@@ -192,6 +196,8 @@ class Queries
         $this->types[$queryname] = $pdoTypes;
 
         if (!$this->queries[$queryname]) {
+            $error_code = 500;
+            include('templates/error.inc.php');
             trigger_error("Prepare ${$queryname} failed: (" . $db->errorCode() . ")", E_USER_WARNING);
             var_dump($db->errorInfo());
             return FALSE;
@@ -320,7 +326,9 @@ class Queries
             //Make sure the corpus is registered in the app db
             $results = $this->run('corpora', $this->corpus_id);
             if (!is_array($results) OR count($results) != 1) {
-                header("HTTP/1.0 404 Not Found - Unknown corpus $this->corpus_id");
+                $error_code = 404;
+                $error_message = "The corpus '$this->corpus_id' is unknown.";
+                include('templates/error.inc.php');
                 trigger_error("Corpus $this->corpus_id is not defined in the database", E_USER_ERROR);
                 $this->_corpus_info = FALSE;
             }
@@ -1209,7 +1217,9 @@ class Queries
                 PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8mb4'
             ));
         } catch (PDOException $e) {
-            header("HTTP/1.0 500 Internal Server Error - Could not reach database");
+            $error_code = 500;
+            $error_message = "There was a problem connecting to the database";
+            include('templates/error.inc.php');
             trigger_error('Connection failed: ' . $e->getMessage(), E_USER_ERROR);
             die();
         }
