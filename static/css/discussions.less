@@ -190,62 +190,65 @@
         }
     }
 
-    .comment {
-        .user {
-            margin-bottom: 10px;
-        }
-        .time {
-            float: right;
-        }
+    .comments.item-list {
 
-        .view-state {
-            float: right;
-            margin-right: 10px;
-            cursor: pointer;
-            font-size: 11px;
-            color: #999;
-
-            .icon-white {
-                opacity: 0.5;
+        .comment {
+            .user {
+                margin-bottom: 10px;
+            }
+            .time {
+                float: right;
             }
 
-            &:hover {
-                color: #FFF;
+            .view-state {
+                float: right;
+                margin-right: 10px;
+                cursor: pointer;
+                font-size: 11px;
+                color: #999;
 
                 .icon-white {
-                    opacity: 1;
+                    opacity: 0.5;
+                }
+
+                &:hover {
+                    color: #FFF;
+
+                    .icon-white {
+                        opacity: 1;
+                    }
                 }
             }
-        }
 
-        .message {
-            line-height: 1.5em;
+            .message {
+                line-height: 1.5em;
 
-            .ref {
-                color: #f4eb3e;
-                white-space: nowrap;
-                border: 1px solid transparent;
-                background-color: rgba(255, 255, 0, 0.1);
-                cursor: pointer;
-                padding: 2px;
+                .ref {
+                    color: #f4eb3e;
+                    white-space: nowrap;
+                    border: 1px solid transparent;
+                    background-color: rgba(255, 255, 0, 0.1);
+                    cursor: pointer;
+                    padding: 2px;
 
-                .reference-mode & {
-                    border-color: #AAA;
-                }
-
-                &.highlight,
-                &:hover {
-                    text-decoration: underline;
-                    background-color: rgba(255, 255, 0, 0.3);
-                }
-
-                &.type-T {
-                    color: #93e7ff;
-                    background-color: rgba(104, 208, 242, 0.1);
+                    .reference-mode & {
+                        border-color: #AAA;
+                    }
 
                     &.highlight,
                     &:hover {
-                        background-color: rgba(104, 208, 242, 0.3);
+                        text-decoration: underline;
+                        background-color: rgba(255, 255, 0, 0.3);
+                    }
+
+                    &.type-T {
+                        color: #93e7ff;
+                        background-color: rgba(104, 208, 242, 0.1);
+
+                        &.highlight,
+                        &:hover {
+                            background-color: rgba(104, 208, 242, 0.3);
+                        }
                     }
                 }
             }

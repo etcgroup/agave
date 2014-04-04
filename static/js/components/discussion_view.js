@@ -84,8 +84,6 @@ define(['jquery',
     DiscussionView.prototype.show = function (discussion_id) {
         this.discussion_id = discussion_id;
 
-        //Clear the current list contents
-        this.ui.commentList.html('');
         if (this.discussion_id) {
             this.ui.discussionTitle.html('');
         } else {
@@ -100,7 +98,10 @@ define(['jquery',
 
         this.poll.start();
 
-        this.ui.commentInput.focus();
+        this.ui.commentInput.prop('disabled', false);
+        this.ui.commentSubmit.prop('disabled', false);
+        this.ui.backButton.prop('disabled', false);
+        this.ui.referenceButton.prop('disabled', false);
     };
 
     DiscussionView.prototype.isShowing = function () {
@@ -110,6 +111,20 @@ define(['jquery',
 
     DiscussionView.prototype.hide = function () {
         this.discussion_id = null;
+
+        //Clear the current list contents
+        this.ui.commentList.html('');
+        this.ui.discussionTitle.html('');
+        this.ui.commentInput.val('');
+
+        //Make sure to hide this before we disable or it'll still be here
+        // when we come back.
+        this.ui.backButton.tooltip('hide');
+
+        this.ui.commentInput.prop('disabled', true);
+        this.ui.commentSubmit.prop('disabled', true);
+        this.ui.backButton.prop('disabled', true);
+        this.ui.referenceButton.prop('disabled', true);
 
         this.poll.stop();
     };

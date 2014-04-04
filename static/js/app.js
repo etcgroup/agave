@@ -328,7 +328,8 @@ define(function (require) {
 
     };
 
-    App.prototype.setDiscussionState = function (cssClass) {
+    App.prototype.setDiscussionState = function (cssClass, callback) {
+
         this.ui.collaborator
             .removeClass('show-left show-mid show-right hide')
             .addClass(cssClass);
@@ -355,8 +356,8 @@ define(function (require) {
         var self = this;
         this.discussionList.on('show-discussion', function (e, id) {
             self.discussionList.hide();
-            self.discussionView.show(id);
             self.setDiscussionState('show-right');
+            self.discussionView.show(id);
         });
     };
 
@@ -423,16 +424,15 @@ define(function (require) {
     App.prototype.showDiscussionList = function(showMe) {
         if (showMe) {
             //Hide the sign-in box, show the discussions
-            this.discussionList.show();
             this.discussionView.hide();
             this.signIn.hide();
             this.setDiscussionState('show-mid');
+            this.discussionList.show();
         } else {
             //Show the sign-in box, hide the discussion list and view
             this.discussionList.hide();
             this.discussionView.hide();
             this.setDiscussionState('show-left');
-
             //Doing this after so that it will be focused
             this.signIn.show();
         }
