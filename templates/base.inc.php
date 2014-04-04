@@ -8,7 +8,7 @@ function base_page($request, $page = NULL)
     }
     $page_defaults = array(
         'title' => 'Agave',
-        'css' => '',
+        'app_css' => '',
         'nav' => '',
         'app_js' => ''
     );
@@ -33,8 +33,7 @@ function base_page($request, $page = NULL)
         <link rel="icon"
               type="image/png"
               href="<?php $request->stat('img/logo-only.png'); ?>">
-        <link rel="stylesheet" href="<?php $request->stat('css/main.css'); ?>">
-        <?php echo $page['css']; ?>
+        <?php echo $page['app_css']; ?>
     </head>
     <body>
     <?php
