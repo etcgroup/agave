@@ -193,6 +193,10 @@ body {
 .collaborator.show-right .sliding-panel.col {
   margin-left: -200%;
 }
+.collaborator.show-right .sliding-panel.col .discussion-view .comment {
+  opacity: 1;
+  filter: alpha(opacity=100);
+}
 .user-box.col {
   left: 0;
   width: 33.333%;

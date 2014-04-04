@@ -55,12 +55,17 @@ define(['jquery', 'util/urls'], function($, urls) {
     };
 
     SignIn.prototype.hide = function() {
+        this.into.addClass('hide');
+
         if (this.ui.userInput) {
             this.ui.userInput.val('');
         }
     };
 
     SignIn.prototype.show = function() {
+
+        this.into.removeClass('hide');
+
         if (this.ui.userInput) {
             this.ui.userInput.focus();
         }

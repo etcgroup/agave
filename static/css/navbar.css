@@ -12,6 +12,9 @@
   -moz-border-radius: 0;
   border-radius: 0;
 }
+.navbar .navbar-inner > .container-fluid {
+  padding-right: 15px;
+}
 .navbar .nav-main-info {
   float: left;
 }
@@ -49,11 +52,13 @@
   list-style: none;
   padding: 0;
   margin: 0 0 0 30px;
-  float: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .navbar .details > li {
   line-height: 40px;
-  float: left;
+  display: inline;
 }
 .navbar .details > li.divider-vertical {
   height: 20px;
@@ -63,6 +68,7 @@
 }
 .navbar .user-display {
   float: right;
+  padding-left: 10px;
 }
 .navbar .user-display .sign-out-button {
   margin: 0 0 0 10px;
