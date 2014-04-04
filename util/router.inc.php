@@ -21,7 +21,7 @@ class Router
         'tweets' => array('(?<corpus_id>\w*)/api/tweets', 'views/api/tweets.inc.php'),
         'users' => array('(?<corpus_id>\w*)/api/users', 'views/api/users.inc.php'),
         'auth' => array('(?<corpus_id>\w*)/auth', 'views/auth.inc.php'),
-        'index' => array('(?<corpus_id>\w*)', 'views/main.inc.php'),
+        'index' => array('(?<corpus_id>\w*)', 'views/vis.inc.php'),
     );
 
     /**
