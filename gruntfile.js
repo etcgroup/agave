@@ -248,13 +248,13 @@ module.exports = function (grunt) {
                     //Exclude jquery and the dummy config file
                     exclude: ['jquery']
                 },
-                modules: ['main']
+                modules: ['main', 'about']
             },
             css: {
                 options: {
                     optimizeCss: 'standard'
                 },
-                modules: ['main']
+                modules: ['main', 'about']
             }
         },
 

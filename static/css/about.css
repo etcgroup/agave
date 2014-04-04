@@ -1,0 +1,11 @@
+@import url(lib/bootstrap.css);
+.no-select {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+}
+.spinner > div > div {
+  background: #FFF;
+}
