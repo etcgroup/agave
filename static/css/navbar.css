@@ -50,8 +50,8 @@
 }
 .navbar .details {
   list-style: none;
-  padding: 0;
-  margin: 0 0 0 30px;
+  margin: 0;
+  padding: 0 0 0 30px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
