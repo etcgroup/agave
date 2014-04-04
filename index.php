@@ -10,7 +10,6 @@ include_once 'util/queries.inc.php';
 
 $config = new Config('app.ini');
 $request = new Request($config);
-
 $router = new Router($config);
 
 //If in secure mode, ensure https
@@ -20,22 +19,13 @@ if ($config->get('secure')) {
     }
 }
 
-//If they didn't provide a corpus, redirect to the default corpus.
-//TODO: replace this with some kind of corpus list page or something.
-if ($router->current_url() === '') {
-    $dbconf = $config->get('db');
-    $request->redirect($router->site_url($dbconf['corpus']));
-}
-
 list($route, $arguments) = $router->get_route();
 if (isset($arguments['corpus_id'])) {
-    $corpus_id = $arguments['corpus_id'];
+    $db = new Queries($config, $arguments['corpus_id']);
 } else {
-    $dbconf = $config->get('db');
-    $corpus_id = $dbconf['corpus'];
+    $db = new Queries($config);
 }
 
-$db = new Queries($config, $corpus_id);
 $request->start_session($db);
 
 include $route;

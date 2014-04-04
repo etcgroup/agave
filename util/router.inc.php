@@ -13,15 +13,16 @@ class Router
 
     private $routes = array(
         //route name => array(route path, handler file)
-        'annotations' => array('(?<corpus_id>\w*)/api/annotations', 'views/api/annotations.inc.php'),
-        'keywords' => array('(?<corpus_id>\w*)/api/burst_keywords', 'views/api/burst_keywords.inc.php'),
-        'counts' => array('(?<corpus_id>\w*)/api/counts', 'views/api/counts.inc.php'),
-        'discussions' => array('(?<corpus_id>\w*)/api/discussions', 'views/api/discussions.inc.php'),
-        'messages' => array('(?<corpus_id>\w*)/api/messages', 'views/api/messages.inc.php'),
-        'tweets' => array('(?<corpus_id>\w*)/api/tweets', 'views/api/tweets.inc.php'),
-        'users' => array('(?<corpus_id>\w*)/api/users', 'views/api/users.inc.php'),
-        'auth' => array('(?<corpus_id>\w*)/auth', 'views/auth.inc.php'),
-        'index' => array('(?<corpus_id>\w*)', 'views/vis.inc.php'),
+        'annotations' => array('(?<corpus_id>\w+)/api/annotations', 'views/api/annotations.inc.php'),
+        'keywords' => array('(?<corpus_id>\w+)/api/burst_keywords', 'views/api/burst_keywords.inc.php'),
+        'counts' => array('(?<corpus_id>\w+)/api/counts', 'views/api/counts.inc.php'),
+        'discussions' => array('(?<corpus_id>\w+)/api/discussions', 'views/api/discussions.inc.php'),
+        'messages' => array('(?<corpus_id>\w+)/api/messages', 'views/api/messages.inc.php'),
+        'tweets' => array('(?<corpus_id>\w+)/api/tweets', 'views/api/tweets.inc.php'),
+        'users' => array('(?<corpus_id>\w+)/api/users', 'views/api/users.inc.php'),
+        'auth' => array('(?<corpus_id>\w+)/auth', 'views/auth.inc.php'),
+        'vis' => array('(?<corpus_id>\w+)', 'views/vis.inc.php'),
+        'about' => array('', 'views/about.inc.php'),
     );
 
     /**
