@@ -85,15 +85,15 @@ function about_content($request, $router, $corpora)
                     </p>
 
                     <p>
-                        Data sets from social media like Twitter
-                        feature complex dynamics and relationships. As data sets grow larger,
-                        it can quickly become difficult to explore effectively.
+                        Data sets from Twitter have complex dynamics and tangled relationships.
+                        As data sets grow larger, it can quickly become difficult
+                        to explore effectively.
                     </p>
 
                     <p>
                         Agave is useful for getting oriented in a new data set,
-                        discovering key events, and uncovering important topics.
-                        Its simple and usable web-based design makes it possible
+                        discovering key events, and uncovering important topics, and
+                        its simple and usable web-based design makes it possible
                         for all team members to participate productively.
                     </p>
 
