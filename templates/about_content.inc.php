@@ -24,6 +24,7 @@ function about_content($request, $router, $corpora)
 
                     <h2>Open a Data Set</h2>
 
+                    <?php if (count($corpora) > 0) { ?>
                     <p class="data-set-help">Data currently available in this copy of Agave:</p>
                     <ul class="item-list content-panel data-sets">
                         <?php foreach ($corpora as $corpus) { ?>
@@ -38,7 +39,9 @@ function about_content($request, $router, $corpora)
                             </li>
                         <?php } ?>
                     </ul>
-
+                    <?php } else { ?>
+                    <p class="data-set-help">There is currently no data available.</p>
+                    <?php } ?>
                     <h2>About</h2>
 
                     <p>

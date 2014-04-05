@@ -77,5 +77,6 @@ CREATE TABLE IF NOT EXISTS `corpora` (
   `password` varchar(150) NOT NULL,
   `start_time` datetime DEFAULT NULL,
   `end_time` datetime DEFAULT NULL,
+  `enabled` bool DEFAULT TRUE,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;

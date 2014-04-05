@@ -316,6 +316,7 @@ class Queries
         $this->prepare('corpora',
             "SELECT id, name, UNIX_TIMESTAMP(created) AS created
              FROM corpora
+             WHERE enabled=1
              ORDER BY created DESC",
             '',
             $this->db
@@ -323,8 +324,12 @@ class Queries
 
         $results = $this->run('corpora');
 
-        for ($i = 0; $i < count($results); $i++) {
-            $results[$i]['created'] = new DateTime('@' . $results[$i]['created']);
+        if (is_array($results)) {
+            for ($i = 0; $i < count($results); $i++) {
+                $results[$i]['created'] = new DateTime('@' . $results[$i]['created']);
+            }
+        } else {
+            $results = array();
         }
 
         return $results;
