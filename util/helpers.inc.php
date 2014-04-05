@@ -63,6 +63,6 @@ class Helpers
      * @return string
      */
     public static function friendly_date($datetime) {
-        return $datetime->format('m/d/Y g:i A');
+        return ltrim($datetime->format('m/d/Y g:i A'), 0);
     }
 } 

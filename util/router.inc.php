@@ -70,6 +70,13 @@ class Router
         return $result;
     }
 
+    public function route_url($route_name, $corpus_id) {
+        $params = array('corpus_id' => $corpus_id);
+        $route = $this->routes[$route_name];
+        $route_url = $this->_reverse($route[0], $params);
+        return $this->site_url($route_url);
+    }
+
     private function _reverse($route, $arguments)
     {
         foreach ($arguments as $name => $arg) {

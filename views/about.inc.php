@@ -9,6 +9,8 @@ if ($request->is_env('development')) {
 $corpus_info = $db->get_corpus_info();
 $corpus_stats = $db->get_corpus_stats();
 
+$corpora = $db->get_corpora();
+
 $user_data = $request->user_data();
 $db->log_action('load', $user_data);
 
@@ -16,9 +18,11 @@ $db->log_action('load', $user_data);
 include_once 'templates/about_content.inc.php';
 include_once 'templates/base.inc.php';
 
+$app_css_url = $request->stat('css/about.css', TRUE);
 $page = array(
     'title' => "Agave",
-    'content' => about_content($request),
+    'content' => about_content($request, $router, $corpora),
+    'app_css' => "<link rel='stylesheet' href='$app_css_url' />",
     'app_js' => about_javascript($router, $user_data)
 );
 

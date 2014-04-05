@@ -312,19 +312,39 @@ class Queries
         }
     }
 
+    public function get_corpora() {
+        $this->prepare('corpora',
+            "SELECT id, name, UNIX_TIMESTAMP(created) AS created
+             FROM corpora
+             ORDER BY created DESC",
+            '',
+            $this->db
+        );
+
+        $results = $this->run('corpora');
+
+        for ($i = 0; $i < count($results); $i++) {
+            $results[$i]['created'] = new DateTime('@' . $results[$i]['created']);
+        }
+
+        return $results;
+    }
+
     public function get_corpus_info()
     {
         if ($this->_corpus_info === NULL) {
-            $this->prepare('corpora',
+            $this->prepare('corpus',
                 "SELECT id, name, created, host, port, `schema`, user, password,
-                  UNIX_TIMESTAMP(start_time) AS start_time, UNIX_TIMESTAMP(end_time) AS end_time FROM corpora
+                  UNIX_TIMESTAMP(start_time) AS start_time,
+                  UNIX_TIMESTAMP(end_time) AS end_time
+                 FROM corpora
                  WHERE id=?",
                 's',
                 $this->db
             );
 
             //Make sure the corpus is registered in the app db
-            $results = $this->run('corpora', $this->corpus_id);
+            $results = $this->run('corpus', $this->corpus_id);
             if (!is_array($results) OR count($results) != 1) {
                 $error_code = 404;
                 $error_message = "The corpus '$this->corpus_id' is unknown.";

@@ -1,4 +1,5 @@
 @import url(lib/bootstrap.css);
+@import url(itemlists.css);
 .no-select {
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -8,4 +9,59 @@
 }
 .spinner > div > div {
   background: #FFF;
+}
+.content {
+  margin-top: 30px;
+}
+.brand {
+  width: 350px;
+}
+h2 {
+  font-weight: normal;
+  font-size: 32px;
+  color: #999;
+  margin: 20px 0 8px 0;
+}
+p {
+  color: #CCC;
+  font-size: 20px;
+  line-height: 29px;
+  margin-bottom: 20px;
+}
+.sidebar {
+  font-size: 14px;
+  margin-bottom: 40px;
+}
+.sidebar h2 {
+  font-size: 24px;
+  color: #AAA;
+  margin: 24px 0 8px 0;
+}
+.sidebar p {
+  font-size: 14px;
+  line-height: 22px;
+  margin-bottom: 15px;
+}
+.sidebar p.data-set-help {
+  margin-bottom: 6px;
+}
+.data-sets .item {
+  padding: 0;
+}
+.data-sets .item a {
+  text-decoration: none;
+  padding: 12px;
+  display: block;
+}
+.data-sets .item .name {
+  color: #DDD;
+  font-size: 16px;
+  line-height: 22px;
+}
+.data-sets .item .created-date {
+  font-size: 12px;
+}
+.data-sets .item:hover {
+  background-color: #444;
+  color: #fff;
 }

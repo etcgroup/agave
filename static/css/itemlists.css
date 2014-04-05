@@ -21,6 +21,9 @@ ul.item-list {
   -o-transition: background 200ms;
   transition: background 200ms;
 }
+.item-list > .item:last-child {
+  border-bottom: none;
+}
 .tab-pane-explanation {
   position: absolute;
   top: -24px;
