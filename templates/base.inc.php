@@ -70,7 +70,7 @@ function base_page($request, $page = NULL)
         <!-- Loading production resources -->
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
         <?php if ($page['js_file']) { ?>
-            <script src="<?php $page['js_file'] ?>"></script>
+            <script src="<?php echo $page['js_file'] ?>"></script>
             <script type="text/javascript">
                 //A shim since jQuery didn't know about define when it initialized
                 if (typeof define !== 'undefined' && typeof jQuery !== 'undefined') {
