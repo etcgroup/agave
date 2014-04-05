@@ -19,11 +19,13 @@ include_once 'templates/about_content.inc.php';
 include_once 'templates/base.inc.php';
 
 $app_css_url = $request->stat('css/about.css', TRUE);
+$app_js_url = $request->stat('js/about.js', TRUE);
 $page = array(
     'title' => "Agave",
     'content' => about_content($request, $router, $corpora),
-    'app_css' => "<link rel='stylesheet' href='$app_css_url' />",
-    'app_js' => about_javascript($router, $user_data)
+    'app_js' => about_javascript($router, $user_data),
+    'js_file' => $app_js_url,
+    'css_file' => $app_css_url
 );
 
 echo base_page($request, $page);

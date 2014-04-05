@@ -1,4 +1,4 @@
 define([], function() {
     //Start the app
-    console.log("hello world!");
+    //console.log("hello world!");
 });

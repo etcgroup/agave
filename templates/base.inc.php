@@ -8,9 +8,11 @@ function base_page($request, $page = NULL)
     }
     $page_defaults = array(
         'title' => 'Agave',
-        'app_css' => '',
         'nav' => '',
-        'app_js' => ''
+        'app_css' => '',
+        'app_js' => '',
+        'js_file' => '',
+        'css_file' => ''
     );
     foreach ($page_defaults as $key => $value) {
         if (!isset($page[$key])) {
@@ -33,6 +35,9 @@ function base_page($request, $page = NULL)
         <link rel="icon"
               type="image/png"
               href="<?php $request->stat('img/logo-only.png'); ?>">
+        <?php if ($page['css_file']) { ?>
+            <link rel="stylesheet" href="<?php echo $page['css_file'] ?>" />
+        <?php } ?>
         <?php echo $page['app_css']; ?>
     </head>
     <body>
@@ -64,13 +69,17 @@ function base_page($request, $page = NULL)
     <?php } else { ?>
         <!-- Loading production resources -->
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-        <script src="<?php $request->stat('js/main.js'); ?>"></script>
-        <script type="text/javascript">
-            //A shim since jQuery didn't know about define when it initialized
-            define('jquery', function () {
-                return jQuery;
-            });
-        </script>
+        <?php if ($page['js_file']) { ?>
+            <script src="<?php $page['js_file'] ?>"></script>
+            <script type="text/javascript">
+                //A shim since jQuery didn't know about define when it initialized
+                if (typeof define !== 'undefined' && typeof jQuery !== 'undefined') {
+                    define('jquery', function () {
+                        return jQuery;
+                    });
+                }
+            </script>
+        <?php } ?>
     <?php } ?>
     <?php
     echo $page['app_js'];

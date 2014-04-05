@@ -121,6 +121,11 @@ function about_javascript($request, $user_data)
     ob_start();
     ?>
     <script type="text/javascript">
+        //A shim since jQuery didn't know about define when it initialized
+        define('jquery', function () {
+            return jQuery;
+        });
+
         <?php if ($user_data) { ?>
         window.user_data = <?php echo json_encode($user_data); ?>;
         <?php } ?>

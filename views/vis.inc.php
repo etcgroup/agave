@@ -18,11 +18,13 @@ include_once 'templates/nav_bar.inc.php';
 include_once 'templates/base.inc.php';
 
 $app_css_url = $request->stat('css/main.css', TRUE);
+$app_js_url = $request->stat('js/main.js', TRUE);
 $page = array(
     'title' => "Agave: ${corpus_info['name']}",
     'nav' => nav_bar($corpus_info['name'], $corpus_stats, $router),
     'content' => vis_content($request),
-    'app_css' => "<link rel='stylesheet' href='$app_css_url' />",
+    'css_file' => $app_css_url,
+    'js_file' => $app_js_url,
     'app_js' => vis_app_javascript($router, $user_data, $corpus_info['id'], $corpus_stats)
 );
 
