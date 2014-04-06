@@ -8,3 +8,4 @@
 Puppetfile text eol=lf
 .bash_aliases text eol=lf
 .vimrc text eol=lf
+.bashrc text eol=lf
