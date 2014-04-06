@@ -343,7 +343,8 @@ class Queries
                   UNIX_TIMESTAMP(start_time) AS start_time,
                   UNIX_TIMESTAMP(end_time) AS end_time
                  FROM corpora
-                 WHERE id=?",
+                 WHERE id=?
+                 AND enabled=1",
                 's',
                 $this->db
             );
