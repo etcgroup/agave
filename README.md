@@ -1,20 +1,7 @@
 Agave
 ==========
 
-There are CSS and LESS files contained in the css folder. Do not edit the CSS file when there is 
-a corresponding LESS file available. To build the CSS files, you need to install the 
-LESS compiler. The command below also installs `lesswatch`, a tool that will
-allow automatically compiling the CSS files when the files change:
 
-```bash
-$ npm install --global less lesswatch
-```
-
-To start lesswatch:
-
-```bash
-$ lesswatch css css
-```
 
 Development Setup
 -----------------
@@ -64,9 +51,6 @@ databases, along with some initial data (no tweets though).
 The database user is `agave` and the password is `agave`
 (the root user is similar).
 
-### Running the Tests
-
-To run the javascript tests (in `tests/js`) you
 
 ### Streaming Tweets
 
@@ -81,4 +65,22 @@ Then run this command to begin streaming:
 
 ```bash
 $ stream_tweets --ini-file app.ini | php setup/import_tweets.php
+```
+
+
+### Building static resources
+
+There are CSS and LESS files contained in the css folder. Do not edit the CSS file when there is 
+a corresponding LESS file available. To build the CSS files, you need to install the 
+LESS compiler. The command below also installs `lesswatch`, a tool that will
+allow automatically compiling the CSS files when the files change:
+
+```bash
+$ npm install --global less lesswatch
+```
+
+To start lesswatch:
+
+```bash
+$ lesswatch css css
 ```
